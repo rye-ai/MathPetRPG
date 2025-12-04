@@ -13,7 +13,7 @@
     // ==========================================
     // 🔥 FIREBASE CONFIGURATION
     // ==========================================
-   const firebaseConfig = {
+    const firebaseConfig = {
       apiKey: "AIzaSyAw7gJ8lN5BNE2a74jdAoSu9vrpAsBgcpc",
       authDomain: "petadventure-b73c8.firebaseapp.com",
       projectId: "petadventure-b73c8",
@@ -66,7 +66,11 @@
     .login-btn:active, .submit-btn:active, .explore-btn:active, .btn-green:active { transform: translateY(5px); box-shadow: none; }
     .login-btn:disabled, .submit-btn:disabled, .explore-btn:disabled { background: #cbd5e0; box-shadow: none; cursor: not-allowed; transform: none; }
     
-    .teacher-link { margin-top: 20px; font-size: 14px; color: #718096; text-decoration: underline; cursor: pointer; display: inline-block; }
+    /* Updated Links Area */
+    .login-links { margin-top: 20px; display: flex; justify-content: center; gap: 20px; font-size: 14px; color: #718096; }
+    .link-item { text-decoration: underline; cursor: pointer; }
+    .link-item:hover { color: #5a67d8; }
+
     .teacher-dashboard { display: none; text-align: left; }
     .teacher-dashboard.active { display: block; }
 
@@ -249,13 +253,16 @@
      <button type="submit" class="login-btn">Start Adventure! 🚀</button>
     </form>
     
-    <!-- TEACHER LINK -->
-    <div class="teacher-link" onclick="toggleTeacherLogin()">Teacher Access</div>
+    <!-- SECRET ADMIN TRIGGER -->
+    <div style="margin-top: 30px; font-size: 10px; color: #cbd5e0; cursor: pointer; text-transform: uppercase; letter-spacing: 1px;" onclick="toggleTeacherLogin()">
+        raymondanacaya
+    </div>
     
     <!-- TEACHER LOGIN OVERLAY (Inside box) -->
     <div id="teacher-login-panel" style="display:none; margin-top:20px; border-top:1px solid #eee; padding-top:20px;">
         <h3 style="color:#d69e2e; font-weight:bold; margin-bottom:10px;">Teacher Login</h3>
-        <input type="password" id="teacher-pin" class="login-input" placeholder="Enter Admin PIN (1234)">
+        <!-- Removed the pin hint from placeholder -->
+        <input type="password" id="teacher-pin" class="login-input" placeholder="Enter Admin PIN">
         <button class="action-btn blue" onclick="checkTeacherPin()">Access Dashboard</button>
     </div>
 
@@ -531,10 +538,10 @@
     // ==========================================
     // UPDATE THESE WITH YOUR INFO!
     const GITHUB_CONFIG = {
-        enabled: false, // Set to TRUE when you have created the files on GitHub
-        username: "rye-ai", // e.g. "MathTeacher123"
-        repo: "MathPetRPG",       // e.g. "math-rpg-data"
-        branch: "main"            // usually "main" or "master"
+        enabled: true,             // Set to TRUE to connect
+        username: "rye-ai",        // Your GitHub Username
+        repo: "MathPetRPG",        // Your Repository Name
+        branch: "main"             // Usually "main"
     };
 
     // Helper to build URL for Raw content
@@ -803,6 +810,48 @@
     // Call this immediately
     loadGitHubData();
 
+    // -----------------------------------------
+    // 🔥 FIREBASE: SAVE / LOAD PROGRESS
+    // -----------------------------------------
+    
+    async function loadProgressFromFirebase(username) {
+        try {
+            const docRef = window.fbase.doc(window.db, "students", username);
+            const docSnap = await window.fbase.getDoc(docRef);
+            
+            if (docSnap.exists() && docSnap.data().saveData) {
+                const cloudData = docSnap.data().saveData;
+                console.log("📥 Loaded Cloud Save for", username);
+                
+                // MERGE cloud data into gameState
+                gameState = { ...gameState, ...cloudData };
+                
+                // Ensure nested objects merge correctly if needed, but simpler replace works for now
+                // Just re-render UI to reflect new state
+                return true; 
+            }
+        } catch (e) {
+            console.error("Cloud Load Error:", e);
+        }
+        return false;
+    }
+    
+    async function saveProgressToFirebase() {
+        if (!gameState.playerName) return;
+        
+        try {
+            const docRef = window.fbase.doc(window.db, "students", gameState.playerName);
+            // Only update the saveData field, keep password/assignment intact
+            await window.fbase.setDoc(docRef, {
+                saveData: JSON.parse(JSON.stringify(gameState)), // Deep copy to remove non-serializable refs
+                lastSaved: new Date()
+            }, { merge: true });
+            
+            console.log("☁️ Progress Saved to Cloud");
+        } catch (e) {
+            console.error("Cloud Save Error:", e);
+        }
+    }
 
     // ==========================================
     // 🎮 GAME STATE
@@ -1546,6 +1595,32 @@
         }
     }
     
+    // NEW: Guest Mode for Testing
+    function startGuestMode() {
+        gameState.playerName = "Guest_Tester";
+        // Default setup for Guest
+        gameState.grade = "1"; 
+        
+        // Initialize defaults
+        initializeGame();
+        loadExternalPets();
+        
+        // Load Mock Questions for Guest
+        const allQ = Object.values(QUESTION_REPOSITORY["1"] || {}).flat();
+        gameState.activeQuestionPool = allQ;
+
+        // UI Transition
+        document.getElementById('display-name').innerText = gameState.playerName + " (Guest)";
+        document.getElementById('display-grade').innerText = "Grade: 1";
+        updateStatsDisplay();
+        document.getElementById('login-overlay').classList.add('hidden');
+        
+        generateNextQuestion();
+        renderHub();
+        
+        showToast("Guest Mode Active (No Cloud Save)", "info");
+    }
+    
     // 2. Teacher Login Logic
     function toggleTeacherLogin() {
         const panel = document.getElementById('teacher-login-panel');
@@ -1554,7 +1629,8 @@
     
     function checkTeacherPin() {
         const pin = document.getElementById('teacher-pin').value;
-        if (pin === "1234") { // Simple PIN for demo
+        // Updated PIN to 1030
+        if (pin === "1030") { 
             document.getElementById('teacher-dashboard-screen').style.display = 'block';
         } else {
             alert("Incorrect PIN!");
@@ -2432,8 +2508,6 @@
     // UPDATED: Supports Boss Battles AND ARENA
     function startBattle(tileType, isBoss, isArena) {
       const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
-
-       
       
       let enemy;
       let logMsg = "";
