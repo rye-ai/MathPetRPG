@@ -1,13 +1,331 @@
-[ { "q": "Count the apples. How many apples are there?", "a": 3, "qVisualHTML": "<div style='font-size: 40px; text-align: center; letter-spacing: 10px;'>🍎 🍎 🍎</div>" }, { "q": "What number comes next? 1, 2, 3, ...", "a": 4 }, { "q": "Count the blue cars. How many are there?", "a": 5, "qVisualHTML": "<div style='font-size: 40px; text-align: center; letter-spacing: 10px;'>🚙 🚙 🚙 🚙 🚙</div>" }, { "q": "Which number is missing? 5, 6, __, 8", "a": "7", "options": [ "4", "7", "9", "10" ] }, { "q": "Count the stars in the box.", "a": 8, "qVisualHTML": "<div style='font-size: 40px; text-align: center; width: 200px; margin: auto; line-height: 50px;'>⭐️ ⭐️ ⭐️ ⭐️
-
-
-⭐️ ⭐️ ⭐️ ⭐️</div>" }, { "q": "Which number represents this amount of fingers?", "a": "2", "qVisualHTML": "<div style='font-size: 50px; text-align: center;'>✌️</div>", "options": [ "1", "2", "3", "4" ] }, { "q": "Count the green circles.", "a": 6, "qVisualHTML": "<div style='text-align: center;'><svg width='150' height='100'><circle cx='20' cy='20' r='15' fill='green' /><circle cx='60' cy='20' r='15' fill='green' /><circle cx='100' cy='20' r='15' fill='green' /><circle cx='20' cy='60' r='15' fill='green' /><circle cx='60' cy='60' r='15' fill='green' /><circle cx='100' cy='60' r='15' fill='green' /></svg></div>" }, { "q": "What number comes immediately after 4?", "a": 5 }, { "q": "Look at the Ten Frame. How many red dots are there?", "a": 10, "qVisualHTML": "<div style='text-align: center;'><svg width='160' height='80' viewBox='0 0 200 100'><rect x='0' y='0' width='200' height='100' fill='white' stroke='black' stroke-width='3'/><line x1='100' y1='0' x2='100' y2='100' stroke='black' stroke-width='3'/><line x1='0' y1='50' x2='200' y2='50' stroke='black' stroke-width='3'/><circle cx='25' cy='25' r='15' fill='red'/><circle cx='75' cy='25' r='15' fill='red'/><circle cx='125' cy='25' r='15' fill='red'/><circle cx='175' cy='25' r='15' fill='red'/><circle cx='25' cy='75' r='15' fill='red'/><circle cx='75' cy='75' r='15' fill='red'/><circle cx='125' cy='75' r='15' fill='red'/><circle cx='175' cy='75' r='15' fill='red'/><circle cx='50' cy='25' r='15' fill='red'/><circle cx='150' cy='25' r='15' fill='red'/><circle cx='50' cy='75' r='15' fill='red'/><circle cx='150' cy='75' r='15' fill='red'/></svg></div>" }, { "q": "Which group has exactly 4 items?", "a": "The Cookies", "options": [ "The Cookies", "The Bananas", "The Cats", "The Dogs" ], "qVisualHTML": "<div style='font-size: 20px; text-align: center;'>🍪 🍪 🍪 🍪 vs 🍌 🍌 🍌</div>" }, { "q": "How many cats do you see?", "a": 1, "qVisualHTML": "<div style='font-size: 40px; text-align: center;'>🐱</div>" }, { "q": "If you have 2 cookies and get 1 more, how many do you have?", "a": 3 }, { "q": "Count the dots on the dice.", "a": 5, "qVisualHTML": "<div style='text-align: center;'><svg width='100' height='100'><rect width='80' height='80' fill='white' stroke='black' rx='10' ry='10' stroke-width='3'/><circle cx='20' cy='20' r='8' fill='black'/><circle cx='60' cy='20' r='8' fill='black'/><circle cx='40' cy='40' r='8' fill='black'/><circle cx='20' cy='60' r='8' fill='black'/><circle cx='60' cy='60' r='8' fill='black'/></svg></div>" }, { "q": "Which number is smaller?", "a": "2", "options": [ "2", "5", "8", "10" ] }, { "q": "How many squares are there?", "a": 4, "qVisualHTML": "<div style='text-align: center;'><svg width='200' height='50'><rect x='10' y='10' width='30' height='30' fill='blue'/><rect x='50' y='10' width='30' height='30' fill='blue'/><rect x='90' y='10' width='30' height='30' fill='blue'/><rect x='130' y='10' width='30' height='30' fill='blue'/></svg></div>" }, { "q": "Count the balloons. Select the correct number.", "a": "7", "options": [ "5", "6", "7", "8" ], "qVisualHTML": "<div style='font-size: 30px; text-align: center;'>🎈 🎈 🎈 🎈 🎈 🎈 🎈</div>" }, { "q": "What comes next in the pattern? 1, 2, 1, 2, __", "a": 1 }, { "q": "Which number word matches the number 3?", "a": "Three", "options": [ "One", "Two", "Three", "Four" ] }, { "q": "How many fish are in the bowl?", "a": 0, "qVisualHTML": "<div style='text-align: center; border: 2px solid blue; width: 100px; height: 100px; margin: auto; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #e0f7fa;'> </div>" }, { "q": "Which set shows 2 hearts?", "a": "Set B", "options": [ "Set A (1 Heart)", "Set B (2 Hearts)", "Set C (3 Hearts)", "Set D (4 Hearts)" ], "qVisualHTML": "<div style='font-size: 30px; text-align: center;'>Set A: ❤️ | Set B: ❤️ ❤️</div>" }, { "q": "What is the number shown on this domino?", "a": 6, "qVisualHTML": "<div style='text-align: center;'><svg width='100' height='50'><rect width='100' height='50' fill='white' stroke='black' stroke-width='2'/><line x1='50' y1='0' x2='50' y2='50' stroke='black' stroke-width='2'/><circle cx='25' cy='15' r='5' fill='black'/><circle cx='25' cy='35' r='5' fill='black'/><circle cx='75' cy='10' r='5' fill='black'/><circle cx='75' cy='25' r='5' fill='black'/><circle cx='75' cy='40' r='5' fill='black'/><circle cx='10' cy='25' r='5' fill='black'/></svg></div>" }, { "q": "Count the tally marks.", "a": 5, "qVisualHTML": "<div style='text-align: center;'><svg width='60' height='60'><line x1='10' y1='10' x2='10' y2='50' stroke='black' stroke-width='3'/><line x1='20' y1='10' x2='20' y2='50' stroke='black' stroke-width='3'/><line x1='30' y1='10' x2='30' y2='50' stroke='black' stroke-width='3'/><line x1='40' y1='10' x2='40' y2='50' stroke='black' stroke-width='3'/><line x1='5' y1='10' x2='45' y2='50' stroke='black' stroke-width='3'/></svg></div>" }, { "q": "Fill in the blank: 8, 9, __", "a": 10 }, { "q": "How many yellow suns are there?", "a": 9, "qVisualHTML": "<div style='font-size: 30px; text-align: center; width: 250px; margin: auto; line-height: 40px;'>☀️ ☀️ ☀️
-
-
-☀️ ☀️ ☀️
-
-
-☀️ ☀️ ☀️</div>" }, { "q": "Which number is greater?", "a": "9", "options": [ "4", "6", "9", "1" ] }, { "q": "Count the purple flowers.", "a": 2, "qVisualHTML": "<div style='font-size: 40px; text-align: center;'>🪻 🪻</div>" }, { "q": "What comes before 2?", "a": "1", "options": [ "0", "1", "3", "4" ] }, { "q": "How many dots are in the Ten Frame?", "a": 7, "qVisualHTML": "<div style='text-align: center;'><svg width='160' height='80' viewBox='0 0 200 100'><rect x='0' y='0' width='200' height='100' fill='white' stroke='black' stroke-width='3'/><line x1='100' y1='0' x2='100' y2='100' stroke='black' stroke-width='3'/><line x1='0' y1='50' x2='200' y2='50' stroke='black' stroke-width='3'/><circle cx='25' cy='25' r='15' fill='blue'/><circle cx='75' cy='25' r='15' fill='blue'/><circle cx='125' cy='25' r='15' fill='blue'/><circle cx='175' cy='25' r='15' fill='blue'/><circle cx='25' cy='75' r='15' fill='blue'/><circle cx='75' cy='75' r='15' fill='blue'/><circle cx='125' cy='75' r='15' fill='blue'/></svg></div>" }, { "q": "Which shows the number 5?", "a": "The Hand", "options": [ "The Hand (5 fingers)", "The Dice (2 dots)", "The Number 1", "The Letter A" ], "qVisualHTML": "<div style='font-size: 40px; text-align: center;'>🖐️</div>" }, { "q": "Count forward from 3: 3, 4, 5, __", "a": 6 }, { "q": "How many triangles do you see?", "a": 3, "qVisualHTML": "<div style='text-align: center;'><svg width='150' height='60'><polygon points='25,10 10,50 40,50' fill='orange' /><polygon points='75,10 60,50 90,50' fill='orange' /><polygon points='125,10 110,50 140,50' fill='orange' /></svg></div>" }, { "q": "Is the number of apples equal to the number of oranges?", "a": "No", "options": [ "Yes", "No", "I don't know", "Maybe" ], "qVisualHTML": "<div style='font-size: 30px; text-align: center;'>🍎 🍎 vs 🍊 🍊 🍊</div>" }, { "q": "Count the books.", "a": 4, "qVisualHTML": "<div style='font-size: 40px; text-align: center;'>📕 📗 📘 📙</div>" }, { "q": "Which number is one more than 9?", "a": 10 }, { "q": "How many items are in this group?", "a": 8, "qVisualHTML": "<div style='font-size: 30px; text-align: center;'>🍄 🍄 🍄 🍄 🍄 🍄 🍄 🍄</div>" }, { "q": "Look at the number line. What is missing?", "a": "3", "options": [ "1", "3", "5", "0" ], "qVisualHTML": "<div style='font-size: 20px; text-align: center; font-family: monospace;'>0--1--2--?--4--5</div>" }, { "q": "Count the red balls.", "a": 5, "qVisualHTML": "<div style='text-align: center;'><svg width='200' height='50'><circle cx='20' cy='25' r='10' fill='red'/><circle cx='50' cy='25' r='10' fill='red'/><circle cx='80' cy='25' r='10' fill='red'/><circle cx='110' cy='25' r='10' fill='red'/><circle cx='140' cy='25' r='10' fill='red'/></svg></div>" }, { "q": "What number represents a pair of shoes?", "a": 2 }, { "q": "Which set has more items?", "a": "The Stars", "options": [ "The Stars", "The Moons", "They are equal", "None" ], "qVisualHTML": "<div style='font-size: 30px; text-align: center;'>⭐️ ⭐️ ⭐️ ⭐️ vs 🌙 🌙</div>" }, { "q": "What number is shown on the dice?", "a": 1, "qVisualHTML": "<div style='text-align: center;'><svg width='60' height='60'><rect width='60' height='60' fill='white' stroke='black' rx='10' ry='10' stroke-width='3'/><circle cx='30' cy='30' r='8' fill='black'/></svg></div>" }, { "q": "How many fingers are held up?", "a": 1, "qVisualHTML": "<div style='font-size: 50px; text-align: center;'>☝️</div>" }, { "q": "Start at 6 and count up. What is next?", "a": 7 }, { "q": "Which shape group shows the number 3?", "a": "Triangles", "options": [ "Triangles (3 items)", "Squares (4 items)", "Circles (1 item)", "Stars (5 items)" ], "qVisualHTML": "<div style='text-align: center; font-size: 20px;'>🔺🔺🔺 vs 🟥🟥🟥🟥</div>" }, { "q": "How many bees are there?", "a": 6, "qVisualHTML": "<div style='font-size: 35px; text-align: center; letter-spacing: 5px;'>🐝 🐝 🐝
-
-
-🐝 🐝 🐝</div>" }, { "q": "Select the number Eight.", "a": "8", "options": [ "6", "8", "3", "0" ] }, { "q": "Count the pandas.", "a": 2, "qVisualHTML": "<div style='font-size: 40px; text-align: center;'>🐼 🐼</div>" }, { "q": "If you count 1, 2, 3, 4, 5. How many objects did you count?", "a": 5 }, { "q": "How many green squares are in the Ten Frame?", "a": 4, "qVisualHTML": "<div style='text-align: center;'><svg width='160' height='80' viewBox='0 0 200 100'><rect x='0' y='0' width='200' height='100' fill='white' stroke='black' stroke-width='3'/><line x1='100' y1='0' x2='100' y2='100' stroke='black' stroke-width='3'/><line x1='0' y1='50' x2='200' y2='50' stroke='black' stroke-width='3'/><rect x='10' y='10' width='30' height='30' fill='green'/><rect x='60' y='10' width='30' height='30' fill='green'/><rect x='110' y='10' width='30' height='30' fill='green'/><rect x='160' y='10' width='30' height='30' fill='green'/></svg></div>" }, { "q": "Which number is less than 3?", "a": "1", "options": [ "1", "4", "5", "10" ] }, { "q": "How many total items are there?", "a": 7, "qVisualHTML": "<div style='font-size: 30px; text-align: center;'>🐱 🐶 🐱 🐶 🐱 🐶 🐱</div>" } ]
+[
+  {
+    "q": "Count the apples. How many apples are there?",
+    "a": 3,
+    "qVisualHTML": "<div style='font-size: 40px; text-align: center; letter-spacing: 10px;'>🍎 🍎 🍎</div>"
+  },
+  {
+    "q": "What number comes next? 1, 2, 3, ...",
+    "a": 4
+  },
+  {
+    "q": "Count the blue cars. How many are there?",
+    "a": 5,
+    "qVisualHTML": "<div style='font-size: 40px; text-align: center; letter-spacing: 10px;'>🚙 🚙 🚙 🚙 🚙</div>"
+  },
+  {
+    "q": "Which number is missing? 5, 6, __, 8",
+    "a": "7",
+    "options": [
+      "4",
+      "7",
+      "9",
+      "10"
+    ]
+  },
+  {
+    "q": "Count the stars in the box.",
+    "a": 8,
+    "qVisualHTML": "<div style='font-size: 40px; text-align: center; width: 200px; margin: auto; line-height: 50px;'>⭐️ ⭐️ ⭐️ ⭐️<br>⭐️ ⭐️ ⭐️ ⭐️</div>"
+  },
+  {
+    "q": "Which number represents this amount of fingers?",
+    "a": "2",
+    "qVisualHTML": "<div style='font-size: 50px; text-align: center;'>✌️</div>",
+    "options": [
+      "1",
+      "2",
+      "3",
+      "4"
+    ]
+  },
+  {
+    "q": "Count the green circles.",
+    "a": 6,
+    "qVisualHTML": "<div style='text-align: center;'><svg width='150' height='100'><circle cx='20' cy='20' r='15' fill='green' /><circle cx='60' cy='20' r='15' fill='green' /><circle cx='100' cy='20' r='15' fill='green' /><circle cx='20' cy='60' r='15' fill='green' /><circle cx='60' cy='60' r='15' fill='green' /><circle cx='100' cy='60' r='15' fill='green' /></svg></div>"
+  },
+  {
+    "q": "What number comes immediately after 4?",
+    "a": 5
+  },
+  {
+    "q": "Look at the Ten Frame. How many red dots are there?",
+    "a": 10,
+    "qVisualHTML": "<div style='text-align: center;'><svg width='160' height='80' viewBox='0 0 200 100'><rect x='0' y='0' width='200' height='100' fill='white' stroke='black' stroke-width='3'/><line x1='100' y1='0' x2='100' y2='100' stroke='black' stroke-width='3'/><line x1='0' y1='50' x2='200' y2='50' stroke='black' stroke-width='3'/><circle cx='25' cy='25' r='15' fill='red'/><circle cx='75' cy='25' r='15' fill='red'/><circle cx='125' cy='25' r='15' fill='red'/><circle cx='175' cy='25' r='15' fill='red'/><circle cx='25' cy='75' r='15' fill='red'/><circle cx='75' cy='75' r='15' fill='red'/><circle cx='125' cy='75' r='15' fill='red'/><circle cx='175' cy='75' r='15' fill='red'/><circle cx='50' cy='25' r='15' fill='red'/><circle cx='150' cy='25' r='15' fill='red'/><circle cx='50' cy='75' r='15' fill='red'/><circle cx='150' cy='75' r='15' fill='red'/></svg></div>"
+  },
+  {
+    "q": "Which group has exactly 4 items?",
+    "a": "The Cookies",
+    "options": [
+      "The Cookies",
+      "The Bananas",
+      "The Cats",
+      "The Dogs"
+    ],
+    "qVisualHTML": "<div style='font-size: 20px; text-align: center;'>🍪 🍪 🍪 🍪 vs 🍌 🍌 🍌</div>"
+  },
+  {
+    "q": "How many cats do you see?",
+    "a": 1,
+    "qVisualHTML": "<div style='font-size: 40px; text-align: center;'>🐱</div>"
+  },
+  {
+    "q": "If you have 2 cookies and get 1 more, how many do you have?",
+    "a": 3
+  },
+  {
+    "q": "Count the dots on the dice.",
+    "a": 5,
+    "qVisualHTML": "<div style='text-align: center;'><svg width='100' height='100'><rect width='80' height='80' fill='white' stroke='black' rx='10' ry='10' stroke-width='3'/><circle cx='20' cy='20' r='8' fill='black'/><circle cx='60' cy='20' r='8' fill='black'/><circle cx='40' cy='40' r='8' fill='black'/><circle cx='20' cy='60' r='8' fill='black'/><circle cx='60' cy='60' r='8' fill='black'/></svg></div>"
+  },
+  {
+    "q": "Which number is smaller?",
+    "a": "2",
+    "options": [
+      "2",
+      "5",
+      "8",
+      "10"
+    ]
+  },
+  {
+    "q": "How many squares are there?",
+    "a": 4,
+    "qVisualHTML": "<div style='text-align: center;'><svg width='200' height='50'><rect x='10' y='10' width='30' height='30' fill='blue'/><rect x='50' y='10' width='30' height='30' fill='blue'/><rect x='90' y='10' width='30' height='30' fill='blue'/><rect x='130' y='10' width='30' height='30' fill='blue'/></svg></div>"
+  },
+  {
+    "q": "Count the balloons. Select the correct number.",
+    "a": "7",
+    "options": [
+      "5",
+      "6",
+      "7",
+      "8"
+    ],
+    "qVisualHTML": "<div style='font-size: 30px; text-align: center;'>🎈 🎈 🎈 🎈 🎈 🎈 🎈</div>"
+  },
+  {
+    "q": "What comes next in the pattern? 1, 2, 1, 2, __",
+    "a": 1
+  },
+  {
+    "q": "Which number word matches the number 3?",
+    "a": "Three",
+    "options": [
+      "One",
+      "Two",
+      "Three",
+      "Four"
+    ]
+  },
+  {
+    "q": "How many fish are in the bowl?",
+    "a": 0,
+    "qVisualHTML": "<div style='text-align: center; border: 2px solid blue; width: 100px; height: 100px; margin: auto; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #e0f7fa;'> </div>"
+  },
+  {
+    "q": "Which set shows 2 hearts?",
+    "a": "Set B",
+    "options": [
+      "Set A (1 Heart)",
+      "Set B (2 Hearts)",
+      "Set C (3 Hearts)",
+      "Set D (4 Hearts)"
+    ],
+    "qVisualHTML": "<div style='font-size: 30px; text-align: center;'>Set A: ❤️ | Set B: ❤️ ❤️</div>"
+  },
+  {
+    "q": "What is the number shown on this domino?",
+    "a": 6,
+    "qVisualHTML": "<div style='text-align: center;'><svg width='100' height='50'><rect width='100' height='50' fill='white' stroke='black' stroke-width='2'/><line x1='50' y1='0' x2='50' y2='50' stroke='black' stroke-width='2'/><circle cx='25' cy='15' r='5' fill='black'/><circle cx='25' cy='35' r='5' fill='black'/><circle cx='75' cy='10' r='5' fill='black'/><circle cx='75' cy='25' r='5' fill='black'/><circle cx='75' cy='40' r='5' fill='black'/><circle cx='10' cy='25' r='5' fill='black'/></svg></div>"
+  },
+  {
+    "q": "Count the tally marks.",
+    "a": 5,
+    "qVisualHTML": "<div style='text-align: center;'><svg width='60' height='60'><line x1='10' y1='10' x2='10' y2='50' stroke='black' stroke-width='3'/><line x1='20' y1='10' x2='20' y2='50' stroke='black' stroke-width='3'/><line x1='30' y1='10' x2='30' y2='50' stroke='black' stroke-width='3'/><line x1='40' y1='10' x2='40' y2='50' stroke='black' stroke-width='3'/><line x1='5' y1='10' x2='45' y2='50' stroke='black' stroke-width='3'/></svg></div>"
+  },
+  {
+    "q": "Fill in the blank: 8, 9, __",
+    "a": 10
+  },
+  {
+    "q": "How many yellow suns are there?",
+    "a": 9,
+    "qVisualHTML": "<div style='font-size: 30px; text-align: center; width: 250px; margin: auto; line-height: 40px;'>☀️ ☀️ ☀️<br>☀️ ☀️ ☀️<br>☀️ ☀️ ☀️</div>"
+  },
+  {
+    "q": "Which number is greater?",
+    "a": "9",
+    "options": [
+      "4",
+      "6",
+      "9",
+      "1"
+    ]
+  },
+  {
+    "q": "Count the purple flowers.",
+    "a": 2,
+    "qVisualHTML": "<div style='font-size: 40px; text-align: center;'>🪻 🪻</div>"
+  },
+  {
+    "q": "What comes before 2?",
+    "a": "1",
+    "options": [
+      "0",
+      "1",
+      "3",
+      "4"
+    ]
+  },
+  {
+    "q": "How many dots are in the Ten Frame?",
+    "a": 7,
+    "qVisualHTML": "<div style='text-align: center;'><svg width='160' height='80' viewBox='0 0 200 100'><rect x='0' y='0' width='200' height='100' fill='white' stroke='black' stroke-width='3'/><line x1='100' y1='0' x2='100' y2='100' stroke='black' stroke-width='3'/><line x1='0' y1='50' x2='200' y2='50' stroke='black' stroke-width='3'/><circle cx='25' cy='25' r='15' fill='blue'/><circle cx='75' cy='25' r='15' fill='blue'/><circle cx='125' cy='25' r='15' fill='blue'/><circle cx='175' cy='25' r='15' fill='blue'/><circle cx='25' cy='75' r='15' fill='blue'/><circle cx='75' cy='75' r='15' fill='blue'/><circle cx='125' cy='75' r='15' fill='blue'/></svg></div>"
+  },
+  {
+    "q": "Which shows the number 5?",
+    "a": "The Hand",
+    "options": [
+      "The Hand (5 fingers)",
+      "The Dice (2 dots)",
+      "The Number 1",
+      "The Letter A"
+    ],
+    "qVisualHTML": "<div style='font-size: 40px; text-align: center;'>🖐️</div>"
+  },
+  {
+    "q": "Count forward from 3: 3, 4, 5, __",
+    "a": 6
+  },
+  {
+    "q": "How many triangles do you see?",
+    "a": 3,
+    "qVisualHTML": "<div style='text-align: center;'><svg width='150' height='60'><polygon points='25,10 10,50 40,50' fill='orange' /><polygon points='75,10 60,50 90,50' fill='orange' /><polygon points='125,10 110,50 140,50' fill='orange' /></svg></div>"
+  },
+  {
+    "q": "Is the number of apples equal to the number of oranges?",
+    "a": "No",
+    "options": [
+      "Yes",
+      "No",
+      "I don't know",
+      "Maybe"
+    ],
+    "qVisualHTML": "<div style='font-size: 30px; text-align: center;'>🍎 🍎 vs 🍊 🍊 🍊</div>"
+  },
+  {
+    "q": "Count the books.",
+    "a": 4,
+    "qVisualHTML": "<div style='font-size: 40px; text-align: center;'>📕 📗 📘 📙</div>"
+  },
+  {
+    "q": "Which number is one more than 9?",
+    "a": 10
+  },
+  {
+    "q": "How many items are in this group?",
+    "a": 8,
+    "qVisualHTML": "<div style='font-size: 30px; text-align: center;'>🍄 🍄 🍄 🍄 🍄 🍄 🍄 🍄</div>"
+  },
+  {
+    "q": "Look at the number line. What is missing?",
+    "a": "3",
+    "options": [
+      "1",
+      "3",
+      "5",
+      "0"
+    ],
+    "qVisualHTML": "<div style='font-size: 20px; text-align: center; font-family: monospace;'>0--1--2--?--4--5</div>"
+  },
+  {
+    "q": "Count the red balls.",
+    "a": 5,
+    "qVisualHTML": "<div style='text-align: center;'><svg width='200' height='50'><circle cx='20' cy='25' r='10' fill='red'/><circle cx='50' cy='25' r='10' fill='red'/><circle cx='80' cy='25' r='10' fill='red'/><circle cx='110' cy='25' r='10' fill='red'/><circle cx='140' cy='25' r='10' fill='red'/></svg></div>"
+  },
+  {
+    "q": "What number represents a pair of shoes?",
+    "a": 2
+  },
+  {
+    "q": "Which set has more items?",
+    "a": "The Stars",
+    "options": [
+      "The Stars",
+      "The Moons",
+      "They are equal",
+      "None"
+    ],
+    "qVisualHTML": "<div style='font-size: 30px; text-align: center;'>⭐️ ⭐️ ⭐️ ⭐️ vs 🌙 🌙</div>"
+  },
+  {
+    "q": "What number is shown on the dice?",
+    "a": 1,
+    "qVisualHTML": "<div style='text-align: center;'><svg width='60' height='60'><rect width='60' height='60' fill='white' stroke='black' rx='10' ry='10' stroke-width='3'/><circle cx='30' cy='30' r='8' fill='black'/></svg></div>"
+  },
+  {
+    "q": "How many fingers are held up?",
+    "a": 1,
+    "qVisualHTML": "<div style='font-size: 50px; text-align: center;'>☝️</div>"
+  },
+  {
+    "q": "Start at 6 and count up. What is next?",
+    "a": 7
+  },
+  {
+    "q": "Which shape group shows the number 3?",
+    "a": "Triangles",
+    "options": [
+      "Triangles (3 items)",
+      "Squares (4 items)",
+      "Circles (1 item)",
+      "Stars (5 items)"
+    ],
+    "qVisualHTML": "<div style='text-align: center; font-size: 20px;'>🔺🔺🔺 vs 🟥🟥🟥🟥</div>"
+  },
+  {
+    "q": "How many bees are there?",
+    "a": 6,
+    "qVisualHTML": "<div style='font-size: 35px; text-align: center; letter-spacing: 5px;'>🐝 🐝 🐝 <br> 🐝 🐝 🐝</div>"
+  },
+  {
+    "q": "Select the number Eight.",
+    "a": "8",
+    "options": [
+      "6",
+      "8",
+      "3",
+      "0"
+    ]
+  },
+  {
+    "q": "Count the pandas.",
+    "a": 2,
+    "qVisualHTML": "<div style='font-size: 40px; text-align: center;'>🐼 🐼</div>"
+  },
+  {
+    "q": "If you count 1, 2, 3, 4, 5. How many objects did you count?",
+    "a": 5
+  },
+  {
+    "q": "How many green squares are in the Ten Frame?",
+    "a": 4,
+    "qVisualHTML": "<div style='text-align: center;'><svg width='160' height='80' viewBox='0 0 200 100'><rect x='0' y='0' width='200' height='100' fill='white' stroke='black' stroke-width='3'/><line x1='100' y1='0' x2='100' y2='100' stroke='black' stroke-width='3'/><line x1='0' y1='50' x2='200' y2='50' stroke='black' stroke-width='3'/><rect x='10' y='10' width='30' height='30' fill='green'/><rect x='60' y='10' width='30' height='30' fill='green'/><rect x='110' y='10' width='30' height='30' fill='green'/><rect x='160' y='10' width='30' height='30' fill='green'/></svg></div>"
+  },
+  {
+    "q": "Which number is less than 3?",
+    "a": "1",
+    "options": [
+      "1",
+      "4",
+      "5",
+      "10"
+    ]
+  },
+  {
+    "q": "How many total items are there?",
+    "a": 7,
+    "qVisualHTML": "<div style='font-size: 30px; text-align: center;'>🐱 🐶 🐱 🐶 🐱 🐶 🐱</div>"
+  }
+]
