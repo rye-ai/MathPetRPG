@@ -8,7 +8,8 @@
   <!-- 1. LOAD FIREBASE LIBRARIES (Updated imports to include getDocs for listing students) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    // ADDED deleteDoc IMPORT
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, addDoc, getDocs, runTransaction, arrayUnion, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     // ==========================================
     // 🔥 FIREBASE CONFIGURATION
@@ -17,7 +18,7 @@
       apiKey: "AIzaSyAw7gJ8lN5BNE2a74jdAoSu9vrpAsBgcpc",
       authDomain: "petadventure-b73c8.firebaseapp.com",
       projectId: "petadventure-b73c8",
-      storageBucket: "petadventure-b73c8.firebasestorage.app",
+      storageBucket: "petadventure-b73c8.firebase.storage.app",
       messagingSenderId: "590511399628",
       appId: "1:590511399628:web:400e68086ccfaba2e65869"
     };
@@ -28,7 +29,8 @@
     
     // Expose DB to window so our main game functions can use it
     window.db = db;
-    window.fbase = { doc, getDoc, setDoc, updateDoc, onSnapshot, collection, addDoc, getDocs };
+    // Added runTransaction, arrayUnion, and deleteDoc
+    window.fbase = { doc, getDoc, setDoc, updateDoc, onSnapshot, collection, addDoc, getDocs, runTransaction, arrayUnion, deleteDoc };
     
     console.log("🔥 Firebase Initialized");
   </script>
@@ -91,7 +93,7 @@
     .screen.active { display: block; }
     
     .quiz-container { text-align: center; padding: 10px; display: flex; flex-direction: column; height: 100%; justify-content: center; }
-    .question-text { font-size: clamp(24px, 4vw, 32px); color: #2d3748; margin: 20px 0; font-weight: bold; }
+    .question-text { font-size: clamp(24px, 4vw, 32px); color: #2d3748; font-weight: bold; }
     .answer-input { font-size: 28px; padding: 10px; width: 150px; text-align: center; border: 3px solid #cbd5e0; border-radius: 10px; }
     .feedback { height: 30px; margin-top: 15px; font-weight: bold; font-size: 18px; }
     .feedback.correct { color: #38a169; }
@@ -122,6 +124,24 @@
     @keyframes projectileGlide { 0% { left: 0; opacity: 1; transform: scale(0.8) rotate(0deg); } 100% { left: 100%; opacity: 0; transform: scale(0.5) rotate(360deg); } }
     .projectile { position: fixed; width: 60px; height: 60px; font-size: 40px; pointer-events: none; z-index: 3000; display: flex; justify-content: center; align-items: center; filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8)); }
     
+    /* 💥 START OF PVP FLIP FIX 💥 */
+    /* NEW: Dedicated class to flip the opponent's visual content horizontally */
+    /* This ensures that both the pet image and the pet emoji face left (towards the player) */
+    .battler-visual.flipped-opponent {
+        transform: scaleX(-1);
+    }
+    /* If the pet is an image, we apply the flip to the image itself, 
+       but we must ensure the container is NOT flipped, as flipping the container
+       can mess up the alignment of the HP/Name bars relative to the element. 
+       The cleanest fix is to apply the class to the container and just let the CSS handle it. 
+       Let's stick to the simplest one that works for both image and emoji:
+    */
+    /* The image itself is rendered inside the container. We only flip the container. */
+    .battler-visual.flipped-opponent img {
+        /* No double-flip rule is needed, the container flip is enough to face left */
+    }
+    /* 💥 END OF PVP FLIP FIX 💥 */
+
     .pet-stats { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 15px; }
     .stat-box { background: white; padding: 8px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex: 1; min-width: 70px; }
     .stat-label { font-size: 11px; color: #718096; margin-bottom: 3px; }
@@ -218,6 +238,31 @@
     .student-list-item:last-child { border-bottom: none; }
     .student-info strong { color: #2d3748; font-size: 16px; }
     .student-info span { color: #718096; font-size: 12px; margin-left: 5px; }
+
+    /* NEW: Confirmation Modal for Delete */
+    .delete-confirm-modal .confirm-buttons { display: flex; justify-content: space-between; gap: 10px; }
+    .delete-confirm-modal .confirm-buttons .confirm-btn.yes { background: #e53e3e; }
+    
+    /* NEW: Grade Grouping Styles */
+    .grade-group {
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        background: #f7fafc;
+        overflow: hidden;
+    }
+    .grade-summary {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 15px;
+        font-weight: bold;
+        font-size: 16px;
+        background: #e9eef2;
+        cursor: pointer;
+    }
+    .grade-student-list {
+        background: white;
+    }
   </style>
   </head>
  <body><!-- Login Screen -->
@@ -382,8 +427,21 @@
       <div style="color: #718096; margin-bottom: 10px; font-size: 14px;">
        Solve to earn Brain Points!
       </div>
-      <div class="question-text" id="question-text">
-       Loading question...
+      
+      <!-- NEW: Dedicated container for Image/SVG visuals -->
+      <div id="question-visual-container" class="my-4 mx-auto" style="max-width: 90%; height: auto; display: flex; justify-content: center;">
+          <!-- SVG or Image will be rendered here -->
+      </div>
+      
+      <!-- Question text now uses innerHTML for flexibility -->
+      <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px;">
+        <div class="question-text" id="question-text" style="margin: 0;">
+         Loading question...
+        </div>
+        <!-- NEW SPEAKER BUTTON -->
+        <button id="tts-speaker-btn" onclick="readQuestionAloud()" class="bg-indigo-500 text-white p-2 rounded-full shadow-md hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition duration-150" style="width: 40px; height: 40px; line-height: 1;">
+            🔊
+        </button>
       </div><!-- Standard Input Mode -->
       <div id="input-mode-container"><input type="number" id="answer-input" class="answer-input" placeholder="?"> <br> <button class="submit-btn" id="check-btn" style="margin-top: 20px;">Check Answer</button>
       </div><!-- NEW: MCQ Mode -->
@@ -435,12 +493,17 @@
          <button class="action-btn red" style="margin-top:20px;" onclick="document.getElementById('multiplayer-menu').style.display='none'; document.getElementById('wilds-menu').style.display='block';">Back</button>
      </div>
      
-     <!-- PvP Waiting Screen -->
+     <!-- PvP Waiting Screen - UPDATED STRUCTURE -->
      <div id="pvp-lobby-screen" style="display:none; text-align:center; padding-top:40px;">
-         <h2>Waiting for Opponent...</h2>
+         <h2 id="pvp-status-msg" style="font-size:24px; margin-bottom:10px; color:#2d3748;">Waiting...</h2>
          <div style="font-size:60px; margin:20px 0; letter-spacing:10px; font-family:monospace; color:#5a67d8;" id="display-room-code">----</div>
-         <p>Tell your friend to join using this code!</p>
-         <button class="action-btn red" onclick="leavePvPRoom()">Cancel</button>
+         <p id="pvp-host-status"></p>
+         <p id="pvp-guest-status"></p>
+         
+         <!-- Host-only button to start the game -->
+         <button id="pvp-start-btn" class="action-btn green" style="display:none; width:250px; margin:20px auto;" onclick="startPvPBattle()">START BATTLE! ⚔️</button>
+         
+         <button class="action-btn red" style="width:200px; margin:20px auto;" onclick="leavePvPRoom()">Cancel</button>
      </div>
 
      <!-- Map View -->
@@ -497,7 +560,7 @@
      </div>
     </section>
    </main>
-  </div><!-- Release Confirmation Modal -->
+  </div><!-- Release Confirmation Modal (Pet) -->
   <div class="modal-overlay" id="release-modal">
    <div class="confirm-modal">
     <h2>⚠️ Release Pet?</h2>
@@ -528,7 +591,7 @@
    </div>
   </div>
 
-  <!-- NEW: ARENA ENTRY MODAL -->
+  <!-- ARENA ENTRY MODAL -->
   <div class="modal-overlay" id="arena-modal">
    <div class="confirm-modal">
     <div style="font-size: 60px; margin-bottom: 10px;">🏟️</div>
@@ -552,7 +615,7 @@
    </div>
   </div>
 
-  <!-- NEW: REPLACE MOVE MODAL -->
+  <!-- REPLACE MOVE MODAL -->
   <div class="modal-overlay" id="replace-move-modal">
    <div class="confirm-modal">
     <h2 style="color: #4299e1;">🧠 Move Relearner</h2>
@@ -565,6 +628,22 @@
 
     <div class="confirm-buttons">
         <button class="confirm-btn no" onclick="closeReplaceModal()">Cancel</button> 
+    </div>
+   </div>
+  </div>
+  
+  <!-- NEW: TEACHER DELETE CONFIRMATION MODAL -->
+  <div class="modal-overlay" id="teacher-delete-modal">
+   <div class="confirm-modal delete-confirm-modal">
+    <div style="font-size: 60px; margin-bottom: 10px;">🗑️</div>
+    <h2 style="color: #e53e3e;">Delete Student Account?</h2>
+    <p style="font-weight: bold; font-size: 18px;">Are you sure you want to delete account: <strong id="delete-student-name-display">STUDENT_NAME</strong>?</p>
+    <div class="confirm-warning">
+     🚨 WARNING: All associated data (save games, pets, BP) will be permanently lost! This cannot be undone.
+    </div>
+    <div class="confirm-buttons">
+        <button class="confirm-btn no" onclick="document.getElementById('teacher-delete-modal').classList.remove('active');">Cancel</button> 
+        <button class="confirm-btn yes" id="delete-student-confirm-btn">Yes, Delete Permanently</button>
     </div>
    </div>
   </div>
@@ -1139,7 +1218,7 @@
 
     // HELPER: Check if a tile is safe to walk on
     function isWalkable(tile) {
-      // Walkable: 0=Path, 1=Grass, 4=Sand, 5=Flowers, 6=Ice
+      // Walkable: 0=Path, 1=Grass, 2=Tree, 3=Water
       // Blocked: 2=Tree, 3=Water, 7=Boss (Solid), 8=Arena (Solid)
       return tile !== 2 && tile !== 3 && tile !== 7 && tile !== 8;
     }
@@ -1519,7 +1598,7 @@
                 closeArenaModal();
                 startBattle(8, false, true); // Not boss, IS ARENA
             } else {
-                alert("You don't have enough tickets! Buy them at the Shop.");
+                showToast("You don't have enough tickets! Buy them at the Shop.", "error");
                 closeArenaModal();
             }
         };
@@ -1605,8 +1684,8 @@
       const name = document.getElementById('student-name').value.trim();
       const pass = document.getElementById('student-pass').value.trim();
       
-      if (!name) { alert("Please enter a username!"); return; }
-      if (!pass) { alert("Please enter a password!"); return; }
+      if (!name) { showToast("Please enter a username!", "error"); return; }
+      if (!pass) { showToast("Please enter a password!", "error"); return; }
       
       const startBtn = document.querySelector('.login-btn');
       startBtn.innerText = "Verifying...";
@@ -1616,7 +1695,7 @@
       const authResult = await authenticateStudent(name, pass);
       
       if (!authResult.success) {
-          alert(authResult.message);
+          showToast(authResult.message, "error");
           startBtn.innerText = "Start Adventure! 🚀";
           startBtn.disabled = false;
           return;
@@ -1632,7 +1711,7 @@
           gameState.grade = grade;
           
           if (!topics || topics.length === 0) {
-              alert("Your teacher has not assigned any topics yet! Ask them to check 'Manage Topics'.");
+              showToast("Your teacher has not assigned any topics yet! Ask them to check 'Manage Topics'.", "info");
               startBtn.innerText = "Start Adventure! 🚀";
               startBtn.disabled = false;
               return;
@@ -1748,7 +1827,21 @@
       const qData = gameState.activeQuestionPool[Math.floor(Math.random() * gameState.activeQuestionPool.length)];
       gameState.currentQuestion = qData;
       
-      document.getElementById('question-text').innerText = qData.q;
+      // Get the containers
+      const qTextEl = document.getElementById('question-text');
+      const qVisualEl = document.getElementById('question-visual-container');
+
+      // 1. Handle Visual Content (SVG or Image tag using innerHTML)
+      if (qData.qVisualHTML) {
+          // Use innerHTML to render SVG or HTML image tags directly
+          qVisualEl.innerHTML = qData.qVisualHTML;
+      } else {
+          qVisualEl.innerHTML = ''; // Clear visual container if no visual content
+      }
+
+      // 2. Handle Text Content (Use innerHTML for primary text to support bold/math rendering)
+      qTextEl.innerHTML = qData.q; 
+      
       document.getElementById('feedback').innerText = '';
       
       if (qData.options && qData.options.length > 0) {
@@ -2183,7 +2276,7 @@
          
          if (rand < 0.75) {
              pool = PET_TYPES.rare; // 75%
-         } else if (rand < 0.95) { // 0.75 + 0.20 = 0.95
+         } else if (rand < 0.95) { // 0.75 + 0.30 = 0.80
              pool = PET_TYPES.epic; // 20%
          } else {
              pool = PET_TYPES.legendary; // 5%
@@ -2431,6 +2524,9 @@
       if(!pet.level) pet.level = 1;
 
       const playerVis = document.getElementById('battle-player-visual');
+      // REMOVE FLIP CLASS from player visual (left side)
+      playerVis.classList.remove('flipped-opponent'); 
+
       if(pet.image) {
          playerVis.innerHTML = `<img src="${pet.image}" class="battler-image ${pet.imageStyle||''}">`;
       } else {
@@ -2438,6 +2534,9 @@
       }
 
       const enemyVis = document.getElementById('battle-enemy-visual');
+      // ADD FLIP CLASS to enemy visual (right side) for single player
+      enemyVis.classList.add('flipped-opponent');
+
       if(bs.enemy.image) {
          enemyVis.innerHTML = `<img src="${bs.enemy.image}" class="battler-image ${bs.enemy.imageStyle||''}">`;
       } else {
@@ -2515,7 +2614,11 @@
          // Hit Enemy
          bs.enemyHP = Math.max(0, bs.enemyHP - dmg);
          bs.log.push(`...Hit for ${dmg} damage!`);
+         
+         // Damage flash for opponent
          document.getElementById('battle-enemy-visual').style.animation = "damageFlash 0.5s";
+         setTimeout(() => { document.getElementById('battle-enemy-visual').style.animation = ""; }, 500);
+         
          renderBattle();
 
          // CHECK WIN
@@ -2527,9 +2630,6 @@
          // --- ENEMY TURN (Delayed) ---
          setTimeout(() => {
             if(!gameState.inBattle) return;
-            
-            // Reset Enemy Flash Animation from previous hit
-            document.getElementById('battle-enemy-visual').style.animation = "";
             
             // Enemy Attacks
             const enemyDmg = bs.enemy.damage;
@@ -2721,6 +2821,56 @@
       initRPG();
     }
 
+// ==========================================
+// 🗣️ BROWSER TEXT-TO-SPEECH (TTS) HANDLER
+// ==========================================
+
+function speakQuestion(text) {
+    // Only proceed if the current grade is K (Kindergarten) or 1
+    if (gameState.grade !== 'K' && gameState.grade !== '2') {
+        return;
+    }
+
+    if ('speechSynthesis' in window) {
+        // Stop any currently speaking text first
+        window.speechSynthesis.cancel();
+        
+        const utterance = new SpeechSynthesisUtterance(text);
+        
+        // Optional: Select a suitable voice (may vary by browser/OS)
+        // Set a low, clear rate for better clarity for younger listeners
+        utterance.rate = 0.9; 
+        
+        // Optional: You could select a specific voice if available
+        // let voice = window.speechSynthesis.getVoices().find(v => v.name.includes('Google US English'));
+        // if (voice) { utterance.voice = voice; }
+        
+        window.speechSynthesis.speak(utterance);
+    } else {
+        console.warn("Browser does not support Speech Synthesis API.");
+    }
+}
+
+// ==========================================
+// 🔊 ON-DEMAND READ ALOUD TRIGGER
+// ==========================================
+
+function readQuestionAloud() {
+    // 1. Update the 'if' condition (allows K, 1, or 2 to proceed)
+    if (gameState.currentQuestion && (gameState.grade === 'K' || gameState.grade === '1' || gameState.grade === '2')) {
+        // ... TTS logic remains the same ...
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = gameState.currentQuestion.q;
+        const textToSpeak = tempDiv.textContent || tempDiv.innerText || "";
+
+        speakQuestion(textToSpeak);
+    // 2. Update the 'else if' condition (updates the informational message)
+    } else if (gameState.currentQuestion) {
+        showToast("Read Aloud is only enabled for Kindergarten, Grade 1, and Grade 2.", "info");
+    }
+}
+
+
     // ==========================================
     // 💾 UTILS
     // ==========================================
@@ -2894,7 +3044,7 @@
             document.getElementById('teacher-dashboard-screen').style.display = 'block';
             loadStudentList(); // Load list immediately
         } else {
-            alert("Incorrect PIN!");
+            showToast("Incorrect PIN!", "error");
         }
     }
     
@@ -2904,14 +3054,14 @@
         const pass = document.getElementById('new-student-pass').value.trim();
         const grade = document.getElementById('new-student-grade').value;
         
-        if (!user || !pass) { alert("Enter username and password"); return; }
+        if (!user || !pass) { showToast("Enter username and password", "error"); return; }
         
         try {
             const studentRef = window.fbase.doc(window.db, "students", user);
             const docSnap = await window.fbase.getDoc(studentRef);
             
             if (docSnap.exists()) {
-                alert("Student already exists!");
+                showToast("Student already exists!", "error");
                 return;
             }
             
@@ -2923,7 +3073,7 @@
                 createdAt: new Date()
             });
             
-            alert(`Created account for ${user}!`);
+            showToast(`Created account for ${user}!`, "success");
             // Clear inputs
             document.getElementById('new-student-user').value = '';
             document.getElementById('new-student-pass').value = '';
@@ -2931,42 +3081,128 @@
             
         } catch(e) {
             console.error("Create error", e);
-            alert("Error creating account");
+            showToast("Error creating account", "error");
         }
     }
 
-    // 4. Load Student List
+    // Helper mapping Grades to display order
+    const GRADE_ORDER = ["K", "1", "2", "3", "4", "5", "6"];
+    const GRADE_NAMES = {
+        "K": "Kindergarten",
+        "1": "Grade 1",
+        "2": "Grade 2",
+        "3": "Grade 3",
+        "4": "Grade 4",
+        "5": "Grade 5",
+        "6": "Grade 6",
+        "unassigned": "Unassigned Grade (Fix!)"
+    };
+
+    // 4. Load Student List (UPDATED to include Grade Grouping)
     async function loadStudentList() {
         const listDiv = document.getElementById('student-list-container');
         listDiv.innerHTML = 'Loading...';
         
         try {
             const querySnapshot = await window.fbase.getDocs(window.fbase.collection(window.db, "students"));
-            let html = '';
             
-            if (querySnapshot.empty) {
-                html = '<div style="padding:20px; text-align:center;">No students found.</div>';
-            } else {
+            let studentsByGrade = {};
+
+            if (!querySnapshot.empty) {
                 querySnapshot.forEach((doc) => {
                     const s = doc.data();
-                    html += `
-                    <div class="student-list-item">
-                        <div class="student-info">
-                            <strong>${s.username}</strong> 
-                            <span>(Grade ${s.assignedGrade || '?'})</span>
-                        </div>
-                        <button class="action-btn blue" style="width:auto; padding:5px 10px; font-size:12px;" onclick="openTopicManager('${s.username}', '${s.assignedGrade}')">Manage</button>
-                    </div>`;
+                    const gradeKey = s.assignedGrade || 'unassigned';
+                    if (!studentsByGrade[gradeKey]) {
+                        studentsByGrade[gradeKey] = [];
+                    }
+                    studentsByGrade[gradeKey].push(s);
                 });
             }
+            
+            let html = '';
+            
+            // Sort grades using the defined order, pushing 'unassigned' to the end
+            const sortedGrades = Object.keys(studentsByGrade).sort((a, b) => {
+                const indexA = GRADE_ORDER.indexOf(a);
+                const indexB = GRADE_ORDER.indexOf(b);
+                if (a === 'unassigned') return 1;
+                if (b === 'unassigned') return -1;
+                return indexA - indexB;
+            });
+
+            if (sortedGrades.length === 0) {
+                 html = '<div style="padding:20px; text-align:center;">No students found.</div>';
+            } else {
+                 sortedGrades.forEach(gradeKey => {
+                     const gradeDisplayName = GRADE_NAMES[gradeKey] || `Grade ${gradeKey}`;
+                     const students = studentsByGrade[gradeKey];
+                     
+                     // Start collapsible group for the grade
+                     html += `
+                        <details class="grade-group" ${gradeKey !== 'unassigned' ? 'open' : ''}>
+                           <summary class="grade-summary">
+                               ${gradeDisplayName} (${students.length})
+                           </summary>
+                           <div class="grade-student-list">
+                     `;
+                     
+                     // Add student items inside the group
+                     students.forEach(s => {
+                         html += `
+                             <div class="student-list-item">
+                                 <div class="student-info">
+                                     <strong>${s.username}</strong> 
+                                 </div>
+                                 <div style="display:flex; gap:10px;">
+                                     <button class="action-btn blue" style="width:auto; padding:5px 10px; font-size:12px;" onclick="openTopicManager('${s.username}', '${s.assignedGrade || 'K'}')">Manage</button>
+                                     <button class="action-btn red" style="width:auto; padding:5px 10px; font-size:12px;" onclick="confirmDeleteStudent('${s.username}')">Delete</button>
+                                 </div>
+                             </div>`;
+                     });
+                     
+                     // Close collapsible group
+                     html += `
+                           </div>
+                        </details>
+                     `;
+                 });
+            }
+
             listDiv.innerHTML = html;
         } catch(e) {
             console.error("List error", e);
             listDiv.innerHTML = "Error loading list.";
         }
     }
+    
+    // 5. Delete Student Confirmation (Teacher Function)
+    function confirmDeleteStudent(username) {
+        document.getElementById('delete-student-name-display').innerText = username;
+        
+        const deleteBtn = document.getElementById('delete-student-confirm-btn');
+        deleteBtn.onclick = () => deleteStudentAccount(username);
+        
+        document.getElementById('teacher-delete-modal').classList.add('active');
+    }
 
-    // 5. Manage Topics (Teacher Dashboard)
+    // 6. Delete Student Execution (Teacher Function)
+    async function deleteStudentAccount(username) {
+        document.getElementById('teacher-delete-modal').classList.remove('active');
+        showToast(`Attempting to delete ${username}...`, "info");
+        
+        try {
+            const studentRef = window.fbase.doc(window.db, "students", username);
+            await window.fbase.deleteDoc(studentRef);
+            
+            showToast(`Account for ${username} permanently deleted.`, "success");
+            loadStudentList(); // Refresh list immediately
+        } catch(e) {
+            console.error("Delete error:", e);
+            showToast(`Failed to delete account for ${username}.`, "error");
+        }
+    }
+
+    // 7. Manage Topics (Teacher Dashboard) - Existing logic...
     let currentManagingStudent = null;
     let currentStudentAssignments = []; // Store fetched assignments
     
@@ -3011,7 +3247,7 @@
             // Fallback offline topics if GH fails or disabled
              const topics = Object.keys(QUESTION_REPOSITORY[grade] || {});
              if (topics.length === 0) {
-                 listDiv.innerHTML = '<div style="color:orange">No topics found for Grade ' + grade + '</div>';
+                 listDiv.innerHTML = '<div style="color:red">No JSON files found in Grade ' + grade + ' folder.</div>';
              }
              topics.forEach(t => {
                  const isChecked = currentStudentAssignments.includes(`INTERNAL:${t}`) ? 'checked' : '';
@@ -3057,13 +3293,13 @@
                 assignedTopics: selectedTopics
             });
             
-            alert(`Updated ${currentManagingStudent} to Grade ${selectedGrade} with ${selectedTopics.length} topics!`);
+            showToast(`Updated ${currentManagingStudent} to Grade ${selectedGrade} with ${selectedTopics.length} topics!`, "success");
             document.getElementById('topic-manager-modal').style.display = 'none';
             loadStudentList(); // Refresh main list to show new grade
             
         } catch(e) {
             console.error("Save error:", e);
-            alert("Failed to save.");
+            showToast("Failed to save.", "error");
         }
     }
 
@@ -3075,6 +3311,7 @@
     let currentRoomId = null;
     let pvpUnsubscribe = null;
     let isHost = false;
+    let localOpponentHP = 0; // NEW: Local variable to track opponent's HP for damage animation
 
     function showMultiplayerMenu() {
         document.getElementById('wilds-menu').style.display = 'none';
@@ -3088,8 +3325,8 @@
         }
         
         const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
-        if (!pet || pet.hp <= 0) {
-            showToast("Your active pet is too weak!", "error");
+        if (!pet || pet.hp <= 0 || !pet.isHatched || pet.powers.length === 0) {
+            showToast("Active pet must be healthy and have powers!", "error");
             return;
         }
         
@@ -3108,28 +3345,26 @@
                 hostPet: pet,
                 status: "waiting", // waiting -> connected -> battle
                 createdAt: new Date(),
-                // Battle State Fields
-                turn: "host", // host goes first
+                // Initial Battle State
+                turn: "host",
                 hostHP: pet.hp,
                 hostMaxHP: pet.maxHP,
                 guestHP: 0, 
                 guestMaxHP: 0,
-                logs: ["Waiting for opponent..."]
+                logs: [`${gameState.playerName} created the room. Share code ${roomCode}.`]
             });
             
             // Switch UI
             document.getElementById('multiplayer-menu').style.display = 'none';
             document.getElementById('pvp-lobby-screen').style.display = 'block';
             document.getElementById('display-room-code').innerText = roomCode;
-            document.getElementById('pvp-status-msg').innerText = "Waiting for opponent...";
-            document.getElementById('pvp-ready-btn').style.display = 'none'; // Hide ready button until someone joins
             
             // Listen for changes
             subscribeToRoom(roomCode);
             
         } catch (e) {
             console.error("Failed to create room:", e);
-            alert("Could not create room. Check connection.");
+            showToast("Could not create room. Check connection.", "error");
         }
     }
     
@@ -3141,8 +3376,8 @@
             showToast("Invalid Code", "error");
             return;
         }
-        if (!pet || pet.hp <= 0) {
-            showToast("Your active pet is too weak!", "error");
+        if (!pet || pet.hp <= 0 || !pet.isHatched || pet.powers.length === 0) {
+            showToast("Active pet must be healthy and have powers!", "error");
             return;
         }
         
@@ -3160,8 +3395,8 @@
                     guestPet: pet,
                     guestHP: pet.hp,
                     guestMaxHP: pet.maxHP,
-                    status: "connected",
-                    logs: ["Player 2 Joined! Waiting for Ready..."]
+                    status: "connected", // Move directly to connected state
+                    logs: window.fbase.arrayUnion(`${gameState.playerName} joined! Host can now start the battle.`)
                 });
                 
                 // Switch UI
@@ -3171,10 +3406,11 @@
                 
                 subscribeToRoom(code);
             } else {
-                showToast("Room not found or full", "error");
+                showToast("Room not found, full, or battle already started.", "error");
             }
         } catch(e) {
             console.error("Join failed:", e);
+            showToast("Join failed. Check room code.", "error");
         }
     }
     
@@ -3185,20 +3421,37 @@
             const data = doc.data();
             if (!data) return;
             
-            // 1. LOBBY PHASE: Someone Joined
-            if (data.status === "connected") {
-                document.getElementById('pvp-status-msg').innerHTML = `
-                    <div style="color:green">Opponent Found!</div>
-                    <div>${data.hostName} vs ${data.guestName}</div>
-                `;
-                // Show Ready Button
-                const readyBtn = document.getElementById('pvp-ready-btn');
-                readyBtn.style.display = 'inline-block';
-                readyBtn.innerText = (isHost ? data.hostReady : data.guestReady) ? "Waiting for Other..." : "I AM READY!";
+            const pvpStatusMsg = document.getElementById('pvp-status-msg');
+            const pvpHostStatus = document.getElementById('pvp-host-status');
+            const pvpGuestStatus = document.getElementById('pvp-guest-status');
+            const pvpStartBtn = document.getElementById('pvp-start-btn');
+            
+            // Update the display for Host/Guest names
+            const hostName = data.hostName || "Host";
+            const guestName = data.guestName || "Waiting...";
+            
+            // 1. LOBBY PHASE: Waiting or Connected
+            if (data.status === "waiting" || data.status === "connected") {
                 
-                // Check if both ready -> Trigger Battle
-                if (isHost && data.hostReady && data.guestReady) {
-                     window.fbase.updateDoc(roomRef, { status: "battle", logs: ["BATTLE STARTED!"] });
+                document.getElementById('battle-ui').style.display = 'none'; // Ensure battle screen is hidden
+                
+                pvpHostStatus.innerHTML = `Host: <strong>${hostName}</strong>`;
+                pvpGuestStatus.innerHTML = `Guest: <strong>${guestName}</strong>`;
+
+                if (data.status === "waiting") {
+                    pvpStatusMsg.innerText = "Waiting for Opponent...";
+                    pvpStartBtn.style.display = 'none';
+                } else if (data.status === "connected") {
+                    pvpStatusMsg.innerText = "✅ Opponent Found!";
+                    
+                    if (isHost) {
+                        pvpStatusMsg.innerText = `✅ Opponent (${guestName}) Found!`;
+                        pvpStartBtn.style.display = 'block';
+                    } else {
+                        // Guest sees this
+                        pvpStatusMsg.innerText = `⏳ Waiting for Host (${hostName}) to start the battle...`;
+                        pvpStartBtn.style.display = 'none';
+                    }
                 }
             }
             
@@ -3207,9 +3460,9 @@
                 if (document.getElementById('pvp-lobby-screen').style.display !== 'none') {
                     // Transition from Lobby to Battle Screen
                     document.getElementById('pvp-lobby-screen').style.display = 'none';
-                    document.getElementById('battle-ui').style.display = 'block';
+                    document.getElementById('battle-ui').style.display = 'flex'; // Use flex for battle layout
                     // Set generic Arena BG
-                    document.getElementById('battle-ui').style.backgroundImage = `url('${ARENA_IMGS[0]}')`;
+                    document.getElementById('battle-ui').style.backgroundImage = `url('${ARENA_IMGS[Math.floor(Math.random() * ARENA_IMGS.length)]}')`;
                 }
                 
                 renderPvPBattle(data);
@@ -3217,14 +3470,20 @@
         });
     }
     
-    async function setPvPReady() {
+    // NEW: Function for Host to manually start the battle
+    async function startPvPBattle() {
+        if (!isHost || !currentRoomId) return;
         const roomRef = window.fbase.doc(window.db, "rooms", currentRoomId);
-        if (isHost) {
-            await window.fbase.updateDoc(roomRef, { hostReady: true });
-        } else {
-            await window.fbase.updateDoc(roomRef, { guestReady: true });
+        
+        try {
+             await window.fbase.updateDoc(roomRef, { 
+                status: "battle", 
+                logs: window.fbase.arrayUnion("⚔️ BATTLE STARTED! Host goes first.")
+             });
+        } catch(e) {
+            console.error("Failed to start battle:", e);
+            showToast("Failed to start battle. Try again.", "error");
         }
-        document.getElementById('pvp-ready-btn').disabled = true;
     }
     
     // Renders the shared state from Firebase onto the local screen
@@ -3240,6 +3499,10 @@
         
         // Left Side (Player)
         const playerVis = document.getElementById('battle-player-visual');
+        
+        // 💥 FLIP FIX: Ensure Player (left side) is never flipped (faces right)
+        playerVis.classList.remove('flipped-opponent'); 
+
         playerVis.innerHTML = myPet.image 
             ? `<img src="${myPet.image}" class="battler-image ${myPet.imageStyle||''}">` 
             : myPet.emoji;
@@ -3249,10 +3512,23 @@
 
         // Right Side (Opponent)
         const enemyVis = document.getElementById('battle-enemy-visual');
+        
+        // 💥 FLIP FIX: Ensure Opponent (right side) is always flipped (faces left)
+        enemyVis.classList.add('flipped-opponent');
+
         enemyVis.innerHTML = oppPet.image 
             ? `<img src="${oppPet.image}" class="battler-image ${oppPet.imageStyle||''}">` 
             : oppPet.emoji;
         
+        // --- NEW: DAMAGE FLASH (Fix 1 - Defensive Animation) ---
+        if (localOpponentHP > oppHP) {
+            // Damage occurred on the opponent
+            enemyVis.style.animation = "damageFlash 0.5s";
+            setTimeout(() => { enemyVis.style.animation = ""; }, 500);
+        }
+        // Update the local opponent HP tracker for the next turn check
+        localOpponentHP = oppHP;
+
         document.getElementById('enemy-hp-bar').style.width = (oppHP / oppMax * 100) + "%";
         document.getElementById('enemy-name').innerText = (isHost ? data.guestName : data.hostName);
 
@@ -3280,56 +3556,66 @@
             const item = findShopItem(pid);
             const visual = item.image ? `<img src="${item.image}" style="width:24px;">` : item.icon;
             // Add level bonus logic here if needed, for now raw damage
-            return `<button class="action-btn green" onclick="usePvPAttack('${pid}')" ${!isMyTurn ? 'disabled style="opacity:0.5"' : ''}>${visual} ${item.name}</button>`;
+            return `<button class="action-btn green" onclick="usePvPAttack('${pid}')" ${!isMyTurn ? 'disabled style="opacity:0.5; transform:none; box-shadow:none; cursor:not-allowed;"' : ''}>${visual} <span>${item.name}</span></button>`;
         }).join('');
     }
 
     async function usePvPAttack(pid) {
-        // Don't allow click if not my turn (double check)
-        // Fetch latest state to be sure? Or trust local snapshot. 
-        // We trust snapshot for UI but Firebase rules would handle security in real app.
-        
         const power = findShopItem(pid);
         const roomRef = window.fbase.doc(window.db, "rooms", currentRoomId);
         
+        // 1. --- NEW: ATTACKER ANIMATION (Fix 1 - Offensive Animation) ---
+        const playerVis = document.getElementById('battle-player-visual');
+        const enemyVis = document.getElementById('battle-enemy-visual');
+        
+        // Start player shake and projectile immediately
+        playerVis.style.animation = "attackShake 0.5s";
+        setTimeout(() => { playerVis.style.animation = ""; }, 500);
+        
+        const visual = power.image ? power.image : power.icon;
+        // The attack projectile still moves Player -> Opponent
+        createProjectile(visual, playerVis, enemyVis);
+
         // Calculate Damage
         const dmg = power.damage || 10;
         
-        // Optimistic UI Update (optional, but let's just wait for DB to prevent desync)
-        
-        // Update DB
-        // If I am host, I damage guest. If I am guest, I damage host.
-        // Switch turn.
-        const updateData = {
-            logs: window.fbase.arrayUnion(`${isHost ? "Host" : "Guest"} used ${power.name}! (-${dmg} HP)`),
-            turn: isHost ? "guest" : "host"
-        };
-        
-        // Note: In a real app we'd use transactions to prevent race conditions
-        // Here we just use field paths for simplicity
-        if (isHost) {
-             // Host attacking Guest
-             // We can't rely on 'current value' easily without transaction, 
-             // but for this demo we can read from DOM or cached state? 
-             // Better: Read DB once before write or rely on client knowledge. 
-             // Let's just decrement using `increment`? No, `increment` is for counters.
-             // We will read the snapshot passed to render? No, that's stale.
-             // Let's do a transaction for safety.
-             await window.fbase.runTransaction(window.db, async (transaction) => {
-                 const sfDoc = await transaction.get(roomRef);
-                 if (!sfDoc.exists()) return;
-                 const newGuestHP = Math.max(0, sfDoc.data().guestHP - dmg);
-                 transaction.update(roomRef, { guestHP: newGuestHP, turn: 'guest', logs: updateData.logs });
-             });
-             
-        } else {
-             // Guest attacking Host
-             await window.fbase.runTransaction(window.db, async (transaction) => {
-                 const sfDoc = await transaction.get(roomRef);
-                 if (!sfDoc.exists()) return;
-                 const newHostHP = Math.max(0, sfDoc.data().hostHP - dmg);
-                 transaction.update(roomRef, { hostHP: newHostHP, turn: 'host', logs: updateData.logs });
-             });
+        // Use a transaction to safely read, modify, and write the state
+        try {
+            await window.fbase.runTransaction(window.db, async (transaction) => {
+                const sfDoc = await transaction.get(roomRef);
+                if (!sfDoc.exists()) { throw "Document does not exist!"; }
+                
+                const data = sfDoc.data();
+                const isMyTurn = (data.turn === 'host' && isHost) || (data.turn === 'guest' && !isHost);
+                
+                if (!isMyTurn) {
+                    // Prevent attack if not turn
+                    return; 
+                }
+
+                let newHostHP = data.hostHP;
+                let newGuestHP = data.guestHP;
+                const nextTurn = isHost ? "guest" : "host";
+                
+                if (isHost) {
+                     // Host attacking Guest
+                     newGuestHP = Math.max(0, newGuestHP - dmg);
+                } else {
+                     // Guest attacking Host
+                     newHostHP = Math.max(0, newHostHP - dmg);
+                }
+                
+                // Update the document with new HP, next turn, and log message
+                transaction.update(roomRef, { 
+                    hostHP: newHostHP, 
+                    guestHP: newGuestHP, 
+                    turn: nextTurn, 
+                    logs: window.fbase.arrayUnion(`${isHost ? data.hostName : data.guestName} used ${power.name}! (-${dmg} HP)`)
+                });
+            });
+        } catch (e) {
+            console.error("PvP Attack Transaction failed:", e);
+            showToast("PvP attack failed (Desync/Error).", "error");
         }
     }
     
@@ -3337,6 +3623,7 @@
         if (pvpUnsubscribe) pvpUnsubscribe();
         currentRoomId = null;
         isHost = false;
+        localOpponentHP = 0; // Reset local state
         document.getElementById('pvp-lobby-screen').style.display = 'none';
         document.getElementById('battle-ui').style.display = 'none';
         document.getElementById('wilds-menu').style.display = 'block';
@@ -3347,9 +3634,15 @@
   <div id="pvp-lobby-screen" style="display:none; text-align:center; padding-top:40px;">
      <h2 id="pvp-status-msg" style="font-size:24px; margin-bottom:10px; color:#2d3748;">Waiting...</h2>
      <div style="font-size:60px; margin:20px 0; letter-spacing:10px; font-family:monospace; color:#5a67d8;" id="display-room-code">----</div>
-     <p>Share this code to play!</p>
      
-     <button id="pvp-ready-btn" class="action-btn green" style="display:none; width:200px; margin:20px auto;" onclick="setPvPReady()">I AM READY!</button>
+     <div style="font-size: 16px; margin-bottom: 20px;">
+        <p id="pvp-host-status"></p>
+        <p id="pvp-guest-status"></p>
+     </div>
+     
+     <button id="pvp-start-btn" class="action-btn green" style="display:none; width:250px; margin:20px auto;" onclick="startPvPBattle()">START BATTLE! ⚔️</button>
      
      <button class="action-btn red" style="width:200px; margin:20px auto;" onclick="leavePvPRoom()">Cancel</button>
   </div>
+</body>
+</html>
