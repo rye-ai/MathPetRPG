@@ -1,0 +1,213 @@
+[
+  {
+    "q": "What time is shown on the clock?",
+    "a": "3:00",
+    "qVisualHTML": "<div style='text-align: center;'><svg width='150' height='150'><circle cx='75' cy='75' r='70' stroke='black' stroke-width='3' fill='white' /><g font-family='Arial' font-size='14' text-anchor='middle' dominant-baseline='central'><text x='75' y='17'>12</text><text x='105' y='25'>1</text><text x='125' y='46'>2</text><text x='133' y='75'>3</text><text x='125' y='104'>4</text><text x='105' y='125'>5</text><text x='75' y='133'>6</text><text x='45' y='125'>7</text><text x='25' y='104'>8</text><text x='17' y='75'>9</text><text x='25' y='46'>10</text><text x='45' y='25'>11</text></g><line x1='75' y1='75' x2='75' y2='25' stroke='black' stroke-width='4' stroke-linecap='round' /><line x1='75' y1='75' x2='110' y2='75' stroke='black' stroke-width='6' stroke-linecap='round' /><circle cx='75' cy='75' r='4' fill='black' /></svg></div>",
+    "options": ["3:00", "12:15", "3:12", "12:03"]
+  },
+  {
+    "q": "The short hand points to the 4. The long hand points to the 12. What time is it?",
+    "a": "4:00",
+    "options": ["4:00", "12:20", "4:12", "12:04"]
+  },
+  {
+    "q": "How many minutes are in one hour?",
+    "a": 60
+  },
+  {
+    "q": "What time is shown on the clock?",
+    "a": "6:30",
+    "qVisualHTML": "<div style='text-align: center;'><svg width='150' height='150'><circle cx='75' cy='75' r='70' stroke='black' stroke-width='3' fill='white' /><g font-family='Arial' font-size='14' text-anchor='middle' dominant-baseline='central'><text x='75' y='17'>12</text><text x='105' y='25'>1</text><text x='125' y='46'>2</text><text x='133' y='75'>3</text><text x='125' y='104'>4</text><text x='105' y='125'>5</text><text x='75' y='133'>6</text><text x='45' y='125'>7</text><text x='25' y='104'>8</text><text x='17' y='75'>9</text><text x='25' y='46'>10</text><text x='45' y='25'>11</text></g><line x1='75' y1='75' x2='75' y2='125' stroke='black' stroke-width='4' stroke-linecap='round' /><line x1='75' y1='75' x2='75' y2='95' stroke='black' stroke-width='6' stroke-linecap='round' /><circle cx='75' cy='75' r='4' fill='black' /></svg></div>",
+    "options": ["6:30", "6:00", "12:30", "5:30"]
+  },
+  {
+    "q": "If the minute hand is pointing to the 6, how many minutes past the hour is it?",
+    "a": 30
+  },
+  {
+    "q": "What time is shown on the clock?",
+    "a": "9:15",
+    "qVisualHTML": "<div style='text-align: center;'><svg width='150' height='150'><circle cx='75' cy='75' r='70' stroke='black' stroke-width='3' fill='white' /><g font-family='Arial' font-size='14' text-anchor='middle' dominant-baseline='central'><text x='75' y='17'>12</text><text x='105' y='25'>1</text><text x='125' y='46'>2</text><text x='133' y='75'>3</text><text x='125' y='104'>4</text><text x='105' y='125'>5</text><text x='75' y='133'>6</text><text x='45' y='125'>7</text><text x='25' y='104'>8</text><text x='17' y='75'>9</text><text x='25' y='46'>10</text><text x='45' y='25'>11</text></g><line x1='75' y1='75' x2='125' y2='75' stroke='black' stroke-width='4' stroke-linecap='round' /><line x1='75' y1='75' x2='40' y2='75' stroke='black' stroke-width='6' stroke-linecap='round' /><circle cx='75' cy='75' r='4' fill='black' /></svg></div>",
+    "options": ["9:15", "3:45", "9:03", "3:09"]
+  },
+  {
+    "q": "Which hand on the clock moves the slowest?",
+    "a": "The hour hand",
+    "options": ["The minute hand", "The hour hand", "The second hand", "They move the same"]
+  },
+  {
+    "q": "What time is shown on the clock?",
+    "a": "1:00",
+    "qVisualHTML": "<div style='text-align: center;'><svg width='150' height='150'><circle cx='75' cy='75' r='70' stroke='black' stroke-width='3' fill='white' /><g font-family='Arial' font-size='14' text-anchor='middle' dominant-baseline='central'><text x='75' y='17'>12</text><text x='105' y='25'>1</text><text x='125' y='46'>2</text><text x='133' y='75'>3</text><text x='125' y='104'>4</text><text x='105' y='125'>5</text><text x='75' y='133'>6</text><text x='45' y='125'>7</text><text x='25' y='104'>8</text><text x='17' y='75'>9</text><text x='25' y='46'>10</text><text x='45' y='25'>11</text></g><line x1='75' y1='75' x2='75' y2='25' stroke='black' stroke-width='4' stroke-linecap='round' /><line x1='75' y1='75' x2='92' y2='40' stroke='black' stroke-width='6' stroke-linecap='round' /><circle cx='75' cy='75' r='4' fill='black' /></svg></div>",
+    "options": ["1:00", "12:05", "12:01", "1:12"]
+  },
+  {
+    "q": "How many minutes does each number on the clock represent?",
+    "a": 5
+  },
+  {
+    "q": "Which time is 'Quarter past 5'?",
+    "a": "5:15",
+    "options": ["5:15", "5:30", "5:45", "4:45"]
+  },
+  {
+    "q": "What time is shown on the clock?",
+    "a": "8:45",
+    "qVisualHTML": "<div style='text-align: center;'><svg width='150' height='150'><circle cx='75' cy='75' r='70' stroke='black' stroke-width='3' fill='white' /><g font-family='Arial' font-size='14' text-anchor='middle' dominant-baseline='central'><text x='75' y='17'>12</text><text x='105' y='25'>1</text><text x='125' y='46'>2</text><text x='133' y='75'>3</text><text x='125' y='104'>4</text><text x='105' y='125'>5</text><text x='75' y='133'>6</text><text x='45' y='125'>7</text><text x='25' y='104'>8</text><text x='17' y='75'>9</text><text x='25' y='46'>10</text><text x='45' y='25'>11</text></g><line x1='75' y1='75' x2='25' y2='75' stroke='black' stroke-width='4' stroke-linecap='round' /><line x1='75' y1='75' x2='45' y2='60' stroke='black' stroke-width='6' stroke-linecap='round' /><circle cx='75' cy='75' r='4' fill='black' /></svg></div>",
+    "options": ["8:45", "9:45", "8:15", "9:15"]
+  },
+  {
+    "q": "What time is shown on the clock?",
+    "a": "10:30",
+    "qVisualHTML": "<div style='text-align: center;'><svg width='150' height='150'><circle cx='75' cy='75' r='70' stroke='black' stroke-width='3' fill='white' /><g font-family='Arial' font-size='14' text-anchor='middle' dominant-baseline='central'><text x='75' y='17'>12</text><text x='105' y='25'>1</text><text x='125' y='46'>2</text><text x='133' y='75'>3</text><text x='125' y='104'>4</text><text x='105' y='125'>5</text><text x='75' y='133'>6</text><text x='45' y='125'>7</text><text x='25' y='104'>8</text><text x='17' y='75'>9</text><text x='25' y='46'>10</text><text x='45' y='25'>11</text></g><line x1='75' y1='75' x2='75' y2='125' stroke='black' stroke-width='4' stroke-linecap='round' /><line x1='75' y1='75' x2='50' y2='50' stroke='black' stroke-width='6' stroke-linecap='round' /><circle cx='75' cy='75' r='4' fill='black' /></svg></div>",
+    "options": ["10:30", "10:06", "6:50", "11:30"]
+  },
+  {
+    "q": "The hour hand is halfway between 2 and 3. The minute hand is on the 6. What time is it?",
+    "a": "2:30",
+    "options": ["2:30", "3:30", "2:06", "3:06"]
+  },
+  {
+    "q": "What time is shown on the clock?",
+    "a": "7:00",
+    "qVisualHTML": "<div style='text-align: center;'><svg width='150' height='150'><circle cx='75' cy='75' r='70' stroke='black' stroke-width='3' fill='white' /><g font-family='Arial' font-size='14' text-anchor='middle' dominant-baseline='central'><text x='75' y='17'>12</text><text x='105' y='25'>1</text><text x='125' y='46'>2</text><text x='133' y='75'>3</text><text x='125' y='104'>4</text><text x='105' y='125'>5</text><text x='75' y='133'>6</text><text x='45' y='125'>7</text><text x='25' y='104'>8</text><text x='17' y='75'>9</text><text x='25' y='46'>10</text><text x='45' y='25'>11</text></g><line x1='75' y1='75' x2='75' y2='25' stroke='black' stroke-width='4' stroke-linecap='round' /><line x1='75' y1='75' x2='50' y2='108' stroke='black' stroke-width='6' stroke-linecap='round' /><circle cx='75' cy='75' r='4' fill='black' /></svg></div>",
+    "options": ["7:00", "12:35", "7:12", "12:07"]
+  },
+  {
+    "q": "Which time is 'Half past 8'?",
+    "a": "8:30",
+    "options": ["8:30", "8:15", "7:30", "9:30"]
+  },
+  {
+    "q": "What time is shown on the clock?",
+    "a": "11:15",
+    "qVisualHTML": "<div style='text-align: center;'><svg width='150' height='150'><circle cx='75' cy='75' r='70' stroke='black' stroke-width='3' fill='white' /><g font-family='Arial' font-size='14' text-anchor='middle' dominant-baseline='central'><text x='75' y='17'>12</text><text x='105' y='25'>1</text><text x='125' y='46'>2</text><text x='133' y='75'>3</text><text x='125' y='104'>4</text><text x='105' y='125'>5</text><text x='75' y='133'>6</text><text x='45' y='125'>7</text><text x='25' y='104'>8</text><text x='17' y='75'>9</text><text x='25' y='46'>10</text><text x='45' y='25'>11</text></g><line x1='75' y1='75' x2='125' y2='75' stroke='black' stroke-width='4' stroke-linecap='round' /><line x1='75' y1='75' x2='55' y2='40' stroke='black' stroke-width='6' stroke-linecap='round' /><circle cx='75' cy='75' r='4' fill='black' /></svg></div>",
+    "options": ["11:15", "11:03", "3:55", "12:15"]
+  },
+  {
+    "q": "If the time is 5:05, which number is the minute hand pointing to?",
+    "a": "1",
+    "options": ["1", "5", "12", "2"]
+  },
+  {
+    "q": "What time is shown on the clock?",
+    "a": "2:00",
+    "qVisualHTML": "<div style='text-align: center;'><svg width='150' height='150'><circle cx='75' cy='75' r='70' stroke='black' stroke-width='3' fill='white' /><g font-family='Arial' font-size='14' text-anchor='middle' dominant-baseline='central'><text x='75' y='17'>12</text><text x='105' y='25'>1</text><text x='125' y='46'>2</text><text x='133' y='75'>3</text><text x='125' y='104'>4</text><text x='105' y='125'>5</text><text x='75' y='133'>6</text><text x='45' y='125'>7</text><text x='25' y='104'>8</text><text x='17' y='75'>9</text><text x='25' y='46'>10</text><text x='45' y='25'>11</text></g><line x1='75' y1='75' x2='75' y2='25' stroke='black' stroke-width='4' stroke-linecap='round' /><line x1='75' y1='75' x2='110' y2='55' stroke='black' stroke-width='6' stroke-linecap='round' /><circle cx='75' cy='75' r='4' fill='black' /></svg></div>",
+    "options": ["2:00", "12:10", "2:12", "12:02"]
+  },
+  {
+    "q": "The minute hand is on the 4. How many minutes have passed since the hour?",
+    "a": 20
+  },
+  {
+    "q": "What time is shown on the clock?",
+    "a": "5:30",
+    "qVisualHTML": "<div style='text-align: center;'><svg width='150' height='150'><circle cx='75' cy='75' r='70' stroke='black' stroke-width='3' fill='white' /><g font-family='Arial' font-size='14' text-anchor='middle' dominant-baseline='central'><text x='75' y='17'>12</text><text x='105' y='25'>1</text><text x='125' y='46'>2</text><text x='133' y='75'>3</text><text x='125' y='104'>4</text><text x='105' y='125'>5</text><text x='75' y='133'>6</text><text x='45' y='125'>7</text><text x='25' y='104'>8</text><text x='17' y='75'>9</text><text x='25' y='46'>10</text><text x='45' y='25'>11</text></g><line x1='75' y1='75' x2='75' y2='125' stroke='black' stroke-width='4' stroke-linecap='round' /><line x1='75' y1='75' x2='95' y2='110' stroke='black' stroke-width='6' stroke-linecap='round' /><circle cx='75' cy='75' r='4' fill='black' /></svg></div>",
+    "options": ["5:30", "6:30", "5:06", "6:25"]
+  },
+  {
+    "q": "What time is shown on the clock?",
+    "a": "12:00",
+    "qVisualHTML": "<div style='text-align: center;'><svg width='150' height='150'><circle cx='75' cy='75' r='70' stroke='black' stroke-width='3' fill='white' /><g font-family='Arial' font-size='14' text-anchor='middle' dominant-baseline='central'><text x='75' y='17'>12</text><text x='105' y='25'>1</text><text x='125' y='46'>2</text><text x='133' y='75'>3</text><text x='125' y='104'>4</text><text x='105' y='125'>5</text><text x='75' y='133'>6</text><text x='45' y='125'>7</text><text x='25' y='104'>8</text><text x='17' y='75'>9</text><text x='25' y='46'>10</text><text x='45' y='25'>11</text></g><line x1='75' y1='75' x2='75' y2='25' stroke='black' stroke-width='4' stroke-linecap='round' /><line x1='75' y1='75' x2='75' y2='45' stroke='black' stroke-width='6' stroke-linecap='round' /><circle cx='75' cy='75' r='4' fill='black' /></svg></div>",
+    "options": ["12:00", "6:00", "12:30", "6:30"]
+  },
+  {
+    "q": "Which time shows 'Quarter past 1'?",
+    "a": "1:15",
+    "options": ["1:15", "1:45", "1:30", "12:45"]
+  },
+  {
+    "q": "What time is shown on the clock?",
+    "a": "4:30",
+    "qVisualHTML": "<div style='text-align: center;'><svg width='150' height='150'><circle cx='75' cy='75' r='70' stroke='black' stroke-width='3' fill='white' /><g font-family='Arial' font-size='14' text-anchor='middle' dominant-baseline='central'><text x='75' y='17'>12</text><text x='105' y='25'>1</text><text x='125' y='46'>2</text><text x='133' y='75'>3</text><text x='125' y='104'>4</text><text x='105' y='125'>5</text><text x='75' y='133'>6</text><text x='45' y='125'>7</text><text x='25' y='104'>8</text><text x='17' y='75'>9</text><text x='25' y='46'>10</text><text x='45' y='25'>11</text></g><line x1='75' y1='75' x2='75' y2='125' stroke='black' stroke-width='4' stroke-linecap='round' /><line x1='75' y1='75' x2='100' y2='100' stroke='black' stroke-width='6' stroke-linecap='round' /><circle cx='75' cy='75' r='4' fill='black' /></svg></div>",
+    "options": ["4:30", "5:30", "4:06", "5:06"]
+  },
+  {
+    "q": "What time is shown on the clock?",
+    "a": "3:15",
+    "qVisualHTML": "<div style='text-align: center;'><svg width='150' height='150'><circle cx='75' cy='75' r='70' stroke='black' stroke-width='3' fill='white' /><g font-family='Arial' font-size='14' text-anchor='middle' dominant-baseline='central'><text x='75' y='17'>12</text><text x='105' y='25'>1</text><text x='125' y='46'>2</text><text x='133' y='75'>3</text><text x='125' y='104'>4</text><text x='105' y='125'>5</text><text x='75' y='133'>6</text><text x='45' y='125'>7</text><text x='25' y='104'>8</text><text x='17' y='75'>9</text><text x='25' y='46'>10</text><text x='45' y='25'>11</text></g><line x1='75' y1='75' x2='125' y2='75' stroke='black' stroke-width='4' stroke-linecap='round' /><line x1='75' y1='75' x2='110' y2='75' stroke='black' stroke-width='6' stroke-linecap='round' /><circle cx='75' cy='75' r='4' fill='black' /></svg></div>",
+    "options": ["3:15", "3:03", "3:45", "12:15"]
+  },
+  {
+    "q": "If it is 7:55, how many minutes until 8:00?",
+    "a": 5
+  },
+  {
+    "q": "What time is shown on the clock?",
+    "a": "9:00",
+    "qVisualHTML": "<div style='text-align: center;'><svg width='150' height='150'><circle cx='75' cy='75' r='70' stroke='black' stroke-width='3' fill='white' /><g font-family='Arial' font-size='14' text-anchor='middle' dominant-baseline='central'><text x='75' y='17'>12</text><text x='105' y='25'>1</text><text x='125' y='46'>2</text><text x='133' y='75'>3</text><text x='125' y='104'>4</text><text x='105' y='125'>5</text><text x='75' y='133'>6</text><text x='45' y='125'>7</text><text x='25' y='104'>8</text><text x='17' y='75'>9</text><text x='25' y='46'>10</text><text x='45' y='25'>11</text></g><line x1='75' y1='75' x2='75' y2='25' stroke='black' stroke-width='4' stroke-linecap='round' /><line x1='75' y1='75' x2='35' y2='75' stroke='black' stroke-width='6' stroke-linecap='round' /><circle cx='75' cy='75' r='4' fill='black' /></svg></div>",
+    "options": ["9:00", "12:45", "9:12", "12:09"]
+  },
+  {
+    "q": "What time is shown on the clock?",
+    "a": "1:30",
+    "qVisualHTML": "<div style='text-align: center;'><svg width='150' height='150'><circle cx='75' cy='75' r='70' stroke='black' stroke-width='3' fill='white' /><g font-family='Arial' font-size='14' text-anchor='middle' dominant-baseline='central'><text x='75' y='17'>12</text><text x='105' y='25'>1</text><text x='125' y='46'>2</text><text x='133' y='75'>3</text><text x='125' y='104'>4</text><text x='105' y='125'>5</text><text x='75' y='133'>6</text><text x='45' y='125'>7</text><text x='25' y='104'>8</text><text x='17' y='75'>9</text><text x='25' y='46'>10</text><text x='45' y='25'>11</text></g><line x1='75' y1='75' x2='75' y2='125' stroke='black' stroke-width='4' stroke-linecap='round' /><line x1='75' y1='75' x2='95' y2='55' stroke='black' stroke-width='6' stroke-linecap='round' /><circle cx='75' cy='75' r='4' fill='black' /></svg></div>",
+    "options": ["1:30", "2:30", "1:06", "6:05"]
+  },
+  {
+    "q": "The hour hand is past the 10 and the minute hand is on the 9. What time is it?",
+    "a": "10:45",
+    "options": ["10:45", "9:45", "10:09", "11:45"]
+  },
+  {
+    "q": "What time is shown on the clock?",
+    "a": "6:15",
+    "qVisualHTML": "<div style='text-align: center;'><svg width='150' height='150'><circle cx='75' cy='75' r='70' stroke='black' stroke-width='3' fill='white' /><g font-family='Arial' font-size='14' text-anchor='middle' dominant-baseline='central'><text x='75' y='17'>12</text><text x='105' y='25'>1</text><text x='125' y='46'>2</text><text x='133' y='75'>3</text><text x='125' y='104'>4</text><text x='105' y='125'>5</text><text x='75' y='133'>6</text><text x='45' y='125'>7</text><text x='25' y='104'>8</text><text x='17' y='75'>9</text><text x='25' y='46'>10</text><text x='45' y='25'>11</text></g><line x1='75' y1='75' x2='125' y2='75' stroke='black' stroke-width='4' stroke-linecap='round' /><line x1='75' y1='75' x2='75' y2='110' stroke='black' stroke-width='6' stroke-linecap='round' /><circle cx='75' cy='75' r='4' fill='black' /></svg></div>",
+    "options": ["6:15", "3:30", "6:03", "3:06"]
+  },
+  {
+    "q": "How many minutes past the hour is it when the minute hand is on the 5?",
+    "a": 25
+  },
+  {
+    "q": "What time is shown on the clock?",
+    "a": "10:00",
+    "qVisualHTML": "<div style='text-align: center;'><svg width='150' height='150'><circle cx='75' cy='75' r='70' stroke='black' stroke-width='3' fill='white' /><g font-family='Arial' font-size='14' text-anchor='middle' dominant-baseline='central'><text x='75' y='17'>12</text><text x='105' y='25'>1</text><text x='125' y='46'>2</text><text x='133' y='75'>3</text><text x='125' y='104'>4</text><text x='105' y='125'>5</text><text x='75' y='133'>6</text><text x='45' y='125'>7</text><text x='25' y='104'>8</text><text x='17' y='75'>9</text><text x='25' y='46'>10</text><text x='45' y='25'>11</text></g><line x1='75' y1='75' x2='75' y2='25' stroke='black' stroke-width='4' stroke-linecap='round' /><line x1='75' y1='75' x2='40' y2='50' stroke='black' stroke-width='6' stroke-linecap='round' /><circle cx='75' cy='75' r='4' fill='black' /></svg></div>",
+    "options": ["10:00", "12:50", "10:12", "12:10"]
+  },
+  {
+    "q": "What time is shown on the clock?",
+    "a": "7:30",
+    "qVisualHTML": "<div style='text-align: center;'><svg width='150' height='150'><circle cx='75' cy='75' r='70' stroke='black' stroke-width='3' fill='white' /><g font-family='Arial' font-size='14' text-anchor='middle' dominant-baseline='central'><text x='75' y='17'>12</text><text x='105' y='25'>1</text><text x='125' y='46'>2</text><text x='133' y='75'>3</text><text x='125' y='104'>4</text><text x='105' y='125'>5</text><text x='75' y='133'>6</text><text x='45' y='125'>7</text><text x='25' y='104'>8</text><text x='17' y='75'>9</text><text x='25' y='46'>10</text><text x='45' y='25'>11</text></g><line x1='75' y1='75' x2='75' y2='125' stroke='black' stroke-width='4' stroke-linecap='round' /><line x1='75' y1='75' x2='40' y2='100' stroke='black' stroke-width='6' stroke-linecap='round' /><circle cx='75' cy='75' r='4' fill='black' /></svg></div>",
+    "options": ["7:30", "8:30", "7:06", "6:35"]
+  },
+  {
+    "q": "What time is shown on the clock?",
+    "a": "2:15",
+    "qVisualHTML": "<div style='text-align: center;'><svg width='150' height='150'><circle cx='75' cy='75' r='70' stroke='black' stroke-width='3' fill='white' /><g font-family='Arial' font-size='14' text-anchor='middle' dominant-baseline='central'><text x='75' y='17'>12</text><text x='105' y='25'>1</text><text x='125' y='46'>2</text><text x='133' y='75'>3</text><text x='125' y='104'>4</text><text x='105' y='125'>5</text><text x='75' y='133'>6</text><text x='45' y='125'>7</text><text x='25' y='104'>8</text><text x='17' y='75'>9</text><text x='25' y='46'>10</text><text x='45' y='25'>11</text></g><line x1='75' y1='75' x2='125' y2='75' stroke='black' stroke-width='4' stroke-linecap='round' /><line x1='75' y1='75' x2='105' y2='55' stroke='black' stroke-width='6' stroke-linecap='round' /><circle cx='75' cy='75' r='4' fill='black' /></svg></div>",
+    "options": ["2:15", "3:10", "2:03", "3:15"]
+  },
+  {
+    "q": "The minute hand points to the 11. How many minutes is this?",
+    "a": 55
+  },
+  {
+    "q": "What time is shown on the clock?",
+    "a": "11:00",
+    "qVisualHTML": "<div style='text-align: center;'><svg width='150' height='150'><circle cx='75' cy='75' r='70' stroke='black' stroke-width='3' fill='white' /><g font-family='Arial' font-size='14' text-anchor='middle' dominant-baseline='central'><text x='75' y='17'>12</text><text x='105' y='25'>1</text><text x='125' y='46'>2</text><text x='133' y='75'>3</text><text x='125' y='104'>4</text><text x='105' y='125'>5</text><text x='75' y='133'>6</text><text x='45' y='125'>7</text><text x='25' y='104'>8</text><text x='17' y='75'>9</text><text x='25' y='46'>10</text><text x='45' y='25'>11</text></g><line x1='75' y1='75' x2='75' y2='25' stroke='black' stroke-width='4' stroke-linecap='round' /><line x1='75' y1='75' x2='55' y2='35' stroke='black' stroke-width='6' stroke-linecap='round' /><circle cx='75' cy='75' r='4' fill='black' /></svg></div>",
+    "options": ["11:00", "12:55", "11:12", "12:11"]
+  },
+  {
+    "q": "Which time is 'Quarter to 4'?",
+    "a": "3:45",
+    "options": ["3:45", "4:45", "4:15", "3:15"]
+  },
+  {
+    "q": "What time is shown on the clock?",
+    "a": "8:30",
+    "qVisualHTML": "<div style='text-align: center;'><svg width='150' height='150'><circle cx='75' cy='75' r='70' stroke='black' stroke-width='3' fill='white' /><g font-family='Arial' font-size='14' text-anchor='middle' dominant-baseline='central'><text x='75' y='17'>12</text><text x='105' y='25'>1</text><text x='125' y='46'>2</text><text x='133' y='75'>3</text><text x='125' y='104'>4</text><text x='105' y='125'>5</text><text x='75' y='133'>6</text><text x='45' y='125'>7</text><text x='25' y='104'>8</text><text x='17' y='75'>9</text><text x='25' y='46'>10</text><text x='45' y='25'>11</text></g><line x1='75' y1='75' x2='75' y2='125' stroke='black' stroke-width='4' stroke-linecap='round' /><line x1='75' y1='75' x2='25' y2='90' stroke='black' stroke-width='6' stroke-linecap='round' /><circle cx='75' cy='75' r='4' fill='black' /></svg></div>",
+    "options": ["8:30", "9:30", "8:06", "9:06"]
+  },
+  {
+    "q": "What time is shown on the clock?",
+    "a": "12:15",
+    "qVisualHTML": "<div style='text-align: center;'><svg width='150' height='150'><circle cx='75' cy='75' r='70' stroke='black' stroke-width='3' fill='white' /><g font-family='Arial' font-size='14' text-anchor='middle' dominant-baseline='central'><text x='75' y='17'>12</text><text x='105' y='25'>1</text><text x='125' y='46'>2</text><text x='133' y='75'>3</text><text x='125' y='104'>4</text><text x='105' y='125'>5</text><text x='75' y='133'>6</text><text x='45' y='125'>7</text><text x='25' y='104'>8</text><text x='17' y='75'>9</text><text x='25' y='46'>10</text><text x='45' y='25'>11</text></g><line x1='75' y1='75' x2='125' y2='75' stroke='black' stroke-width='4' stroke-linecap='round' /><line x1='75' y1='75' x2='85' y2='35' stroke='black' stroke-width='6' stroke-linecap='round' /><circle cx='75' cy='75' r='4' fill='black' /></svg></div>",
+    "options": ["12:15", "12:03", "3:00", "3:12"]
+  },
+  {
+    "q": "What time is shown on the clock?",
+    "a": "9:30",
+    "qVisualHTML": "<div style='text-align: center;'><svg width='150' height='150'><circle cx='75' cy='75' r='70' stroke='black' stroke-width='3' fill='white' /><g font-family='Arial' font-size='14' text-anchor='middle' dominant-baseline='central'><text x='75' y='17'>12</text><text x='105' y='25'>1</text><text x='125' y='46'>2</text><text x='133' y='75'>3</text><text x='125' y='104'>4</text><text x='105' y='125'>5</text><text x='75' y='133'>6</text><text x='45' y='125'>7</text><text x='25' y='104'>8</text><text x='17' y='75'>9</text><text x='25' y='46'>10</text><text x='45' y='25'>11</text></g><line x1='75' y1='75' x2='75' y2='125' stroke='black' stroke-width='4' stroke-linecap='round' /><line x1='75' y1='75' x2='30' y2='70' stroke='black' stroke-width='6' stroke-linecap='round' /><circle cx='75' cy='75' r='4' fill='black' /></svg></div>",
+    "options": ["9:30", "10:30", "9:06", "6:45"]
+  }
+]
