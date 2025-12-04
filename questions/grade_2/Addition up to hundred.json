@@ -1,0 +1,398 @@
+[
+  {
+    "q": "Solve: 24 + 13 = ?",
+    "a": 37
+  },
+  {
+    "q": "What is the sum of 45 and 22?",
+    "a": "67",
+    "options": [
+      "67",
+      "57",
+      "66",
+      "68"
+    ]
+  },
+  {
+    "q": "Add: 36 + 48",
+    "a": 84
+  },
+  {
+    "q": "Solve: 57 + 24",
+    "a": "81",
+    "options": [
+      "71",
+      "81",
+      "80",
+      "91"
+    ]
+  },
+  {
+    "q": "What number is shown by these blocks?",
+    "a": 34,
+    "qVisualHTML": "<div style='display: flex; gap: 10px; justify-content: center;'><svg width='100' height='80'><rect x='10' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/><rect x='25' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/><rect x='40' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/><rect x='60' y='60' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='60' y='50' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='60' y='40' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='60' y='30' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/></svg></div>"
+  },
+  {
+    "q": "Solve: 19 + 19",
+    "a": 38
+  },
+  {
+    "q": "Which equation is correct?",
+    "a": "25 + 35 = 60",
+    "options": [
+      "25 + 35 = 50",
+      "25 + 35 = 60",
+      "25 + 35 = 55",
+      "25 + 35 = 70"
+    ]
+  },
+  {
+    "q": "Add these two numbers: 62 + 15",
+    "a": 77
+  },
+  {
+    "q": "What is 28 + 44?",
+    "a": "72",
+    "options": [
+      "62",
+      "72",
+      "74",
+      "82"
+    ]
+  },
+  {
+    "q": "How many total blocks are there? (Add the two groups)",
+    "a": 35,
+    "qVisualHTML": "<div style='display: flex; gap: 20px; justify-content: center; align-items: center;'><svg width='60' height='80'><rect x='5' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/><rect x='20' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/><rect x='35' y='60' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='35' y='50' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='35' y='40' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='35' y='30' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='35' y='20' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/></svg><span style='font-size: 30px;'>+</span><svg width='60' height='80'><rect x='5' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/></svg></div>"
+  },
+  {
+    "q": "Solve: 72 + 18",
+    "a": 90
+  },
+  {
+    "q": "Sarah has 24 pencils. John gives her 13 more. How many pencils does Sarah have now?",
+    "a": "37",
+    "options": [
+      "36",
+      "37",
+      "47",
+      "11"
+    ]
+  },
+  {
+    "q": "Add: 43 + 39",
+    "a": 82
+  },
+  {
+    "q": "Which sum is greater than 50?",
+    "a": "26 + 25",
+    "options": [
+      "20 + 20",
+      "24 + 24",
+      "26 + 25",
+      "10 + 39"
+    ]
+  },
+  {
+    "q": "Calculate the total value shown.",
+    "a": 42,
+    "qVisualHTML": "<div style='display: flex; justify-content: center;'><svg width='150' height='80'><rect x='10' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/><rect x='25' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/><rect x='40' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/><rect x='55' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/><rect x='75' y='60' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='75' y='50' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/></svg></div>"
+  },
+  {
+    "q": "Solve: 50 + 27",
+    "a": 77
+  },
+  {
+    "q": "What is 35 + 46?",
+    "a": "81",
+    "options": [
+      "71",
+      "81",
+      "79",
+      "85"
+    ]
+  },
+  {
+    "q": "Fill in the blank: 15 + 15 = __",
+    "a": 30
+  },
+  {
+    "q": "A baker made 48 chocolate muffins and 34 blueberry muffins. How many muffins did he make in all?",
+    "a": "82",
+    "options": [
+      "72",
+      "82",
+      "84",
+      "14"
+    ]
+  },
+  {
+    "q": "Add the blocks together: 25 + 12",
+    "a": 37,
+    "qVisualHTML": "<div style='display: flex; gap: 20px; justify-content: center; align-items: center;'><svg width='80' height='80'><rect x='5' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/><rect x='20' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/><rect x='35' y='60' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='35' y='50' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='35' y='40' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='35' y='30' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='35' y='20' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/></svg><span style='font-size: 30px;'>+</span><svg width='60' height='80'><rect x='5' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/><rect x='20' y='60' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='20' y='50' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/></svg></div>"
+  },
+  {
+    "q": "Solve: 63 + 29",
+    "a": 92
+  },
+  {
+    "q": "What is the sum of 22 + 55?",
+    "a": "77",
+    "options": [
+      "67",
+      "77",
+      "87",
+      "75"
+    ]
+  },
+  {
+    "q": "Find the missing number: 45 + __ = 90",
+    "a": 45
+  },
+  {
+    "q": "When adding 38 + 24, do you need to regroup (carry a ten)?",
+    "a": "Yes",
+    "options": [
+      "Yes",
+      "No",
+      "Only if you subtract",
+      "Impossible to tell"
+    ]
+  },
+  {
+    "q": "Count and add the base-10 blocks.",
+    "a": 53,
+    "qVisualHTML": "<div style='display: flex; justify-content: center;'><svg width='150' height='80'><rect x='10' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/><rect x='25' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/><rect x='40' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/><rect x='55' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/><rect x='70' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/><rect x='90' y='60' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='90' y='50' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='90' y='40' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/></svg></div>"
+  },
+  {
+    "q": "Solve: 33 + 44",
+    "a": 77
+  },
+  {
+    "q": "Solve: 17 + 76",
+    "a": "93",
+    "options": [
+      "83",
+      "93",
+      "94",
+      "81"
+    ]
+  },
+  {
+    "q": "What is 25 + 25 + 25?",
+    "a": 75
+  },
+  {
+    "q": "Break apart 26 to add: 54 + 26. Think 54 + 6 + 20.",
+    "a": "80",
+    "options": [
+      "70",
+      "74",
+      "80",
+      "84"
+    ]
+  },
+  {
+    "q": "Solve the addition problem shown by the blocks. (12 + 13)",
+    "a": 25,
+    "qVisualHTML": "<div style='display: flex; gap: 20px; justify-content: center; align-items: center;'><svg width='60' height='80'><rect x='5' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/><rect x='20' y='60' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='20' y='50' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/></svg><span style='font-size: 30px;'>+</span><svg width='60' height='80'><rect x='5' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/><rect x='20' y='60' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='20' y='50' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='20' y='40' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/></svg></div>"
+  },
+  {
+    "q": "Solve: 88 + 11",
+    "a": 99
+  },
+  {
+    "q": "If you add 3 tens and 4 ones to 2 tens and 8 ones, what is the total?",
+    "a": "62",
+    "options": [
+      "52",
+      "62",
+      "58",
+      "64"
+    ]
+  },
+  {
+    "q": "What is 47 + 39?",
+    "a": 86
+  },
+  {
+    "q": "A zoo has 35 monkeys and 28 tigers. How many animals are there in total?",
+    "a": "63",
+    "options": [
+      "53",
+      "63",
+      "65",
+      "55"
+    ]
+  },
+  {
+    "q": "Add the blocks (Regrouping required): 18 + 14",
+    "a": 32,
+    "qVisualHTML": "<div style='display: flex; gap: 20px; justify-content: center; align-items: center;'><svg width='60' height='80'><rect x='5' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/><rect x='20' y='60' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='20' y='50' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='20' y='40' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='20' y='30' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='32' y='60' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='32' y='50' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='32' y='40' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='32' y='30' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/></svg><span style='font-size: 30px;'>+</span><svg width='60' height='80'><rect x='5' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/><rect x='20' y='60' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='20' y='50' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='20' y='40' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='20' y='30' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/></svg></div>"
+  },
+  {
+    "q": "Solve: 20 + 78",
+    "a": 98
+  },
+  {
+    "q": "What is 5 + 90?",
+    "a": "95",
+    "options": [
+      "95",
+      "59",
+      "905",
+      "85"
+    ]
+  },
+  {
+    "q": "Find the sum: 66 + 27",
+    "a": 93
+  },
+  {
+    "q": "Which number is missing? 12 + __ = 34",
+    "a": "22",
+    "options": [
+      "12",
+      "22",
+      "32",
+      "46"
+    ]
+  },
+  {
+    "q": "What number is shown?",
+    "a": 26,
+    "qVisualHTML": "<div style='display: flex; justify-content: center;'><svg width='120' height='80'><rect x='10' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/><rect x='25' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/><rect x='45' y='60' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='45' y='50' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='45' y='40' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='57' y='60' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='57' y='50' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='57' y='40' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/></svg></div>"
+  },
+  {
+    "q": "Solve: 75 + 15",
+    "a": 90
+  },
+  {
+    "q": "Calculate 32 + 59",
+    "a": "91",
+    "options": [
+      "81",
+      "91",
+      "92",
+      "89"
+    ]
+  },
+  {
+    "q": "What is 10 more than 53?",
+    "a": 63
+  },
+  {
+    "q": "There are 45 boys and 45 girls in the gym. How many students are there in total?",
+    "a": "90",
+    "options": [
+      "80",
+      "90",
+      "100",
+      "85"
+    ]
+  },
+  {
+    "q": "How many total units? (1 rod = 10 units)",
+    "a": 41,
+    "qVisualHTML": "<div style='display: flex; justify-content: center;'><svg width='100' height='80'><rect x='10' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/><rect x='25' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/><rect x='40' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/><rect x='55' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/><rect x='75' y='60' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/></svg></div>"
+  },
+  {
+    "q": "Solve: 13 + 85",
+    "a": 98
+  },
+  {
+    "q": "Which addition problem has a sum of 100?",
+    "a": "50 + 50",
+    "options": [
+      "40 + 50",
+      "50 + 50",
+      "90 + 20",
+      "30 + 60"
+    ]
+  },
+  {
+    "q": "Add: 29 + 48",
+    "a": 77
+  },
+  {
+    "q": "A bus has 22 people. At the stop, 19 more people get on. How many people are on the bus now?",
+    "a": "41",
+    "options": [
+      "31",
+      "41",
+      "42",
+      "39"
+    ]
+  },
+  {
+    "q": "Add the blocks together: 11 + 10",
+    "a": 21,
+    "qVisualHTML": "<div style='display: flex; gap: 20px; justify-content: center; align-items: center;'><svg width='40' height='80'><rect x='5' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/><rect x='20' y='60' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/></svg><span style='font-size: 30px;'>+</span><svg width='40' height='80'><rect x='10' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/></svg></div>"
+  },
+  {
+    "q": "Solve: 36 + 36",
+    "a": 72
+  },
+  {
+    "q": "What is 40 + 38?",
+    "a": "78",
+    "options": [
+      "68",
+      "78",
+      "88",
+      "70"
+    ]
+  },
+  {
+    "q": "Find the sum of 54 and 37.",
+    "a": 91
+  },
+  {
+    "q": "Does 18 + 14 equal 14 + 18?",
+    "a": "Yes",
+    "options": [
+      "Yes",
+      "No",
+      "Only on Tuesdays",
+      "Only if you regroup"
+    ]
+  },
+  {
+    "q": "Count the total value shown.",
+    "a": 40,
+    "qVisualHTML": "<div style='display: flex; justify-content: center;'><svg width='100' height='80'><rect x='10' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/><rect x='25' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/><rect x='40' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/><rect x='55' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/></svg></div>"
+  },
+  {
+    "q": "Solve: 25 + 66",
+    "a": 91
+  },
+  {
+    "q": "Tom read 15 pages on Monday and 26 pages on Tuesday. How many pages did he read?",
+    "a": "41",
+    "options": [
+      "31",
+      "41",
+      "42",
+      "39"
+    ]
+  },
+  {
+    "q": "Solve: 9 + 82",
+    "a": 91
+  },
+  {
+    "q": "What is 64 + 35?",
+    "a": "99",
+    "options": [
+      "89",
+      "99",
+      "98",
+      "100"
+    ]
+  },
+  {
+    "q": "How much is shown? (3 tens and 5 ones)",
+    "a": 35,
+    "qVisualHTML": "<div style='display: flex; justify-content: center;'><svg width='100' height='80'><rect x='10' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/><rect x='25' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/><rect x='40' y='10' width='10' height='60' fill='#4299e1' stroke='black' stroke-width='1'/><rect x='60' y='60' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='60' y='50' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='60' y='40' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='60' y='30' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/><rect x='60' y='20' width='10' height='10' fill='#ecc94b' stroke='black' stroke-width='1'/></svg></div>"
+  }
+]
