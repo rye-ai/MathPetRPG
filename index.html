@@ -1715,15 +1715,25 @@ let QUESTION_REPOSITORY = {};
           gameState.activeQuestionPool = [{q:"1+1?",a:2,options:[1,2,3]}];
       }
       
-      // 3. LOAD SAVE & START
-      loadExternalPets();
+     // Manual Revision - Replace Lines 933-938 with this block:
+// 3. LOAD SAVE & START
+loadExternalPets();
 
-      const cloudLoaded = await loadProgressFromFirebase(name);
-      if (!cloudLoaded) {
-            if (gameState.pets.length === 0) {
-               initializeGame();
-            }
+// 🚨 FIX: Preserve the newly assigned grade before loading old save data
+const tempAssignedGrade = gameState.grade;
+
+const cloudLoaded = await loadProgressFromFirebase(name);
+if (!cloudLoaded) {
+      if (gameState.pets.length === 0) {
+         initializeGame();
       }
+}
+
+// 🚨 FIX: Re-apply the current grade assignment (from the Teacher Dashboard) 
+// in case the loaded save data contained an old grade value.
+if (tempAssignedGrade) {
+    gameState.grade = tempAssignedGrade;
+}
 
       document.getElementById('display-name').innerText = gameState.playerName;
       document.getElementById('display-grade').innerText = `Grade: ${gameState.grade}`;
