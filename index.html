@@ -1,0 +1,3010 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Math Pet Adventure RPG</title>
+  
+  <!-- 1. LOAD FIREBASE LIBRARIES -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // ==========================================
+    // 🔥 FIREBASE CONFIGURATION
+    // ==========================================
+   const firebaseConfig = {
+      apiKey: "AIzaSyAw7gJ8lN5BNE2a74jdAoSu9vrpAsBgcpc",
+      authDomain: "petadventure-b73c8.firebaseapp.com",
+      projectId: "petadventure-b73c8",
+      storageBucket: "petadventure-b73c8.firebasestorage.app",
+      messagingSenderId: "590511399628",
+      appId: "1:590511399628:web:400e68086ccfaba2e65869"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    
+    // Expose DB to window so our main game functions can use it
+    window.db = db;
+    window.fbase = { doc, getDoc, setDoc, updateDoc, onSnapshot, collection, addDoc };
+    
+    console.log("🔥 Firebase Initialized");
+  </script>
+
+  <!-- Load Tailwind -->
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+  
+  <style>@view-transition { navigation: auto; }</style>
+  
+  <!-- Custom Game Styles -->
+  <style>
+    body { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Comic Sans MS', 'Arial Rounded MT Bold', cursive, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 100vh; width: 100vw; overflow: hidden; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    
+    /* Login & Setup Screen */
+    .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); z-index: 2000; display: flex; align-items: center; justify-content: center; overflow-y: auto; padding: 20px; }
+    .login-overlay.hidden { display: none; }
+    .login-box { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 10px 50px rgba(0,0,0,0.3); text-align: center; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative; }
+    
+    .login-title { font-size: clamp(24px, 5vw, 32px); color: #5a67d8; margin-bottom: 10px; font-weight: bold; }
+    .setup-section { margin-bottom: 20px; text-align: left; border-bottom: 2px solid #edf2f7; padding-bottom: 15px; }
+    .setup-label { display: block; font-size: 16px; font-weight: bold; color: #2d3748; margin-bottom: 8px; }
+    .login-input { width: 100%; padding: 12px; font-size: 16px; border: 3px solid #e5e7eb; border-radius: 10px; font-family: inherit; margin-bottom: 10px; }
+    
+    .grade-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); gap: 8px; }
+    .grade-btn { padding: 10px 5px; background: #ebf8ff; border: 2px solid #4299e1; color: #2b6cb0; border-radius: 10px; font-weight: bold; cursor: pointer; transition: all 0.2s; box-shadow: 0 3px 0 #2b6cb0; margin-bottom: 4px; font-size: 14px; }
+    .grade-btn:active { transform: translateY(3px); box-shadow: none; }
+    .grade-btn.selected { background: #3182ce; color: white; border-color: #2c5282; box-shadow: 0 3px 0 #1a365d; }
+    
+    .topic-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; margin-top: 8px; }
+    .topic-checkbox-label { display: flex; align-items: center; background: #f7fafc; padding: 8px; border-radius: 8px; border: 2px solid #e2e8f0; cursor: pointer; font-size: 13px; }
+    .topic-checkbox-label input { margin-right: 8px; transform: scale(1.1); }
+    
+    .login-btn, .submit-btn, .explore-btn, .btn-green { width: 100%; padding: 15px; background: #48bb78; color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 5px 0 #2f855a; margin-top: 10px; text-transform: uppercase; letter-spacing: 1px; touch-action: manipulation; }
+    .login-btn:active, .submit-btn:active, .explore-btn:active, .btn-green:active { transform: translateY(5px); box-shadow: none; }
+    .login-btn:disabled, .submit-btn:disabled, .explore-btn:disabled { background: #cbd5e0; box-shadow: none; cursor: not-allowed; transform: none; }
+    
+    .teacher-link { margin-top: 20px; font-size: 14px; color: #718096; text-decoration: underline; cursor: pointer; display: inline-block; }
+    .teacher-dashboard { display: none; text-align: left; }
+    .teacher-dashboard.active { display: block; }
+
+    .game-container { max-width: 1000px; margin: 0 auto; padding: 10px; height: 100%; display: flex; flex-direction: column; }
+    .header { background: white; padding: 10px 15px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 10px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; }
+    .player-info { display: flex; align-items: center; gap: 10px; flex: 1; }
+    .stats-container { display: flex; gap: 10px; }
+    .logout-btn { padding: 6px 12px; background: #e53e3e; color: white; border: none; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 0 #9b2c2c; margin-left: auto; }
+    .currency-display { background: #fef3c7; padding: 6px 12px; border-radius: 20px; font-weight: bold; color: #92400e; border: 2px solid #fcd34d; font-size: 14px; white-space: nowrap; }
+    .stamina-display { background: #e0f2fe; padding: 6px 12px; border-radius: 20px; font-weight: bold; color: #0369a1; border: 2px solid #7dd3fc; font-size: 14px; white-space: nowrap; }
+    
+    .tabs { display: flex; gap: 8px; margin-bottom: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab { flex: 1; padding: 12px; background: rgba(255,255,255,0.4); border: none; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; white-space: nowrap; text-align: center; font-size: 16px; transition: all 0.2s; min-width: 80px; }
+    .tab.active { background: white; color: #5a67d8; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transform: translateY(-2px); }
+    .content { background: white; border-radius: 15px; padding: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); flex: 1; overflow-y: auto; min-height: 0; }
+    .screen { display: none; height: 100%; }
+    .screen.active { display: block; }
+    
+    .quiz-container { text-align: center; padding: 10px; display: flex; flex-direction: column; height: 100%; justify-content: center; }
+    .question-text { font-size: clamp(24px, 4vw, 32px); color: #2d3748; margin: 20px 0; font-weight: bold; }
+    .answer-input { font-size: 28px; padding: 10px; width: 150px; text-align: center; border: 3px solid #cbd5e0; border-radius: 10px; }
+    .feedback { height: 30px; margin-top: 15px; font-weight: bold; font-size: 18px; }
+    .feedback.correct { color: #38a169; }
+    .feedback.incorrect { color: #e53e3e; }
+    .mcq-options { display: grid; grid-template-columns: 1fr; gap: 12px; max-width: 600px; margin: 0 auto; width: 100%; }
+    @media (min-width: 600px) { .mcq-options { grid-template-columns: 1fr 1fr; } }
+    .mcq-btn { padding: 15px; background: white; border: 2px solid #cbd5e0; border-radius: 12px; font-size: 16px; font-weight: bold; color: #4a5568; cursor: pointer; box-shadow: 0 4px 0 #cbd5e0; text-align: center; touch-action: manipulation; }
+    .mcq-btn:active { transform: translateY(2px); box-shadow: none; }
+    
+    .hub-grid { display: flex; flex-direction: column; gap: 20px; }
+    @media(min-width: 768px) { .hub-grid { flex-direction: row; align-items: flex-start; } .hub-left { flex: 1; max-width: 350px; position: sticky; top: 0; } .hub-right { flex: 1.5; } }
+    .pet-display { background: linear-gradient(135deg, #ebf8ff 0%, #e6fffa 100%); border-radius: 15px; padding: 15px; text-align: center; border: 1px solid #bce3eb; }
+    .pet-visual { font-size: 80px; margin: 10px 0; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.2)); position: relative; display: inline-block; min-width: 100px; min-height: 100px; }
+    .pet-image { width: 120px; height: 120px; object-fit: contain; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.2)); }
+    .blend-multiply { mix-blend-mode: multiply; }
+    .battler-image { width: 100px; height: 100px; object-fit: contain; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.2)); }
+    .pet-name { font-size: 20px; color: #2c5282; margin: 10px 0; font-weight: bold; }
+    .rarity-badge { display: inline-block; padding: 4px 12px; border-radius: 15px; font-size: 12px; font-weight: bold; margin-left: 5px; text-transform: uppercase; letter-spacing: 1px; }
+    .rarity-common { background: #9ca3af; color: white; }
+    .rarity-uncommon { background: #10b981; color: white; }
+    .rarity-rare { background: #3b82f6; color: white; }
+    .rarity-epic { background: #a855f7; color: white; }
+    .rarity-legendary { background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); color: white; animation: shimmer 2s infinite; }
+    
+    @keyframes shimmer { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.3); } }
+    @keyframes attackShake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-15px); } 75% { transform: translateX(15px); } }
+    @keyframes damageFlash { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(2.5) saturate(0); } }
+    @keyframes projectileGlide { 0% { left: 0; opacity: 1; transform: scale(0.8) rotate(0deg); } 100% { left: 100%; opacity: 0; transform: scale(0.5) rotate(360deg); } }
+    .projectile { position: fixed; width: 60px; height: 60px; font-size: 40px; pointer-events: none; z-index: 3000; display: flex; justify-content: center; align-items: center; filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8)); }
+    
+    .pet-stats { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 15px; }
+    .stat-box { background: white; padding: 8px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex: 1; min-width: 70px; }
+    .stat-label { font-size: 11px; color: #718096; margin-bottom: 3px; }
+    .stat-value { font-size: 16px; color: #5a67d8; font-weight: bold; }
+    .inventory-section, .evolution-info { background: #f7fafc; border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px; margin-bottom: 12px; }
+    .inventory-item { display: inline-block; background: white; padding: 8px; margin: 4px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; }
+    .action-btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 5px; transition: transform 0.1s; box-shadow: 0 4px 0 rgba(0,0,0,0.2); font-size: 16px; display: flex; justify-content: center; align-items: center; gap: 10px; }
+    .action-btn:active { transform: translateY(4px); box-shadow: none; }
+    .action-btn.green { background: #48bb78; color: white; }
+    .action-btn.red { background: #f56565; color: white; }
+    .action-btn.blue { background: #4299e1; color: white; }
+    
+    .evolution-btn { margin-top: 10px; padding: 12px; background: #f59e0b; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; width: 100%; box-shadow: 0 4px 0 #d97706; }
+    .evolution-btn:active { transform: translateY(4px); box-shadow: none; }
+    .evolution-btn:disabled { background: #cbd5e0; cursor: not-allowed; box-shadow: none; transform: none; }
+    
+    .pet-collection { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 20px; }
+    .pet-card { background: #fff; padding: 8px; border-radius: 10px; text-align: center; cursor: pointer; border: 3px solid transparent; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .pet-card.active { border-color: #5a67d8; background: #ebf8ff; }
+    .pet-card-visual { font-size: 30px; }
+    
+    .shop-section { margin-bottom: 25px; }
+    .shop-section h2 { color: #5a67d8; border-bottom: 2px solid #5a67d8; margin-bottom: 12px; font-size: 20px; }
+    .shop-items { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+    .shop-item { background: white; padding: 12px; border-radius: 10px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .shop-item-price { background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 15px; font-weight: bold; display: inline-block; margin: 8px 0; font-size: 14px; }
+    .buy-btn { width: 100%; padding: 8px; background: #5a67d8; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: 0 3px 0 #434190; }
+    .buy-btn:active { transform: translateY(3px); box-shadow: none; }
+    
+    .gacha-btn { background: linear-gradient(135deg, #a855f7, #6366f1); color: white; padding: 15px; border-radius: 15px; border: none; font-size: 20px; font-weight: bold; width: 100%; cursor: pointer; box-shadow: 0 5px 0 #5b21b6; transition: all 0.2s; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+    .gacha-btn:active { transform: translateY(5px); box-shadow: none; }
+    .gacha-results { display: flex; gap: 15px; justify-content: center; margin-top: 15px; flex-wrap: wrap; }
+    .gacha-card { background: white; padding: 15px; border-radius: 15px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: popIn 0.5s ease-out; min-width: 120px; }
+    @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 80% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); } }
+    
+    .wilds-container { text-align: center; padding: 20px 10px; }
+    .rpg-container { width: 100%; max-width: 500px; margin: 0 auto; position: relative; border: 4px solid #2d3748; border-radius: 10px; overflow: hidden; background: #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    canvas#rpg-canvas { display: block; width: 100%; height: auto; background: #81c784; image-rendering: pixelated; }
+    .d-pad { display: grid; grid-template-columns: 50px 50px 50px; grid-template-rows: 50px 50px; gap: 10px; justify-content: center; margin-top: 20px; touch-action: manipulation; }
+    .d-btn { width: 50px; height: 50px; background: rgba(255,255,255,0.7); border: 2px solid #2d3748; border-radius: 50%; font-size: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; color: #2d3748; -webkit-tap-highlight-color: transparent; }
+    .d-btn:active { background: white; transform: scale(0.9); }
+    .d-up { grid-column: 2; grid-row: 1; }
+    .d-left { grid-column: 1; grid-row: 2; }
+    .d-down { grid-column: 2; grid-row: 2; }
+    .d-right { grid-column: 3; grid-row: 2; }
+    .controls-hint { text-align: center; color: #4a5568; margin-top: 10px; font-size: 13px; font-style: italic; }
+    
+    .battle-screen { display: none; padding: 20px; background-color: #2d3748; background-size: cover; background-position: center bottom; background-repeat: no-repeat; border-radius: 15px; min-height: 500px; position: relative; overflow: hidden; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
+    .battle-screen.active { display: flex; flex-direction: column; justify-content: space-between; }
+    .battle-arena { display: flex; justify-content: space-around; align-items: flex-end; margin: 40px 0; gap: 20px; flex: 1; }
+    .battler { flex: 1; text-align: center; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.4)); }
+    .battler-visual { font-size: 140px; margin-bottom: 10px; position: relative; display: inline-block; min-width: 150px; min-height: 150px; transition: transform 0.2s; }
+    .battler-image { width: 180px; height: 180px; object-fit: contain; }
+    .battler-name { font-size: 20px; font-weight: bold; color: white; text-shadow: 2px 2px 0 #000; margin-bottom: 8px; background: rgba(0,0,0,0.4); display: inline-block; padding: 2px 10px; border-radius: 10px; }
+    .hp-bar-container { background: rgba(0,0,0,0.5); border-radius: 10px; height: 24px; overflow: hidden; border: 2px solid white; max-width: 200px; margin: 0 auto; }
+    .hp-bar { height: 100%; background: linear-gradient(90deg, #48bb78 0%, #38a169 100%); transition: width 0.5s; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px; text-shadow: 1px 1px 0 rgba(0,0,0,0.5); }
+    .hp-bar.low { background: linear-gradient(90deg, #f56565 0%, #c53030 100%); }
+    .xp-bar-container { background: #e2e8f0; border-radius: 10px; height: 15px; overflow: hidden; border: 1px solid #cbd5e0; margin-top: 5px; }
+    .xp-bar { height: 100%; background: linear-gradient(90deg, #4299e1 0%, #3182ce 100%); transition: width 0.5s; }
+    .battle-actions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; max-width: 600px; margin: 0 auto; background: rgba(255,255,255,0.9); padding: 15px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+    .battle-log { background: rgba(0,0,0,0.7); padding: 15px; border-radius: 10px; margin-top: 10px; min-height: 60px; font-size: 16px; color: white; max-height: 100px; overflow-y: auto; text-align: center; border: 2px solid rgba(255,255,255,0.3); }
+    
+    @media (max-width: 600px) { .header { flex-direction: row; padding: 10px; } .player-info { font-size: 14px; } .battle-arena { flex-direction: column; gap: 30px; align-items: center; } .battler-visual { font-size: 100px; min-width: 100px; min-height: 100px; } .battler-image { width: 120px; height: 120px; } .rpg-container { border-width: 2px; } .gacha-results { gap: 10px; } .gacha-card { min-width: 100px; padding: 10px; } .modal-overlay { padding: 20px; } .confirm-modal { padding: 20px; width: 100%; } }
+    
+    .toast { position: fixed; top: 20px; right: 20px; background: white; padding: 15px 20px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); font-size: 16px; font-weight: bold; z-index: 3000; animation: slideIn 0.3s ease-out; max-width: 90%; }
+    .toast.success { border-left: 5px solid #48bb78; color: #276749; }
+    .toast.error { border-left: 5px solid #f56565; color: #742a2a; }
+    .toast.info { border-left: 5px solid #4299e1; color: #2c5282; }
+    @keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    
+    .no-pet-message { text-align: center; padding: 40px 20px; color: #718096; font-size: 18px; }
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2500; align-items: center; justify-content: center; }
+    .modal-overlay.active { display: flex; }
+    .confirm-modal { background: white; border-radius: 20px; padding: 30px; max-width: 500px; width: 90%; text-align: center; box-shadow: 0 10px 50px rgba(0,0,0,0.5); }
+    .confirm-modal h2 { color: #f56565; margin-bottom: 15px; font-size: 24px; }
+    .confirm-modal p { color: #374151; font-size: 16px; margin-bottom: 15px; line-height: 1.6; }
+    .confirm-modal .pet-preview { font-size: 60px; margin: 15px 0; }
+    .confirm-reward { background: #d1fae5; color: #065f46; padding: 12px; border-radius: 10px; font-weight: bold; margin: 15px 0; }
+    .confirm-warning { background: #fee2e2; color: #991b1b; padding: 12px; border-radius: 10px; font-size: 13px; font-weight: bold; margin: 15px 0; }
+    .confirm-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
+    .confirm-btn { padding: 12px 25px; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.3s; font-family: inherit; }
+    .confirm-btn.yes { background: #f56565; color: white; }
+    .confirm-btn.yes:hover { background: #e53e3e; transform: scale(1.05); }
+    .confirm-btn.no { background: #5a67d8; color: white; }
+    .confirm-btn.no:hover { background: #4c51bf; transform: scale(1.05); }
+    
+    .move-replace-list { display: grid; gap: 10px; margin: 20px 0; }
+    .move-replace-btn { background: white; border: 2px solid #cbd5e0; padding: 15px; border-radius: 10px; text-align: left; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-weight: bold; transition: all 0.2s; }
+    .move-replace-btn:hover { border-color: #f56565; background: #fff5f5; color: #c53030; }
+    .move-replace-btn span { pointer-events: none; }
+  </style>
+  </head>
+ <body><!-- Login Screen -->
+  <div class="login-overlay" id="login-overlay">
+   <div class="login-box">
+    <div class="login-icon" style="font-size: 40px; margin-bottom: 10px;">
+     🏫
+    </div>
+    <h1 class="login-title">Math Pet Adventure</h1>
+    <p style="color: #718096; margin-bottom: 20px; font-size: 14px;">Customize your learning journey!</p>
+    
+    <!-- STUDENT FORM -->
+    <form id="setup-form">
+     <div class="setup-section"><label class="setup-label">1. Username</label> 
+         <input type="text" id="student-name" class="login-input" placeholder="Enter Username" required>
+     </div>
+     
+     <!-- PASSWORD FIELD (Added) -->
+     <div class="setup-section"><label class="setup-label">2. Password</label> 
+         <input type="password" id="student-pass" class="login-input" placeholder="Enter Password" required>
+     </div>
+
+     <div class="setup-section" id="grade-section"><label class="setup-label">3. Select Grade:</label>
+      <div class="grade-grid" id="grade-selection">
+       <div class="grade-btn" onclick="selectGrade('K')">K</div>
+       <div class="grade-btn" onclick="selectGrade('1')">1</div>
+       <div class="grade-btn" onclick="selectGrade('2')">2</div>
+       <div class="grade-btn" onclick="selectGrade('3')">3</div>
+       <div class="grade-btn" onclick="selectGrade('4')">4</div>
+       <div class="grade-btn" onclick="selectGrade('5')">5</div>
+       <div class="grade-btn" onclick="selectGrade('6')">6</div>
+      </div>
+     </div>
+     
+     <div class="setup-section" id="topic-section" style="display:none;"><label class="setup-label">4. Choose topics:</label>
+      <div class="topic-list" id="topic-list"></div>
+     </div>
+     
+     <button type="submit" class="login-btn">Start Adventure! 🚀</button>
+    </form>
+    
+    <!-- TEACHER LINK -->
+    <div class="teacher-link" onclick="toggleTeacherLogin()">Teacher Access</div>
+    
+    <!-- TEACHER LOGIN OVERLAY (Inside box) -->
+    <div id="teacher-login-panel" style="display:none; margin-top:20px; border-top:1px solid #eee; padding-top:20px;">
+        <h3 style="color:#d69e2e; font-weight:bold; margin-bottom:10px;">Teacher Login</h3>
+        <input type="password" id="teacher-pin" class="login-input" placeholder="Enter Admin PIN (1234)">
+        <button class="action-btn blue" onclick="checkTeacherPin()">Access Dashboard</button>
+    </div>
+
+   </div>
+   
+   <!-- TEACHER DASHBOARD (Fullscreen Overlay) -->
+   <div id="teacher-dashboard-screen" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:2100; padding:40px; overflow-y:auto;">
+       <div style="max-width:800px; margin:0 auto;">
+           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+               <h1 style="font-size:32px; font-weight:bold; color:#5a67d8;">👩‍🏫 Teacher Dashboard</h1>
+               <button class="action-btn red" style="width:auto; padding:10px 20px;" onclick="location.reload()">Log Out</button>
+           </div>
+           
+           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:40px;">
+               <!-- CREATE STUDENT -->
+               <div style="background:#f7fafc; padding:25px; border-radius:15px; border:2px solid #e2e8f0;">
+                   <h2 style="font-size:20px; font-weight:bold; margin-bottom:15px;">Create Student Account</h2>
+                   <input type="text" id="new-student-user" class="login-input" placeholder="Username">
+                   <input type="password" id="new-student-pass" class="login-input" placeholder="Password">
+                   
+                   <label style="display:block; font-weight:bold; margin-top:10px;">Assign Grade:</label>
+                   <select id="new-student-grade" class="login-input">
+                       <option value="K">Kindergarten</option>
+                       <option value="1">Grade 1</option>
+                       <option value="2">Grade 2</option>
+                       <option value="3">Grade 3</option>
+                       <option value="4">Grade 4</option>
+                       <option value="5">Grade 5</option>
+                       <option value="6">Grade 6</option>
+                   </select>
+                   
+                   <button class="action-btn green" onclick="createStudentAccount()">Create Account</button>
+               </div>
+               
+               <!-- INFO -->
+               <div style="background:#fffbeb; padding:25px; border-radius:15px; border:2px solid #fbd38d;">
+                   <h2 style="color:#d69e2e; font-size:20px; font-weight:bold; margin-bottom:10px;">Instructions</h2>
+                   <p style="line-height:1.6; color:#744210;">
+                       1. Enter a Username and Password for your student.<br>
+                       2. Select their Grade Level.<br>
+                       3. Click "Create Account".<br><br>
+                       <strong>Note:</strong> Accounts created here are "Locked". Students cannot change their grade level when logging in.
+                   </p>
+               </div>
+           </div>
+       </div>
+   </div>
+
+  </div><!-- Main Game -->
+  
+  <!-- (Main Game HTML structure remains the same) -->
+  <div class="game-container">
+   <header class="header">
+    <div class="player-info">
+     <span style="font-size: 24px; margin-right: 5px;">👤</span>
+     <div>
+      <div style="font-weight: bold; font-size: 16px;" id="display-name">
+       Player
+      </div>
+      <div style="font-size: 12px; color: #718096;" id="display-grade">
+       Grade: -
+      </div>
+     </div><button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+    
+    <div class="stats-container">
+        <div class="stamina-display">
+         ⚡ <span id="stamina-display">100</span>/100
+        </div>
+        <div class="currency-display">
+         🧠 <span id="bp-display">0</span> BP
+        </div>
+    </div>
+   </header>
+   <nav class="tabs"><button class="tab active" data-tab="study" onclick="switchTab('study')">📚 Study</button> <button class="tab" data-tab="hub" onclick="switchTab('hub')">🏠 Pet Hub</button> <button class="tab" data-tab="shop" onclick="switchTab('shop')">🛒 Shop</button> <button class="tab" data-tab="wilds" onclick="switchTab('wilds')">🌲 Wilds</button>
+   </nav>
+   <main class="content"><!-- Study Screen -->
+    <section id="screen-study" class="screen active">
+     <div class="quiz-container">
+      <div style="color: #718096; margin-bottom: 10px; font-size: 14px;">
+       Solve to earn Brain Points!
+      </div>
+      <div class="question-text" id="question-text">
+       Loading question...
+      </div><!-- Standard Input Mode -->
+      <div id="input-mode-container"><input type="number" id="answer-input" class="answer-input" placeholder="?"> <br> <button class="submit-btn" id="check-btn" style="margin-top: 20px;">Check Answer</button>
+      </div><!-- NEW: MCQ Mode -->
+      <div id="mcq-mode-container" class="mcq-options" style="display:none">
+       <!-- Buttons injected via JS -->
+      </div>
+      <div id="feedback" class="feedback"></div>
+     </div>
+    </section><!-- Hub Screen -->
+    <section id="screen-hub" class="screen">
+     <div id="hub-content"></div>
+    </section><!-- Shop Screen -->
+    <section id="screen-shop" class="screen">
+     <div id="shop-content"></div>
+    </section><!-- Wilds Screen -->
+    <section id="screen-wilds" class="screen">
+     <!-- Menu View -->
+     <div class="wilds-container" id="wilds-menu">
+       <div style="font-size: 60px; margin-bottom: 20px;">🌲🌾🌲</div>
+       <h2 class="section-title">The Wild Grass</h2>
+       <p style="margin-bottom: 20px;">Explore to find wild monsters and items!</p>
+       <button class="explore-btn" onclick="startExploration()">Explore (Requires Pet)</button>
+       
+       <!-- NEW: Multiplayer Button -->
+       <div style="margin-top:20px; border-top: 1px solid #eee; padding-top:20px;">
+           <h3 style="color:#d69e2e;">⚔️ Multiplayer Arena</h3>
+           <p style="font-size:13px; margin-bottom:10px;">Challenge a classmate! (Cost: 100 BP)</p>
+           <button class="action-btn blue" onclick="showMultiplayerMenu()">Create / Join Room</button>
+       </div>
+     </div>
+
+     <!-- Multiplayer Menu -->
+     <div id="multiplayer-menu" style="display:none; text-align:center; padding-top:10px;">
+         <h2 style="margin-bottom:20px;">⚔️ PVP Arena Lobby</h2>
+         
+         <div style="background:#f0f9ff; padding:20px; border-radius:15px; margin-bottom:20px;">
+             <h3>Create Room</h3>
+             <p style="font-size:12px; color:#666;">Generate a code for your friend.</p>
+             <button class="action-btn green" onclick="createPvPRoom()">Create Room (100 BP)</button>
+         </div>
+
+         <div style="background:#fff5f5; padding:20px; border-radius:15px;">
+             <h3>Join Room</h3>
+             <p style="font-size:12px; color:#666;">Enter your friend's code.</p>
+             <input type="text" id="room-code-input" placeholder="1234" style="padding:10px; border-radius:5px; border:1px solid #ccc; width:100px; text-align:center; font-size:20px; margin:10px 0;">
+             <button class="action-btn blue" onclick="joinPvPRoom()">Join Room</button>
+         </div>
+         
+         <button class="action-btn red" style="margin-top:20px;" onclick="document.getElementById('multiplayer-menu').style.display='none'; document.getElementById('wilds-menu').style.display='block';">Back</button>
+     </div>
+     
+     <!-- PvP Waiting Screen -->
+     <div id="pvp-lobby-screen" style="display:none; text-align:center; padding-top:40px;">
+         <h2>Waiting for Opponent...</h2>
+         <div style="font-size:60px; margin:20px 0; letter-spacing:10px; font-family:monospace; color:#5a67d8;" id="display-room-code">----</div>
+         <p>Tell your friend to join using this code!</p>
+         <button class="action-btn red" onclick="leavePvPRoom()">Cancel</button>
+     </div>
+
+     <!-- Map View -->
+     <div id="rpg-wrapper" style="display:none; text-align:center; padding-top:10px;">
+         <div class="rpg-container">
+           <canvas id="rpg-canvas" width="480" height="400"></canvas>
+         </div>
+         
+         <!-- Mobile D-Pad -->
+         <div class="d-pad">
+           <div class="d-btn d-up" onclick="handleDPad('ArrowUp')">⬆️</div>
+           <div class="d-btn d-left" onclick="handleDPad('ArrowLeft')">⬅️</div>
+           <div class="d-btn d-down" onclick="handleDPad('ArrowDown')">⬇️</div>
+           <div class="d-btn d-right" onclick="handleDPad('ArrowRight')">➡️</div>
+         </div>
+         <div class="controls-hint">Use Arrow Keys or Tap buttons to move!</div>
+         <button class="action-btn red" style="width:100%; max-width: 200px; margin-top:20px;" onclick="stopExploration()">Stop Exploring</button>
+     </div>
+
+     <!-- Battle View -->
+     <div id="battle-ui" style="display:none;">
+      <div class="battle-arena">
+       <!-- Player -->
+       <div class="battler">
+        <div id="battle-player-visual" class="battler-visual">
+         🥚
+        </div>
+        <div class="hp-bar-container">
+         <div id="player-hp-bar" class="hp-bar" style="width: 100%;"></div>
+        </div>
+        <div id="player-hp-text" style="font-size: 12px; margin-top: 5px; font-weight: bold;">
+         100/100
+        </div>
+       </div>
+       <div style="font-size: 30px; font-weight: bold; color: #e53e3e;">
+        VS
+       </div><!-- Enemy -->
+       <div class="battler">
+        <div id="battle-enemy-visual" class="battler-visual">
+         👾
+        </div>
+        <div class="hp-bar-container">
+         <div id="enemy-hp-bar" class="hp-bar" style="width: 100%;"></div>
+        </div>
+        <div id="enemy-name" style="font-size: 12px; margin-top: 5px; font-weight: bold;">
+         Enemy
+        </div>
+       </div>
+      </div>
+      <div id="battle-log" class="battle-log">
+       Battle started!
+      </div>
+      <div id="battle-actions" class="battle-actions"></div>
+     </div>
+    </section>
+   </main>
+  </div><!-- Release Confirmation Modal -->
+  <div class="modal-overlay" id="release-modal">
+   <div class="confirm-modal">
+    <h2>⚠️ Release Pet?</h2>
+    <div class="pet-preview" id="release-pet-preview">
+     🐱
+    </div>
+    <p id="release-pet-text" style="font-weight: bold; font-size: 18px;">Are you sure you want to release <strong>Cat</strong>?</p>
+    <p style="color: #6b7280; font-size: 14px;">This pet will leave your collection forever and return to the wild.</p>
+    <div class="confirm-reward">
+     ✅ You will receive +10 Brain Points
+    </div>
+    <div class="confirm-warning">
+     🚨 WARNING: This action cannot be undone!
+    </div>
+    <div class="confirm-buttons"><button class="confirm-btn no" id="release-cancel">No, Keep</button> <button class="confirm-btn yes" id="release-confirm">Yes, Release</button>
+    </div>
+   </div>
+  </div><!-- Gacha Modal -->
+  <div class="modal-overlay" id="gacha-modal">
+   <div class="confirm-modal" style="max-width: 800px;">
+    <h2>🌟 Legendary Summon! 🌟</h2>
+    <p>You summoned 3 powerful companions!</p>
+    <div id="gacha-reveal-container" class="gacha-results">
+     <!-- Pets will appear here -->
+    </div>
+    <div style="margin-top: 30px;"><button class="confirm-btn yes" onclick="closeGacha()">Awesome!</button>
+    </div>
+   </div>
+  </div>
+
+  <!-- NEW: ARENA ENTRY MODAL -->
+  <div class="modal-overlay" id="arena-modal">
+   <div class="confirm-modal">
+    <div style="font-size: 60px; margin-bottom: 10px;">🏟️</div>
+    <h2 style="color: #d69e2e;">Championship Arena</h2>
+    <p style="font-weight: bold; font-size: 18px;">Challenge a Powerful Champion?</p>
+    
+    <div style="background: #fffbeb; padding: 15px; border-radius: 10px; border: 2px solid #fbd38d; margin: 15px 0; text-align: left;">
+        <div>🎟️ <strong>Ticket Cost:</strong> 1</div>
+        <div id="arena-ticket-display" style="color: #744210; font-size: 14px; margin-bottom: 10px;">(You have: 0)</div>
+        <hr style="border-color: #fbd38d; margin: 10px 0;">
+        <div style="font-size: 14px;">
+            <div>🏆 <strong>Win:</strong> Rare, Epic, or Legendary Egg</div>
+            <div style="color: #e53e3e;">💀 <strong>Lose:</strong> -20 Stamina</div>
+        </div>
+    </div>
+
+    <div class="confirm-buttons">
+        <button class="confirm-btn no" onclick="closeArenaModal()">Leave</button> 
+        <button class="confirm-btn yes" id="enter-arena-btn" style="background: #d69e2e;">Fight! ⚔️</button>
+    </div>
+   </div>
+  </div>
+
+  <!-- NEW: REPLACE MOVE MODAL -->
+  <div class="modal-overlay" id="replace-move-modal">
+   <div class="confirm-modal">
+    <h2 style="color: #4299e1;">🧠 Move Relearner</h2>
+    <p>Your pet already knows 4 moves!</p>
+    <p style="font-size: 14px; color: #718096;">Select a move to <strong>forget</strong> to learn <strong id="new-move-name" style="color: #48bb78;">New Move</strong>:</p>
+    
+    <div id="replace-move-list" class="move-replace-list">
+        <!-- Buttons injected here -->
+    </div>
+
+    <div class="confirm-buttons">
+        <button class="confirm-btn no" onclick="closeReplaceModal()">Cancel</button> 
+    </div>
+   </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // 🌐 GITHUB CONFIGURATION
+    // ==========================================
+    // UPDATE THESE WITH YOUR INFO!
+    const GITHUB_CONFIG = {
+        enabled: false, // Set to TRUE when you have created the files on GitHub
+        username: "rye-ai", // e.g. "MathTeacher123"
+        repo: "MathPetRPG",       // e.g. "math-rpg-data"
+        branch: "main"            // usually "main" or "master"
+    };
+
+    // Helper to build URL for Raw content
+    function getGhUrl(path) {
+        return `https://raw.githubusercontent.com/${GITHUB_CONFIG.username}/${GITHUB_CONFIG.repo}/${GITHUB_CONFIG.branch}/${path}`;
+    }
+    
+    // Helper to list files in a folder (Using GitHub API)
+    async function fetchGithubFolder(folderPath) {
+        // This uses the GitHub API to scan directory contents
+        const apiUrl = `https://api.github.com/repos/${GITHUB_CONFIG.username}/${GITHUB_CONFIG.repo}/contents/${folderPath}?ref=${GITHUB_CONFIG.branch}`;
+        
+        try {
+            const res = await fetch(apiUrl);
+            // 404 means folder missing (not created yet), which is common. Don't scream error.
+            if (res.status === 404) {
+                console.log(`Folder not found on GitHub: ${folderPath} (Using offline fallback)`);
+                return [];
+            }
+            if (!res.ok) throw new Error(`GitHub API Error: ${res.status}`);
+            const files = await res.json();
+            return files;
+        } catch (e) {
+            console.warn(`Warning scanning folder ${folderPath}:`, e);
+            return [];
+        }
+    }
+
+    // ==========================================
+    // 📂 DEFAULT DATA (Fallback / Offline)
+    // ==========================================
+    // NOTE: These are now 'let' so they can be overwritten by GitHub data
+    
+    let EXTERNAL_PET_DATA = [
+      { 
+        id: 'shadow_dragon_line',
+        base: {
+          id: 'shadow_dragon_baby',
+          name: 'Baby Shadow Dragon',
+          rarity: 'legendary',
+          image: 'https://i.imgur.com/qLkaKtw.png', 
+          imageStyle: 'blend-multiply',
+          emoji: '❓', 
+          baseHP: 50
+        },
+        evolutions: [
+          {
+            name: 'Teen Shadow Dragon',
+            image: 'https://i.imgur.com/qLkaKtw.png',
+            imageStyle: 'blend-multiply',
+            emoji: '❓',
+            rarity: 'legendary',
+            baseHP: 100,
+            cost: 100
+          },
+          {
+            name: 'Elder Shadow Dragon',
+            image: 'https://i.imgur.com/qLkaKtw.png',
+            imageStyle: 'blend-multiply',
+            emoji: '❓',
+            rarity: 'legendary',
+            baseHP: 150,
+            cost: 200
+          }
+        ]
+      }
+    ];
+
+    // MOCK REPOSITORY (Can also be replaced by fetching questions/grade_X.json)
+    let QUESTION_REPOSITORY = {
+      "K": {
+        "counting": [ 
+            { q: "Count: 🍎 🍎 🍎", options: ["2", "3", "4", "5"], a: "3" },
+            { q: "Which is a dog?", options: ["🐶", "🐱", "🐭"], a: "🐶" } 
+        ],
+        "addition_simple": [ { q: "1 + 1 = ?", a: 2 }, { q: "2 + 3 = ?", a: 5 } ]
+      },
+      "1": {
+        "addition": [ 
+            { q: "What is 5 + 5?", options: ["9", "10", "11", "55"], a: "10" },
+            { q: "Choose the even number:", options: ["1", "3", "4", "7"], a: "4" }
+        ],
+        "vocabulary": [
+            { q: "Which word means 'to take away'?", options: ["Add", "Subtract", "Multiply"], a: "Subtract" }
+        ]
+      },
+      "2": {
+        "addition_2digit": [ { q: "20 + 20 = ?", a: 40 }, { q: "15 + 10 = ?", a: 25 } ],
+        "word_problems": [
+            { q: "Tim has 2 apples. He buys 3 more. How many now?", options: ["4", "5", "6"], a: "5" }
+        ]
+      },
+      "3": {
+        "multiplication": [ { q: "2 x 3 = ?", a: 6 } ]
+      },
+      "4": { "fractions": [ { q: "1/2 + 1/2 = ?", a: 1 } ] },
+      "5": { "decimals": [ { q: "0.5 + 0.5 = ?", a: 1 } ] },
+      "6": { "algebra": [ { q: "2x = 10, x=?", a: 5 } ] }
+    };
+
+    // ==========================================
+    // 🐾 DATA DEFINITIONS
+    // ==========================================
+    
+    // 🎨 BATTLE BACKGROUNDS CONFIGURATION
+    const BATTLE_BACKGROUNDS = {
+        1: 'https://i.imgur.com/p3l926w.png', // Grass
+        4: 'https://i.imgur.com/45UYNBB.png', // Sand
+        5: 'https://i.imgur.com/4yKWyIw.png', // Flowers
+        6: 'https://i.imgur.com/A35xQK4.png', // Ice
+        7: 'https://i.imgur.com/45UYNBB.png'  // Boss Lair
+    };
+    
+    const ARENA_IMGS = [
+      'https://i.imgur.com/p3l926w.png', 
+      'https://i.imgur.com/45UYNBB.png', 
+      'https://i.imgur.com/4yKWyIw.png', 
+      'https://i.imgur.com/A35xQK4.png'  
+    ];
+
+    // UPDATED: Added explicit 'rarity' field to all default pets to prevent undefined errors
+    const PET_TYPES = {
+      common: [
+        { id: 'monster_01', name: 'Monster 01', image: 'https://i.imgur.com/Ua3beE3.png', imageStyle: 'blend-multiply', emoji: '❓', baseHP: 40, rarity: 'common' },
+        { id: 'monster_02', name: 'Monster 02', image: '', emoji: '❓', baseHP: 40, rarity: 'common' },
+      ],
+      uncommon: [ { id: 'monster_03', name: 'Monster 03', image: '', emoji: '❓', baseHP: 50, rarity: 'uncommon' } ],
+      rare: [ { id: 'monster_05', name: 'Monster 05', image: '', emoji: '❓', baseHP: 60, rarity: 'rare' } ],
+      epic: [ { id: 'monster_07', name: 'Monster 07', image: '', emoji: '❓', baseHP: 70, rarity: 'epic' } ],
+      legendary: [ { id: 'monster_09', name: 'Monster 09', image: '', emoji: '❓', baseHP: 90, rarity: 'legendary' } ]
+    };
+
+    const EVOLUTION_CHAINS = {
+      'monster_01': [
+        { name: 'Monster 01 Lvl 2', image: 'https://i.imgur.com/EZHaiWT.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50 },
+        { name: 'Monster 01 Lvl 3', image: 'https://i.imgur.com/FK4as8q.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100 }
+      ]
+    };
+
+    // CHANGED TO LET for GitHub Overwrite
+    let MONSTER_TYPES = [
+      { emoji: '👾', image: 'https://imgur.com/a/iinGWFO.png', imageStyle: 'blend-multiply', name: 'Enemy 01', hp: 30, damage: 8, xp: 15 },
+      { emoji: '👹', image: 'https://i.imgur.com/qLkaKtw.png', imageStyle: 'blend-multiply', name: 'Enemy 02', hp: 35, damage: 10, xp: 20 },
+      { emoji: '🦇', image: 'https://i.imgur.com/qLkaKtw.png', imageStyle: 'blend-multiply', name: 'Enemy 03', hp: 25, damage: 7, xp: 15 },
+      { emoji: '🐍', image: 'https://i.imgur.com/qLkaKtw.png', imageStyle: 'blend-multiply', name: 'Enemy 04', hp: 28, damage: 9, xp: 18 },
+      { emoji: '🕷️', image: 'https://i.imgur.com/qLkaKtw.png', imageStyle: 'blend-multiply', name: 'Enemy 05', hp: 32, damage: 8, xp: 18 }
+    ];
+
+    // CHANGED TO LET
+    let BOSS_TYPES = [
+       { emoji: '💀', image: 'https://i.imgur.com/qLkaKtw.png', imageStyle: 'blend-multiply', name: 'Shadow King', hp: 150, damage: 20, xp: 100, isBoss: true }
+    ];
+    
+    // CHANGED TO LET
+    let ARENA_MONSTERS = [
+       { emoji: '🐉', image: 'https://i.imgur.com/qLkaKtw.png', imageStyle: 'blend-multiply', name: 'Arena Champ', hp: 120, damage: 18, xp: 80 },
+       { emoji: '🦅', image: 'https://i.imgur.com/qLkaKtw.png', imageStyle: 'blend-multiply', name: 'Sky Guardian', hp: 110, damage: 22, xp: 80 },
+       { emoji: '🦕', image: 'https://i.imgur.com/qLkaKtw.png', imageStyle: 'blend-multiply', name: 'Ancient Rex', hp: 140, damage: 15, xp: 80 }
+    ];
+
+    // Shop items - REMOVED SHAPES AND ICONS
+    // CHANGED TO LET so we can add powers from GitHub
+    let SHOP_ITEMS = {
+      egg_items: [
+        { id: 'premium_food', name: 'Premium Food', icon: '🥩', price: 50, desc: 'Adds 20% to hatch progress', effect: 20 },
+        { id: 'warmer', name: 'Warmer', icon: '🔥', price: 30, desc: 'Adds 10% to hatch progress', effect: 10 },
+        { id: 'hatching_machine', name: 'Hatching Machine', icon: '️', price: 100, desc: 'Adds 50% to hatch progress', effect: 50 }
+      ],
+      power_items: [
+        { id: 'claw_attack', name: 'Claw Attack', image: 'https://i.imgur.com/Ua3beE3.png', icon: '🦅', price: 80, desc: 'Deals 10 damage', damage: 10 },
+        { id: 'fire_spell', name: 'Fire Spell', icon: '🔥', price: 120, desc: 'Deals 15 damage', damage: 15 },
+        { id: 'quick_dodge', name: 'Quick Dodge', icon: '💨', price: 100, desc: '50% dodge chance', dodge: 0.5 },
+        { id: 'ice_blast', name: 'Ice Blast', icon: '❄️', price: 110, desc: 'Deals 12 damage', damage: 12 },
+        { id: 'thunder_strike', name: 'Thunder Strike', icon: '⚡', price: 150, desc: 'Deals 18 damage', damage: 18 },
+        { id: 'water_wave', name: 'Water Wave', icon: '🌊', price: 90, desc: 'Deals 11 damage', damage: 11 },
+        { id: 'earth_slam', name: 'Earth Slam', icon: '🪨', price: 100, desc: 'Deals 13 damage', damage: 13 },
+        { id: 'wind_slash', name: 'Wind Slash', icon: '🌪️', price: 95, desc: 'Deals 10 damage', damage: 10 },
+        { id: 'shadow_strike', name: 'Shadow Strike', icon: '🌑', price: 130, desc: 'Deals 16 damage', damage: 16 },
+        { id: 'light_beam', name: 'Light Beam', icon: '✨', price: 140, desc: 'Deals 17 damage', damage: 17 },
+        { id: 'poison_fang', name: 'Poison Fang', icon: '🐍', price: 105, desc: 'Deals 14 damage', damage: 14 },
+        { id: 'mega_punch', name: 'Mega Punch', icon: '👊', price: 115, desc: 'Deals 15 damage', damage: 15 }
+      ],
+      consumable_items: [
+        { id: 'health_potion', name: 'Health Potion', icon: '🧪', price: 50, desc: 'Restores 30 HP', healing: 30 },
+        { id: 'stamina_potion', name: 'Stamina Potion', icon: '⚡', price: 40, desc: 'Restores 50 Stamina', stamina: 50 },
+        { id: 'arena_ticket', name: 'Arena Ticket', icon: '🎟️', price: 150, desc: 'Enter 1 Arena Fight', type: 'ticket' }
+      ]
+    };
+
+    // ==========================================
+    // 🌐 FETCH GITHUB DATA LOGIC
+    // ==========================================
+    
+    async function loadGitHubData() {
+        if (!GITHUB_CONFIG.enabled) return;
+        
+        console.log("🚀 Attempting to fetch Assets from GitHub...");
+        
+        // 1. Fetch Enemies (Forest)
+        try {
+            const res = await fetch(getGhUrl('enemies/forest.json'));
+            if(res.ok) {
+                const data = await res.json();
+                MONSTER_TYPES = data;
+                console.log("✅ Loaded Custom Forest Monsters");
+            }
+        } catch(e) { console.log("Failed to load forest monsters", e); }
+
+        // 2. Fetch Bosses
+        try {
+            const res = await fetch(getGhUrl('enemies/boss.json'));
+            if(res.ok) {
+                const data = await res.json();
+                BOSS_TYPES = data;
+                console.log("✅ Loaded Custom Bosses");
+            }
+        } catch(e) { console.log("Failed to load boss monsters", e); }
+
+        // 3. Fetch Arena Champs
+        try {
+            const res = await fetch(getGhUrl('enemies/arena.json'));
+            if(res.ok) {
+                const data = await res.json();
+                ARENA_MONSTERS = data;
+                console.log("✅ Loaded Custom Arena Champs");
+            }
+        } catch(e) { console.log("Failed to load arena monsters", e); }
+
+        // 4. Fetch Evolution Lines
+        try {
+            const res = await fetch(getGhUrl('pets/evolutions.json'));
+            if(res.ok) {
+                const data = await res.json();
+                if (Array.isArray(data)) {
+                    const newLines = data.filter(d => !EXTERNAL_PET_DATA.find(e => e.id === d.id));
+                    EXTERNAL_PET_DATA = [...EXTERNAL_PET_DATA, ...newLines];
+                    console.log("✅ Loaded Custom Pet Lines");
+                    loadExternalPets(); 
+                }
+            }
+        } catch(e) { console.log("Failed to load pet evolutions", e); }
+
+        // 5. Fetch Custom Powers
+        try {
+            const res = await fetch(getGhUrl('powers/list.json'));
+            if(res.ok) {
+                const data = await res.json();
+                if (Array.isArray(data)) {
+                    const existingIds = new Set(SHOP_ITEMS.power_items.map(p => p.id));
+                    const newPowers = data.filter(p => !existingIds.has(p.id));
+                    
+                    if (newPowers.length > 0) {
+                        SHOP_ITEMS.power_items = [...SHOP_ITEMS.power_items, ...newPowers];
+                        console.log(`✅ Loaded ${newPowers.length} Custom Powers`);
+                        if (document.getElementById('screen-shop').classList.contains('active')) {
+                            renderShop();
+                        }
+                    }
+                }
+            }
+        } catch(e) { console.log("Failed to load custom powers", e); }
+        
+        // Note: Questions are loaded dynamically when you select a Grade now!
+    }
+
+    // Call this immediately
+    loadGitHubData();
+
+
+    // ==========================================
+    // 🎮 GAME STATE
+    // ==========================================
+    let gameState = {
+      playerName: "Student",
+      grade: null,
+      selectedTopics: [],
+      activeQuestionPool: [],
+      currentQuestion: null,
+      brainPoints: 0,
+      pets: [],
+      currentPetId: null,
+      inventory: {},
+      inBattle: false,
+      battleState: null,
+      mapX: 2, // Starting Map Pos
+      mapY: 2,
+      stamina: 100, // Default Stamina
+      maxStamina: 100,
+      tempMoveToLearn: null // Used for replace logic
+    };
+
+    // ==========================================
+    // 🗺️ RPG MAP LOGIC
+    // ==========================================
+    const TILE_SIZE = 40;
+    const MAP_COLS = 12;
+    const MAP_ROWS = 10;
+    
+    // TILE TYPES: 
+    // 0=Path, 1=Grass, 2=Tree, 3=Water
+    // 4=Sand, 5=Flowers, 6=Ice, 7=BOSS LAIR, 8=ARENA
+    
+    // 1. Forest Path
+    const MAP_1 = [
+      [2,2,2,2,0,0,0,0,2,2,2,2],
+      [2,0,0,0,0,0,1,1,0,0,0,2],
+      [2,0,1,1,0,0,1,1,1,0,0,2],
+      [2,0,1,1,0,0,0,0,0,0,0,0], 
+      [0,0,0,0,0,2,2,0,0,1,1,0], 
+      [0,0,0,2,2,2,2,0,0,1,1,0],
+      [2,1,1,1,0,0,0,0,0,0,0,2],
+      [2,1,1,1,0,0,2,0,0,0,0,2],
+      [2,0,0,0,0,0,2,0,0,0,0,2],
+      [2,2,2,2,0,0,0,0,2,2,2,2]
+    ];
+    
+    // 2. The Lake (Arena will spawn randomly)
+    const MAP_2 = [
+      [2,2,0,0,0,0,0,0,0,0,2,2],
+      [2,0,0,4,4,0,0,4,4,0,0,2],
+      [0,0,4,3,3,0,0,3,3,3,4,0], // Bridges added to ensure access
+      [0,0,3,3,3,0,0,3,3,3,0,0], 
+      [0,0,3,3,3,8,8,3,3,3,0,0], // Arena
+      [0,0,3,3,3,8,8,3,3,3,0,0],
+      [0,0,4,3,3,0,0,3,3,3,4,0], 
+      [2,0,0,4,4,0,0,4,4,0,0,2],
+      [2,0,0,0,0,0,0,0,0,0,0,2],
+      [2,2,0,0,0,0,0,0,0,0,2,2]
+    ];
+
+    // 3. Deep Grass (High Encounter)
+    const MAP_3 = [
+      [2,2,2,2,2,0,0,2,2,2,2,2],
+      [2,1,1,1,1,0,0,1,1,1,1,2],
+      [2,1,1,1,1,0,0,1,1,1,1,2],
+      [0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,1,1,1,1,1,1,1,1,0,0],
+      [0,0,1,1,1,1,1,1,1,1,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0],
+      [2,1,1,1,1,0,0,1,1,1,1,2],
+      [2,1,1,1,1,0,0,1,1,1,1,2],
+      [2,2,2,2,2,0,0,2,2,2,2,2]
+    ];
+    
+    // 4. Crossroads
+    const MAP_4 = [
+      [2,2,2,2,0,0,0,0,2,2,2,2],
+      [2,5,5,2,0,0,0,0,2,5,5,2],
+      [2,5,5,2,0,0,0,0,2,5,5,2],
+      [0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,2,2,2,2,0,0,0,0], 
+      [0,0,0,0,2,2,2,2,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0],
+      [2,5,5,2,0,0,0,0,2,5,5,2],
+      [2,5,5,2,0,0,0,0,2,5,5,2],
+      [2,2,2,2,0,0,0,0,2,2,2,2]
+    ];
+
+    // 5. Zigzag Route (Rocky parts - using Sand for rocks)
+    const MAP_5 = [
+      [2,2,2,0,0,2,2,2,2,2,2,2],
+      [2,1,1,0,0,1,1,1,1,1,1,2],
+      [2,2,2,2,2,2,2,2,0,0,0,0], 
+      [0,0,0,0,0,0,0,0,0,2,2,2],
+      [2,2,2,0,0,2,2,2,2,2,1,2],
+      [2,4,4,0,0,2,4,4,4,4,4,2],
+      [2,4,4,0,0,0,0,0,0,0,0,2],
+      [2,4,4,2,2,2,2,2,2,0,0,2],
+      [2,0,0,0,0,0,0,0,0,0,0,2],
+      [2,2,2,2,2,0,0,2,2,2,2,2]
+    ];
+
+    // 6. Dense Woods
+    const MAP_6 = [
+      [2,2,2,0,0,2,2,2,2,2,2,2],
+      [2,2,0,0,0,0,2,2,1,1,1,2],
+      [2,0,0,2,2,0,0,2,1,1,1,2],
+      [2,0,2,2,2,2,0,0,0,0,0,0],
+      [0,0,2,1,1,2,2,2,2,0,0,2],
+      [2,0,2,1,1,1,1,1,2,0,0,2],
+      [2,0,0,0,0,0,0,0,0,0,0,2],
+      [2,2,2,2,0,0,2,2,2,2,0,2],
+      [2,1,1,0,0,0,0,1,1,0,0,2],
+      [2,2,2,0,0,2,2,2,2,2,2,2]
+    ];
+
+    // 7. Coastal Strip
+    const MAP_7 = [
+      [2,2,0,0,0,0,2,3,3,3,3,3],
+      [2,1,0,0,0,0,4,3,3,3,3,3],
+      [0,0,0,0,0,0,4,3,3,3,3,3],
+      [0,0,0,1,1,0,4,3,3,3,3,3],
+      [0,0,0,0,0,4,4,4,4,4,3,3],
+      [2,0,0,1,1,0,4,3,3,3,3,3],
+      [2,1,0,0,0,0,4,3,3,3,3,3],
+      [2,1,1,0,0,0,2,3,3,3,3,3],
+      [2,0,0,0,0,0,2,3,3,3,3,3],
+      [2,2,2,0,0,2,2,3,3,3,3,3]
+    ];
+
+    // 8. Twin Lakes
+    const MAP_8 = [
+      [2,2,0,0,0,0,0,0,0,0,2,2],
+      [2,0,0,3,3,3,0,0,3,3,0,2],
+      [0,0,3,3,3,3,0,3,3,3,3,0],
+      [0,0,3,3,3,3,0,3,3,3,3,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0], 
+      [0,0,3,3,3,3,0,3,3,3,3,0],
+      [2,0,0,3,3,0,0,0,3,3,0,2],
+      [2,0,0,0,0,0,0,0,0,0,0,2],
+      [2,1,1,0,0,0,0,0,1,1,1,2],
+      [2,2,2,0,0,0,0,0,0,2,2,2]
+    ];
+
+    // 9. Flower Gardens (Flowers added)
+    const MAP_9 = [
+      [2,2,0,0,2,2,2,2,0,0,2,2],
+      [2,5,5,5,5,5,5,5,5,5,5,2],
+      [2,5,5,5,5,5,5,5,5,5,5,2],
+      [0,0,0,0,0,0,0,0,0,0,0,0],
+      [2,5,5,5,0,0,0,0,5,5,5,2],
+      [2,5,5,5,0,2,2,0,5,5,5,2],
+      [2,5,5,5,0,2,2,0,5,5,5,2],
+      [2,5,5,5,5,5,5,5,5,5,5,2],
+      [2,0,0,0,0,0,0,0,0,0,0,2],
+      [2,2,2,0,0,2,2,0,0,2,2,2]
+    ];
+
+    // 10. The Bridge
+    const MAP_10 = [
+      [3,3,3,0,0,0,0,0,0,3,3,3],
+      [3,3,3,0,0,0,0,0,0,3,3,3],
+      [3,3,3,0,0,0,0,0,0,3,3,3],
+      [0,0,0,0,1,0,0,1,0,0,0,0], 
+      [0,0,0,0,1,2,2,1,0,0,0,0],
+      [3,3,3,0,0,0,0,0,0,3,3,3],
+      [3,3,3,0,0,0,0,0,0,3,3,3],
+      [3,3,3,0,0,0,0,0,0,3,3,3],
+      [3,3,3,0,0,0,0,0,0,3,3,3],
+      [3,3,3,0,0,0,0,0,0,3,3,3]
+    ];
+    
+    // 11. Hidden Clearing
+    const MAP_11 = [
+      [2,2,2,2,2,0,0,2,2,2,2,2],
+      [2,2,2,2,2,0,0,2,2,2,2,2],
+      [2,2,0,0,0,0,0,0,0,0,2,2],
+      [2,2,0,5,5,5,5,5,5,0,2,2],
+      [2,2,0,5,5,5,5,5,5,0,2,2],
+      [2,2,0,5,5,5,5,5,5,0,2,2],
+      [2,2,0,0,0,0,0,0,0,0,2,2],
+      [2,2,2,2,2,0,0,2,2,2,2,2],
+      [2,2,2,2,2,0,0,2,2,2,2,2],
+      [2,2,2,2,2,0,0,2,2,2,2,2]
+    ];
+
+    // 12. Mountain Pass (Added Gravel/Rocks AND BOSS TILE)
+    const MAP_12 = [
+      [2,2,2,2,0,0,0,0,2,2,2,2],
+      [2,0,0,0,0,0,0,0,0,0,0,2],
+      [2,0,2,2,2,2,2,2,2,2,0,2],
+      [2,0,0,0,0,4,4,0,0,0,0,2],
+      [2,2,2,2,2,7,7,2,2,2,2,2], // Tile 7 = Boss Lair!
+      [2,0,0,0,0,7,7,0,0,0,0,2],
+      [2,0,2,2,2,2,2,2,2,2,0,2],
+      [2,0,0,0,0,0,0,0,0,0,0,2],
+      [2,4,4,0,0,0,0,0,0,4,4,2],
+      [2,2,2,2,0,0,0,0,2,2,2,2]
+    ];
+
+    // 13. Safari Plains
+    const MAP_13 = [
+      [2,2,0,0,2,0,0,2,0,0,2,2],
+      [2,1,0,0,3,0,0,3,0,0,1,2],
+      [0,0,0,0,3,0,0,3,0,0,0,0],
+      [0,0,1,1,0,0,0,0,1,1,0,0],
+      [0,0,1,1,0,3,3,0,1,1,0,0],
+      [0,0,0,0,0,3,3,0,0,0,0,0],
+      [2,1,0,0,0,0,0,0,0,0,1,2],
+      [2,3,3,0,0,1,1,0,0,3,3,2],
+      [2,3,3,0,0,1,1,0,0,3,3,2],
+      [2,2,0,0,2,0,0,2,0,0,2,2]
+    ];
+
+    // 14. Frozen Pond (New Ice Map)
+    const MAP_14 = [
+      [2,2,2,2,2,2,2,0,0,0,0,0],
+      [2,6,6,6,6,6,2,0,0,6,6,0],
+      [2,6,6,6,6,6,0,0,0,6,6,0],
+      [2,0,0,0,0,0,0,0,0,0,0,0],
+      [2,0,0,0,3,3,3,3,0,0,0,0],
+      [2,0,0,0,3,3,3,3,0,0,0,0],
+      [2,0,0,0,3,3,3,3,0,0,0,2],
+      [2,6,6,0,0,0,0,0,0,6,6,2],
+      [2,6,6,0,0,0,0,0,0,6,6,2],
+      [2,2,2,2,2,2,0,0,2,2,2,2]
+    ];
+
+    const MAP_COLLECTION = [
+        MAP_1, MAP_2, MAP_3, MAP_4, 
+        MAP_5, MAP_6, MAP_7, MAP_8, MAP_9, 
+        MAP_10, MAP_11, MAP_12, MAP_13, MAP_14
+    ];
+    
+    let currentMapData = MAP_1;
+
+    let canvas, ctx;
+    let playerImage = new Image(); 
+    // Default Human Sprite
+    const HUMAN_SPRITE_URL = "https://i.imgur.com/J6eL2tY.png"; 
+    
+    // VISUAL UPDATE: Use the first Arena image as the map icon
+    let arenaIcon = new Image();
+    arenaIcon.src = 'https://i.imgur.com/cTaTVl8.png';
+
+    // HELPER: Check if a tile is safe to walk on
+    function isWalkable(tile) {
+      // Walkable: 0=Path, 1=Grass, 4=Sand, 5=Flowers, 6=Ice
+      // Blocked: 2=Tree, 3=Water, 7=Boss (Solid), 8=Arena (Solid)
+      return tile !== 2 && tile !== 3 && tile !== 7 && tile !== 8;
+    }
+
+    function initRPG() {
+      canvas = document.getElementById('rpg-canvas');
+      ctx = canvas.getContext('2d');
+      
+      // Load Sprite
+      const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+      
+      if (pet && pet.image && pet.image.length > 5) {
+        playerImage.src = pet.image;
+      } else {
+        playerImage.src = HUMAN_SPRITE_URL; // Fallback to Human
+      }
+      
+      // FIX: Ensure currentMapData is a fresh copy on first load so we don't mutate the const MAP_1
+      if (currentMapData === MAP_1) {
+          currentMapData = JSON.parse(JSON.stringify(MAP_1));
+      }
+      
+      // Ensure arena is spawned on first load
+      injectRandomArena();
+      
+      playerImage.onload = () => {
+          drawMap();
+      };
+      
+      // Pre-draw just in case
+      drawMap();
+      
+      document.removeEventListener('keydown', handleKeyDown);
+      document.addEventListener('keydown', handleKeyDown);
+      
+      // NEW: CLICK/TOUCH INTERACTION
+      // Allows user to click the building instead of just walking into it
+      canvas.addEventListener('click', (e) => {
+          if (gameState.inBattle) return;
+
+          const rect = canvas.getBoundingClientRect();
+          const scaleX = canvas.width / rect.width;
+          const scaleY = canvas.height / rect.height;
+          
+          const clickX = (e.clientX - rect.left) * scaleX;
+          const clickY = (e.clientY - rect.top) * scaleY;
+          
+          const tileX = Math.floor(clickX / TILE_SIZE);
+          const tileY = Math.floor(clickY / TILE_SIZE);
+          
+          // Safety: Check bounds
+          if (tileX < 0 || tileX >= MAP_COLS || tileY < 0 || tileY >= MAP_ROWS) return;
+
+          // Check Distance: Must be adjacent (1 block away) or on top (diagonal ok)
+          // Manhattan distance of 2 allows diagonals (1x + 1y)
+          const dist = Math.abs(tileX - gameState.mapX) + Math.abs(tileY - gameState.mapY);
+          
+          if (dist <= 2) { 
+               const clickedTile = currentMapData[tileY][tileX];
+               
+               if (clickedTile === 8) { // ARENA
+                   checkArenaEntry();
+               } else if (clickedTile === 7) { // BOSS
+                   confirmBossBattle(7);
+               }
+          }
+      });
+    }
+
+    function drawMap() {
+      if (!ctx) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw Tiles
+      for (let r = 0; r < MAP_ROWS; r++) {
+        for (let c = 0; c < MAP_COLS; c++) {
+          const tile = currentMapData[r][c];
+          const x = c * TILE_SIZE;
+          const y = r * TILE_SIZE;
+          
+          if (tile === 2) {
+             // Tree
+             ctx.fillStyle = '#2e7d32';
+             ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+             ctx.font = '24px Arial';
+             ctx.fillStyle = '#1b5e20'; 
+             ctx.fillText('🌲', x+5, y+30);
+          } else if (tile === 3) {
+             // Water
+             ctx.fillStyle = '#4fc3f7';
+             ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+             ctx.font = '16px Arial';
+             ctx.fillStyle = '#0288d1'; 
+             ctx.fillText('~', x+10, y+25);
+          } else if (tile === 1) {
+             // Grass (Battle Zone)
+             ctx.fillStyle = '#66bb6a';
+             ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+             ctx.font = '10px Arial';
+             ctx.fillStyle = '#388e3c'; 
+             ctx.fillText('w', x+5, y+15);
+             ctx.fillText('w', x+20, y+30);
+          } else if (tile === 4) {
+             // SAND (Battle Zone)
+             ctx.fillStyle = '#fdd835';
+             ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+             ctx.font = '10px Arial';
+             ctx.fillStyle = '#fbc02d'; 
+             ctx.fillText('∴', x+5, y+15);
+             ctx.fillText('∴', x+20, y+30);
+          } else if (tile === 5) {
+             // FLOWERS (Battle Zone)
+             ctx.fillStyle = '#a5d6a7';
+             ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+             ctx.font = '10px Arial';
+             ctx.fillStyle = '#e91e63'; 
+             ctx.fillText('✿', x+5, y+20);
+             ctx.fillText('✿', x+25, y+30);
+          } else if (tile === 6) {
+             // ICE (Battle Zone)
+             ctx.fillStyle = '#e1f5fe';
+             ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+             ctx.font = '10px Arial';
+             ctx.fillStyle = '#81d4fa'; 
+             ctx.fillText('❄️', x+10, y+25);
+          } else if (tile === 7) {
+             // BOSS LAIR
+             ctx.fillStyle = '#2d3748'; // Dark ground
+             ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+             ctx.font = '16px Arial';
+             ctx.fillStyle = '#e53e3e'; 
+             ctx.fillText('💀', x+10, y+25);
+          } else if (tile === 8) {
+             // ARENA - UPDATED VISUAL
+             // If image is loaded, draw it. Else draw emoji.
+             if (arenaIcon.complete && arenaIcon.naturalWidth > 0) {
+                 ctx.fillStyle = '#edf2f7'; // Background for transparent pngs
+                 ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+                 ctx.drawImage(arenaIcon, x, y, TILE_SIZE, TILE_SIZE);
+             } else {
+                 ctx.fillStyle = '#edf2f7'; 
+                 ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+                 ctx.font = '18px Arial';
+                 ctx.fillStyle = '#d69e2e'; 
+                 ctx.fillText('🏟️', x+5, y+28);
+             }
+          } else {
+             // Path (Safe)
+             ctx.fillStyle = '#d7ccc8';
+             ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+          }
+        }
+      }
+      
+      // Draw Player
+      const px = gameState.mapX * TILE_SIZE;
+      const py = gameState.mapY * TILE_SIZE;
+      
+      // Selection highlight (yellow box under player)
+      ctx.strokeStyle = 'rgba(255, 255, 0, 0.5)';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(px, py, TILE_SIZE, TILE_SIZE);
+      
+      // Draw Image or Emoji
+      const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+      
+      if (playerImage.complete && playerImage.naturalWidth !== 0) {
+         ctx.drawImage(playerImage, px, py, TILE_SIZE, TILE_SIZE);
+      } else {
+          ctx.fillStyle = 'red';
+          ctx.beginPath();
+          ctx.arc(px + TILE_SIZE/2, py + TILE_SIZE/2, TILE_SIZE/3, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = 'white';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+      }
+    }
+
+    function handleKeyDown(e) {
+      if(gameState.inBattle) return;
+      if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].indexOf(e.key) > -1) {
+        e.preventDefault();
+      }
+      handleDPad(e.key);
+    }
+
+    function handleDPad(key) {
+      if (gameState.inBattle) return;
+      
+      let dx = 0;
+      let dy = 0;
+      
+      if (key === 'ArrowUp') dy = -1;
+      if (key === 'ArrowDown') dy = 1;
+      if (key === 'ArrowLeft') dx = -1;
+      if (key === 'ArrowRight') dx = 1;
+      
+      if (dx !== 0 || dy !== 0) {
+        tryMove(dx, dy);
+      }
+    }
+
+    function tryMove(dx, dy) {
+      // STAMINA CHECK
+      if (gameState.stamina <= 0) {
+          showToast("No Stamina! Study to buy Energy!", "error");
+          return;
+      }
+
+      const newX = gameState.mapX + dx;
+      const newY = gameState.mapY + dy;
+      
+      // -- MAP TRANSITION LOGIC --
+      // Check boundaries to switch maps
+      if (newX < 0) { switchMap('left'); return; }
+      if (newX >= MAP_COLS) { switchMap('right'); return; }
+      if (newY < 0) { switchMap('up'); return; }
+      if (newY >= MAP_ROWS) { switchMap('down'); return; }
+      
+      const targetTile = currentMapData[newY][newX];
+
+      // -- INTERACTION LOGIC (Bump to Interact) --
+      // Check BOSS (Tile 7) - Block movement, trigger event
+      if (targetTile === 7) {
+         confirmBossBattle(7);
+         return; // Stop moving
+      }
+      // Check ARENA (Tile 8) - Block movement, trigger event
+      if (targetTile === 8) {
+         checkArenaEntry();
+         return; // Stop moving
+      }
+
+      // Collision check (Tree=2, Water=3) using helper
+      if (!isWalkable(targetTile)) return; // Blocked
+      
+      // Move success
+      gameState.mapX = newX;
+      gameState.mapY = newY;
+      
+      // CONSUME STAMINA
+      gameState.stamina = Math.max(0, gameState.stamina - 1);
+      updateStatsDisplay(); // Update UI
+      
+      drawMap();
+      
+      // Check Encounter (Grass=1, Sand=4, Flowers=5, Ice=6)
+      if (targetTile === 1 || targetTile === 4 || targetTile === 5 || targetTile === 6) {
+         checkEncounter(targetTile); 
+      }
+    }
+    
+    // UPDATED: Randomly spawn an Arena on the map
+    function injectRandomArena() {
+        // First, check if there's already an arena (Tile 8) on this map
+        let hasArena = false;
+        for(let r=0; r<MAP_ROWS; r++) {
+            for(let c=0; c<MAP_COLS; c++) {
+                if (currentMapData[r][c] === 8) hasArena = true;
+            }
+        }
+        
+        // If no arena, create one at a random valid spot
+        // UPDATED: Ensure it spawns on a spot that is REACHABLE (neighboring a path/grass)
+        if (!hasArena) {
+            let possibleSpots = [];
+            for(let r=1; r<MAP_ROWS-1; r++) { // Avoid edges
+                for(let c=1; c<MAP_COLS-1; c++) {
+                    const t = currentMapData[r][c];
+                    // Can replace Path (0) or Grass (1) primarily to be safe
+                    if (t === 0 || t === 1) {
+                        possibleSpots.push({r, c});
+                    }
+                }
+            }
+            
+            if (possibleSpots.length > 0) {
+                const spot = possibleSpots[Math.floor(Math.random() * possibleSpots.length)];
+                currentMapData[spot.r][spot.c] = 8;
+            }
+        }
+    }
+
+    // UPDATED: Smart Map Switching with Safe Spawn Search
+    function switchMap(direction) {
+      const originalMap = MAP_COLLECTION[Math.floor(Math.random() * MAP_COLLECTION.length)];
+      // Deep Copy the map so we can modify it (add Arena) without changing the original const
+      currentMapData = JSON.parse(JSON.stringify(originalMap));
+      
+      // Inject a random Arena into this new map instance
+      injectRandomArena();
+      
+      // 1. Determine "Ideal" Entry Point based on where you came from
+      let idealX = gameState.mapX;
+      let idealY = gameState.mapY;
+      
+      if (direction === 'left') {
+         idealX = MAP_COLS - 1; // You went Left, so enter from Right edge
+      } else if (direction === 'right') {
+         idealX = 0; // You went Right, so enter from Left edge
+      } else if (direction === 'up') {
+         idealY = MAP_ROWS - 1; // You went Up, so enter from Bottom edge
+      } else if (direction === 'down') {
+         idealY = 0; // You went Down, so enter from Top edge
+      }
+      
+      // 2. Find NEAREST Walkable Tile to Ideal Point
+      // This prevents getting stuck in water or trees if the entry point is bad
+      let bestX = idealX;
+      let bestY = idealY;
+      let minDistance = 9999;
+      let foundSafeSpot = false;
+      
+      // Scan the entire map to find the closest safe tile to your ideal entry
+      for(let r=0; r<MAP_ROWS; r++) {
+        for(let c=0; c<MAP_COLS; c++) {
+           const tile = currentMapData[r][c];
+           if (isWalkable(tile)) {
+               // Calculate distance (Manhattan distance is fine here)
+               const dist = Math.abs(r - idealY) + Math.abs(c - idealX);
+               
+               if (dist < minDistance) {
+                   minDistance = dist;
+                   bestX = c;
+                   bestY = r;
+                   foundSafeSpot = true;
+               }
+           }
+        }
+      }
+      
+      // Fallback just in case a map has ZERO walkable tiles (unlikely)
+      if (!foundSafeSpot) {
+          bestX = 5; bestY = 5;
+      }
+      
+      gameState.mapX = bestX;
+      gameState.mapY = bestY;
+      
+      drawMap();
+      showToast("Entered a new zone!", "info");
+    }
+
+    function checkEncounter(tileType) {
+       // 20% chance on risky tiles
+       if (Math.random() < 0.2) {
+         startBattle(tileType, false, false); // Not boss, Not arena
+       }
+    }
+    
+    function confirmBossBattle(tileType) {
+        if(confirm("⚠️ DANGER! \n\nYou are standing before the Boss Lair.\nRecommended Level: 5+\n\nDo you want to fight?")) {
+            startBattle(tileType, true, false); // IS boss, Not arena
+        }
+        // No else needed, player just stays standing in front
+    }
+
+    // UPDATED: New Modal-based Arena Entry
+    function checkArenaEntry() {
+        // Prevent double opening
+        if (document.getElementById('arena-modal').classList.contains('active')) return;
+
+        const tickets = gameState.inventory['arena_ticket'] || 0;
+        const display = document.getElementById('arena-ticket-display');
+        const btn = document.getElementById('enter-arena-btn');
+        
+        display.innerText = `(You have: ${tickets})`;
+        
+        const modal = document.getElementById('arena-modal');
+        modal.classList.add('active');
+        
+        // Setup Button logic specifically for this instance
+        btn.onclick = () => {
+            if (tickets > 0) {
+                gameState.inventory['arena_ticket']--;
+                closeArenaModal();
+                startBattle(8, false, true); // Not boss, IS ARENA
+            } else {
+                alert("You don't have enough tickets! Buy them at the Shop.");
+                closeArenaModal();
+            }
+        };
+    }
+    
+    function closeArenaModal() {
+        document.getElementById('arena-modal').classList.remove('active');
+    }
+
+
+    // ==========================================
+    // ⚙️ SETUP & LOGIN LOGIC
+    // ==========================================
+    
+    async function selectGrade(grade) {
+      // Visual feedback
+      document.querySelectorAll('.grade-btn').forEach(btn => btn.classList.remove('selected'));
+      // Find specific button
+      const clickedBtn = Array.from(document.querySelectorAll('.grade-btn')).find(b => b.innerText.trim() === grade);
+      if(clickedBtn) clickedBtn.classList.add('selected');
+      
+      gameState.grade = grade;
+      const topicList = document.getElementById('topic-list');
+      
+      // UI Feedback
+      topicList.innerHTML = '<div style="color:gray; padding:10px;">🔍 Scanning GitHub for topics...</div>';
+      document.getElementById('topic-section').style.display = 'block';
+
+      // 1. TRY GITHUB FOLDER FIRST
+      if (GITHUB_CONFIG.enabled) {
+          // Look for folder: questions/grade_K, questions/grade_1, etc.
+          const folderName = `questions/grade_${grade}`;
+          
+          // Call GitHub API to get file list
+          const files = await fetchGithubFolder(folderName);
+          
+          if (files && files.length > 0) {
+              topicList.innerHTML = ''; // Clear loading message
+              
+              // Filter for .json files only
+              const jsonFiles = files.filter(f => f.name.endsWith('.json'));
+              
+              if (jsonFiles.length === 0) {
+                  topicList.innerHTML = '<div style="color:red">No JSON files found in this grade folder.</div>';
+                  return;
+              }
+
+              // Create a checkbox for each file found
+              jsonFiles.forEach(file => {
+                  // "Addition.json" -> "Addition"
+                  const topicName = file.name.replace('.json', '').replace(/_/g, ' ');
+                  
+                  const label = document.createElement('label');
+                  label.className = 'topic-checkbox-label';
+                  // IMPORTANT: We store the file's download_url as the value!
+                  label.innerHTML = `<input type="checkbox" value="${file.download_url}" checked> ${topicName}`;
+                  topicList.appendChild(label);
+              });
+              return; // Stop here if successful
+          }
+      }
+
+      // 2. FALLBACK TO INTERNAL DATA (If GitHub fails, is empty, or disabled)
+      const topics = Object.keys(QUESTION_REPOSITORY[grade] || {});
+      topicList.innerHTML = '';
+      
+      if (topics.length === 0) {
+        topicList.innerHTML = '<div style="color:orange; font-size:12px;">No offline topics. Connect GitHub to see more!</div>';
+      } else {
+        topics.forEach(topic => {
+          const niceName = topic.replace(/_/g, ' ').toUpperCase();
+          const label = document.createElement('label');
+          label.className = 'topic-checkbox-label';
+          // Value starts with INTERNAL: to distinguish from URLs
+          label.innerHTML = `<input type="checkbox" value="INTERNAL:${topic}" checked> ${niceName}`;
+          topicList.appendChild(label);
+        });
+      }
+    }
+
+    // -----------------------------------------
+    // 🔥 FIREBASE: TEACHER & STUDENT AUTH
+    // -----------------------------------------
+
+    // 1. Check if a student account exists with password
+    async function authenticateStudent(name, password) {
+        try {
+            const studentRef = window.fbase.doc(window.db, "students", name);
+            const docSnap = await window.fbase.getDoc(studentRef);
+            
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                // If account has a password set, check it
+                if (data.password && data.password !== password) {
+                    return { success: false, message: "Incorrect Password!" };
+                }
+                // Return assignment data if exists
+                return { 
+                    success: true, 
+                    assignment: data.assignedGrade ? { grade: data.assignedGrade, topics: data.assignedTopics } : null 
+                };
+            } else {
+                // New account or no password set yet (Legacy Mode: Allow login, maybe prompt to set later)
+                // For strict mode, you might want to return false here.
+                // We will allow it but return null assignment
+                return { success: true, assignment: null, isNew: true };
+            }
+        } catch (e) {
+            console.warn("Auth check failed", e);
+            return { success: true, message: "Offline Mode" }; // Allow offline play
+        }
+    }
+    
+    // 2. Teacher Login Logic
+    function toggleTeacherLogin() {
+        const panel = document.getElementById('teacher-login-panel');
+        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    }
+    
+    function checkTeacherPin() {
+        const pin = document.getElementById('teacher-pin').value;
+        if (pin === "1234") { // Simple PIN for demo
+            document.getElementById('teacher-dashboard-screen').style.display = 'block';
+        } else {
+            alert("Incorrect PIN!");
+        }
+    }
+    
+    // 3. Create Student Account (Teacher Function)
+    async function createStudentAccount() {
+        const username = document.getElementById('new-student-user').value.trim();
+        const password = document.getElementById('new-student-pass').value.trim();
+        const grade = document.getElementById('new-student-grade').value;
+        
+        if (!username || !password) { alert("Please fill in all fields."); return; }
+        
+        try {
+            const studentRef = window.fbase.doc(window.db, "students", username);
+            
+            // Default Topic Selection for simplicity (All available for that grade)
+            // In a real app, you'd fetch them. Here we assume they'll load all for assigned grade.
+            // Ideally, we'd let the teacher pick topics too.
+            
+            await window.fbase.setDoc(studentRef, {
+                password: password,
+                assignedGrade: grade,
+                assignedTopics: [], // Empty array signals "Load all topics for this grade" or handle in logic
+                createdAt: new Date()
+            }, { merge: true });
+            
+            alert(`✅ Account Created!\n\nStudent: ${username}\nGrade: ${grade}`);
+            
+            // Clear inputs
+            document.getElementById('new-student-user').value = "";
+            document.getElementById('new-student-pass').value = "";
+            
+        } catch(e) {
+            console.error("Error creating student:", e);
+            alert("Failed to create account. Check console.");
+        }
+    }
+
+
+    document.getElementById('setup-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('student-name').value.trim();
+      const pass = document.getElementById('student-pass').value.trim();
+      
+      if (!name) { alert("Please enter a username!"); return; }
+      // Require password now
+      if (!pass) { alert("Please enter a password!"); return; }
+      
+      const startBtn = document.querySelector('.login-btn');
+      startBtn.innerText = "Verifying...";
+      startBtn.disabled = true;
+      
+      // 1. AUTHENTICATE
+      const authResult = await authenticateStudent(name, pass);
+      
+      if (!authResult.success) {
+          alert(authResult.message);
+          startBtn.innerText = "Start Adventure! 🚀";
+          startBtn.disabled = false;
+          return;
+      }
+      
+      gameState.playerName = name;
+
+      // 2. HANDLE ASSIGNMENTS VS SELECTION
+      let selectedGrade = gameState.grade;
+      let selectedTopics = [];
+      
+      if (authResult.assignment) {
+          // Teacher Assigned Mode
+          alert(`👨‍🏫 Welcome back, ${name}!\n\nYour teacher assigned you to Grade ${authResult.assignment.grade}.`);
+          selectedGrade = authResult.assignment.grade;
+          gameState.grade = selectedGrade;
+          // If topics are empty in DB, imply ALL topics for that grade
+          // For this demo, we will auto-select all by fetching the grade folder list again essentially
+          // Or simply skip topic selection UI and load all.
+          
+          // Quick fix: If assignment exists but topics are empty/undefined, try to load everything for that grade
+          if (!authResult.assignment.topics || authResult.assignment.topics.length === 0) {
+               // We need to fetch the list... reuse selectGrade logic?
+               // Simplest: Use a flag to tell the loader "Load Everything"
+               selectedTopics = [`ALL_FOR_GRADE:${selectedGrade}`];
+          } else {
+               selectedTopics = authResult.assignment.topics;
+          }
+          
+      } else {
+          // Free Play Mode (User Selection)
+          if (!gameState.grade) { alert("Please select a grade!"); startBtn.disabled=false; startBtn.innerText="Start"; return; }
+          const checkboxes = document.querySelectorAll('#topic-list input:checked');
+          if (checkboxes.length === 0) { alert("Select at least one topic!"); startBtn.disabled=false; startBtn.innerText="Start"; return; }
+          selectedTopics = Array.from(checkboxes).map(cb => cb.value);
+      }
+      
+      startBtn.innerText = "Loading World...";
+      gameState.activeQuestionPool = [];
+      
+      // LOAD QUESTIONS
+      for (const val of selectedTopics) {
+          if (val.startsWith('ALL_FOR_GRADE:')) {
+               // Logic to fetch ALL JSONs for this grade from GitHub
+               const g = val.split(':')[1];
+               if (GITHUB_CONFIG.enabled) {
+                   const folderName = `questions/grade_${g}`;
+                   const files = await fetchGithubFolder(folderName);
+                   for(const f of files) {
+                       if(f.name.endsWith('.json')) {
+                           try {
+                               const res = await fetch(f.download_url);
+                               const q = await res.json();
+                               gameState.activeQuestionPool = gameState.activeQuestionPool.concat(q);
+                           } catch(e){}
+                       }
+                   }
+               } else {
+                   // Fallback offline
+                   const allQ = Object.values(QUESTION_REPOSITORY[g] || {}).flat();
+                   gameState.activeQuestionPool = allQ;
+               }
+          }
+          else if (val.startsWith('INTERNAL:')) {
+              const topicKey = val.replace('INTERNAL:', '');
+              const qList = QUESTION_REPOSITORY[gameState.grade][topicKey];
+              if (qList) gameState.activeQuestionPool = gameState.activeQuestionPool.concat(qList);
+          } else {
+              try {
+                  const res = await fetch(val);
+                  if (res.ok) {
+                      const qList = await res.json();
+                      if (Array.isArray(qList)) {
+                          gameState.activeQuestionPool = gameState.activeQuestionPool.concat(qList);
+                      }
+                  }
+              } catch (err) {
+                  console.error("Failed to load question file:", val);
+              }
+          }
+      }
+      
+      // Fallback if nothing loaded
+      if (gameState.activeQuestionPool.length === 0) {
+          // Just load mock data to prevent crash
+           const allQ = Object.values(QUESTION_REPOSITORY[gameState.grade || '1'] || {}).flat();
+           gameState.activeQuestionPool = allQ.length > 0 ? allQ : [{q: "1+1?", a:2, options:[1,2,3]}];
+      }
+      
+      loadExternalPets();
+
+      // 3. LOAD SAVE DATA
+      const cloudLoaded = await loadProgressFromFirebase(name);
+      if (!cloudLoaded) {
+          const saved = localStorage.getItem('math_rpg_' + name);
+          if (saved) {
+            const data = JSON.parse(saved);
+            gameState.brainPoints = data.brainPoints || 0;
+            gameState.pets = data.pets || [];
+            gameState.currentPetId = data.currentPetId;
+            gameState.inventory = data.inventory || {};
+            
+            if (gameState.inventory['arena_ticket'] === undefined) {
+                gameState.inventory['arena_ticket'] = 1;
+            }
+          } else {
+            if (gameState.pets.length === 0) {
+               initializeGame();
+            }
+          }
+      }
+
+      document.getElementById('display-name').innerText = gameState.playerName;
+      document.getElementById('display-grade').innerText = `Grade: ${gameState.grade}`;
+      updateStatsDisplay();
+      document.getElementById('login-overlay').classList.add('hidden');
+      
+      generateNextQuestion();
+      renderHub();
+    });
+
+    function loadExternalPets() {
+      EXTERNAL_PET_DATA.forEach(line => {
+        if (PET_TYPES[line.base.rarity]) {
+          if (!PET_TYPES[line.base.rarity].find(p => p.id === line.base.id)) {
+             PET_TYPES[line.base.rarity].push(line.base);
+          }
+        }
+        EVOLUTION_CHAINS[line.base.id] = line.evolutions;
+      });
+      console.log("External evolution lines loaded into game memory.");
+    }
+
+    function loadQuestionsFromMockRepository() {
+      gameState.activeQuestionPool = [];
+      gameState.selectedTopics.forEach(topic => {
+        const questions = QUESTION_REPOSITORY[gameState.grade][topic];
+        if (questions) {
+          gameState.activeQuestionPool = gameState.activeQuestionPool.concat(questions);
+        }
+      });
+    }
+
+    function initializeGame() {
+      gameState.pets.push({
+        id: 'starter_cat',
+        type: 'monster_01', 
+        emoji: '🐱',
+        image: 'https://i.imgur.com/Ua3beE3.png',
+        imageStyle: 'blend-multiply',
+        name: 'Cat',
+        hatchProgress: 100,
+        isHatched: true,
+        hp: 40,
+        maxHP: 40,
+        powers: ['claw_attack'], 
+        rarity: 'common',
+        evolutionStage: 0,
+        // NEW: Leveling Stats
+        level: 1,
+        xp: 0,
+        maxXp: 300 // Starting Max XP (Increased for difficulty)
+      });
+      gameState.currentPetId = 'starter_cat';
+      
+      // CHANGED: Start with 100 BP (Instead of 5000)
+      gameState.brainPoints = 100; 
+      
+      gameState.stamina = 100;
+      
+      // GIFT: Free Ticket
+      gameState.inventory['arena_ticket'] = 1; 
+    }
+
+    // ==========================================
+    // 📚 STUDY LOGIC
+    // ==========================================
+    function generateNextQuestion() {
+      if (gameState.activeQuestionPool.length === 0) {
+        document.getElementById('question-text').innerText = "No questions selected!";
+        return;
+      }
+      const qData = gameState.activeQuestionPool[Math.floor(Math.random() * gameState.activeQuestionPool.length)];
+      gameState.currentQuestion = qData;
+      
+      document.getElementById('question-text').innerText = qData.q;
+      document.getElementById('feedback').innerText = '';
+      
+      if (qData.options && qData.options.length > 0) {
+          document.getElementById('input-mode-container').style.display = 'none';
+          const mcqContainer = document.getElementById('mcq-mode-container');
+          mcqContainer.style.display = 'grid';
+          mcqContainer.innerHTML = '';
+          
+          qData.options.forEach(opt => {
+              const btn = document.createElement('div');
+              btn.className = 'mcq-btn';
+              btn.innerText = opt;
+              btn.onclick = () => checkAnswer(opt);
+              mcqContainer.appendChild(btn);
+          });
+      } else {
+          document.getElementById('input-mode-container').style.display = 'block';
+          document.getElementById('mcq-mode-container').style.display = 'none';
+          document.getElementById('answer-input').value = '';
+          document.getElementById('answer-input').focus();
+      }
+    }
+
+    function checkAnswer(val) {
+      let input = val;
+      if (input === undefined) {
+          input = document.getElementById('answer-input').value;
+          if(typeof gameState.currentQuestion.a === 'number') {
+              input = parseFloat(input);
+          }
+      }
+      
+      const fb = document.getElementById('feedback');
+      if (!gameState.currentQuestion) return;
+
+      if (input == gameState.currentQuestion.a) {
+        fb.innerText = "Correct! +10 BP";
+        fb.className = "feedback correct";
+        addBP(10);
+        setTimeout(generateNextQuestion, 1000);
+      } else {
+        // NEW: Penalty for wrong answers
+        if (gameState.brainPoints > 0) {
+            // Deduct 5, but stop at 0
+            const deduction = Math.min(gameState.brainPoints, 5);
+            gameState.brainPoints -= deduction;
+            updateStatsDisplay();
+            saveGame();
+            
+            fb.innerText = `Incorrect! -${deduction} BP`;
+        } else {
+            fb.innerText = "Incorrect! (0 BP)";
+        }
+        fb.className = "feedback incorrect";
+      }
+    }
+    
+    document.getElementById('check-btn').addEventListener('click', () => checkAnswer());
+    
+    document.getElementById('answer-input').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') checkAnswer();
+    });
+
+    function addBP(amount) {
+      gameState.brainPoints += amount;
+      updateStatsDisplay();
+      saveGame();
+    }
+
+    // ==========================================
+    // 🏠 HUB LOGIC
+    // ==========================================
+    function renderHub() {
+      const container = document.getElementById('hub-content');
+      const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+      
+      if (!pet) {
+        container.innerHTML = "<div class='no-pet-message'>No pet selected.</div>";
+        return;
+      }
+      
+      // Ensure properties exist
+      if(!pet.level) pet.level = 1;
+      if(!pet.xp) pet.xp = 0;
+      if(!pet.maxXp) pet.maxXp = 100;
+      if(pet.hatchProgress === undefined) pet.hatchProgress = 100;
+      if(pet.isHatched === undefined) pet.isHatched = true;
+      
+      let visualHtml = '';
+      if (pet.image && pet.image.length > 5) {
+         const extraClass = pet.imageStyle || '';
+         visualHtml = `<img src="${pet.image}" class="pet-image ${extraClass}" alt="${pet.name}">`;
+      } else {
+         visualHtml = `<div style="font-size:80px">${pet.emoji}</div>`;
+      }
+
+      // -- EGG VIEW CHECK --
+      if (!pet.isHatched) {
+         container.innerHTML = `
+           <div style="text-align:center; padding:20px;">
+             <h2>🥚 Incubator</h2>
+             <div class="pet-visual" style="font-size:100px;">🥚</div>
+             <h3>${pet.name}</h3>
+             <div style="margin:20px 0;">
+                <div style="font-size:14px; margin-bottom:5px;">Hatch Progress: ${pet.hatchProgress}%</div>
+                <div class="xp-bar-container" style="max-width:300px; margin:0 auto; height:20px;">
+                    <div class="xp-bar" style="width: ${pet.hatchProgress}%; background:#ecc94b;"></div>
+                </div>
+             </div>
+             
+             ${pet.hatchProgress >= 100 
+               ? `<button class="action-btn green" onclick="hatchPet()">✨ HATCH NOW! ✨</button>` 
+               : `<p style="color:#718096">Use Items in Shop to speed up!</p>`}
+             
+             <div style="margin-top:20px; text-align:left;">
+               <h3>Inventory</h3>
+               ${renderInventory(true)} <!-- true = show only egg items -->
+             </div>
+           </div>
+           
+           <div class="pet-collection">
+             ${renderCollection()}
+           </div>
+         `;
+         return;
+      }
+
+      const evolutionChain = EVOLUTION_CHAINS[pet.type];
+      let evoHtml = '';
+      if (evolutionChain && pet.evolutionStage < evolutionChain.length) {
+         const nextEvo = evolutionChain[pet.evolutionStage];
+         const canEvolve = gameState.brainPoints >= nextEvo.cost;
+         evoHtml = `
+           <div class="evolution-info">
+             <h3>🧬 Evolution</h3>
+             <p>Next: <strong>${nextEvo.name}</strong></p>
+             <button class="evolution-btn" ${canEvolve ? '' : 'disabled'} onclick="evolvePet()">
+               ${canEvolve ? '✨ Evolve ('+nextEvo.cost+' BP)' : '🔒 Need '+nextEvo.cost+' BP'}
+             </button>
+           </div>
+         `;
+      } else if (evolutionChain) {
+         evoHtml = `<div class="evolution-info" style="background:#fef3c7"><h3>👑 Max Level</h3></div>`;
+      }
+
+      // Calculate XP %
+      const xpPercent = (pet.xp / pet.maxXp) * 100;
+
+      container.innerHTML = `
+        <div class="hub-grid">
+          <div class="hub-left">
+            <div class="pet-display">
+              <div class="pet-visual" style="position:relative;">
+                ${visualHtml}
+              </div>
+              <div class="pet-name">Lvl ${pet.level} ${pet.name} <span class="rarity-badge rarity-${pet.rarity}">${pet.rarity}</span></div>
+              
+              <!-- XP Bar Display -->
+              <div style="text-align:left; font-size:12px; color:#4a5568; margin-top:5px;">XP: ${pet.xp} / ${pet.maxXp}</div>
+              <div class="xp-bar-container">
+                  <div class="xp-bar" style="width: ${xpPercent}%"></div>
+              </div>
+
+              <button class="action-btn red" style="margin-top:15px;" onclick="releasePet()">Release</button>
+            </div>
+          </div>
+          
+          <div class="hub-right">
+            <div class="inventory-section">
+              <h3>Stats</h3>
+              <div class="pet-stats">
+                <div class="stat-box"><div class="stat-label">HP</div><div class="stat-value">${pet.hp}/${pet.maxHP}</div></div>
+                <div class="stat-box"><div class="stat-label">Power</div><div class="stat-value">${pet.powers.length}/4</div></div>
+              </div>
+            </div>
+            
+            ${evoHtml}
+            
+            <div class="inventory-section">
+              <h3>🎒 Inventory</h3>
+              ${renderInventory(false)}
+            </div>
+            
+            <div class="inventory-section">
+              <h3>⚔️ Learned Powers</h3>
+              <div id="hub-powers">${renderPowersList(pet)}</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="pet-collection">
+           ${renderCollection()}
+        </div>
+      `;
+    }
+
+    function renderCollection() {
+       return gameState.pets.map(p => `
+             <div class="pet-card ${p.id === gameState.currentPetId ? 'active' : ''}" onclick="switchPet('${p.id}')">
+               <div class="pet-card-visual">
+                 ${!p.isHatched ? '🥚' : (p.image && p.image.length > 5 
+                   ? `<img src="${p.image}" class="${p.imageStyle || ''}" style="width: 40px; height: 40px; object-fit: contain;">` 
+                   : p.emoji)}
+               </div>
+               <div class="pet-card-name" style="font-size:12px; margin-top:5px;">${p.name}</div>
+             </div>
+           `).join('');
+    }
+
+    function renderInventory(isEggView) {
+      const potionCount = gameState.inventory['health_potion'] || 0;
+      const staminaCount = gameState.inventory['stamina_potion'] || 0;
+      const ticketCount = gameState.inventory['arena_ticket'] || 0;
+      
+      const food = gameState.inventory['premium_food'] || 0;
+      const warm = gameState.inventory['warmer'] || 0;
+      // NEW: Get machine count
+      const machine = gameState.inventory['hatching_machine'] || 0; 
+      
+      let html = "";
+      
+      if (!isEggView) {
+          if (potionCount > 0) {
+              html += `
+                <div class="inventory-item">
+                  <div style="font-size:24px">🧪</div>
+                  <div style="font-size:12px;">Health x${potionCount}</div>
+                  <button class="buy-btn" style="margin-top:5px; background:#48bb78; font-size:12px; padding:4px 8px;" onclick="useItem('health_potion')">Use</button>
+                </div>`;
+          }
+          if (staminaCount > 0) {
+              html += `
+                <div class="inventory-item">
+                  <div style="font-size:24px">⚡</div>
+                  <div style="font-size:12px;">Stamina x${staminaCount}</div>
+                  <button class="buy-btn" style="margin-top:5px; background:#3182ce; font-size:12px; padding:4px 8px;" onclick="useItem('stamina_potion')">Use</button>
+                </div>`;
+          }
+          if (ticketCount > 0) {
+              html += `
+                <div class="inventory-item">
+                  <div style="font-size:24px">🎟️</div>
+                  <div style="font-size:12px;">Ticket x${ticketCount}</div>
+                  <div style="font-size:10px; color:#666;">Use in Wilds</div>
+                </div>`;
+          }
+      } else {
+          // Egg View Items
+           if (food > 0) {
+              html += `
+                <div class="inventory-item">
+                  <div style="font-size:24px">🥩</div>
+                  <div style="font-size:12px;">Food x${food}</div>
+                  <button class="buy-btn" style="margin-top:5px;" onclick="useItem('premium_food')">+20%</button>
+                </div>`;
+          }
+          if (warm > 0) {
+              html += `
+                <div class="inventory-item">
+                  <div style="font-size:24px">🔥</div>
+                  <div style="font-size:12px;">Warmer x${warm}</div>
+                  <button class="buy-btn" style="margin-top:5px;" onclick="useItem('warmer')">+10%</button>
+                </div>`;
+          }
+          // NEW: Render Hatching Machine
+          if (machine > 0) {
+              html += `
+                <div class="inventory-item">
+                  <div style="font-size:24px">⚙️</div>
+                  <div style="font-size:12px;">Machine x${machine}</div>
+                  <button class="buy-btn" style="margin-top:5px; background:#805ad5;" onclick="useItem('hatching_machine')">+50%</button>
+                </div>`;
+          }
+      }
+      
+      if (html === "") return "<p style='color:#718096; font-size:14px;'>Empty.</p>";
+      return html;
+    }
+
+    function renderPowersList(pet) {
+      if (pet.powers.length === 0) return "None.";
+      return pet.powers.map(pid => {
+        const item = findShopItem(pid);
+        if (!item) return '';
+        
+        const visual = item.image 
+           ? `<img src="${item.image}" style="width:20px;height:20px;vertical-align:middle; margin-right:5px;">` 
+           : item.icon;
+           
+        return `<div style="padding:8px; border-bottom:1px solid #eee; font-size:14px;">${visual} ${item.name}</div>`;
+      }).join('');
+    }
+
+    function switchPet(id) {
+      gameState.currentPetId = id;
+      saveGame();
+      renderHub();
+    }
+    
+    function hatchPet() {
+       const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+       if(pet.hatchProgress >= 100) {
+           pet.isHatched = true;
+           pet.hatchProgress = 100;
+           showToast("🐣 HATCHED! Welcome to the world!", "success");
+           saveGame();
+           renderHub();
+       }
+    }
+
+    function useItem(itemId) {
+      if (gameState.inventory[itemId] > 0) {
+          const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+
+          if (itemId === 'health_potion') {
+              if(pet.hp >= pet.maxHP) { showToast("HP is full!", "info"); return; }
+              gameState.inventory[itemId]--;
+              pet.hp = Math.min(pet.hp + 30, pet.maxHP);
+              showToast("Healed 30 HP!", "success");
+          }
+          else if (itemId === 'stamina_potion') {
+              if(gameState.stamina >= gameState.maxStamina) { showToast("Stamina full!", "info"); return; }
+              gameState.inventory[itemId]--;
+              gameState.stamina = Math.min(gameState.stamina + 50, gameState.maxStamina);
+              updateStatsDisplay();
+              showToast("Restored 50 Stamina!", "success");
+          }
+          else if (itemId === 'premium_food') {
+              if(pet.isHatched) return;
+              gameState.inventory[itemId]--;
+              pet.hatchProgress = Math.min(100, pet.hatchProgress + 20);
+          }
+          else if (itemId === 'warmer') {
+              if(pet.isHatched) return;
+              gameState.inventory[itemId]--;
+              pet.hatchProgress = Math.min(100, pet.hatchProgress + 10);
+          }
+          // NEW: Handle Hatching Machine Logic
+          else if (itemId === 'hatching_machine') {
+              if(pet.isHatched) return;
+              gameState.inventory[itemId]--;
+              pet.hatchProgress = Math.min(100, pet.hatchProgress + 50);
+          }
+          
+          saveGame();
+          renderHub();
+      }
+    }
+
+    async function evolvePet() {
+      const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+      const chain = EVOLUTION_CHAINS[pet.type];
+      if (!chain) return;
+      const nextEvo = chain[pet.evolutionStage];
+      
+      if (gameState.brainPoints >= nextEvo.cost) {
+        gameState.brainPoints -= nextEvo.cost;
+        pet.name = nextEvo.name;
+        pet.image = nextEvo.image;
+        pet.imageStyle = nextEvo.imageStyle;
+        pet.rarity = nextEvo.rarity;
+        pet.maxHP = nextEvo.baseHP;
+        pet.hp = pet.maxHP; 
+        pet.evolutionStage++;
+        saveGame();
+        updateStatsDisplay();
+        renderHub();
+        showToast(`Evolved into ${pet.name}!`, "success");
+      } else {
+        showToast("Not enough Brain Points!", "error");
+      }
+    }
+
+    // ==========================================
+    // 🛒 SHOP LOGIC (UPDATED WITH GACHA)
+    // ==========================================
+    function renderShop() {
+      const container = document.getElementById('shop-content');
+      let html = '';
+      
+      html += `
+        <div class="shop-section" style="text-align:center; background:#f3e8ff; padding:15px; border-radius:15px; border:2px solid #a855f7; margin-bottom:30px;">
+          <h2 style="color:#6b21a8; border-bottom:none; font-size:18px;">🔮 Legendary Summoning Altar</h2>
+          <p style="margin-bottom:15px; font-size:14px;">Summon 3 Guaranteed <strong>Rare</strong>, <strong>Epic</strong> or <strong>Legendary</strong> Companions!</p>
+          <button class="gacha-btn" onclick="buyGacha()">SUMMON (5000 BP)</button>
+        </div>
+      `;
+      
+      const categories = [
+        { title: '🥚 Egg Care', items: SHOP_ITEMS.egg_items, type: 'egg' },
+        { title: '⚔️ Powers', items: SHOP_ITEMS.power_items, type: 'power' },
+        { title: '🧪 Consumables', items: SHOP_ITEMS.consumable_items, type: 'consumable' }
+      ];
+
+      categories.forEach(cat => {
+        html += `<div class="shop-section"><h2>${cat.title}</h2><div class="shop-items">`;
+        cat.items.forEach(item => {
+          const visual = item.image 
+             ? `<img src="${item.image}" style="width:40px;height:40px;object-fit:contain;">` 
+             : `<div style="font-size:30px;">${item.icon}</div>`;
+
+          // UPDATED: Added flex container to the visual div to ensure centering
+          html += `
+            <div class="shop-item">
+              <div style="margin-bottom:8px; height: 50px; display: flex; align-items: center; justify-content: center;">${visual}</div>
+              <div class="shop-item-name" style="font-size:14px; font-weight:bold;">${item.name}</div>
+              <div class="shop-item-price">🧠 ${item.price}</div>
+              <div style="font-size:11px; color:#666; margin-bottom:8px">${item.desc || ''}</div>
+              <button class="buy-btn" onclick="buyItem('${item.id}', '${cat.type}')">Buy</button>
+            </div>
+          `;
+        });
+        html += `</div></div>`;
+      });
+      container.innerHTML = html;
+    }
+
+    // UPDATED: Gacha with weighted probabilities (75% Rare, 20% Epic, 5% Legendary)
+    function buyGacha() {
+      if (gameState.brainPoints < 5000) {
+        showToast("Need 5000 BP!", "error");
+        return;
+      }
+      
+      gameState.brainPoints -= 5000;
+      updateStatsDisplay();
+      
+      const pulls = [];
+      for(let i=0; i<3; i++) {
+         const rand = Math.random(); // 0.0 to 1.0
+         let pool;
+         
+         if (rand < 0.75) {
+             pool = PET_TYPES.rare; // 75%
+         } else if (rand < 0.95) { // 0.75 + 0.20 = 0.95
+             pool = PET_TYPES.epic; // 20%
+         } else {
+             pool = PET_TYPES.legendary; // 5%
+         }
+         
+         // Fallback
+         if (!pool || pool.length === 0) pool = PET_TYPES.common;
+
+         const randomPet = pool[Math.floor(Math.random() * pool.length)];
+         const newPet = {
+            id: 'pet_' + Date.now() + '_' + i,
+            type: randomPet.id,
+            name: randomPet.name,
+            image: randomPet.image,
+            imageStyle: randomPet.imageStyle,
+            emoji: randomPet.emoji,
+            rarity: randomPet.rarity,
+            hp: randomPet.baseHP,
+            maxHP: randomPet.baseHP,
+            powers: [],
+            isHatched: true,
+            hatchProgress: 100,
+            evolutionStage: 0,
+            // NEW GACHA PETS START AT LVL 1
+            level: 1,
+            xp: 0,
+            maxXp: 100
+         };
+         gameState.pets.push(newPet);
+         pulls.push(newPet);
+      }
+      
+      saveGame();
+      
+      const modal = document.getElementById('gacha-modal');
+      const container = document.getElementById('gacha-reveal-container');
+      container.innerHTML = pulls.map(p => `
+        <div class="gacha-card">
+           <div style="font-size:40px;">${p.image ? `<img src="${p.image}" class="${p.imageStyle}" style="width:60px;height:60px;object-fit:contain;">` : p.emoji}</div>
+           <div style="font-weight:bold; margin-top:8px; font-size:14px;">${p.name}</div>
+           <div class="rarity-badge rarity-${p.rarity}" style="font-size:10px;">${p.rarity}</div>
+        </div>
+      `).join('');
+      
+      modal.classList.add('active');
+    }
+    
+    function closeGacha() {
+      document.getElementById('gacha-modal').classList.remove('active');
+      switchTab('hub'); 
+    }
+
+    function findShopItem(id) {
+      for (const key in SHOP_ITEMS) {
+        const found = SHOP_ITEMS[key].find(i => i.id === id);
+        if (found) return found;
+      }
+      return null;
+    }
+
+    function buyItem(id, type) {
+      const item = findShopItem(id);
+      if (!item) return;
+      
+      if (gameState.brainPoints < item.price) {
+        showToast("Not enough Brain Points!", "error");
+        return;
+      }
+      
+      const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+      
+      if (type === 'power') {
+        if(pet.powers.includes(id)) { showToast("Already learned!", "info"); return; }
+        
+        // NEW: REPLACE MOVE LOGIC
+        if(pet.powers.length >= 4) {
+            openReplaceModal(item); // Trigger the modal
+            return; // Stop purchase until user decides
+        }
+        
+        pet.powers.push(id);
+      } else if (type === 'consumable' || type === 'egg') {
+        gameState.inventory[id] = (gameState.inventory[id] || 0) + 1;
+      } else if (type === 'ticket') {
+        gameState.inventory['arena_ticket'] = (gameState.inventory['arena_ticket'] || 0) + 1;
+      }
+      
+      gameState.brainPoints -= item.price;
+      saveGame();
+      updateStatsDisplay();
+      renderShop();
+      showToast(`Bought ${item.name}!`, "success");
+    }
+    
+    // NEW: Handle Move Replacement UI
+    function openReplaceModal(newItem) {
+        gameState.tempMoveToLearn = newItem; // Store pending item
+        const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+        
+        document.getElementById('new-move-name').innerText = newItem.name;
+        const list = document.getElementById('replace-move-list');
+        list.innerHTML = '';
+        
+        pet.powers.forEach((pid, index) => {
+            const move = findShopItem(pid);
+            const btn = document.createElement('div');
+            btn.className = 'move-replace-btn';
+            btn.innerHTML = `
+                <div style="display:flex; align-items:center; gap:10px;">
+                    ${move.image ? `<img src="${move.image}" style="width:30px;">` : move.icon}
+                    ${move.name}
+                </div>
+                <div style="color:#e53e3e; font-size:12px;">FORGET 🗑️</div>
+            `;
+            btn.onclick = () => confirmReplaceMove(index);
+            list.appendChild(btn);
+        });
+        
+        document.getElementById('replace-move-modal').classList.add('active');
+    }
+    
+    function closeReplaceModal() {
+        document.getElementById('replace-move-modal').classList.remove('active');
+        gameState.tempMoveToLearn = null;
+    }
+    
+    function confirmReplaceMove(indexToRemove) {
+        if (!gameState.tempMoveToLearn) return;
+        
+        const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+        const oldMoveId = pet.powers[indexToRemove];
+        const oldMove = findShopItem(oldMoveId);
+        
+        // 1. Remove Old Move
+        pet.powers.splice(indexToRemove, 1);
+        
+        // 2. Add New Move
+        pet.powers.push(gameState.tempMoveToLearn.id);
+        
+        // 3. Charge Player
+        gameState.brainPoints -= gameState.tempMoveToLearn.price;
+        
+        saveGame();
+        updateStatsDisplay();
+        renderShop();
+        closeReplaceModal();
+        
+        showToast(`Forgot ${oldMove.name} and learned ${gameState.tempMoveToLearn.name}!`, "success");
+    }
+
+    // ==========================================
+    // ⚔️ BATTLE LOGIC
+    // ==========================================
+    function startExploration() {
+      const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+      if(pet.hp <= 0) { showToast("Pet fainted! Heal first.", "error"); return; }
+      if(pet.powers.length === 0) { showToast("Learn a power first!", "error"); return; }
+      if(gameState.stamina <= 0) { showToast("No Stamina! Go Study.", "error"); return; }
+      if(!pet.isHatched) { showToast("Egg cannot fight! Hatch it first.", "error"); return; }
+
+      // FIX: Force reset battle state in case user left tab mid-battle
+      gameState.inBattle = false;
+      gameState.battleState = null;
+
+      document.getElementById('wilds-menu').style.display = 'none';
+      document.getElementById('rpg-wrapper').style.display = 'block';
+      initRPG();
+    }
+
+    function stopExploration() {
+       document.getElementById('wilds-menu').style.display = 'block';
+       document.getElementById('rpg-wrapper').style.display = 'none';
+       // Optional safety reset
+       gameState.inBattle = false;
+    }
+
+    // HELPER: Generate a high-level enemy for Arena
+    function getArenaEnemy() {
+        // Pool diverse high-tier pets
+        const pool = [...PET_TYPES.rare, ...PET_TYPES.epic, ...PET_TYPES.legendary];
+        const base = pool[Math.floor(Math.random() * pool.length)];
+        
+        // Convert Pet Data to Enemy Data
+        return {
+            name: "Champion " + base.name,
+            image: base.image,
+            imageStyle: base.imageStyle,
+            emoji: base.emoji,
+            hp: Math.floor(base.baseHP * 2.5), // Arena enemies are tanky
+            damage: Math.floor(base.baseHP * 0.3), // They hit hard
+            xp: 100
+        };
+    }
+
+    // UPDATED: Supports Boss Battles AND ARENA
+    function startBattle(tileType, isBoss, isArena) {
+      const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+
+       
+      
+      let enemy;
+      let logMsg = "";
+      
+      if (isArena) {
+          enemy = getArenaEnemy(); // NEW: Random High-Tier Enemy
+          logMsg = "⚔️ ARENA CHALLENGE STARTED!";
+      } else if (isBoss) {
+          enemy = BOSS_TYPES[Math.floor(Math.random() * BOSS_TYPES.length)];
+          logMsg = "⚠️ BOSS BATTLE STARTED!";
+      } else {
+          enemy = MONSTER_TYPES[Math.floor(Math.random() * MONSTER_TYPES.length)];
+          logMsg = "A wild " + enemy.name + " appeared!";
+      }
+      
+      gameState.inBattle = true;
+      gameState.battleState = {
+        enemy: { ...enemy }, // Copy enemy data
+        playerHP: pet.hp,
+        enemyHP: enemy.hp,
+        isBoss: isBoss,
+        isArena: isArena,
+        turnInProgress: false, // NEW: Prevents spamming attacks
+        log: [logMsg]
+      };
+      
+      // SET BACKGROUND IMAGE
+      let bgUrl = BATTLE_BACKGROUNDS[1];
+      if (isArena) {
+         bgUrl = ARENA_IMGS[Math.floor(Math.random() * ARENA_IMGS.length)];
+      } else {
+         bgUrl = BATTLE_BACKGROUNDS[tileType] || BATTLE_BACKGROUNDS[1];
+      }
+       
+      document.getElementById('battle-ui').style.backgroundImage = `url('${bgUrl}')`;
+      
+      document.getElementById('rpg-wrapper').style.display = 'none';
+      document.getElementById('battle-ui').style.display = 'block';
+      renderBattle();
+    }
+
+    function renderBattle() {
+      const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+      const bs = gameState.battleState;
+      if (!bs) return;
+
+      // Ensure stats exist if old save
+      if(!pet.level) pet.level = 1;
+
+      const playerVis = document.getElementById('battle-player-visual');
+      if(pet.image) {
+         playerVis.innerHTML = `<img src="${pet.image}" class="battler-image ${pet.imageStyle||''}">`;
+      } else {
+         playerVis.innerHTML = pet.emoji;
+      }
+
+      const enemyVis = document.getElementById('battle-enemy-visual');
+      if(bs.enemy.image) {
+         enemyVis.innerHTML = `<img src="${bs.enemy.image}" class="battler-image ${bs.enemy.imageStyle||''}">`;
+      } else {
+         enemyVis.innerHTML = bs.enemy.emoji;
+      }
+      document.getElementById('enemy-name').innerText = bs.enemy.name + (bs.isBoss ? " (BOSS)" : "") + (bs.isArena ? " (CHAMP)" : "");
+      
+      // Update Enemy HP Bar (Boss needs red bar?)
+      const ePct = (bs.enemyHP / bs.enemy.hp) * 100;
+      document.getElementById('enemy-hp-bar').style.width = ePct + "%";
+
+      // Player Stats
+      const pPct = (bs.playerHP / pet.maxHP) * 100;
+      document.getElementById('player-hp-bar').style.width = pPct + "%";
+      document.getElementById('player-hp-text').innerText = `Lvl ${pet.level} - ${bs.playerHP}/${pet.maxHP}`;
+
+      const actionsDiv = document.getElementById('battle-actions');
+      
+      // NEW: Check if controls should be disabled
+      const isLocked = bs.turnInProgress;
+      const btnStyle = isLocked ? 'opacity: 0.5; cursor: not-allowed; transform: none;' : '';
+      const disabledAttr = isLocked ? 'disabled' : '';
+
+      actionsDiv.innerHTML = pet.powers.map(pid => {
+        const item = findShopItem(pid);
+        const visual = item.image 
+           ? `<img src="${item.image}" style="width:24px;height:24px;object-fit:contain;">`
+           : `<span style="font-size: 20px; line-height: 1;">${item.icon}</span>`;
+        
+        const lvlBonus = Math.max(0, pet.level - 1);
+        const totalDmg = (item.damage || 0) + lvlBonus;
+           
+        return `<button class="action-btn green" onclick="usePower('${pid}')" title="Deals ${totalDmg} Dmg" style="${btnStyle}" ${disabledAttr}>${visual} <span>${item.name}</span></button>`;
+      }).join('');
+      
+      actionsDiv.innerHTML += `<button class="action-btn red" onclick="flee()" style="${btnStyle}" ${disabledAttr}>Run</button>`;
+
+      document.getElementById('battle-log').innerHTML = bs.log.map(l => `<div>${l}</div>`).join('');
+      document.getElementById('battle-log').scrollTop = document.getElementById('battle-log').scrollHeight;
+    }
+
+    // UPDATED: Strict Turn-Based Logic
+    function usePower(pid) {
+      if(!gameState.inBattle) return;
+      
+      // 1. STOP SPAMMING: If a turn is already happening, ignore click
+      if(gameState.battleState.turnInProgress) return;
+      
+      // 2. LOCK UI
+      gameState.battleState.turnInProgress = true;
+      renderBattle(); // Re-render to grey out buttons
+
+      const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+      const power = findShopItem(pid);
+      const bs = gameState.battleState;
+      
+      // --- PLAYER TURN ---
+      const levelBonus = Math.max(0, (pet.level || 1) - 1);
+      const dmg = (power.damage || 5) + levelBonus;
+      
+      // Log and Animate Player
+      bs.log.push(`${pet.name} used ${power.name}!`);
+      renderBattle();
+
+      const projectileVisual = power.image ? power.image : power.icon;
+      createProjectile(projectileVisual, document.getElementById('battle-player-visual'), document.getElementById('battle-enemy-visual'));
+      
+      document.getElementById('battle-player-visual').style.animation = "attackShake 0.5s";
+      
+      // Wait for projectile to hit (600ms)
+      setTimeout(()=> { 
+         // Reset Player Animation
+         document.getElementById('battle-player-visual').style.animation = "";
+         
+         // Hit Enemy
+         bs.enemyHP = Math.max(0, bs.enemyHP - dmg);
+         bs.log.push(`...Hit for ${dmg} damage!`);
+         document.getElementById('battle-enemy-visual').style.animation = "damageFlash 0.5s";
+         renderBattle();
+
+         // CHECK WIN
+         if(bs.enemyHP <= 0) {
+            setTimeout(winBattle, 1000);
+            return;
+         }
+
+         // --- ENEMY TURN (Delayed) ---
+         setTimeout(() => {
+            if(!gameState.inBattle) return;
+            
+            // Reset Enemy Flash Animation from previous hit
+            document.getElementById('battle-enemy-visual').style.animation = "";
+            
+            // Enemy Attacks
+            const enemyDmg = bs.enemy.damage;
+            bs.log.push(`${bs.enemy.name} attacks!`);
+            document.getElementById('battle-enemy-visual').style.animation = "attackShake 0.5s";
+            renderBattle();
+            
+            // Wait for Enemy Impact (600ms)
+            setTimeout(() => {
+                // Hit Player
+                bs.playerHP = Math.max(0, bs.playerHP - enemyDmg);
+                bs.log.push(`...You took ${enemyDmg} damage!`);
+                document.getElementById('battle-player-visual').style.animation = "damageFlash 0.5s";
+                
+                // Remove animations shortly after
+                setTimeout(() => {
+                    document.getElementById('battle-enemy-visual').style.animation = "";
+                    document.getElementById('battle-player-visual').style.animation = "";
+                }, 500);
+
+                renderBattle();
+                
+                // CHECK LOSS
+                if(bs.playerHP <= 0) {
+                  setTimeout(loseBattle, 1000);
+                } else {
+                  // UNLOCK UI -> Player Turn Again
+                  bs.turnInProgress = false;
+                  renderBattle(); 
+                }
+            }, 600);
+
+         }, 1000); // 1 second pause between turns
+
+      }, 600);
+    }
+
+    // ARENA REWARD: Weighted Random (50% Rare, 30% Epic, 20% Legendary)
+    function giveRandomEgg() {
+       const rand = Math.random(); // 0.0 to 1.0
+       let pool;
+       
+       if (rand < 0.50) {
+           pool = PET_TYPES.rare; // 50% chance
+       } else if (rand < 0.80) { // 0.50 + 0.30 = 0.80
+           pool = PET_TYPES.epic; // 30% chance
+       } else {
+           pool = PET_TYPES.legendary; // Remaining 20% chance
+       }
+       
+       // Fallback if a specific tier list is empty
+       if (!pool || pool.length === 0) pool = PET_TYPES.common;
+
+       const randomPet = pool[Math.floor(Math.random() * pool.length)];
+       return createAndPushEgg(randomPet);
+    }
+
+    // WILD DROP REWARD: Low/Mid Tier (Common, Uncommon, Rare)
+    function giveWildEgg() {
+       const tiers = [...PET_TYPES.common, ...PET_TYPES.uncommon, ...PET_TYPES.rare];
+       const randomPet = tiers[Math.floor(Math.random() * tiers.length)];
+       return createAndPushEgg(randomPet);
+    }
+
+    // Helper to add egg to inventory
+    function createAndPushEgg(basePet) {
+       // SAFETY FIX: Default to 'common' if rarity is missing
+       const petRarity = basePet.rarity || 'common';
+       
+       const newPet = {
+            id: 'pet_' + Date.now() + Math.random(),
+            type: basePet.id,
+            name: "Mystery Egg",
+            image: basePet.image,
+            imageStyle: basePet.imageStyle,
+            emoji: basePet.emoji,
+            rarity: petRarity,
+            hp: basePet.baseHP,
+            maxHP: basePet.baseHP,
+            powers: [],
+            isHatched: false, // EGG MODE
+            hatchProgress: 0,
+            evolutionStage: 0,
+            level: 1,
+            xp: 0,
+            maxXp: 100
+         };
+         gameState.pets.push(newPet);
+         return petRarity;
+    }
+
+    function winBattle() {
+      const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+      const bs = gameState.battleState;
+      
+      pet.hp = bs.playerHP;
+      
+      // Calculate Rewards
+      const bpReward = bs.isBoss ? 100 : (bs.isArena ? 50 : 20);
+      const xpReward = bs.enemy.xp || 15;
+      
+      addBP(bpReward);
+      
+      let extraMsg = "";
+      
+      // 1. ARENA VICTORY: 100% Chance for High Tier Egg
+      if (bs.isArena) {
+          const rarity = giveRandomEgg();
+          extraMsg = `\n🏆 ARENA CHAMPION! Received ${rarity.toUpperCase()} EGG!`;
+      } 
+      // 2. BOSS VICTORY: 100% Chance for Rare+ Egg
+      else if (bs.isBoss) {
+          const rarity = giveRandomEgg();
+          extraMsg = `\n💀 BOSS DEFEATED! Received ${rarity.toUpperCase()} EGG!`;
+      }
+      // 3. WILD VICTORY: 10% Chance for Normal Egg
+      else {
+          // Roll a 10-sided die (0.0 to 1.0)
+          if (Math.random() < 0.10) { 
+              const rarity = giveWildEgg();
+              extraMsg = `\n🥚 LUCKY DROP! Found a ${rarity.toUpperCase()} Egg!`;
+          }
+      }
+      
+      // Handle Leveling
+      if(!pet.level) pet.level = 1;
+      if(!pet.xp) pet.xp = 0;
+      // Increased difficulty scaling
+      if(!pet.maxXp) pet.maxXp = pet.level * 300 + 200;
+      
+      pet.xp += xpReward;
+      
+      let levelMsg = "";
+      
+      // Level Up Check
+      if (pet.xp >= pet.maxXp) {
+          pet.level++;
+          pet.xp = 0;
+          // Updated Formula: Takes much longer to level up now
+          pet.maxXp = pet.level * 300 + 200; 
+          pet.maxHP += 10; // Stat boost
+          pet.hp = pet.maxHP; // Full heal
+          levelMsg = `\n🎉 LEVEL UP! Now Lvl ${pet.level}! (+10 HP)`;
+      }
+      
+      showToast(`Victory! +${bpReward} BP, +${xpReward} XP${levelMsg}${extraMsg}`, "success");
+      gameState.inBattle = false;
+      
+      document.getElementById('battle-ui').style.display = 'none';
+      document.getElementById('rpg-wrapper').style.display = 'block';
+      initRPG(); 
+      
+      saveGame();
+    }
+
+    function loseBattle() {
+      const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+      pet.hp = 0;
+      
+      // Arena penalty
+      if (gameState.battleState && gameState.battleState.isArena) {
+          gameState.stamina = Math.max(0, gameState.stamina - 20);
+          updateStatsDisplay();
+          showToast("Lost Arena Match... -20 Stamina", "error");
+      } else {
+          showToast("Defeated...", "error");
+      }
+      
+      gameState.inBattle = false;
+      
+      document.getElementById('battle-ui').style.display = 'none';
+      document.getElementById('wilds-menu').style.display = 'block'; // Go back to menu
+      
+      saveGame();
+    }
+
+    function flee() {
+      // Prevent fleeing mid-turn or in Arena
+      if(gameState.battleState.turnInProgress) return;
+
+      if (gameState.battleState && gameState.battleState.isArena) {
+          showToast("Cannot flee from Arena!", "error");
+          return;
+      }
+      gameState.inBattle = false;
+      
+      document.getElementById('battle-ui').style.display = 'none';
+      document.getElementById('rpg-wrapper').style.display = 'block'; // Go back to Map
+      initRPG();
+    }
+
+    // ==========================================
+    // 💾 UTILS
+    // ==========================================
+    function switchTab(tabId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      
+      document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
+      document.getElementById('screen-' + tabId).classList.add('active');
+      
+      if (tabId === 'hub') renderHub();
+      if (tabId === 'shop') renderShop();
+      
+      if (tabId !== 'wilds') {
+         document.getElementById('rpg-wrapper').style.display = 'none';
+         document.getElementById('battle-ui').style.display = 'none';
+         document.getElementById('wilds-menu').style.display = 'block';
+      }
+    }
+
+    function updateStatsDisplay() {
+      document.getElementById('bp-display').innerText = gameState.brainPoints;
+      if(document.getElementById('stamina-display')) {
+          document.getElementById('stamina-display').innerText = gameState.stamina;
+          
+          // Visual Warning for Low Stamina
+          if(gameState.stamina < 10) {
+              document.getElementById('stamina-display').style.color = "red";
+          } else {
+              document.getElementById('stamina-display').style.color = "inherit";
+          }
+      }
+    }
+
+    // UPDATED: Smarter Projectile Logic (Uses math to hit enemy exactly)
+    function createProjectile(visual, startEl, endEl) {
+      const p = document.createElement('div');
+      p.className = 'projectile';
+      
+      if (visual && visual.startsWith('http')) {
+        p.innerHTML = `<img src="${visual}" style="width:100%;height:100%;object-fit:contain;">`;
+      } else {
+        p.innerText = visual;
+      }
+
+      // 1. Get exact positions of Player and Enemy
+      const startRect = startEl.getBoundingClientRect();
+      const endRect = endEl.getBoundingClientRect();
+      
+      // 2. Calculate center points
+      const startX = startRect.left + startRect.width / 2;
+      const startY = startRect.top + startRect.height / 2;
+      const endX = endRect.left + endRect.width / 2;
+      const endY = endRect.top + endRect.height / 2;
+      
+      // 3. Set starting position (centering the projectile)
+      p.style.left = (startX - 30) + 'px'; // -30 because width is 60px
+      p.style.top = (startY - 30) + 'px';
+      
+      document.body.appendChild(p);
+      
+      // 4. Calculate travel distance
+      const deltaX = endX - startX;
+      const deltaY = endY - startY;
+
+      // 5. Animate using Web Animations API for accuracy
+      const animation = p.animate([
+        { transform: 'translate(0, 0) scale(0.5) rotate(0deg)', opacity: 1 },
+        { transform: `translate(${deltaX}px, ${deltaY}px) scale(1.2) rotate(360deg)`, opacity: 0 }
+      ], {
+        duration: 600,
+        easing: 'cubic-bezier(0.25, 1, 0.5, 1)' // "Fast out, slow in" feel
+      });
+
+      // 6. Remove element when animation is done
+      animation.onfinish = () => p.remove();
+    }
+
+    function showToast(msg, type) {
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.style.borderLeftColor = type === 'error' ? '#f56565' : '#48bb78';
+      t.innerText = msg;
+      document.body.appendChild(t);
+      setTimeout(()=>t.remove(), 3000);
+    }
+
+    function saveGame() {
+      if(gameState.playerName) {
+        localStorage.setItem('math_rpg_' + gameState.playerName, JSON.stringify(gameState));
+        // NEW: Cloud Save if logged in
+        if(typeof saveProgressToFirebase === 'function') {
+            saveProgressToFirebase();
+        }
+      }
+    }
+
+    function logout() {
+      location.reload();
+    }
+    
+    function releasePet() {
+       if(gameState.pets.length <= 1) { showToast("Can't release last pet!", "error"); return; }
+       
+       window.petToRelease = gameState.pets.find(p => p.id === gameState.currentPetId);
+       
+       const modal = document.getElementById('release-modal');
+       modal.querySelector('.pet-preview').innerHTML = window.petToRelease.image 
+          ? `<img src="${window.petToRelease.image}" class="pet-image blend-multiply" style="width:80px; height:80px;">` 
+          : window.petToRelease.emoji;
+       modal.querySelector('p strong').innerText = window.petToRelease.name;
+       
+       modal.classList.add('active');
+    }
+    
+    document.getElementById('release-confirm').addEventListener('click', () => {
+        gameState.pets = gameState.pets.filter(p => p.id !== gameState.currentPetId);
+        gameState.currentPetId = gameState.pets[0].id;
+        gameState.brainPoints += 10;
+        saveGame();
+        renderHub();
+        updateStatsDisplay();
+        document.getElementById('release-modal').classList.remove('active');
+        showToast("Pet Released. +10 BP", "success");
+    });
+    
+    document.getElementById('release-cancel').addEventListener('click', () => {
+        document.getElementById('release-modal').classList.remove('active');
+    });
+    
+    // ==========================================
+    // 🔥 NEW: MULTIPLAYER FUNCTIONS
+    // ==========================================
+    
+    function showMultiplayerMenu() {
+        document.getElementById('wilds-menu').style.display = 'none';
+        document.getElementById('multiplayer-menu').style.display = 'block';
+    }
+    
+    async function createPvPRoom() {
+        if (gameState.brainPoints < 100) {
+            showToast("Need 100 BP to create a room!", "error");
+            return;
+        }
+        
+        gameState.brainPoints -= 100;
+        updateStatsDisplay();
+        
+        // Generate random 4-digit code
+        const roomCode = Math.floor(1000 + Math.random() * 9000).toString();
+        
+        try {
+            // Add to Firestore
+            await window.fbase.setDoc(window.fbase.doc(window.db, "rooms", roomCode), {
+                host: gameState.playerName,
+                hostPet: gameState.pets.find(p => p.id === gameState.currentPetId),
+                status: "waiting",
+                createdAt: new Date()
+            });
+            
+            // Switch UI
+            document.getElementById('multiplayer-menu').style.display = 'none';
+            document.getElementById('pvp-lobby-screen').style.display = 'block';
+            document.getElementById('display-room-code').innerText = roomCode;
+            
+            // Listen for opponent
+            listenToRoom(roomCode, true); // true = isHost
+            
+        } catch (e) {
+            console.error("Failed to create room:", e);
+            alert("Could not create room. Check connection.");
+        }
+    }
+    
+    async function joinPvPRoom() {
+        const code = document.getElementById('room-code-input').value.trim();
+        if (code.length !== 4) {
+            showToast("Invalid Code", "error");
+            return;
+        }
+        
+        try {
+            const roomRef = window.fbase.doc(window.db, "rooms", code);
+            const docSnap = await window.fbase.getDoc(roomRef);
+            
+            if (docSnap.exists() && docSnap.data().status === "waiting") {
+                // Join the room
+                await window.fbase.updateDoc(roomRef, {
+                    guest: gameState.playerName,
+                    guestPet: gameState.pets.find(p => p.id === gameState.currentPetId),
+                    status: "ready"
+                });
+                
+                // Switch UI
+                document.getElementById('multiplayer-menu').style.display = 'none';
+                document.getElementById('pvp-lobby-screen').style.display = 'block';
+                document.getElementById('display-room-code').innerText = code;
+                document.querySelector('#pvp-lobby-screen h2').innerText = "Connecting...";
+                
+                listenToRoom(code, false); // false = isHost
+            } else {
+                showToast("Room not found or full", "error");
+            }
+        } catch(e) {
+            console.error("Join failed:", e);
+        }
+    }
+    
+    let roomUnsubscribe = null;
+    
+    function listenToRoom(roomCode, isHost) {
+        const roomRef = window.fbase.doc(window.db, "rooms", roomCode);
+        
+        roomUnsubscribe = window.fbase.onSnapshot(roomRef, (doc) => {
+            const data = doc.data();
+            if (!data) return;
+            
+            if (data.status === "ready" && isHost) {
+                 showToast(`Player ${data.guest} joined!`, "success");
+                 // TODO: In a full version, this would transition to a synchronized battle screen
+                 // For this demo, we just acknowledge the connection
+            }
+        });
+    }
+    
+    function leavePvPRoom() {
+        if (roomUnsubscribe) roomUnsubscribe();
+        document.getElementById('pvp-lobby-screen').style.display = 'none';
+        document.getElementById('wilds-menu').style.display = 'block';
+    }
+
+  </script>
+ </body>
+</html>
