@@ -2852,6 +2852,223 @@
     });
     
     // ==========================================
+    // 🔥 FIREBASE: TEACHER & STUDENT AUTH
+    // ==========================================
+
+    // 1. Check if a student account exists with password
+    async function authenticateStudent(name, password) {
+        try {
+            const studentRef = window.fbase.doc(window.db, "students", name);
+            const docSnap = await window.fbase.getDoc(studentRef);
+            
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                // Strict Password Check
+                if (data.password && data.password !== password) {
+                    return { success: false, message: "Incorrect Password!" };
+                }
+                // Return assignment data
+                return { 
+                    success: true, 
+                    assignment: data.assignedGrade ? { grade: data.assignedGrade, topics: data.assignedTopics || [] } : null 
+                };
+            } else {
+                // STRICT MODE: If account doesn't exist, reject login.
+                return { success: false, message: "Account not found. Ask your teacher to create one." };
+            }
+        } catch (e) {
+            console.warn("Auth check failed", e);
+            return { success: false, message: "Connection Error. Try again." };
+        }
+    }
+    
+    // 2. Teacher Login Logic
+    function toggleTeacherLogin() {
+        const panel = document.getElementById('teacher-login-panel');
+        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    }
+    
+    function checkTeacherPin() {
+        const pin = document.getElementById('teacher-pin').value;
+        if (pin === "1030") { 
+            document.getElementById('teacher-dashboard-screen').style.display = 'block';
+            loadStudentList(); // Load list immediately
+        } else {
+            alert("Incorrect PIN!");
+        }
+    }
+    
+    // 3. Create Student Account (Teacher Function)
+    async function createStudentAccount() {
+        const user = document.getElementById('new-student-user').value.trim();
+        const pass = document.getElementById('new-student-pass').value.trim();
+        const grade = document.getElementById('new-student-grade').value;
+        
+        if (!user || !pass) { alert("Enter username and password"); return; }
+        
+        try {
+            const studentRef = window.fbase.doc(window.db, "students", user);
+            const docSnap = await window.fbase.getDoc(studentRef);
+            
+            if (docSnap.exists()) {
+                alert("Student already exists!");
+                return;
+            }
+            
+            await window.fbase.setDoc(studentRef, {
+                username: user,
+                password: pass,
+                assignedGrade: grade,
+                assignedTopics: [], // Default empty
+                createdAt: new Date()
+            });
+            
+            alert(`Created account for ${user}!`);
+            // Clear inputs
+            document.getElementById('new-student-user').value = '';
+            document.getElementById('new-student-pass').value = '';
+            loadStudentList();
+            
+        } catch(e) {
+            console.error("Create error", e);
+            alert("Error creating account");
+        }
+    }
+
+    // 4. Load Student List
+    async function loadStudentList() {
+        const listDiv = document.getElementById('student-list-container');
+        listDiv.innerHTML = 'Loading...';
+        
+        try {
+            const querySnapshot = await window.fbase.getDocs(window.fbase.collection(window.db, "students"));
+            let html = '';
+            
+            if (querySnapshot.empty) {
+                html = '<div style="padding:20px; text-align:center;">No students found.</div>';
+            } else {
+                querySnapshot.forEach((doc) => {
+                    const s = doc.data();
+                    html += `
+                    <div class="student-list-item">
+                        <div class="student-info">
+                            <strong>${s.username}</strong> 
+                            <span>(Grade ${s.assignedGrade || '?'})</span>
+                        </div>
+                        <button class="action-btn blue" style="width:auto; padding:5px 10px; font-size:12px;" onclick="openTopicManager('${s.username}', '${s.assignedGrade}')">Manage</button>
+                    </div>`;
+                });
+            }
+            listDiv.innerHTML = html;
+        } catch(e) {
+            console.error("List error", e);
+            listDiv.innerHTML = "Error loading list.";
+        }
+    }
+
+    // 5. Manage Topics (Teacher Dashboard)
+    let currentManagingStudent = null;
+    let currentStudentAssignments = []; // Store fetched assignments
+    
+    async function openTopicManager(studentName, grade) {
+        currentManagingStudent = studentName;
+        
+        // Update UI Text
+        document.getElementById('tm-student-name').innerText = `Student: ${studentName}`;
+        
+        // Set Dropdown to current grade
+        const gradeSelect = document.getElementById('tm-grade-select');
+        gradeSelect.value = grade || 'K'; 
+        
+        document.getElementById('topic-manager-modal').style.display = 'flex';
+        document.getElementById('tm-topic-list').innerHTML = '<div style="color:gray">Loading data...</div>';
+        
+        // Fetch Current Student Assignments from DB once
+        const studentRef = window.fbase.doc(window.db, "students", studentName);
+        const docSnap = await window.fbase.getDoc(studentRef);
+        currentStudentAssignments = docSnap.exists() ? (docSnap.data().assignedTopics || []) : [];
+        
+        // Load the list based on the grade in the dropdown
+        refreshTopicManagerUI();
+    }
+    
+    // Called when opening modal OR changing grade dropdown
+    async function refreshTopicManagerUI() {
+        const grade = document.getElementById('tm-grade-select').value;
+        const listDiv = document.getElementById('tm-topic-list');
+        listDiv.innerHTML = '<div style="color:gray">Scanning GitHub for Grade ' + grade + '...</div>';
+        
+        // 1. Fetch Available Topics for this Grade (From GitHub)
+        let availableFiles = [];
+        if (GITHUB_CONFIG.enabled) {
+             const folderName = `questions/grade_${grade}`;
+             availableFiles = await fetchGithubFolder(folderName);
+        }
+        
+        listDiv.innerHTML = '';
+        
+        if (availableFiles.length === 0) {
+            // Fallback offline topics if GH fails or disabled
+             const topics = Object.keys(QUESTION_REPOSITORY[grade] || {});
+             if (topics.length === 0) {
+                 listDiv.innerHTML = '<div style="color:orange">No topics found for Grade ' + grade + '</div>';
+             }
+             topics.forEach(t => {
+                 const isChecked = currentStudentAssignments.includes(`INTERNAL:${t}`) ? 'checked' : '';
+                 listDiv.innerHTML += `
+                    <label class="topic-checkbox-label" style="margin-bottom:5px;">
+                        <input type="checkbox" value="INTERNAL:${t}" ${isChecked}> ${t.toUpperCase()}
+                    </label>`;
+             });
+        } else {
+            // Render GitHub Files
+            const jsonFiles = availableFiles.filter(f => f.name.endsWith('.json'));
+            
+            if (jsonFiles.length === 0) {
+                listDiv.innerHTML = '<div style="color:red">No JSON files found in Grade ' + grade + ' folder.</div>';
+            }
+            
+            jsonFiles.forEach(file => {
+                const topicName = file.name.replace('.json', '').replace(/_/g, ' ');
+                // Check if this URL is in the student's list
+                const isChecked = currentStudentAssignments.includes(file.download_url) ? 'checked' : '';
+                
+                listDiv.innerHTML += `
+                    <label class="topic-checkbox-label" style="margin-bottom:5px;">
+                        <input type="checkbox" value="${file.download_url}" ${isChecked}> ${topicName}
+                    </label>`;
+            });
+        }
+    }
+    
+    async function saveStudentTopics() {
+        if (!currentManagingStudent) return;
+        
+        const checkboxes = document.querySelectorAll('#tm-topic-list input:checked');
+        const selectedTopics = Array.from(checkboxes).map(cb => cb.value);
+        
+        // Get the (possibly changed) grade
+        const selectedGrade = document.getElementById('tm-grade-select').value;
+        
+        try {
+            const studentRef = window.fbase.doc(window.db, "students", currentManagingStudent);
+            await window.fbase.updateDoc(studentRef, {
+                assignedGrade: selectedGrade, 
+                assignedTopics: selectedTopics
+            });
+            
+            alert(`Updated ${currentManagingStudent} to Grade ${selectedGrade} with ${selectedTopics.length} topics!`);
+            document.getElementById('topic-manager-modal').style.display = 'none';
+            loadStudentList(); // Refresh main list to show new grade
+            
+        } catch(e) {
+            console.error("Save error:", e);
+            alert("Failed to save.");
+        }
+    }
+
+    
+    // ==========================================
     // 🔥 NEW: MULTIPLAYER FUNCTIONS
     // ==========================================
     
