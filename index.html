@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Math Pet Adventure RPG</title>
   
-  <!-- 1. LOAD FIREBASE LIBRARIES -->
+  <!-- 1. LOAD FIREBASE LIBRARIES (Updated imports to include getDocs for listing students) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     // ==========================================
     // 🔥 FIREBASE CONFIGURATION
@@ -28,7 +28,7 @@
     
     // Expose DB to window so our main game functions can use it
     window.db = db;
-    window.fbase = { doc, getDoc, setDoc, updateDoc, onSnapshot, collection, addDoc };
+    window.fbase = { doc, getDoc, setDoc, updateDoc, onSnapshot, collection, addDoc, getDocs };
     
     console.log("🔥 Firebase Initialized");
   </script>
@@ -212,6 +212,12 @@
     .move-replace-btn { background: white; border: 2px solid #cbd5e0; padding: 15px; border-radius: 10px; text-align: left; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-weight: bold; transition: all 0.2s; }
     .move-replace-btn:hover { border-color: #f56565; background: #fff5f5; color: #c53030; }
     .move-replace-btn span { pointer-events: none; }
+
+    /* Styles for Student List in Dashboard */
+    .student-list-item { background: white; padding: 12px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+    .student-list-item:last-child { border-bottom: none; }
+    .student-info strong { color: #2d3748; font-size: 16px; }
+    .student-info span { color: #718096; font-size: 12px; margin-left: 5px; }
   </style>
   </head>
  <body><!-- Login Screen -->
@@ -234,21 +240,7 @@
          <input type="password" id="student-pass" class="login-input" placeholder="Enter Password" required>
      </div>
 
-     <div class="setup-section" id="grade-section"><label class="setup-label">3. Select Grade:</label>
-      <div class="grade-grid" id="grade-selection">
-       <div class="grade-btn" onclick="selectGrade('K')">K</div>
-       <div class="grade-btn" onclick="selectGrade('1')">1</div>
-       <div class="grade-btn" onclick="selectGrade('2')">2</div>
-       <div class="grade-btn" onclick="selectGrade('3')">3</div>
-       <div class="grade-btn" onclick="selectGrade('4')">4</div>
-       <div class="grade-btn" onclick="selectGrade('5')">5</div>
-       <div class="grade-btn" onclick="selectGrade('6')">6</div>
-      </div>
-     </div>
-     
-     <div class="setup-section" id="topic-section" style="display:none;"><label class="setup-label">4. Choose topics:</label>
-      <div class="topic-list" id="topic-list"></div>
-     </div>
+     <!-- NO GRADE SELECTOR HERE (Strict Mode: Grade comes from DB) -->
      
      <button type="submit" class="login-btn">Start Adventure! 🚀</button>
     </form>
@@ -270,21 +262,68 @@
    
    <!-- TEACHER DASHBOARD (Fullscreen Overlay) -->
    <div id="teacher-dashboard-screen" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:2100; padding:40px; overflow-y:auto;">
-       <div style="max-width:800px; margin:0 auto;">
+       <div style="max-width:1000px; margin:0 auto;">
            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
                <h1 style="font-size:32px; font-weight:bold; color:#5a67d8;">👩‍🏫 Teacher Dashboard</h1>
                <button class="action-btn red" style="width:auto; padding:10px 20px;" onclick="location.reload()">Log Out</button>
            </div>
            
-           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:40px;">
+           <div style="display:grid; grid-template-columns: 1fr 1.5fr; gap:40px;">
                <!-- CREATE STUDENT -->
-               <div style="background:#f7fafc; padding:25px; border-radius:15px; border:2px solid #e2e8f0;">
-                   <h2 style="font-size:20px; font-weight:bold; margin-bottom:15px;">Create Student Account</h2>
-                   <input type="text" id="new-student-user" class="login-input" placeholder="Username">
-                   <input type="password" id="new-student-pass" class="login-input" placeholder="Password">
+               <div>
+                   <div style="background:#f7fafc; padding:25px; border-radius:15px; border:2px solid #e2e8f0; margin-bottom: 20px;">
+                       <h2 style="font-size:20px; font-weight:bold; margin-bottom:15px;">Create Student Account</h2>
+                       <input type="text" id="new-student-user" class="login-input" placeholder="Username">
+                       <input type="password" id="new-student-pass" class="login-input" placeholder="Password">
+                       
+                       <label style="display:block; font-weight:bold; margin-top:10px;">Assign Grade:</label>
+                       <select id="new-student-grade" class="login-input">
+                           <option value="K">Kindergarten</option>
+                           <option value="1">Grade 1</option>
+                           <option value="2">Grade 2</option>
+                           <option value="3">Grade 3</option>
+                           <option value="4">Grade 4</option>
+                           <option value="5">Grade 5</option>
+                           <option value="6">Grade 6</option>
+                       </select>
+                       
+                       <button class="action-btn green" onclick="createStudentAccount()">Create Account</button>
+                   </div>
                    
-                   <label style="display:block; font-weight:bold; margin-top:10px;">Assign Grade:</label>
-                   <select id="new-student-grade" class="login-input">
+                   <!-- INSTRUCTIONS -->
+                    <div style="background:#fffbeb; padding:20px; border-radius:15px; border:2px solid #fbd38d;">
+                       <h2 style="color:#d69e2e; font-size:16px; font-weight:bold; margin-bottom:5px;">Instructions</h2>
+                       <p style="font-size:13px; line-height:1.4; color:#744210;">
+                           1. Create accounts for your students here.<br>
+                           2. Click "Manage" on the right to assign specific topics.<br>
+                           3. Students can only see topics you check.
+                       </p>
+                   </div>
+               </div>
+               
+               <!-- STUDENT LIST -->
+               <div style="background:#fff; border:2px solid #e2e8f0; border-radius:15px; overflow:hidden;">
+                   <div style="background:#f7fafc; padding:15px; border-bottom:2px solid #e2e8f0; font-weight:bold; color:#4a5568;">
+                       Enrolled Students
+                       <button class="action-btn blue" style="float:right; width:auto; padding:5px 10px; font-size:12px; margin-top:-2px;" onclick="loadStudentList()">Refresh List</button>
+                   </div>
+                   <div id="student-list-container" style="max-height: 500px; overflow-y: auto;">
+                       <div style="padding:20px; text-align:center; color:gray;">Loading list...</div>
+                   </div>
+               </div>
+           </div>
+       </div>
+       
+       <!-- TOPIC MANAGER MODAL -->
+       <div id="topic-manager-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
+           <div style="background:white; padding:30px; border-radius:15px; width:500px; max-width:90%;">
+               <h2 style="font-size:22px; font-weight:bold; color:#5a67d8; margin-bottom:10px;">Manage Student</h2>
+               <p id="tm-student-name" style="font-weight:bold; color:#2d3748; margin-bottom:15px;">Student: -</p>
+               
+               <!-- NEW: Grade Selector inside Modal -->
+               <div style="margin-bottom:15px; background:#f7fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0;">
+                   <label style="font-weight:bold; color:#4a5568; font-size:14px;">Assigned Grade Level:</label>
+                   <select id="tm-grade-select" style="width:100%; padding:8px; margin-top:5px; border:1px solid #cbd5e0; border-radius:5px;" onchange="refreshTopicManagerUI()">
                        <option value="K">Kindergarten</option>
                        <option value="1">Grade 1</option>
                        <option value="2">Grade 2</option>
@@ -293,19 +332,17 @@
                        <option value="5">Grade 5</option>
                        <option value="6">Grade 6</option>
                    </select>
-                   
-                   <button class="action-btn green" onclick="createStudentAccount()">Create Account</button>
+               </div>
+
+               <label style="font-weight:bold; color:#4a5568; font-size:14px;">Assign Topics:</label>
+               <div id="tm-topic-list" style="max-height:300px; overflow-y:auto; border:1px solid #eee; padding:10px; border-radius:5px; margin-bottom:20px; margin-top:5px;">
+                   <!-- Checkboxes go here -->
+                   Loading topics...
                </div>
                
-               <!-- INFO -->
-               <div style="background:#fffbeb; padding:25px; border-radius:15px; border:2px solid #fbd38d;">
-                   <h2 style="color:#d69e2e; font-size:20px; font-weight:bold; margin-bottom:10px;">Instructions</h2>
-                   <p style="line-height:1.6; color:#744210;">
-                       1. Enter a Username and Password for your student.<br>
-                       2. Select their Grade Level.<br>
-                       3. Click "Create Account".<br><br>
-                       <strong>Note:</strong> Accounts created here are "Locked". Students cannot change their grade level when logging in.
-                   </p>
+               <div style="display:flex; gap:10px;">
+                   <button class="action-btn blue" onclick="saveStudentTopics()">Save Changes</button>
+                   <button class="action-btn red" onclick="document.getElementById('topic-manager-modal').style.display='none'">Cancel</button>
                </div>
            </div>
        </div>
@@ -666,7 +703,7 @@
     const PET_TYPES = {
       common: [
         { id: 'monster_01', name: 'Monster 01', image: 'https://i.imgur.com/Ua3beE3.png', imageStyle: 'blend-multiply', emoji: '❓', baseHP: 40, rarity: 'common' },
-        { id: 'monster_02', name: 'Monster 02', image: '', emoji: '❓', baseHP: 40, rarity: 'common' },
+        { id: 'monster_02', name: 'Monster 02', image: 'https://i.imgur.com/8lDzXT2.png', emoji: '❓', baseHP: 40, rarity: 'common' },
       ],
       uncommon: [ { id: 'monster_03', name: 'Monster 03', image: '', emoji: '❓', baseHP: 50, rarity: 'uncommon' } ],
       rare: [ { id: 'monster_05', name: 'Monster 05', image: '', emoji: '❓', baseHP: 60, rarity: 'rare' } ],
@@ -675,9 +712,13 @@
     };
 
     const EVOLUTION_CHAINS = {
-      'monster_01': [
+     'monster_01': [
         { name: 'Monster 01 Lvl 2', image: 'https://i.imgur.com/EZHaiWT.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50 },
         { name: 'Monster 01 Lvl 3', image: 'https://i.imgur.com/FK4as8q.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100 }
+      ],
+     'monster_02': [
+        { name: 'Monster 01 Lvl 2', image: 'https://i.imgur.com/RnQV8e0.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50 },
+        { name: 'Monster 01 Lvl 3', image: 'https://i.imgur.com/2wgvSfS.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100 }
       ]
     };
 
@@ -825,9 +866,6 @@
                 
                 // MERGE cloud data into gameState
                 gameState = { ...gameState, ...cloudData };
-                
-                // Ensure nested objects merge correctly if needed, but simpler replace works for now
-                // Just re-render UI to reflect new state
                 return true; 
             }
         } catch (e) {
@@ -1492,76 +1530,6 @@
     }
 
 
-    // ==========================================
-    // ⚙️ SETUP & LOGIN LOGIC
-    // ==========================================
-    
-    async function selectGrade(grade) {
-      // Visual feedback
-      document.querySelectorAll('.grade-btn').forEach(btn => btn.classList.remove('selected'));
-      // Find specific button
-      const clickedBtn = Array.from(document.querySelectorAll('.grade-btn')).find(b => b.innerText.trim() === grade);
-      if(clickedBtn) clickedBtn.classList.add('selected');
-      
-      gameState.grade = grade;
-      const topicList = document.getElementById('topic-list');
-      
-      // UI Feedback
-      topicList.innerHTML = '<div style="color:gray; padding:10px;">🔍 Scanning GitHub for topics...</div>';
-      document.getElementById('topic-section').style.display = 'block';
-
-      // 1. TRY GITHUB FOLDER FIRST
-      if (GITHUB_CONFIG.enabled) {
-          // Look for folder: questions/grade_K, questions/grade_1, etc.
-          const folderName = `questions/grade_${grade}`;
-          
-          // Call GitHub API to get file list
-          const files = await fetchGithubFolder(folderName);
-          
-          if (files && files.length > 0) {
-              topicList.innerHTML = ''; // Clear loading message
-              
-              // Filter for .json files only
-              const jsonFiles = files.filter(f => f.name.endsWith('.json'));
-              
-              if (jsonFiles.length === 0) {
-                  topicList.innerHTML = '<div style="color:red">No JSON files found in this grade folder.</div>';
-                  return;
-              }
-
-              // Create a checkbox for each file found
-              jsonFiles.forEach(file => {
-                  // "Addition.json" -> "Addition"
-                  const topicName = file.name.replace('.json', '').replace(/_/g, ' ');
-                  
-                  const label = document.createElement('label');
-                  label.className = 'topic-checkbox-label';
-                  // IMPORTANT: We store the file's download_url as the value!
-                  label.innerHTML = `<input type="checkbox" value="${file.download_url}" checked> ${topicName}`;
-                  topicList.appendChild(label);
-              });
-              return; // Stop here if successful
-          }
-      }
-
-      // 2. FALLBACK TO INTERNAL DATA (If GitHub fails, is empty, or disabled)
-      const topics = Object.keys(QUESTION_REPOSITORY[grade] || {});
-      topicList.innerHTML = '';
-      
-      if (topics.length === 0) {
-        topicList.innerHTML = '<div style="color:orange; font-size:12px;">No offline topics. Connect GitHub to see more!</div>';
-      } else {
-        topics.forEach(topic => {
-          const niceName = topic.replace(/_/g, ' ').toUpperCase();
-          const label = document.createElement('label');
-          label.className = 'topic-checkbox-label';
-          // Value starts with INTERNAL: to distinguish from URLs
-          label.innerHTML = `<input type="checkbox" value="INTERNAL:${topic}" checked> ${niceName}`;
-          topicList.appendChild(label);
-        });
-      }
-    }
-
     // -----------------------------------------
     // 🔥 FIREBASE: TEACHER & STUDENT AUTH
     // -----------------------------------------
@@ -1574,51 +1542,23 @@
             
             if (docSnap.exists()) {
                 const data = docSnap.data();
-                // If account has a password set, check it
+                // Strict Password Check
                 if (data.password && data.password !== password) {
                     return { success: false, message: "Incorrect Password!" };
                 }
-                // Return assignment data if exists
+                // Return assignment data
                 return { 
                     success: true, 
-                    assignment: data.assignedGrade ? { grade: data.assignedGrade, topics: data.assignedTopics } : null 
+                    assignment: data.assignedGrade ? { grade: data.assignedGrade, topics: data.assignedTopics || [] } : null 
                 };
             } else {
-                // New account or no password set yet (Legacy Mode: Allow login, maybe prompt to set later)
-                // For strict mode, you might want to return false here.
-                // We will allow it but return null assignment
-                return { success: true, assignment: null, isNew: true };
+                // STRICT MODE: If account doesn't exist, reject login.
+                return { success: false, message: "Account not found. Ask your teacher to create one." };
             }
         } catch (e) {
             console.warn("Auth check failed", e);
-            return { success: true, message: "Offline Mode" }; // Allow offline play
+            return { success: false, message: "Connection Error. Try again." };
         }
-    }
-    
-    // NEW: Guest Mode for Testing
-    function startGuestMode() {
-        gameState.playerName = "Guest_Tester";
-        // Default setup for Guest
-        gameState.grade = "1"; 
-        
-        // Initialize defaults
-        initializeGame();
-        loadExternalPets();
-        
-        // Load Mock Questions for Guest
-        const allQ = Object.values(QUESTION_REPOSITORY["1"] || {}).flat();
-        gameState.activeQuestionPool = allQ;
-
-        // UI Transition
-        document.getElementById('display-name').innerText = gameState.playerName + " (Guest)";
-        document.getElementById('display-grade').innerText = "Grade: 1";
-        updateStatsDisplay();
-        document.getElementById('login-overlay').classList.add('hidden');
-        
-        generateNextQuestion();
-        renderHub();
-        
-        showToast("Guest Mode Active (No Cloud Save)", "info");
     }
     
     // 2. Teacher Login Logic
@@ -1632,6 +1572,7 @@
         // Updated PIN to 1030
         if (pin === "1030") { 
             document.getElementById('teacher-dashboard-screen').style.display = 'block';
+            loadStudentList(); // Load list when dashboard opens
         } else {
             alert("Incorrect PIN!");
         }
@@ -1648,26 +1589,164 @@
         try {
             const studentRef = window.fbase.doc(window.db, "students", username);
             
-            // Default Topic Selection for simplicity (All available for that grade)
-            // In a real app, you'd fetch them. Here we assume they'll load all for assigned grade.
-            // Ideally, we'd let the teacher pick topics too.
-            
+            // Create account with Grade assignment and EMPTY topic list (Teacher must assign)
             await window.fbase.setDoc(studentRef, {
                 password: password,
                 assignedGrade: grade,
-                assignedTopics: [], // Empty array signals "Load all topics for this grade" or handle in logic
+                assignedTopics: [], 
                 createdAt: new Date()
             }, { merge: true });
             
             alert(`✅ Account Created!\n\nStudent: ${username}\nGrade: ${grade}`);
             
-            // Clear inputs
+            // Clear inputs & Refresh List
             document.getElementById('new-student-user').value = "";
             document.getElementById('new-student-pass').value = "";
+            loadStudentList();
             
         } catch(e) {
             console.error("Error creating student:", e);
             alert("Failed to create account. Check console.");
+        }
+    }
+
+    // 4. Load Student List for Teacher Dashboard
+    async function loadStudentList() {
+        const listContainer = document.getElementById('student-list-container');
+        listContainer.innerHTML = '<div style="padding:20px; text-align:center; color:gray;">Fetching students...</div>';
+        
+        try {
+            // Fetch all documents in 'students' collection
+            const snapshot = await window.fbase.getDocs(window.fbase.collection(window.db, "students"));
+            
+            if (snapshot.empty) {
+                listContainer.innerHTML = '<div style="padding:20px; text-align:center; color:gray;">No students found.</div>';
+                return;
+            }
+            
+            listContainer.innerHTML = ''; // Clear loading
+            
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const name = doc.id;
+                
+                const item = document.createElement('div');
+                item.className = 'student-list-item';
+                item.innerHTML = `
+                    <div class="student-info">
+                        <strong>${name}</strong>
+                        <span>Grade: ${data.assignedGrade || '-'}</span>
+                        <span>Topics: ${data.assignedTopics ? data.assignedTopics.length : 0}</span>
+                    </div>
+                    <button class="action-btn blue" style="width:auto; padding:5px 15px; font-size:12px;" onclick="openTopicManager('${name}', '${data.assignedGrade}')">Manage Topics</button>
+                `;
+                listContainer.appendChild(item);
+            });
+            
+        } catch(e) {
+            console.error("Error loading students:", e);
+            listContainer.innerHTML = '<div style="color:red; padding:20px;">Error loading list. Check console.</div>';
+        }
+    }
+
+    // 5. Manage Topics (Teacher Dashboard)
+    let currentManagingStudent = null;
+    let currentStudentAssignments = []; // Store fetched assignments
+    
+    async function openTopicManager(studentName, grade) {
+        currentManagingStudent = studentName;
+        
+        // Update UI Text
+        document.getElementById('tm-student-name').innerText = `Student: ${studentName}`;
+        
+        // Set Dropdown to current grade
+        const gradeSelect = document.getElementById('tm-grade-select');
+        gradeSelect.value = grade || 'K'; 
+        
+        document.getElementById('topic-manager-modal').style.display = 'flex';
+        document.getElementById('tm-topic-list').innerHTML = '<div style="color:gray">Loading data...</div>';
+        
+        // Fetch Current Student Assignments from DB once
+        const studentRef = window.fbase.doc(window.db, "students", studentName);
+        const docSnap = await window.fbase.getDoc(studentRef);
+        currentStudentAssignments = docSnap.exists() ? (docSnap.data().assignedTopics || []) : [];
+        
+        // Load the list based on the grade in the dropdown
+        refreshTopicManagerUI();
+    }
+    
+    // NEW: Called when opening modal OR changing grade dropdown
+    async function refreshTopicManagerUI() {
+        const grade = document.getElementById('tm-grade-select').value;
+        const listDiv = document.getElementById('tm-topic-list');
+        listDiv.innerHTML = '<div style="color:gray">Scanning GitHub for Grade ' + grade + '...</div>';
+        
+        // 1. Fetch Available Topics for this Grade (From GitHub)
+        let availableFiles = [];
+        if (GITHUB_CONFIG.enabled) {
+             const folderName = `questions/grade_${grade}`;
+             availableFiles = await fetchGithubFolder(folderName);
+        }
+        
+        listDiv.innerHTML = '';
+        
+        if (availableFiles.length === 0) {
+            // Fallback offline topics if GH fails or disabled
+             const topics = Object.keys(QUESTION_REPOSITORY[grade] || {});
+             if (topics.length === 0) {
+                 listDiv.innerHTML = '<div style="color:orange">No topics found for Grade ' + grade + '</div>';
+             }
+             topics.forEach(t => {
+                 const isChecked = currentStudentAssignments.includes(`INTERNAL:${t}`) ? 'checked' : '';
+                 listDiv.innerHTML += `
+                    <label class="topic-checkbox-label" style="margin-bottom:5px;">
+                        <input type="checkbox" value="INTERNAL:${t}" ${isChecked}> ${t.toUpperCase()}
+                    </label>`;
+             });
+        } else {
+            // Render GitHub Files
+            const jsonFiles = availableFiles.filter(f => f.name.endsWith('.json'));
+            
+            if (jsonFiles.length === 0) {
+                listDiv.innerHTML = '<div style="color:red">No JSON files found in Grade ' + grade + ' folder.</div>';
+            }
+            
+            jsonFiles.forEach(file => {
+                const topicName = file.name.replace('.json', '').replace(/_/g, ' ');
+                // Check if this URL is in the student's list
+                const isChecked = currentStudentAssignments.includes(file.download_url) ? 'checked' : '';
+                
+                listDiv.innerHTML += `
+                    <label class="topic-checkbox-label" style="margin-bottom:5px;">
+                        <input type="checkbox" value="${file.download_url}" ${isChecked}> ${topicName}
+                    </label>`;
+            });
+        }
+    }
+    
+    async function saveStudentTopics() {
+        if (!currentManagingStudent) return;
+        
+        const checkboxes = document.querySelectorAll('#tm-topic-list input:checked');
+        const selectedTopics = Array.from(checkboxes).map(cb => cb.value);
+        
+        // NEW: Get the (possibly changed) grade
+        const selectedGrade = document.getElementById('tm-grade-select').value;
+        
+        try {
+            const studentRef = window.fbase.doc(window.db, "students", currentManagingStudent);
+            await window.fbase.updateDoc(studentRef, {
+                assignedGrade: selectedGrade, // Save the new grade
+                assignedTopics: selectedTopics
+            });
+            
+            alert(`Updated ${currentManagingStudent} to Grade ${selectedGrade} with ${selectedTopics.length} topics!`);
+            document.getElementById('topic-manager-modal').style.display = 'none';
+            loadStudentList(); // Refresh main list to show new grade
+            
+        } catch(e) {
+            console.error("Save error:", e);
+            alert("Failed to save.");
         }
     }
 
@@ -1678,14 +1757,13 @@
       const pass = document.getElementById('student-pass').value.trim();
       
       if (!name) { alert("Please enter a username!"); return; }
-      // Require password now
       if (!pass) { alert("Please enter a password!"); return; }
       
       const startBtn = document.querySelector('.login-btn');
       startBtn.innerText = "Verifying...";
       startBtn.disabled = true;
       
-      // 1. AUTHENTICATE
+      // 1. AUTHENTICATE (Strict Mode)
       const authResult = await authenticateStudent(name, pass);
       
       if (!authResult.success) {
@@ -1697,109 +1775,55 @@
       
       gameState.playerName = name;
 
-      // 2. HANDLE ASSIGNMENTS VS SELECTION
-      let selectedGrade = gameState.grade;
-      let selectedTopics = [];
-      
+      // 2. LOAD ASSIGNED TOPICS ONLY
       if (authResult.assignment) {
-          // Teacher Assigned Mode
-          alert(`👨‍🏫 Welcome back, ${name}!\n\nYour teacher assigned you to Grade ${authResult.assignment.grade}.`);
-          selectedGrade = authResult.assignment.grade;
-          gameState.grade = selectedGrade;
-          // If topics are empty in DB, imply ALL topics for that grade
-          // For this demo, we will auto-select all by fetching the grade folder list again essentially
-          // Or simply skip topic selection UI and load all.
+          const grade = authResult.assignment.grade;
+          const topics = authResult.assignment.topics;
           
-          // Quick fix: If assignment exists but topics are empty/undefined, try to load everything for that grade
-          if (!authResult.assignment.topics || authResult.assignment.topics.length === 0) {
-               // We need to fetch the list... reuse selectGrade logic?
-               // Simplest: Use a flag to tell the loader "Load Everything"
-               selectedTopics = [`ALL_FOR_GRADE:${selectedGrade}`];
-          } else {
-               selectedTopics = authResult.assignment.topics;
+          gameState.grade = grade;
+          
+          if (!topics || topics.length === 0) {
+              alert("Your teacher has not assigned any topics yet! Ask them to check 'Manage Topics'.");
+              startBtn.innerText = "Start Adventure! 🚀";
+              startBtn.disabled = false;
+              return;
+          }
+          
+          startBtn.innerText = "Loading World...";
+          gameState.activeQuestionPool = [];
+          
+          // Fetch assigned questions
+          for (const val of topics) {
+              if (val.startsWith('INTERNAL:')) {
+                  const topicKey = val.replace('INTERNAL:', '');
+                  const qList = QUESTION_REPOSITORY[gameState.grade][topicKey];
+                  if (qList) gameState.activeQuestionPool = gameState.activeQuestionPool.concat(qList);
+              } else {
+                  try {
+                      const res = await fetch(val);
+                      if (res.ok) {
+                          const qList = await res.json();
+                          if (Array.isArray(qList)) {
+                              gameState.activeQuestionPool = gameState.activeQuestionPool.concat(qList);
+                          }
+                      }
+                  } catch (err) { console.error("Failed to load question:", val); }
+              }
           }
           
       } else {
-          // Free Play Mode (User Selection)
-          if (!gameState.grade) { alert("Please select a grade!"); startBtn.disabled=false; startBtn.innerText="Start"; return; }
-          const checkboxes = document.querySelectorAll('#topic-list input:checked');
-          if (checkboxes.length === 0) { alert("Select at least one topic!"); startBtn.disabled=false; startBtn.innerText="Start"; return; }
-          selectedTopics = Array.from(checkboxes).map(cb => cb.value);
+          // Should technically not happen in strict mode, but fallback just in case
+          gameState.activeQuestionPool = [{q:"1+1?",a:2,options:[1,2,3]}];
       }
       
-      startBtn.innerText = "Loading World...";
-      gameState.activeQuestionPool = [];
-      
-      // LOAD QUESTIONS
-      for (const val of selectedTopics) {
-          if (val.startsWith('ALL_FOR_GRADE:')) {
-               // Logic to fetch ALL JSONs for this grade from GitHub
-               const g = val.split(':')[1];
-               if (GITHUB_CONFIG.enabled) {
-                   const folderName = `questions/grade_${g}`;
-                   const files = await fetchGithubFolder(folderName);
-                   for(const f of files) {
-                       if(f.name.endsWith('.json')) {
-                           try {
-                               const res = await fetch(f.download_url);
-                               const q = await res.json();
-                               gameState.activeQuestionPool = gameState.activeQuestionPool.concat(q);
-                           } catch(e){}
-                       }
-                   }
-               } else {
-                   // Fallback offline
-                   const allQ = Object.values(QUESTION_REPOSITORY[g] || {}).flat();
-                   gameState.activeQuestionPool = allQ;
-               }
-          }
-          else if (val.startsWith('INTERNAL:')) {
-              const topicKey = val.replace('INTERNAL:', '');
-              const qList = QUESTION_REPOSITORY[gameState.grade][topicKey];
-              if (qList) gameState.activeQuestionPool = gameState.activeQuestionPool.concat(qList);
-          } else {
-              try {
-                  const res = await fetch(val);
-                  if (res.ok) {
-                      const qList = await res.json();
-                      if (Array.isArray(qList)) {
-                          gameState.activeQuestionPool = gameState.activeQuestionPool.concat(qList);
-                      }
-                  }
-              } catch (err) {
-                  console.error("Failed to load question file:", val);
-              }
-          }
-      }
-      
-      // Fallback if nothing loaded
-      if (gameState.activeQuestionPool.length === 0) {
-          // Just load mock data to prevent crash
-           const allQ = Object.values(QUESTION_REPOSITORY[gameState.grade || '1'] || {}).flat();
-           gameState.activeQuestionPool = allQ.length > 0 ? allQ : [{q: "1+1?", a:2, options:[1,2,3]}];
-      }
-      
+      // 3. LOAD SAVE & START
       loadExternalPets();
 
-      // 3. LOAD SAVE DATA
       const cloudLoaded = await loadProgressFromFirebase(name);
       if (!cloudLoaded) {
-          const saved = localStorage.getItem('math_rpg_' + name);
-          if (saved) {
-            const data = JSON.parse(saved);
-            gameState.brainPoints = data.brainPoints || 0;
-            gameState.pets = data.pets || [];
-            gameState.currentPetId = data.currentPetId;
-            gameState.inventory = data.inventory || {};
-            
-            if (gameState.inventory['arena_ticket'] === undefined) {
-                gameState.inventory['arena_ticket'] = 1;
-            }
-          } else {
             if (gameState.pets.length === 0) {
                initializeGame();
             }
-          }
       }
 
       document.getElementById('display-name').innerText = gameState.playerName;
