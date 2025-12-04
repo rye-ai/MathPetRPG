@@ -1,6 +1,6 @@
 [
   {
-    "q": "How many red apples are there?",
+    "q": "How many red apples can you count?",
     "a": 1,
     "qVisualHTML": "<div style='font-size: 40px; letter-spacing: 15px; text-align: center; width: 100%;'>🍎</div>"
   },
@@ -9,26 +9,26 @@
     "a": 4
   },
   {
-    "q": "Which word matches the number 2?",
-    "a": "Two",
+    "q": "Which number matches the word 'Two'?",
+    "a": "2",
     "options": [
-      "One",
-      "Two",
-      "Five",
-      "Ten"
+      "1",
+      "2",
+      "5",
+      "10"
     ]
   },
   {
-    "q": "How many yellow stars do you see?",
+    "q": "Count the yellow stars.",
     "a": 3,
     "qVisualHTML": "<div style='font-size: 40px; letter-spacing: 15px; text-align: center; width: 100%;'>⭐️ ⭐️ ⭐️</div>"
   },
   {
-    "q": "What number comes after 5?",
+    "q": "What number comes right after 5?",
     "a": 6
   },
   {
-    "q": "Which number represents 'Seven'?",
+    "q": "Which number is 'Seven'?",
     "a": "7",
     "options": [
       "2",
@@ -38,16 +38,16 @@
     ]
   },
   {
-    "q": "Count the cats.",
+    "q": "How many cats are there?",
     "a": 2,
     "qVisualHTML": "<div style='font-size: 40px; letter-spacing: 15px; text-align: center; width: 100%;'>🐱 🐱</div>"
   },
   {
-    "q": "What is the missing number? 7, 8, __, 10",
+    "q": "Find the missing number: 7, 8, __, 10",
     "a": 9
   },
   {
-    "q": "Which group of numbers is in the correct counting order?",
+    "q": "Which list counts up correctly?",
     "a": "1, 2, 3, 4",
     "options": [
       "1, 2, 3, 4",
@@ -57,7 +57,7 @@
     ]
   },
   {
-    "q": "How many green frogs are there?",
+    "q": "Count the green frogs.",
     "a": 5,
     "qVisualHTML": "<div style='font-size: 40px; letter-spacing: 15px; text-align: center; width: 100%;'>🐸 🐸 🐸 🐸 🐸</div>"
   },
@@ -76,16 +76,16 @@
     ]
   },
   {
-    "q": "Count the soccer balls.",
+    "q": "How many soccer balls do you see?",
     "a": 4,
     "qVisualHTML": "<div style='font-size: 40px; letter-spacing: 15px; text-align: center; width: 100%;'>⚽ ⚽ ⚽ ⚽</div>"
   },
   {
-    "q": "What number is missing? 4, __, 6",
+    "q": "What number goes in the blank? 4, __, 6",
     "a": 5
   },
   {
-    "q": "Which number word means 1?",
+    "q": "Which word is for the number 1?",
     "a": "One",
     "options": [
       "One",
@@ -95,7 +95,7 @@
     ]
   },
   {
-    "q": "How many blue cars are there?",
+    "q": "Count the blue cars.",
     "a": 6,
     "qVisualHTML": "<div style='font-size: 40px; letter-spacing: 15px; text-align: center; width: 100%;'>🚗 🚗 🚗 🚗 🚗 🚗</div>"
   },
@@ -114,16 +114,16 @@
     ]
   },
   {
-    "q": "Count the cookies.",
+    "q": "How many cookies are on the screen?",
     "a": 7,
     "qVisualHTML": "<div style='font-size: 40px; letter-spacing: 15px; text-align: center; width: 100%;'>🍪 🍪 🍪 🍪 🍪 🍪 🍪</div>"
   },
   {
-    "q": "Count forward from 3. What is the next number?",
+    "q": "Start at 3 and count up 1. What number is it?",
     "a": 4
   },
   {
-    "q": "Which sequence counts backward?",
+    "q": "Which numbers are counting backwards?",
     "a": "3, 2, 1",
     "options": [
       "1, 2, 3",
@@ -133,7 +133,7 @@
     ]
   },
   {
-    "q": "How many sunflowers can you count?",
+    "q": "Count the sunflowers.",
     "a": 8,
     "qVisualHTML": "<div style='font-size: 40px; letter-spacing: 15px; text-align: center; width: 100%;'>🌻 🌻 🌻 🌻 🌻 🌻 🌻 🌻</div>"
   },
@@ -142,7 +142,7 @@
     "a": 3
   },
   {
-    "q": "Which is the number 'Five'?",
+    "q": "Which number is 'Five'?",
     "a": "5",
     "options": [
       "2",
@@ -152,12 +152,12 @@
     ]
   },
   {
-    "q": "Count the purple butterflies.",
+    "q": "How many purple butterflies are there?",
     "a": 9,
     "qVisualHTML": "<div style='font-size: 40px; letter-spacing: 15px; text-align: center; width: 100%;'>🦋 🦋 🦋 🦋 🦋 🦋 🦋 🦋 🦋</div>"
   },
   {
-    "q": "What is 1 more than 6?",
+    "q": "What is one more than 6?",
     "a": 7
   },
   {
@@ -176,11 +176,11 @@
     "qVisualHTML": "<div style='font-size: 40px; letter-spacing: 15px; text-align: center; width: 100%;'>🐻 🐻 🐻 🐻 🐻 🐻 🐻 🐻 🐻 🐻</div>"
   },
   {
-    "q": "Type the number for 'Three'.",
+    "q": "Type the number Three.",
     "a": 3
   },
   {
-    "q": "Which shows the correct order to 5?",
+    "q": "Which list shows numbers in the right order?",
     "a": "1, 2, 3, 4, 5",
     "options": [
       "1, 2, 3, 4, 5",
@@ -190,7 +190,7 @@
     ]
   },
   {
-    "q": "How many ducks are there?",
+    "q": "Count the ducks.",
     "a": 5,
     "qVisualHTML": "<div style='font-size: 40px; letter-spacing: 15px; text-align: center; width: 100%;'>🦆 🦆 🦆 🦆 🦆</div>"
   },
@@ -199,7 +199,7 @@
     "a": 3
   },
   {
-    "q": "Which number is equal to the number of fingers on one hand?",
+    "q": "Which number matches the amount of fingers on one hand?",
     "a": "5",
     "options": [
       "3",
@@ -218,7 +218,7 @@
     "a": 9
   },
   {
-    "q": "Which word matches the number 8?",
+    "q": "Which word is for the number 8?",
     "a": "Eight",
     "options": [
       "Six",
@@ -247,7 +247,7 @@
     ]
   },
   {
-    "q": "Count the slices of pizza.",
+    "q": "How many slices of pizza do you see?",
     "a": 3,
     "qVisualHTML": "<div style='font-size: 40px; letter-spacing: 15px; text-align: center; width: 100%;'>🍕 🍕 🍕</div>"
   },
@@ -275,7 +275,7 @@
     "a": 7
   },
   {
-    "q": "Which is the number 'Nine'?",
+    "q": "Which number is 'Nine'?",
     "a": "9",
     "options": [
       "6",
@@ -285,7 +285,7 @@
     ]
   },
   {
-    "q": "Count the green apples.",
+    "q": "How many green apples are there?",
     "a": 5,
     "qVisualHTML": "<div style='font-size: 40px; letter-spacing: 15px; text-align: center; width: 100%;'>🍏 🍏 🍏 🍏 🍏</div>"
   },
@@ -304,7 +304,7 @@
     ]
   },
   {
-    "q": "Count the hearts.",
+    "q": "Count the red hearts.",
     "a": 7,
     "qVisualHTML": "<div style='font-size: 40px; letter-spacing: 15px; text-align: center; width: 100%;'>❤️ ❤️ ❤️ ❤️ ❤️ ❤️ ❤️</div>"
   },
