@@ -1649,6 +1649,43 @@ let QUESTION_REPOSITORY = {};
         });
       }
     }
+    
+    // NEW FUNCTION: Loads the active question pool based on the assigned topics/grade
+    async function loadAssignmentAndQuestions(assignment) {
+        if (!assignment || !assignment.grade || !assignment.topics || assignment.topics.length === 0) {
+            gameState.activeQuestionPool = [{q:"Welcome! Please ask your teacher to assign topics.", a:"NA"}];
+            return false;
+        }
+
+        gameState.activeQuestionPool = [];
+        
+        for (const val of assignment.topics) {
+            if (val.startsWith('INTERNAL:')) {
+                const topicKey = val.replace('INTERNAL:', '');
+                // Ensure we use the CORRECT assigned grade, not the potentially overwritten one
+                const qList = QUESTION_REPOSITORY[assignment.grade][topicKey]; 
+                if (qList) gameState.activeQuestionPool = gameState.activeQuestionPool.concat(qList);
+            } else {
+                try {
+                    const res = await fetch(val);
+                    if (res.ok) {
+                        const qList = await res.json();
+                        if (Array.isArray(qList)) {
+                            gameState.activeQuestionPool = gameState.activeQuestionPool.concat(qList);
+                        }
+                    }
+                } catch (err) { console.error("Failed to load question:", val); }
+            }
+        }
+
+        if (gameState.activeQuestionPool.length === 0) {
+             gameState.activeQuestionPool = [{q:"No questions loaded for your assigned topics. Contact teacher.", a:"NA"}];
+             return false;
+        }
+        
+        return true;
+    }
+
 
     document.getElementById('setup-form').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -1672,68 +1709,42 @@ let QUESTION_REPOSITORY = {};
           return;
       }
       
+      // If successful, start loading
       gameState.playerName = name;
-
-      // 2. LOAD ASSIGNED TOPICS ONLY
-      if (authResult.assignment) {
-          const grade = authResult.assignment.grade;
-          const topics = authResult.assignment.topics;
-          
-          gameState.grade = grade;
-          
-          if (!topics || topics.length === 0) {
-              showToast("Your teacher has not assigned any topics yet! Ask them to check 'Manage Topics'.", "info");
-              startBtn.innerText = "Start Adventure! 🚀";
-              startBtn.disabled = false;
-              return;
-          }
-          
-          startBtn.innerText = "Loading World...";
-          gameState.activeQuestionPool = [];
-          
-          // Fetch assigned questions
-          for (const val of topics) {
-              if (val.startsWith('INTERNAL:')) {
-                  const topicKey = val.replace('INTERNAL:', '');
-                  const qList = QUESTION_REPOSITORY[gameState.grade][topicKey];
-                  if (qList) gameState.activeQuestionPool = gameState.activeQuestionPool.concat(qList);
-              } else {
-                  try {
-                      const res = await fetch(val);
-                      if (res.ok) {
-                          const qList = await res.json();
-                          if (Array.isArray(qList)) {
-                              gameState.activeQuestionPool = gameState.activeQuestionPool.concat(qList);
-                          }
-                      }
-                  } catch (err) { console.error("Failed to load question:", val); }
-              }
-          }
-          
-      } else {
-          // Should technically not happen in strict mode, but fallback just in case
-          gameState.activeQuestionPool = [{q:"1+1?",a:2,options:[1,2,3]}];
-      }
+      loadExternalPets();
       
-     // Manual Revision - Replace Lines 933-938 with this block:
-// 3. LOAD SAVE & START
-loadExternalPets();
+      // Get the NEW assignments from the DB check
+      const assignedGrade = authResult.assignment?.grade;
+      const assignedTopics = authResult.assignment?.topics || [];
+      
+      // 🚨 FIX: Preserve the newly assigned grade before loading old save data
+      // This is now the definitive grade from the teacher
+      const tempAssignedGrade = assignedGrade; 
 
-// 🚨 FIX: Preserve the newly assigned grade before loading old save data
-const tempAssignedGrade = gameState.grade;
-
-const cloudLoaded = await loadProgressFromFirebase(name);
-if (!cloudLoaded) {
-      if (gameState.pets.length === 0) {
-         initializeGame();
+      // 2. LOAD SAVE
+      const cloudLoaded = await loadProgressFromFirebase(name);
+      
+      if (!cloudLoaded) {
+          if (gameState.pets.length === 0) {
+             initializeGame();
+          }
       }
-}
 
-// 🚨 FIX: Re-apply the current grade assignment (from the Teacher Dashboard) 
-// in case the loaded save data contained an old grade value.
-if (tempAssignedGrade) {
-    gameState.grade = tempAssignedGrade;
-}
+      // 🚨 FIX: Re-apply the current grade assignment and topic list
+      // This prevents the old saved grade/topic data from being used.
+      if (tempAssignedGrade) {
+          gameState.grade = tempAssignedGrade;
+          gameState.selectedTopics = assignedTopics;
+      }
+
+      // 3. LOAD QUESTIONS (CRITICAL: MUST HAPPEN AFTER STATE LOAD/CORRECTION)
+      startBtn.innerText = "Loading Questions...";
+      const isQuestionPoolLoaded = await loadAssignmentAndQuestions(authResult.assignment);
+
+      if (!isQuestionPoolLoaded) {
+          showToast("Teacher topics are empty or failed to load. Please ask your teacher to assign topics.", "error");
+          // But continue game initialization with the fallback question or a message
+      }
 
       document.getElementById('display-name').innerText = gameState.playerName;
       document.getElementById('display-grade').innerText = `Grade: ${gameState.grade}`;
@@ -1802,7 +1813,7 @@ if (tempAssignedGrade) {
     // ==========================================
     function generateNextQuestion() {
       if (gameState.activeQuestionPool.length === 0) {
-        document.getElementById('question-text').innerText = "No questions selected!";
+        document.getElementById('question-text').innerText = "No questions selected! Ask your teacher to assign topics.";
         return;
       }
       const qData = gameState.activeQuestionPool[Math.floor(Math.random() * gameState.activeQuestionPool.length)];
