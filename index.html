@@ -753,12 +753,21 @@ let QUESTION_REPOSITORY = {};
     const PET_TYPES = {
       common: [
         { id: 'monster_01', name: 'Monster 01', image: 'https://i.imgur.com/Ua3beE3.png', imageStyle: 'blend-multiply', emoji: '❓', baseHP: 40, rarity: 'common' },
-        { id: 'monster_02', name: 'Monster 02', image: 'https://i.imgur.com/8lDzXT2.png', emoji: '❓', baseHP: 40, rarity: 'common' },
+        { id: 'monster_02', name: 'CaidICE', image: 'https://i.imgur.com/Ua3beE3.png', imageStyle: 'blend-multiply', emoji: '❓', baseHP: 40, rarity: 'common' },
+        { id: 'monster_03', name: 'KatieDro', image: 'https://i.imgur.com/NtOoC4Z.png', imageStyle: 'blend-multiply', emoji: '❓', baseHP: 40, rarity: 'common' },
+        { id: 'monster_04', name: 'Royalion', image: 'https://i.imgur.com/5QaXnHW.png', imageStyle: 'blend-multiply', emoji: '❓', baseHP: 40, rarity: 'common' },
+        { id: 'monster_05', name: 'KingBear', image: 'https://i.imgur.com/hSbm6RQ.png', imageStyle: 'blend-multiply', emoji: '❓', baseHP: 40, rarity: 'common' },
+        { id: 'monster_06', name: 'Kaifire', image: 'https://i.imgur.com/lxpz125.png', imageStyle: 'blend-multiply', emoji: '❓', baseHP: 40, rarity: 'common' },
+        { id: 'monster_07', name: 'Teviphant', image: 'https://i.imgur.com/i9OsNaB.png', imageStyle: 'blend-multiply', emoji: '❓', baseHP: 40, rarity: 'common' },
+        { id: 'monster_08', name: 'Augustur', image: 'https://i.imgur.com/iBOjqz9.png', imageStyle: 'blend-multiply', emoji: '❓', baseHP: 40, rarity: 'common' },
+        { id: 'monster_09', name: 'Luking', image: 'https://i.imgur.com/sFOfFNr.png', imageStyle: 'blend-multiply', emoji: '❓', baseHP: 40, rarity: 'common' },
+        { id: 'monster_10', name: 'Kaylight', image: 'https://i.imgur.com/6thFTYY.png', imageStyle: 'blend-multiply', emoji: '❓', baseHP: 40, rarity: 'common' },
+        { id: 'monster_11', name: 'Zyfir', image: 'https://i.imgur.com/21xf1kM.png', imageStyle: 'blend-multiply', emoji: '❓', baseHP: 40, rarity: 'common' }
       ],
-      uncommon: [ { id: 'monster_03', name: 'Monster 03', image: '', emoji: '❓', baseHP: 50, rarity: 'uncommon' } ],
-      rare: [ { id: 'monster_05', name: 'Monster 05', image: '', emoji: '❓', baseHP: 60, rarity: 'rare' } ],
-      epic: [ { id: 'monster_07', name: 'Monster 07', image: '', emoji: '❓', baseHP: 70, rarity: 'epic' } ],
-      legendary: [ { id: 'monster_09', name: 'Monster 09', image: '', emoji: '❓', baseHP: 90, rarity: 'legendary' } ]
+      uncommon: [ { id: 'monster_12', name: 'Monster 03', image: 'https://i.imgur.com/qLkaKtw.png', emoji: '❓', baseHP: 50, rarity: 'uncommon' } ],
+      rare: [ { id: 'monster_13', name: 'Monster 05', image: 'https://i.imgur.com/qLkaKtw.png', emoji: '❓', baseHP: 60, rarity: 'rare' } ],
+      epic: [ { id: 'monster_14', name: 'Monster 07', image: 'https://i.imgur.com/qLkaKtw.png', emoji: '❓', baseHP: 70, rarity: 'epic' } ],
+      legendary: [ { id: 'monster_15', name: 'Monster 09', image: 'https://i.imgur.com/qLkaKtw.png', emoji: '❓', baseHP: 90, rarity: 'legendary' } ]
     };
 
     const EVOLUTION_CHAINS = {
@@ -767,14 +776,50 @@ let QUESTION_REPOSITORY = {};
         { name: 'Monster 01 Lvl 3', image: 'https://i.imgur.com/FK4as8q.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100 }
       ],
      'monster_02': [
-        { name: 'Monster 01 Lvl 2', image: 'https://i.imgur.com/RnQV8e0.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50 },
-        { name: 'Monster 01 Lvl 3', image: 'https://i.imgur.com/2wgvSfS.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100 }
-      ] // Added ]
+        { name: 'Monster 01 Lvl 2', image: 'https://i.imgur.com/a6ZLuzF.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50 },
+        { name: 'Monster 01 Lvl 3', image: 'https://i.imgur.com/Hc6GMnT.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100 }
+      ],
+      'monster_03': [
+        { name: 'Monster 01 Lvl 2', image: 'https://i.imgur.com/ZDXxfGy.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50 },
+        { name: 'Monster 01 Lvl 3', image: 'https://i.imgur.com/R4LQJ5O.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100 }
+      ],
+      'monster_04': [
+        { name: 'Monster 01 Lvl 2', image: 'https://i.imgur.com/31AZwGh.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50 },
+        { name: 'Monster 01 Lvl 3', image: 'https://i.imgur.com/zkg100p.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100 }
+      ],
+      'monster_05': [
+        { name: 'Monster 01 Lvl 2', image: 'https://i.imgur.com/KG9lIQ0.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50 },
+        { name: 'Monster 01 Lvl 3', image: 'https://i.imgur.com/rd5PKnA.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100 }
+      ],
+      'monster_06': [
+        { name: 'Monster 01 Lvl 2', image: 'https://i.imgur.com/H4PbnAo.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50 },
+        { name: 'Monster 01 Lvl 3', image: 'https://i.imgur.com/oFc36C1.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100 }
+      ],
+      'monster_07': [
+        { name: 'Monster 01 Lvl 2', image: 'https://i.imgur.com/MfDgu3y.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50 },
+        { name: 'Monster 01 Lvl 3', image: 'https://i.imgur.com/4c8PsTB.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100 }
+      ],
+      'monster_08': [
+        { name: 'Monster 01 Lvl 2', image: 'https://i.imgur.com/RI5fSo3.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50 },
+        { name: 'Monster 01 Lvl 3', image: 'https://i.imgur.com/v9GaMd5.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100 }
+      ],
+      'monster_09': [
+        { name: 'Monster 01 Lvl 2', image: 'https://i.imgur.com/GtlAa2Y.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50 },
+        { name: 'Monster 01 Lvl 3', image: 'https://i.imgur.com/cesjBk9.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100 }
+      ],
+      'monster_10': [
+        { name: 'Monster 01 Lvl 2', image: 'https://i.imgur.com/kTvQn9p.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50 },
+        { name: 'Monster 01 Lvl 3', image: 'https://i.imgur.com/14vlQjF.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100 }
+      ],
+      'monster_11': [
+        { name: 'Monster 01 Lvl 2', image: 'https://i.imgur.com/WkHahSR.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50 },
+        { name: 'Monster 01 Lvl 3', image: 'https://i.imgur.com/Bf0qq04.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100 }
+      ]
     };
 
     // CHANGED TO LET for GitHub Overwrite
     let MONSTER_TYPES = [
-      { emoji: '👾', image: 'https://imgur.com/a/iinGWFO.png', imageStyle: 'blend-multiply', name: 'Enemy 01', hp: 30, damage: 8, xp: 15 },
+      { emoji: '👾', image: 'https://i.imgur.com/qLkaKtw.png', imageStyle: 'blend-multiply', name: 'Enemy 01', hp: 30, damage: 8, xp: 15 },
       { emoji: '👹', image: 'https://i.imgur.com/qLkaKtw.png', imageStyle: 'blend-multiply', name: 'Enemy 02', hp: 35, damage: 10, xp: 20 },
       { emoji: '🦇', image: 'https://i.imgur.com/qLkaKtw.png', imageStyle: 'blend-multiply', name: 'Enemy 03', hp: 25, damage: 7, xp: 15 },
       { emoji: '🐍', image: 'https://i.imgur.com/qLkaKtw.png', imageStyle: 'blend-multiply', name: 'Enemy 04', hp: 28, damage: 9, xp: 18 },
@@ -2191,7 +2236,7 @@ let QUESTION_REPOSITORY = {};
       
       if (gameState.brainPoints >= nextEvo.cost) {
         gameState.brainPoints -= nextEvo.cost;
-        pet.name = nextEvo.name;
+        // pet.name = nextEvo.name; // COMMENTED OUT: Keeping the base pet name constant.
         pet.image = nextEvo.image;
         pet.imageStyle = nextEvo.imageStyle;
         pet.rarity = nextEvo.rarity;
@@ -2201,7 +2246,7 @@ let QUESTION_REPOSITORY = {};
         saveGame();
         updateStatsDisplay();
         renderHub();
-        showToast(`Evolved into ${pet.name}!`, "success");
+        showToast(`Evolved into a new form! Name: ${pet.name}`, "success");
       } else {
         showToast("Not enough Brain Points!", "error");
       }
