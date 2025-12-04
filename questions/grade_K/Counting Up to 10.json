@@ -95,7 +95,7 @@
     ]
   },
   {
-    "q": "Count the blue cars.",
+    "q": "Count the cars.",
     "a": 6,
     "qVisualHTML": "<div style='font-size: 40px; letter-spacing: 15px; text-align: center; width: 100%;'>🚗 🚗 🚗 🚗 🚗 🚗</div>"
   },
