@@ -1,0 +1,39 @@
+[
+  {
+    "q": "Look at the reading logs below. What is the **Lower Extreme** (minimum value) of the minutes read?",
+    "a": 10,
+    "qVisualHTML": "<div style='display: flex; flex-direction: column; align-items: center; gap: 10px;'><div style='font-size: 18px; font-weight: bold;'>Minutes Read</div><div style='display: flex; gap: 10px;'><div style='border: 2px solid #333; padding: 10px; font-size: 20px; width: 40px; text-align: center;'>10</div><div style='border: 2px solid #333; padding: 10px; font-size: 20px; width: 40px; text-align: center;'>10</div><div style='border: 2px solid #333; padding: 10px; font-size: 20px; width: 40px; text-align: center;'>15</div><div style='border: 2px solid #333; padding: 10px; font-size: 20px; width: 40px; text-align: center;'>20</div><div style='border: 2px solid #333; padding: 10px; font-size: 20px; width: 40px; text-align: center;'>25</div><div style='border: 2px solid #333; padding: 10px; font-size: 20px; width: 40px; text-align: center;'>35</div><div style='border: 2px solid #333; padding: 10px; font-size: 20px; width: 40px; text-align: center;'>40</div></div></div>"
+  },
+  {
+    "q": "Using the same data, what is the **Upper Extreme** (maximum value)?",
+    "a": 40,
+    "qVisualHTML": "<div style='display: flex; flex-direction: column; align-items: center; gap: 10px;'><div style='font-size: 18px; font-weight: bold;'>Minutes Read</div><div style='display: flex; gap: 10px;'><div style='border: 2px solid #333; padding: 10px; font-size: 20px; width: 40px; text-align: center;'>10</div><div style='border: 2px solid #333; padding: 10px; font-size: 20px; width: 40px; text-align: center;'>10</div><div style='border: 2px solid #333; padding: 10px; font-size: 20px; width: 40px; text-align: center;'>15</div><div style='border: 2px solid #333; padding: 10px; font-size: 20px; width: 40px; text-align: center;'>20</div><div style='border: 2px solid #333; padding: 10px; font-size: 20px; width: 40px; text-align: center;'>25</div><div style='border: 2px solid #333; padding: 10px; font-size: 20px; width: 40px; text-align: center;'>35</div><div style='border: 2px solid #333; padding: 10px; font-size: 20px; width: 40px; text-align: center;'>40</div></div></div>"
+  },
+  {
+    "q": "What is the **Range** of this data set? (Upper Extreme minus Lower Extreme)",
+    "a": "30",
+    "options": [
+      "20",
+      "30",
+      "40",
+      "10"
+    ],
+    "qVisualHTML": "<div style='display: flex; flex-direction: column; align-items: center; gap: 10px;'><div style='font-size: 18px; font-weight: bold;'>Minutes Read</div><div style='display: flex; gap: 10px;'><div style='border: 2px solid #333; padding: 10px; font-size: 20px; width: 40px; text-align: center;'>10</div><div style='border: 2px solid #333; padding: 10px; font-size: 20px; width: 40px; text-align: center;'>10</div><div style='border: 2px solid #333; padding: 10px; font-size: 20px; width: 40px; text-align: center;'>15</div><div style='border: 2px solid #333; padding: 10px; font-size: 20px; width: 40px; text-align: center;'>20</div><div style='border: 2px solid #333; padding: 10px; font-size: 20px; width: 40px; text-align: center;'>25</div><div style='border: 2px solid #333; padding: 10px; font-size: 20px; width: 40px; text-align: center;'>35</div><div style='border: 2px solid #333; padding: 10px; font-size: 20px; width: 40px; text-align: center;'>40</div></div></div>"
+  },
+  {
+    "q": "Identify the **Mode** of the data set (the number that appears most often).",
+    "a": "10",
+    "options": [
+      "10",
+      "20",
+      "15",
+      "40"
+    ],
+    "qVisualHTML": "<div style='display: flex; flex-direction: column; align-items: center; gap: 10px;'><div style='font-size: 18px; font-weight: bold;'>Minutes Read</div><div style='display: flex; gap: 10px;'><div style='border: 2px solid #333; padding: 10px; font-size: 20px; width: 40px; text-align: center;'>10</div><div style='border: 2px solid #333; padding: 10px; font-size: 20px; width: 40px; text-align: center;'>10</div><div style='border: 2px solid #333; padding: 10px; font-size: 20px; width: 40px; text-align: center;'>15</div><div style='border: 2px solid #333; padding: 10px; font-size: 20px; width: 40px; text-align: center;'>20</div><div style='border: 2px solid #333; padding: 10px; font-size: 20px; width: 40px; text-align: center;'>25</div><div style='border: 2px solid #333; padding: 10px; font-size: 20px; width: 40px; text-align: center;'>35</div><div style='border: 2px solid #333; padding: 10px; font-size: 20px; width: 40px; text-align: center;'>40</div></div></div>"
+  },
+  {
+    "q": "What is the **Median** (the middle number)?",
+    "a": 20,
+    "qVisualHTML": "<div style='display: flex; flex-direction: column; align-items: center; gap: 10px;'><div style='font-size: 18px; font-weight: bold;'>Minutes Read</div><div style='display: flex; gap: 10px;'><div style='border: 2px solid #333; padding: 10px; font-size: 20px; width: 40px; text-align: center;'>10</div><div style='border: 2px solid #333; padding: 10px; font-size: 20px; width: 40px; text-align: center;'>10</div><div style='border: 2px solid #333; padding: 10px; font-size: 20px; width: 40px; text-align: center;'>15</div><div style='border: 2px solid #333; padding: 10px; font-size: 20px; width: 40px; text-align: center;'>20</div><div style='border: 2px solid #333; padding: 10px; font-size: 20px; width: 40px; text-align: center;'>25</div><div style='border: 2px solid #333; padding: 10px; font-size: 20px; width: 40px; text-align: center;'>35</div><div style='border: 2px solid #333; padding: 10px; font-size: 20px; width: 40px; text-align: center;'>40</div></div></div>"
+  }
+]
