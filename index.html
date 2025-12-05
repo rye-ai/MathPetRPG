@@ -615,7 +615,8 @@
      </div>
 
      <!-- Battle View -->
-     <div id="battle-ui" style="display:none;">
+     <!-- Battle View -->
+<div id="battle-ui" style="display: none; flex-direction: column; flex-grow: 1;">
       <div class="battle-arena">
        <!-- Player -->
        <div class="battler">
@@ -2840,7 +2841,7 @@ async function evolvePet() {
       document.getElementById('battle-ui').style.backgroundImage = `url('${bgUrl}')`;
       
       document.getElementById('rpg-wrapper').style.display = 'none';
-      document.getElementById('battle-ui').style.display = 'block';
+      document.getElementById('battle-ui').style.display = 'flex';
       renderBattle();
     }
 
