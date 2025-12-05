@@ -106,8 +106,8 @@
     .hub-grid { display: flex; flex-direction: column; gap: 20px; }
     @media(min-width: 768px) { .hub-grid { flex-direction: row; align-items: flex-start; } .hub-left { flex: 1; max-width: 350px; position: sticky; top: 0; } .hub-right { flex: 1.5; } }
     .pet-display { background: linear-gradient(135deg, #ebf8ff 0%, #e6fffa 100%); border-radius: 15px; padding: 15px; text-align: center; border: 1px solid #bce3eb; }
-    .pet-visual { font-size: 80px; margin: 10px 0; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.2)); position: relative; display: inline-block; min-width: 100px; min-height: 100px; }
-    .pet-image { width: 120px; height: 120px; object-fit: contain; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.2)); }
+    .pet-visual { font-size: 150px; margin: 10px 0; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.2)); position: relative; display: inline-block; min-width: 200px; min-height: 200px; }
+    .pet-image { width: 200px; height: 200px; object-fit: contain; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.2)); }
     .blend-multiply { mix-blend-mode: multiply; }
     .battler-image { width: 100px; height: 100px; object-fit: contain; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.2)); }
     .pet-name { font-size: 20px; color: #2c5282; margin: 10px 0; font-weight: bold; }
@@ -122,7 +122,31 @@
     @keyframes attackShake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-15px); } 75% { transform: translateX(15px); } }
     @keyframes damageFlash { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(2.5) saturate(0); } }
     @keyframes projectileGlide { 0% { left: 0; opacity: 1; transform: scale(0.8) rotate(0deg); } 100% { left: 100%; opacity: 0; transform: scale(0.5) rotate(360deg); } }
-    .projectile { position: fixed; width: 60px; height: 60px; font-size: 40px; pointer-events: none; z-index: 3000; display: flex; justify-content: center; align-items: center; filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8)); }
+    .projectile { 
+    position: fixed; 
+    width: 150px; /* Increased size (was 60px) */
+    height: 150px; /* Increased size (was 60px) */
+    font-size: 60px; /* Increased size for emoji fallback */
+    pointer-events: none; 
+    z-index: 3000; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    /* NEW: Enhanced blur trail/glow (Removed blur filter) */
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8)); 
+    /* Creates a mirrored shadow effect offset to the left for the 'mirage' */
+    text-shadow: 
+        -15px 0 10px rgba(255, 255, 255, 0.8), /* Strong, displaced shadow (the mirage) */
+        -30px 0 15px rgba(255, 255, 255, 0.4); /* Fainter, further displaced shadow */
+    color: white; /* Applies to emojis */
+}
+/* If the content is an image, we apply the blur/shadow effect to the image itself */
+.projectile img {
+    width: 100%; /* Make image fill the 80px container */
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 0 5px #fff);
+}
     
     /* 💥 START OF PVP FLIP FIX 💥 */
     /* NEW: Dedicated class to flip the opponent's visual content horizontally */
@@ -134,9 +158,7 @@
        but we must ensure the container is NOT flipped, as flipping the container
        can mess up the alignment of the HP/Name bars relative to the element. 
        The cleanest fix is to apply the class to the container and just let the CSS handle it. 
-       Let's stick to the simplest one that works for both image and emoji:
-    */
-    /* The image itself is rendered inside the container. We only flip the container. */
+       The image itself is rendered inside the container. We only flip the container. */
     .battler-visual.flipped-opponent img {
         /* No double-flip rule is needed, the container flip is enough to face left */
     }
@@ -194,7 +216,7 @@
     .battle-arena { display: flex; justify-content: space-around; align-items: flex-end; margin: 40px 0; gap: 20px; flex: 1; }
     .battler { flex: 1; text-align: center; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.4)); }
     .battler-visual { font-size: 140px; margin-bottom: 10px; position: relative; display: inline-block; min-width: 150px; min-height: 150px; transition: transform 0.2s; }
-    .battler-image { width: 180px; height: 180px; object-fit: contain; }
+    .battler-image { width: 180px; height: 180px; object-fit: contain; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4)); }
     .battler-name { font-size: 20px; font-weight: bold; color: white; text-shadow: 2px 2px 0 #000; margin-bottom: 8px; background: rgba(0,0,0,0.4); display: inline-block; padding: 2px 10px; border-radius: 10px; }
     .hp-bar-container { background: rgba(0,0,0,0.5); border-radius: 10px; height: 24px; overflow: hidden; border: 2px solid white; max-width: 200px; margin: 0 auto; }
     .hp-bar { height: 100%; background: linear-gradient(90deg, #48bb78 0%, #38a169 100%); transition: width 0.5s; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px; text-shadow: 1px 1px 0 rgba(0,0,0,0.5); }
@@ -262,6 +284,62 @@
     }
     .grade-student-list {
         background: white;
+    }
+
+    /* ===================================================================
+    🌟 NEW EVOLUTION MODAL CSS
+    =================================================================== 
+    */
+    #evolution-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #1a202c; /* Dark background */
+        z-index: 5000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        color: white;
+        text-align: center;
+        transition: opacity 0.5s;
+    }
+
+    .evo-message {
+        font-size: clamp(20px, 5vw, 40px);
+        font-weight: bold;
+        margin-bottom: 40px;
+        opacity: 0; /* Starts hidden */
+    }
+
+    .evo-pet-visual {
+        font-size: 180px;
+        min-width: 200px;
+        min-height: 200px;
+        position: relative;
+        display: inline-block;
+        filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
+    }
+    
+    .evo-pet-image {
+        width: 200px;
+        height: 200px;
+        object-fit: contain;
+    }
+
+    /* Animation for the FLASH and SCALE */
+    @keyframes evolutionFlash {
+        0% { opacity: 1; transform: scale(1); filter: brightness(1); }
+        30% { opacity: 0; transform: scale(0.5); filter: brightness(5) drop-shadow(0 0 50px #ffea00); } /* Disappear and blinding light */
+        40% { opacity: 0; transform: scale(0); } /* Swap image here */
+        60% { opacity: 1; transform: scale(1.3); filter: brightness(3) drop-shadow(0 0 30px #ffffff); } /* New pet appears big with glow */
+        100% { opacity: 1; transform: scale(1); filter: brightness(1); }
+    }
+
+    .flash-and-scale {
+        animation: evolutionFlash 1.5s ease-in-out forwards;
     }
   </style>
   </head>
@@ -553,11 +631,11 @@
         </div>
        </div>
       </div>
-      <div id="battle-log" class="battle-log">
-       Battle started!
-      </div>
       <div id="battle-actions" class="battle-actions"></div>
      </div>
+     <div id="battle-log" class="battle-log">
+       Battle started!
+      </div>
     </section>
    </main>
   </div><!-- Release Confirmation Modal (Pet) -->
@@ -648,6 +726,26 @@
    </div>
   </div>
 
+  <!-- 
+  ===================================================================
+  🌟 NEW EVOLUTION MODAL HTML
+  =================================================================== 
+  -->
+  <div id="evolution-modal">
+    <div id="evo-message-1" class="evo-message" style="transition: opacity 1s;">
+        ...The aura is changing...
+    </div>
+    <div id="evo-pet-container" class="evo-pet-visual">
+        <!-- Pet image will be injected here -->
+    </div>
+    <div id="evo-message-2" class="evo-message" style="transition: opacity 1s; margin-top: 40px;">
+        <!-- Congratulations message will be injected here -->
+    </div>
+    <button id="evo-continue-btn" class="action-btn green" style="width:200px; padding:12px; margin-top: 40px; display:none;">
+        Continue
+    </button>
+  </div>
+
   <script>
     // ==========================================
     // 🌐 GITHUB CONFIGURATION
@@ -698,7 +796,7 @@
           id: 'shadow_dragon_baby',
           name: 'Baby Shadow Dragon',
           rarity: 'legendary',
-          image: 'https://i.imgur.com/qLkaKtw.png', 
+          image: 'https://i.imgur.com/U8Z730Z.png', 
           imageStyle: 'blend-multiply',
           emoji: '❓', 
           baseHP: 50
@@ -706,7 +804,7 @@
         evolutions: [
           {
             name: 'Teen Shadow Dragon',
-            image: 'https://i.imgur.com/qLkaKtw.png',
+            image: 'https://i.imgur.com/U8Z730Z.png',
             imageStyle: 'blend-multiply',
             emoji: '❓',
             rarity: 'legendary',
@@ -715,7 +813,7 @@
           },
           {
             name: 'Elder Shadow Dragon',
-            image: 'https://i.imgur.com/qLkaKtw.png',
+            image: 'https://i.imgur.com/U8Z730Z.png',
             imageStyle: 'blend-multiply',
             emoji: '❓',
             rarity: 'legendary',
@@ -764,82 +862,102 @@ let QUESTION_REPOSITORY = {};
         { id: 'monster_10', name: 'Kaylight', image: 'https://i.imgur.com/6thFTYY.png', imageStyle: 'blend-multiply', emoji: '❓', baseHP: 40, rarity: 'common' },
         { id: 'monster_11', name: 'Zyfir', image: 'https://i.imgur.com/21xf1kM.png', imageStyle: 'blend-multiply', emoji: '❓', baseHP: 40, rarity: 'common' }
       ],
-      uncommon: [ { id: 'monster_12', name: 'Monster 03', image: 'https://i.imgur.com/qLkaKtw.png', emoji: '❓', baseHP: 50, rarity: 'uncommon' } ],
-      rare: [ { id: 'monster_13', name: 'Monster 05', image: 'https://i.imgur.com/qLkaKtw.png', emoji: '❓', baseHP: 60, rarity: 'rare' } ],
-      epic: [ { id: 'monster_14', name: 'Monster 07', image: 'https://i.imgur.com/qLkaKtw.png', emoji: '❓', baseHP: 70, rarity: 'epic' } ],
-      legendary: [ { id: 'monster_15', name: 'Monster 09', image: 'https://i.imgur.com/qLkaKtw.png', emoji: '❓', baseHP: 90, rarity: 'legendary' } ]
+      uncommon: [ { id: 'monster_12', name: 'Malachice', image: 'https://i.imgur.com/8lDzXT2.png', imageStyle: 'blend-multiply', emoji: '❓', baseHP: 50, rarity: 'uncommon' } ],
+      rare: [ { id: 'monster_13', name: 'CaraBrown', image: 'https://i.imgur.com/xp9OsLu.png', imageStyle: 'blend-multiply', emoji: '❓', baseHP: 60, rarity: 'rare' } ],
+      epic: [ { id: 'monster_14', name: 'Ms.Mckenfish', image: 'https://i.imgur.com/wKqiSnY.png', imageStyle: 'blend-multiply', emoji: '❓', baseHP: 70, rarity: 'epic' } ],
+      legendary: [ { id: 'monster_15', name: 'Pilandoc', image: 'https://i.imgur.com/61QHL8Y.png', imageStyle: 'blend-multiply', emoji: '❓', baseHP: 90, rarity: 'legendary' } ]
     };
 
     const EVOLUTION_CHAINS = {
       'monster_01': [
-        { name: 'Monster 01 Lvl 2', image: 'https://i.imgur.com/EZHaiWT.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50 },
-        { name: 'Monster 01 Lvl 3', image: 'https://i.imgur.com/FK4as8q.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100 }
+        { name: 'Monster 01 Lvl 2', image: 'https://i.imgur.com/EZHaiWT.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50, level: 10 },
+        { name: 'Monster 01 Lvl 3', image: 'https://i.imgur.com/FK4as8q.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100, level: 20 }
       ],
      'monster_02': [
-        { name: 'Monster 01 Lvl 2', image: 'https://i.imgur.com/a6ZLuzF.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50 },
-        { name: 'Monster 01 Lvl 3', image: 'https://i.imgur.com/Hc6GMnT.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100 }
+        { name: 'Monster 02 Lvl 2', image: 'https://i.imgur.com/a6ZLuzF.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50, level: 10 },
+        { name: 'Monster 02 Lvl 3', image: 'https://i.imgur.com/Hc6GMnT.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100, level: 20 }
       ],
       'monster_03': [
-        { name: 'Monster 01 Lvl 2', image: 'https://i.imgur.com/ZDXxfGy.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50 },
-        { name: 'Monster 01 Lvl 3', image: 'https://i.imgur.com/R4LQJ5O.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100 }
+        { name: 'Monster 03 Lvl 2', image: 'https://i.imgur.com/ZDXxfGy.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50, level: 10 },
+        { name: 'Monster 03 Lvl 3', image: 'https://i.imgur.com/R4LQJ5O.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100, level: 20 }
       ],
       'monster_04': [
-        { name: 'Monster 01 Lvl 2', image: 'https://i.imgur.com/31AZwGh.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50 },
-        { name: 'Monster 01 Lvl 3', image: 'https://i.imgur.com/zkg100p.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100 }
+        { name: 'Monster 04 Lvl 2', image: 'https://i.imgur.com/31AZwGh.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50, level: 10 },
+        { name: 'Monster 04 Lvl 3', image: 'https://i.imgur.com/zkg100p.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100, level: 20 }
       ],
       'monster_05': [
-        { name: 'Monster 01 Lvl 2', image: 'https://i.imgur.com/KG9lIQ0.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50 },
-        { name: 'Monster 01 Lvl 3', image: 'https://i.imgur.com/rd5PKnA.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100 }
+        { name: 'Monster 05 Lvl 2', image: 'https://i.imgur.com/KG9lIQ0.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50, level: 10 },
+        { name: 'Monster 05 Lvl 3', image: 'https://i.imgur.com/rd5PKnA.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100, level: 20 }
       ],
       'monster_06': [
-        { name: 'Monster 01 Lvl 2', image: 'https://i.imgur.com/H4PbnAo.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50 },
-        { name: 'Monster 01 Lvl 3', image: 'https://i.imgur.com/oFc36C1.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100 }
+        { name: 'Monster 06 Lvl 2', image: 'https://i.imgur.com/H4PbnAo.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50, level: 10 },
+        { name: 'Monster 06 Lvl 3', image: 'https://i.imgur.com/oFc36C1.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100, level: 20 }
       ],
       'monster_07': [
-        { name: 'Monster 01 Lvl 2', image: 'https://i.imgur.com/MfDgu3y.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50 },
-        { name: 'Monster 01 Lvl 3', image: 'https://i.imgur.com/4c8PsTB.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100 }
+        { name: 'Monster 07 Lvl 2', image: 'https://i.imgur.com/MfDgu3y.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50, level: 10 },
+        { name: 'Monster 07 Lvl 3', image: 'https://i.imgur.com/4c8PsTB.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100, level: 20 }
       ],
       'monster_08': [
-        { name: 'Monster 01 Lvl 2', image: 'https://i.imgur.com/RI5fSo3.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50 },
-        { name: 'Monster 01 Lvl 3', image: 'https://i.imgur.com/v9GaMd5.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100 }
+        { name: 'Monster 08 Lvl 2', image: 'https://i.imgur.com/RI5fSo3.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50, level: 10 },
+        { name: 'Monster 08 Lvl 3', image: 'https://i.imgur.com/v9GaMd5.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100, level: 20 }
       ],
       'monster_09': [
-        { name: 'Monster 01 Lvl 2', image: 'https://i.imgur.com/GtlAa2Y.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50 },
-        { name: 'Monster 01 Lvl 3', image: 'https://i.imgur.com/cesjBk9.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100 }
+        { name: 'Monster 09 Lvl 2', image: 'https://i.imgur.com/GtlAa2Y.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50, level: 10 },
+        { name: 'Monster 09 Lvl 3', image: 'https://i.imgur.com/cesjBk9.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100, level: 20 }
       ],
       'monster_10': [
-        { name: 'Monster 01 Lvl 2', image: 'https://i.imgur.com/kTvQn9p.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50 },
-        { name: 'Monster 01 Lvl 3', image: 'https://i.imgur.com/14vlQjF.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100 }
+        { name: 'Monster 10 Lvl 2', image: 'https://i.imgur.com/kTvQn9p.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50, level: 10 },
+        { name: 'Monster 10 Lvl 3', image: 'https://i.imgur.com/14vlQjF.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100, level: 20 }
       ],
       'monster_11': [
-        { name: 'Monster 01 Lvl 2', image: 'https://i.imgur.com/WkHahSR.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50 },
-        { name: 'Monster 01 Lvl 3', image: 'https://i.imgur.com/Bf0qq04.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100 }
+        { name: 'Monster 11 Lvl 2', image: 'https://i.imgur.com/WkHahSR.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50, level: 10 },
+        { name: 'Monster 11 Lvl 3', image: 'https://i.imgur.com/Bf0qq04.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100, level: 20 }
+      ],
+      'monster_12': [
+        { name: 'Monster 12 Lvl 2', image: 'https://i.imgur.com/RnQV8e0.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50, level: 10 },
+        { name: 'Monster 12 Lvl 3', image: 'https://i.imgur.com/2wgvSfS.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100, level: 20 }
+      ],
+      'monster_13': [
+        { name: 'Monster 13 Lvl 2', image: 'https://i.imgur.com/63yQODT.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50, level: 10 },
+        { name: 'Monster 13 Lvl 3', image: 'https://i.imgur.com/OhxM211.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100, level: 20 }
+      ],
+      'monster_14': [
+        { name: 'Monster 14 Lvl 2', image: 'https://i.imgur.com/A45z15n.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50, level: 10 },
+        { name: 'Monster 14 Lvl 3', image: 'https://i.imgur.com/hLTzdSP.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100, level: 20 }
+      ],
+      'monster_15': [
+        { name: 'Monster 15 Lvl 2', image: 'https://i.imgur.com/Ly1Abc1.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'common', baseHP: 60, cost: 50, level: 10 },
+        { name: 'Monster 15 Lvl 3', image: 'https://i.imgur.com/YWIQLZ8.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100, level: 20 }
+      ],
+      'shadow_dragon_baby': [
+        { name: 'Teen Shadow Dragon', image: 'https://i.imgur.com/U8Z730Z.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'legendary', baseHP: 100, cost: 100, level: 10 },
+        { name: 'Elder Shadow Dragon', image: 'https://i.imgur.com/U8Z730Z.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'legendary', baseHP: 150, cost: 200, level: 20 }
       ]
     };
 
     // CHANGED TO LET for GitHub Overwrite
     let MONSTER_TYPES = [
-      { emoji: '👾', image: 'https://i.imgur.com/qLkaKtw.png', imageStyle: 'blend-multiply', name: 'Enemy 01', hp: 30, damage: 8, xp: 15 },
-      { emoji: '👹', image: 'https://i.imgur.com/qLkaKtw.png', imageStyle: 'blend-multiply', name: 'Enemy 02', hp: 35, damage: 10, xp: 20 },
-      { emoji: '🦇', image: 'https://i.imgur.com/qLkaKtw.png', imageStyle: 'blend-multiply', name: 'Enemy 03', hp: 25, damage: 7, xp: 15 },
-      { emoji: '🐍', image: 'https://i.imgur.com/qLkaKtw.png', imageStyle: 'blend-multiply', name: 'Enemy 04', hp: 28, damage: 9, xp: 18 },
-      { emoji: '🕷️', image: 'https://i.imgur.com/qLkaKtw.png', imageStyle: 'blend-multiply', name: 'Enemy 05', hp: 32, damage: 8, xp: 18 }
+      { emoji: '👾', image: 'https://i.imgur.com/AHRqHCJ.png', imageStyle: 'blend-multiply', name: 'Bugja', hp: 30, damage: 8, xp: 15 },
+      { emoji: '👹', image: 'https://i.imgur.com/4kq9Hk8.png', imageStyle: 'blend-multiply', name: 'Plup', hp: 35, damage: 10, xp: 20 },
+      { emoji: '🦇', image: 'https://i.imgur.com/bl64IZr.png', imageStyle: 'blend-multiply', name: 'Jap', hp: 25, damage: 7, xp: 15 },
+      { emoji: '🐍', image: 'https://i.imgur.com/3g4xj8V.png', imageStyle: 'blend-multiply', name: 'Sap', hp: 28, damage: 9, xp: 18 },
+      { emoji: '🕷️', image: 'https://i.imgur.com/3EeoEPb.png', imageStyle: 'blend-multiply', name: 'Slimax', hp: 32, damage: 8, xp: 18 }
     ];
 
     // CHANGED TO LET
     let BOSS_TYPES = [
-       { emoji: '💀', image: 'https://i.imgur.com/qLkaKtw.png', imageStyle: 'blend-multiply', name: 'Shadow King', hp: 150, damage: 20, xp: 100, isBoss: true }
+       { emoji: '💀', image: 'https://imgur.com/a/enemy-8cdhHpl', imageStyle: 'blend-multiply', name: 'Shadow King', hp: 150, damage: 20, xp: 100, isBoss: true }
     ];
     
     // CHANGED TO LET
     let ARENA_MONSTERS = [
-       { emoji: '🐉', image: 'https://i.imgur.com/qLkaKtw.png', imageStyle: 'blend-multiply', name: 'Arena Champ', hp: 120, damage: 18, xp: 80 },
-       { emoji: '🦅', image: 'https://i.imgur.com/qLkaKtw.png', imageStyle: 'blend-multiply', name: 'Sky Guardian', hp: 110, damage: 22, xp: 80 },
-       { emoji: '🦕', image: 'https://i.imgur.com/qLkaKtw.png', imageStyle: 'blend-multiply', name: 'Ancient Rex', hp: 140, damage: 15, xp: 80 }
+       { emoji: '🐉', image: 'https://i.imgur.com/Do89siz.png', imageStyle: 'blend-multiply', name: 'Krackince', hp: 120, damage: 18, xp: 80 },
+       { emoji: '🦅', image: 'https://i.imgur.com/EnGb7W1.png', imageStyle: 'blend-multiply', name: 'Trum', hp: 110, damage: 22, xp: 80 },
+       { emoji: '🦕', image: 'https://i.imgur.com/pjPz77F.png', imageStyle: 'blend-multiply', name: 'Draire', hp: 140, damage: 15, xp: 80 }
     ];
 
     // Shop items - REMOVED SHAPES AND ICONS
-    // CHANGED TO LET so we can add powers from GitHub
+    // UPDATED: Added XP Potion
     let SHOP_ITEMS = {
       egg_items: [
         { id: 'premium_food', name: 'Premium Food', icon: '🥩', price: 50, desc: 'Adds 20% to hatch progress', effect: 20 },
@@ -847,22 +965,24 @@ let QUESTION_REPOSITORY = {};
         { id: 'hatching_machine', name: 'Hatching Machine', icon: '️', price: 100, desc: 'Adds 50% to hatch progress', effect: 50 }
       ],
       power_items: [
-        { id: 'claw_attack', name: 'Claw Attack', image: 'https://i.imgur.com/Ua3beE3.png', icon: '🦅', price: 80, desc: 'Deals 10 damage', damage: 10 },
-        { id: 'fire_spell', name: 'Fire Spell', icon: '🔥', price: 120, desc: 'Deals 15 damage', damage: 15 },
-        { id: 'quick_dodge', name: 'Quick Dodge', icon: '💨', price: 100, desc: '50% dodge chance', dodge: 0.5 },
-        { id: 'ice_blast', name: 'Ice Blast', icon: '❄️', price: 110, desc: 'Deals 12 damage', damage: 12 },
-        { id: 'thunder_strike', name: 'Thunder Strike', icon: '⚡', price: 150, desc: 'Deals 18 damage', damage: 18 },
-        { id: 'water_wave', name: 'Water Wave', icon: '🌊', price: 90, desc: 'Deals 11 damage', damage: 11 },
-        { id: 'earth_slam', name: 'Earth Slam', icon: '🪨', price: 100, desc: 'Deals 13 damage', damage: 13 },
-        { id: 'wind_slash', name: 'Wind Slash', icon: '🌪️', price: 95, desc: 'Deals 10 damage', damage: 10 },
-        { id: 'shadow_strike', name: 'Shadow Strike', icon: '🌑', price: 130, desc: 'Deals 16 damage', damage: 16 },
-        { id: 'light_beam', name: 'Light Beam', icon: '✨', price: 140, desc: 'Deals 17 damage', damage: 17 },
-        { id: 'poison_fang', name: 'Poison Fang', icon: '🐍', price: 105, desc: 'Deals 14 damage', damage: 14 },
-        { id: 'mega_punch', name: 'Mega Punch', icon: '👊', price: 115, desc: 'Deals 15 damage', damage: 15 }
+        { id: 'claw_attack', name: 'Claw Attack', image: 'https://i.imgur.com/AAZ3wIb.png', icon: '🦅', price: 80, desc: 'Deals 10 damage', damage: 10 },
+        { id: 'fire_spell', name: 'Fire Spell',image: 'https://i.imgur.com/9tPU16Y.png', icon: '🔥', price: 120, desc: 'Deals 15 damage', damage: 15 },
+        { id: 'quick_dodge', name: 'Quick Dodge',image: 'https://i.imgur.com/HYaxbbU.png', icon: '💨', price: 100, desc: '50% dodge chance', dodge: 0.5 },
+        { id: 'ice_blast', name: 'Ice Blast',image: 'https://i.imgur.com/4iSixME.png', icon: '❄️', price: 110, desc: 'Deals 12 damage', damage: 12 },
+        { id: 'thunder_strike', name: 'Thunder Strike',image: 'https://i.imgur.com/xqUEYYU.png', icon: '⚡', price: 150, desc: 'Deals 18 damage', damage: 18 },
+        { id: 'water_wave', name: 'Water Wave',image: 'https://i.imgur.com/coT4gNG.png', icon: '🌊', price: 90, desc: 'Deals 11 damage', damage: 11 },
+        { id: 'earth_slam', name: 'Earth Slam',image: 'https://i.imgur.com/efic0pu.png', icon: '🪨', price: 100, desc: 'Deals 13 damage', damage: 13 },
+        { id: 'wind_slash', name: 'Wind Slash',image: 'https://i.imgur.com/tVp0cTh.png', icon: '🌪️', price: 95, desc: 'Deals 10 damage', damage: 10 },
+        { id: 'shadow_strike', name: 'Shadow Strike',image: 'https://i.imgur.com/6M92RYd.png', icon: '🌑', price: 130, desc: 'Deals 16 damage', damage: 16 },
+        { id: 'light_beam', name: 'Light Beam',image: 'https://i.imgur.com/TXTPHP6.png', icon: '✨', price: 140, desc: 'Deals 17 damage', damage: 17 },
+        { id: 'poison_fang', name: 'Poison Fang',image: 'https://i.imgur.com/5oae8Fq.png', icon: '🐍', price: 105, desc: 'Deals 14 damage', damage: 14 },
+        { id: 'mega_punch', name: 'Mega Punch',image: 'https://i.imgur.com/x5b2pmQ.png', icon: '👊', price: 115, desc: 'Deals 15 damage', damage: 15 }
       ],
       consumable_items: [
         { id: 'health_potion', name: 'Health Potion', icon: '🧪', price: 50, desc: 'Restores 30 HP', healing: 30 },
         { id: 'stamina_potion', name: 'Stamina Potion', icon: '⚡', price: 40, desc: 'Restores 50 Stamina', stamina: 50 },
+        // NEW XP POTION
+        { id: 'xp_potion', name: 'XP Potion', icon: '🌟', price: 150, desc: 'Gives 100 XP to active pet', xp: 100 },
         { id: 'arena_ticket', name: 'Arena Ticket', icon: '🎟️', price: 150, desc: 'Enter 1 Arena Fight', type: 'ticket' }
       ]
     };
@@ -1580,8 +1700,8 @@ let QUESTION_REPOSITORY = {};
     }
 
     function checkEncounter(tileType) {
-       // 20% chance on risky tiles
-       if (Math.random() < 0.2) {
+       // 50% chance on risky tiles (0.5 is half the time)
+       if (Math.random() < 0.5) { 
          startBattle(tileType, false, false); // Not boss, Not arena
        }
     }
@@ -2010,13 +2130,14 @@ let QUESTION_REPOSITORY = {};
       let evoHtml = '';
       if (evolutionChain && pet.evolutionStage < evolutionChain.length) {
          const nextEvo = evolutionChain[pet.evolutionStage];
-         const canEvolve = gameState.brainPoints >= nextEvo.cost;
+         const canEvolve = pet.level >= nextEvo.level; // CHECK LEVEL INSTEAD OF BP
+         
          evoHtml = `
            <div class="evolution-info">
              <h3>🧬 Evolution</h3>
              <p>Next: <strong>${nextEvo.name}</strong></p>
              <button class="evolution-btn" ${canEvolve ? '' : 'disabled'} onclick="evolvePet()">
-               ${canEvolve ? '✨ Evolve ('+nextEvo.cost+' BP)' : '🔒 Need '+nextEvo.cost+' BP'}
+               ${canEvolve ? `✨ Evolve (Lvl ${nextEvo.level} Reached!)` : `🔒 Need Level ${nextEvo.level}`}
              </button>
            </div>
          `;
@@ -2092,6 +2213,8 @@ let QUESTION_REPOSITORY = {};
       const potionCount = gameState.inventory['health_potion'] || 0;
       const staminaCount = gameState.inventory['stamina_potion'] || 0;
       const ticketCount = gameState.inventory['arena_ticket'] || 0;
+      // NEW XP POTION COUNT
+      const xpCount = gameState.inventory['xp_potion'] || 0;
       
       const food = gameState.inventory['premium_food'] || 0;
       const warm = gameState.inventory['warmer'] || 0;
@@ -2115,6 +2238,14 @@ let QUESTION_REPOSITORY = {};
                   <div style="font-size:24px">⚡</div>
                   <div style="font-size:12px;">Stamina x${staminaCount}</div>
                   <button class="buy-btn" style="margin-top:5px; background:#3182ce; font-size:12px; padding:4px 8px;" onclick="useItem('stamina_potion')">Use</button>
+                </div>`;
+          }
+           if (xpCount > 0) { // NEW XP POTION INVENTORY DISPLAY
+              html += `
+                <div class="inventory-item">
+                  <div style="font-size:24px">🌟</div>
+                  <div style="font-size:12px;">XP Potion x${xpCount}</div>
+                  <button class="buy-btn" style="margin-top:5px; background:#f59e0b; font-size:12px; padding:4px 8px;" onclick="useItem('xp_potion')">Use</button>
                 </div>`;
           }
           if (ticketCount > 0) {
@@ -2178,12 +2309,26 @@ let QUESTION_REPOSITORY = {};
       renderHub();
     }
     
+    // MODIFIED HATCH PET FUNCTION
     function hatchPet() {
        const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
        if(pet.hatchProgress >= 100) {
            pet.isHatched = true;
            pet.hatchProgress = 100;
-           showToast("🐣 HATCHED! Welcome to the world!", "success");
+           
+           // --- NEW NAME LOOKUP FIX ---
+           let newName = "New Pet";
+           // Loop through PET_TYPES to find the base definition using the pet's 'type' ID
+           for (const rarity in PET_TYPES) {
+               const foundBase = PET_TYPES[rarity].find(base => base.id === pet.type);
+               if (foundBase) {
+                   newName = foundBase.name;
+                   break;
+               }
+           }
+           pet.name = newName; // Assign the correct base pet name
+
+           showToast(`🐣 HATCHED! Welcome, ${newName}!`, "success");
            saveGame();
            renderHub();
        }
@@ -2192,6 +2337,7 @@ let QUESTION_REPOSITORY = {};
     function useItem(itemId) {
       if (gameState.inventory[itemId] > 0) {
           const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+          const item = findShopItem(itemId);
 
           if (itemId === 'health_potion') {
               if(pet.hp >= pet.maxHP) { showToast("HP is full!", "info"); return; }
@@ -2205,6 +2351,28 @@ let QUESTION_REPOSITORY = {};
               gameState.stamina = Math.min(gameState.stamina + 50, gameState.maxStamina);
               updateStatsDisplay();
               showToast("Restored 50 Stamina!", "success");
+          }
+          // NEW: XP Potion Logic
+          else if (itemId === 'xp_potion') {
+              gameState.inventory[itemId]--;
+              let xpGain = item.xp || 100;
+              
+              // Check if pet levels up from this potion
+              if (pet.xp + xpGain >= pet.maxXp) {
+                   // Calculate remainder after first level up
+                   let remainder = pet.xp + xpGain - pet.maxXp;
+                   pet.level++;
+                   pet.maxHP += 10;
+                   pet.xp = remainder;
+                   pet.maxXp = pet.level * 300 + 200;
+                   // Re-heal pet
+                   pet.hp = pet.maxHP;
+                   showToast(`🌟 Used XP Potion! ${pet.name} Leveled Up!`, "success");
+              } else {
+                   pet.xp += xpGain;
+                   showToast(`🌟 Used XP Potion! +${xpGain} XP!`, "success");
+              }
+              
           }
           else if (itemId === 'premium_food') {
               if(pet.isHatched) return;
@@ -2228,30 +2396,103 @@ let QUESTION_REPOSITORY = {};
       }
     }
 
+    // 
+    // ===================================================================
+    // 🌟 MODIFIED EVOLVE PET FUNCTION (Level Requirement)
+    // ===================================================================
+    // 
     async function evolvePet() {
-      const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
-      const chain = EVOLUTION_CHAINS[pet.type];
-      if (!chain) return;
-      const nextEvo = chain[pet.evolutionStage];
-      
-      if (gameState.brainPoints >= nextEvo.cost) {
-        gameState.brainPoints -= nextEvo.cost;
-        // pet.name = nextEvo.name; // COMMENTED OUT: Keeping the base pet name constant.
-        pet.image = nextEvo.image;
-        pet.imageStyle = nextEvo.imageStyle;
-        pet.rarity = nextEvo.rarity;
-        pet.maxHP = nextEvo.baseHP;
-        pet.hp = pet.maxHP; 
-        pet.evolutionStage++;
-        saveGame();
-        updateStatsDisplay();
-        renderHub();
-        showToast(`Evolved into a new form! Name: ${pet.name}`, "success");
-      } else {
-        showToast("Not enough Brain Points!", "error");
-      }
-    }
+        const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+        const chain = EVOLUTION_CHAINS[pet.type];
+        
+        if (!chain) return;
+        const nextEvo = chain[pet.evolutionStage];
+        
+        const modal = document.getElementById('evolution-modal');
+        const petContainer = document.getElementById('evo-pet-container');
+        const message1 = document.getElementById('evo-message-1');
+        const message2 = document.getElementById('evo-message-2');
+        const continueBtn = document.getElementById('evo-continue-btn');
 
+        // 1. Pre-Check: Now checks level requirement
+        if (pet.level < nextEvo.level) {
+            showToast(`Must reach Level ${nextEvo.level} to evolve!`, "error");
+            return;
+        }
+
+        // Initialize Modal State (Current Pet Visual)
+        modal.style.display = 'flex';
+        message1.style.opacity = 0;
+        message2.style.opacity = 0;
+        continueBtn.style.display = 'none';
+
+        // Set initial pet visual
+        const initialVisual = pet.image 
+           ? `<img src="${pet.image}" class="evo-pet-image ${pet.imageStyle||'blend-multiply'}" style="opacity: 1;">` 
+           : pet.emoji;
+        petContainer.innerHTML = initialVisual;
+        petContainer.classList.remove('flash-and-scale');
+
+
+        // --- Cinematic Sequence --- (Total duration ~ 4s)
+
+        // Stage 1: Pet starts glowing/charging
+        setTimeout(() => {
+            message1.innerText = `${pet.name} reached Level ${nextEvo.level}! Preparing to evolve...`;
+            message1.style.opacity = 1;
+            petContainer.style.filter = 'drop-shadow(0 0 40px #ffea00)';
+            petContainer.style.transition = 'filter 1s';
+        }, 500); // 0.5s
+
+        // Stage 2: CORE LOGIC - Start flash and apply data changes while visual is gone
+        setTimeout(() => {
+            message1.style.opacity = 0;
+
+            // DEDUCTION AND STAT UPDATE
+            // BP cost is still deducted, even if the primary condition is level
+            gameState.brainPoints -= nextEvo.cost; 
+            
+            // Apply new stats and visuals
+            // pet.name = nextEvo.name; // Manual name fix: Keep original name
+            pet.image = nextEvo.image;
+            pet.imageStyle = nextEvo.imageStyle;
+            pet.rarity = nextEvo.rarity;
+            pet.maxHP = nextEvo.baseHP;
+            pet.hp = pet.maxHP; 
+            pet.evolutionStage++;
+
+            // Update pet visual for the new stage BEFORE the animation ends
+            const newVisual = pet.image 
+               ? `<img src="${pet.image}" class="evo-pet-image ${pet.imageStyle||'blend-multiply'}">` 
+               : pet.emoji;
+            petContainer.innerHTML = newVisual;
+            
+            // Trigger the dramatic visual transition (flash-and-scale)
+            petContainer.classList.add('flash-and-scale');
+            petContainer.style.filter = 'none'; // Reset filter transition 
+            
+        }, 1500); // 1.5s (Pet is about to flash/disappear)
+
+        // Stage 3: Display Congratulations
+        setTimeout(() => {
+            message2.innerText = `Congratulations! ${pet.name} has evolved into a new form!`;
+            message2.style.opacity = 1;
+            
+            // Ensure animation is finished before allowing continue
+            continueBtn.style.display = 'block';
+            continueBtn.onclick = () => {
+                modal.style.display = 'none';
+                saveGame();
+                updateStatsDisplay();
+                switchTab('hub'); // Switch back to hub (which calls renderHub)
+                showToast(`🎉 ${pet.name} is now Lv ${pet.level} (Stage ${pet.evolutionStage + 1})!`, "success");
+            };
+            
+        }, 3500); // 3.5s (After animation finishes)
+
+    }
+    // End of evolvePet function
+    
     // ==========================================
     // 🛒 SHOP LOGIC (UPDATED WITH GACHA)
     // ==========================================
@@ -2964,8 +3205,9 @@ function readQuestionAloud() {
       const endY = endRect.top + endRect.height / 2;
       
       // 3. Set starting position (centering the projectile)
-      p.style.left = (startX - 30) + 'px'; // -30 because width is 60px
-      p.style.top = (startY - 30) + 'px';
+      // FIX: Projectile size is 80px, so we use 40px offset for centering
+      p.style.left = (startX - 40) + 'px'; 
+      p.style.top = (startY - 40) + 'px';
       
       document.body.appendChild(p);
       
@@ -2975,11 +3217,13 @@ function readQuestionAloud() {
 
       // 5. Animate using Web Animations API for accuracy
       const animation = p.animate([
-        { transform: 'translate(0, 0) scale(0.5) rotate(0deg)', opacity: 1 },
-        { transform: `translate(${deltaX}px, ${deltaY}px) scale(1.2) rotate(360deg)`, opacity: 0 }
+        // START: Small, no rotation
+        { transform: 'translate(0, 0) scale(0.5)', opacity: 1 }, 
+        // END: Moves to deltaX/deltaY, slightly bigger on impact, no rotation
+        { transform: `translate(${deltaX}px, ${deltaY}px) scale(1.2)`, opacity: 0 } 
       ], {
-        duration: 600,
-        easing: 'cubic-bezier(0.25, 1, 0.5, 1)' // "Fast out, slow in" feel
+        duration: 800, // Duration set to 800ms
+        easing: 'cubic-bezier(0.25, 1, 0.5, 1)' 
       });
 
       // 6. Remove element when animation is done
@@ -3189,8 +3433,15 @@ function readQuestionAloud() {
                              <div class="student-list-item">
                                  <div class="student-info">
                                      <strong>${s.username}</strong> 
+                                     <span style="font-size:12px; color:#5a67d8;">BP: ${s.saveData?.brainPoints || 0}</span>
                                  </div>
-                                 <div style="display:flex; gap:10px;">
+                                 <div style="display:flex; gap:10px; align-items:center;">
+                                    <!-- NEW BP REWARD INPUT -->
+                                    <input type="number" id="bp-reward-input-${s.username}" placeholder="BP" min="1" value="100" 
+                                           style="width:50px; padding:3px 5px; border:1px solid #ccc; border-radius:5px; font-size:12px; text-align:center;">
+                                    <button class="action-btn green" style="width:auto; padding:5px 10px; font-size:12px; background:#f59e0b;" 
+                                            onclick="giveStudentBP('${s.username}')">Reward BP</button>
+                                     <!-- EXISTING BUTTONS -->
                                      <button class="action-btn blue" style="width:auto; padding:5px 10px; font-size:12px;" onclick="openTopicManager('${s.username}', '${s.assignedGrade || 'K'}')">Manage</button>
                                      <button class="action-btn red" style="width:auto; padding:5px 10px; font-size:12px;" onclick="confirmDeleteStudent('${s.username}')">Delete</button>
                                  </div>
@@ -3209,6 +3460,55 @@ function readQuestionAloud() {
         } catch(e) {
             console.error("List error", e);
             listDiv.innerHTML = "Error loading list.";
+        }
+    }
+
+    // 8. Give BP Reward (Teacher Function)
+    async function giveStudentBP(username) {
+        const inputId = `bp-reward-input-${username}`;
+        const bpInput = document.getElementById(inputId);
+        const amount = parseInt(bpInput.value, 10);
+
+        if (isNaN(amount) || amount <= 0) {
+            showToast("Please enter a positive BP amount.", "error");
+            return;
+        }
+
+        const studentRef = window.fbase.doc(window.db, "students", username);
+
+        try {
+            await window.fbase.runTransaction(window.db, async (transaction) => {
+                const studentDoc = await transaction.get(studentRef);
+
+                if (!studentDoc.exists()) {
+                    throw new Error("Student document does not exist.");
+                }
+
+                const data = studentDoc.data();
+                // Nested access for BP inside saveData
+                const currentBP = data.saveData?.brainPoints || 0;
+                const newBP = currentBP + amount;
+
+                // Deep copy existing saveData to ensure a clean merge/update
+                const newSaveData = { 
+                    ...(data.saveData || {}), 
+                    brainPoints: newBP 
+                };
+
+                // Update the document with the new saveData object
+                transaction.update(studentRef, {
+                    saveData: newSaveData,
+                    lastRewardGiven: new Date()
+                });
+            });
+
+            showToast(`Successfully gave ${amount} BP to ${username}!`, "success");
+            // Reload list to show updated BP total
+            loadStudentList();
+            
+        } catch (e) {
+            console.error("BP Transaction Failed:", e);
+            showToast(`Failed to reward BP to ${username}. Error: ${e.message || 'Check console.'}`, "error");
         }
     }
     
@@ -3530,7 +3830,7 @@ function readQuestionAloud() {
         const oppPet = isHost ? data.guestPet : data.hostPet;
         
         const myHP = isHost ? data.hostHP : data.guestHP;
-        const myMax = isHost ? data.hostMaxHP : data.guestMaxHP;
+        const myMax = isHost ? data.hostMaxHP : data.hostMaxHP;
         const oppHP = isHost ? data.guestHP : data.hostHP;
         const oppMax = isHost ? data.guestMaxHP : data.hostMaxHP;
         
