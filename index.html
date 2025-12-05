@@ -124,8 +124,8 @@
     @keyframes projectileGlide { 0% { left: 0; opacity: 1; transform: scale(0.8) rotate(0deg); } 100% { left: 100%; opacity: 0; transform: scale(0.5) rotate(360deg); } }
     .projectile { 
     position: fixed; 
-    width: 150px; /* Increased size (was 60px) */
-    height: 150px; /* Increased size (was 60px) */
+    width: 80px; /* Increased size (was 60px) */
+    height: 80px; /* Increased size (was 60px) */
     font-size: 60px; /* Increased size for emoji fallback */
     pointer-events: none; 
     z-index: 3000; 
@@ -809,7 +809,7 @@
           id: 'shadow_dragon_baby',
           name: 'Baby Shadow Dragon',
           rarity: 'legendary',
-          image: 'https://i.imgur.com/U8Z730Z.png', 
+          image: 'https://i.imgur.com/qLkaKtw.png', 
           imageStyle: 'blend-multiply',
           emoji: '❓', 
           baseHP: 50
@@ -817,7 +817,7 @@
         evolutions: [
           {
             name: 'Teen Shadow Dragon',
-            image: 'https://i.imgur.com/U8Z730Z.png',
+            image: 'https://i.imgur.com/qLkaKtw.png',
             imageStyle: 'blend-multiply',
             emoji: '❓',
             rarity: 'legendary',
@@ -826,7 +826,7 @@
           },
           {
             name: 'Elder Shadow Dragon',
-            image: 'https://i.imgur.com/U8Z730Z.png',
+            image: 'https://i.imgur.com/qLkaKtw.png',
             imageStyle: 'blend-multiply',
             emoji: '❓',
             rarity: 'legendary',
@@ -952,8 +952,8 @@ let QUESTION_REPOSITORY = {};
         { name: 'Monster 15 Lvl 3', image: 'https://i.imgur.com/YWIQLZ8.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'rare',   baseHP: 80, cost: 100, level: 20 }
       ],
       'shadow_dragon_baby': [
-        { name: 'Teen Shadow Dragon', image: 'https://i.imgur.com/U8Z730Z.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'legendary', baseHP: 100, cost: 100, level: 10 },
-        { name: 'Elder Shadow Dragon', image: 'https://i.imgur.com/U8Z730Z.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'legendary', baseHP: 150, cost: 200, level: 20 }
+        { name: 'Teen Shadow Dragon', image: 'https://i.imgur.com/qLkaKtw.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'legendary', baseHP: 100, cost: 100, level: 10 },
+        { name: 'Elder Shadow Dragon', image: 'https://i.imgur.com/qLkaKtw.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'legendary', baseHP: 150, cost: 200, level: 20 }
       ]
     };
 
@@ -1693,7 +1693,7 @@ let QUESTION_REPOSITORY = {};
       
       // Scan the entire map to find the closest safe tile to your ideal entry
       for(let r=0; r<MAP_ROWS; r++) {
-        for(let c=0; c<MAP_COLS; c++) {
+        for (let c=0; c<MAP_COLS; c++) {
            const tile = currentMapData[r][c];
            if (isWalkable(tile)) {
                // Calculate distance (Manhattan distance is fine here)
@@ -1911,7 +1911,9 @@ let QUESTION_REPOSITORY = {};
       // 2. LOAD SAVE
       const cloudLoaded = await loadProgressFromFirebase(name);
       
-      if (!cloudLoaded) {
+      // FIX: Ensure starter pet is initialized if no cloud data was successfully loaded
+      // AND the pet array is empty (first time login check).
+      if (!cloudLoaded || gameState.pets.length === 0) {
           if (gameState.pets.length === 0) {
              initializeGame();
           }
@@ -2406,7 +2408,7 @@ let QUESTION_REPOSITORY = {};
                        showToast(`🌟 Used XP Potion! ${pet.name} Leveled Up!`, "success");
                    } else {
                         // Max cap reached, waste the remaining XP and set to max level
-                        pet.xp = 0; // Reset XP since max level reached
+                        pet.xp = pet.maxXp - 1; // Set XP just below the trigger threshold
                         showToast(`🌟 Used XP Potion! XP wasted, Max Level (${maxLevel}) Reached.`, "info");
                    }
               } else {
@@ -2485,20 +2487,20 @@ async function evolvePet() {
 
     // --- Cinematic Sequence --- (Total duration ~ 5s)
 
-    // Stage 1: Pet starts glowing/charging (0.5s -> 2000ms)
+    // Stage 1: Pet starts glowing/charging
     setTimeout(() => {
         message1.innerText = `${pet.name} reached Level ${nextEvo.level}! Preparing to evolve...`;
         message1.style.opacity = 1;
         petContainer.style.filter = 'drop-shadow(0 0 40px #ffea00)';
         petContainer.style.transition = 'filter 1.5s'; // Longer transition for better glow
-    }, 500); // Start message/initial glow after 0.5s
+    }, 500); // 0.5s
 
-    // Stage 2: CORE LOGIC - Start flash and apply data changes (2.0s delay)
-    // We delay this longer to let the charging effect last longer.
+    // Stage 2: CORE LOGIC - Start flash and apply data changes while visual is gone
     setTimeout(() => {
         message1.style.opacity = 0;
 
         // DEDUCTION AND STAT UPDATE
+        // BP cost is still deducted, even if the primary condition is level
         gameState.brainPoints -= nextEvo.cost; 
         
         // Apply new stats and visuals
@@ -2517,13 +2519,12 @@ async function evolvePet() {
         petContainer.innerHTML = newVisual;
         
         // Trigger the dramatic visual transition (flash-and-scale)
-        // This animation lasts 1.5s, so the sequence ends at 3.0s + 1.5s = 4.5s
         petContainer.classList.add('flash-and-scale');
         petContainer.style.filter = 'none'; // Reset filter transition 
         
     }, 3000); // **MODIFIED**: Start the flash/swap at 3.0 seconds
 
-    // Stage 3: Display Congratulations and Cleanup (5.0s delay)
+    // Stage 3: Display Congratulations
     setTimeout(() => {
         message2.innerText = `Congratulations! ${pet.name} has evolved into a new form!`;
         message2.style.opacity = 1;
@@ -2879,7 +2880,7 @@ async function evolvePet() {
       // Player Stats
       const pPct = (bs.playerHP / pet.maxHP) * 100;
       document.getElementById('player-hp-bar').style.width = pPct + "%";
-      document.getElementById('player-hp-text').innerText = `Lvl ${pet.level} - ${pet.hp}/${pet.maxHP}`;
+      document.getElementById('player-hp-text').innerText = `Lvl ${pet.level} - ${bs.playerHP}/${pet.maxHP}`;
 
       const actionsDiv = document.getElementById('battle-actions');
       
@@ -3055,7 +3056,7 @@ async function evolvePet() {
       
       pet.hp = bs.playerHP;
       
-      // Check for max level before applying XP
+      // 1. Check for max level before applying XP
       const maxLevel = LEVEL_CAPS[pet.rarity] || 100;
       if (pet.level >= maxLevel) {
           showToast(`XP not gained: ${pet.name} is Max Level (${maxLevel})!`, "info");
@@ -3100,7 +3101,7 @@ async function evolvePet() {
       
       let levelMsg = "";
       
-      // Level Up Check
+      // Level Up Check (Must be below max level)
       if (pet.xp >= pet.maxXp && pet.level < maxLevel) {
           pet.level++;
           pet.xp = pet.xp - pet.maxXp; // Carry over excess XP
@@ -3110,7 +3111,7 @@ async function evolvePet() {
           pet.hp = pet.maxHP; // Full heal
           levelMsg = `\n🎉 LEVEL UP! Now Lvl ${pet.level}! (+10 HP)`;
       } else if (pet.level >= maxLevel) {
-          // Ensure pet does not exceed cap, reset XP if necessary
+          // If we somehow hit this point, cap XP safely
           pet.xp = 0;
           pet.maxXp = pet.level * 300 + 200; 
       }
@@ -3902,11 +3903,9 @@ function readQuestionAloud() {
         // 💥 FLIP FIX: Ensure Player (left side) is never flipped (faces right)
         playerVis.classList.remove('flipped-opponent'); 
 
-        if(myPet.image) {
-         playerVis.innerHTML = `<img src="${myPet.image}" class="battler-image ${myPet.imageStyle||''}">`;
-        } else {
-         playerVis.innerHTML = myPet.emoji;
-        }
+        playerVis.innerHTML = myPet.image 
+            ? `<img src="${myPet.image}" class="battler-image ${myPet.imageStyle||''}">` 
+            : myPet.emoji;
         
         document.getElementById('player-hp-bar').style.width = (myHP / myMax * 100) + "%";
         document.getElementById('player-hp-text').innerText = `${myHP}/${myMax}`;
@@ -3917,12 +3916,10 @@ function readQuestionAloud() {
         // 💥 FLIP FIX: Ensure Opponent (right side) is always flipped (faces left)
         enemyVis.classList.add('flipped-opponent');
 
-        if(oppPet.image) {
-            enemyVis.innerHTML = `<img src="${oppPet.image}" class="battler-image ${oppPet.imageStyle||''}">`;
-        } else {
-            enemyVis.innerHTML = oppPet.emoji;
-        }
-
+        enemyVis.innerHTML = oppPet.image 
+            ? `<img src="${oppPet.image}" class="battler-image ${oppPet.imageStyle||''}">` 
+            : oppPet.emoji;
+        
         // --- NEW: DAMAGE FLASH (Fix 1 - Defensive Animation) ---
         if (localOpponentHP > oppHP) {
             // Damage occurred on the opponent
