@@ -48,6 +48,18 @@
         background-size: cover;
         height: 100vh; width: 100vw; overflow: hidden; 
         overscroll-behavior: none;
+        
+        /* 🚫 FIX: Disable Text Selection & Cursor 🚫 */
+        user-select: none;          /* User cannot highlight text */
+        -webkit-user-select: none;  /* Safari/Chrome support */
+        caret-color: transparent;   /* Hides the blinking vertical line */
+    }
+
+    /* ✅ RE-ENABLE Cursor for Input Fields Only ✅ */
+    input, textarea {
+        user-select: text;
+        -webkit-user-select: text;
+        caret-color: auto; /* Shows cursor when typing username/answers */
     }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     
@@ -208,6 +220,21 @@
     }
     
     /* Use Block + Absolute Positioning to fix height issues */
+    .battle-screen { 
+        display: none; 
+        background-color: #2d3748; 
+        background-size: cover; 
+        background-position: center bottom; 
+        background-repeat: no-repeat; 
+        border-radius: 15px; 
+        aspect-ratio: 16/9; 
+        width: 100%; 
+        max-height: 100%; 
+        position: relative; 
+        overflow: hidden; 
+        box-shadow: inset 0 0 50px rgba(0,0,0,0.6); 
+    }
+    
     .battle-screen.active { 
         display: block; 
         height: 100%;
@@ -218,22 +245,38 @@
     .battle-arena { 
         width: 100%;
         height: 100%;
-        display: flex; 
-        justify-content: space-between; 
-        align-items: flex-end; /* Align pets to bottom */
-        padding: 0 150px 60px 150px; /* IMPORTANT: Bottom padding creates space for the buttons so pets aren't covered */
         position: absolute;
         top: 0;
         left: 0;
         z-index: 10;
+        /* Removed display:flex so we can use absolute positioning below */
     }
 
     .battler { 
-        position: relative; 
+        position: absolute; /* 📍 PINS THEM TO A SPOT */
         text-align: center; 
         filter: drop-shadow(0 10px 20px rgba(0,0,0,0.6)); 
-        width: 35%; /* Slightly wider to see pets better */
-        max-width: 250px;
+        width: 40%; 
+        max-width: 400px;
+        /* Transition for smooth movement if window resizes */
+        transition: all 0.3s ease-out; 
+    }
+    
+    /* 🟢 PLAYER POSITION (Bottom Left) */
+    #player-container {
+        bottom: 15%; /* Increase to move UP, Decrease to move DOWN */
+        left: 15%;   /* Increase to move RIGHT, Decrease to move LEFT */
+        z-index: 20; /* Player is usually "closer" to camera */
+    }
+
+    /* 🔴 ENEMY POSITION (Top Right - Perspective Depth) */
+    #enemy-container {
+        bottom: 15%; /* Higher 'bottom' makes them look further away */
+        right: 12%;  /* Pinned to the right side */
+        z-index: 20; /* Behind player slightly */
+        
+        /* Scale enemy down slightly to fake "distance" perspective */
+        transform: none; 
     }
 
     .battler-visual { 
@@ -294,7 +337,6 @@
 
     @keyframes attackLunge { 
         0% { transform: translateX(0) scale(1); } 
-        20% { transform: translateX(-20px) scale(0.9); } 
         50% { transform: translateX(60px) scale(1.1); } 
         100% { transform: translateX(0) scale(1); } 
     }
@@ -1471,6 +1513,27 @@
         
         return enemy;
     }
+    
+    // ==========================================
+    // 📏 VISUAL SCALING HELPER (NEW)
+    // ==========================================
+    function getBattlerSize(entity, isBoss, isArena) {
+        let size = 200; // Default Base Size
+
+        // 1. Check Evolution Stage (0, 1, 2)
+        // Note: Wild monsters usually default to stage 0 or 1 unless we defined them otherwise
+        const stage = entity.evolutionStage !== undefined ? entity.evolutionStage : (entity.level > 20 ? 2 : (entity.level > 10 ? 1 : 0));
+        
+        if (stage === 0) size = 180;       // Small
+        else if (stage === 1) size = 240;  // Medium
+        else if (stage >= 2) size = 300;   // Big
+
+        // 2. Boss & Arena Overrides (They are always huge)
+        if (isArena) size = 220;
+        if (isBoss) size = 350; 
+
+        return size;
+    }
 
     // ==========================================
     // 🧪 ELEMENTAL LOGIC ENGINE
@@ -1573,14 +1636,35 @@
     const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
     function renderBattle() {
-      const pet = gameState.pets.find(p => p.id === gameState.currentPetId); const bs = gameState.battleState;
-      const pVis = document.getElementById('battle-player-visual'); pVis.classList.remove('flipped-opponent');
-      pVis.innerHTML = pet.image ? `<img src="${pet.image}" class="battler-image ${pet.imageStyle}">` : pet.emoji;
-      const eVis = document.getElementById('battle-enemy-visual'); eVis.classList.add('flipped-opponent');
-      eVis.innerHTML = bs.enemy.image ? `<img src="${bs.enemy.image}" class="battler-image ${bs.enemy.imageStyle}">` : `<div class="emoji-wrapper" style="font-size:100px;">${bs.enemy.emoji}</div>`;
+      const pet = gameState.pets.find(p => p.id === gameState.currentPetId); 
+      const bs = gameState.battleState;
       
+      // CALCULATE SIZES (FIX ADDED HERE)
+      const pSize = getBattlerSize(pet, false, false);
+      const eSize = getBattlerSize(bs.enemy, bs.isBoss, bs.isArena);
+
+      const pVis = document.getElementById('battle-player-visual'); 
+      pVis.classList.remove('flipped-opponent');
+      
+      // Apply Size to Player (Image or Emoji)
+      if (pet.image) {
+          pVis.innerHTML = `<img src="${pet.image}" class="battler-image ${pet.imageStyle}" style="width:${pSize}px; height:${pSize}px;">`;
+      } else {
+          pVis.innerHTML = `<div style="font-size:${pSize * 0.7}px;">${pet.emoji}</div>`;
+      }
+
+      const eVis = document.getElementById('battle-enemy-visual'); 
+      eVis.classList.add('flipped-opponent');
+      
+      // Apply Size to Enemy (Image or Emoji)
+      if (bs.enemy.image) {
+          eVis.innerHTML = `<img src="${bs.enemy.image}" class="battler-image ${bs.enemy.imageStyle}" style="width:${eSize}px; height:${eSize}px;">`;
+      } else {
+          eVis.innerHTML = `<div class="emoji-wrapper" style="font-size:${eSize * 0.7}px;">${bs.enemy.emoji}</div>`;
+      }
+      
+      // Render HP Bars & Text
       document.getElementById('enemy-name').innerText = bs.enemy.name;
-      // Updated with Trails
       document.getElementById('enemy-hp-bar').style.width = (bs.enemyHP / bs.enemy.hp * 100) + "%";
       document.getElementById('enemy-hp-trail').style.width = (bs.enemyHP / bs.enemy.hp * 100) + "%";
       
@@ -1588,10 +1672,9 @@
       document.getElementById('player-hp-trail').style.width = (bs.playerHP / pet.maxHP * 100) + "%";
       document.getElementById('player-hp-text').innerText = `${bs.playerHP}/${pet.maxHP}`;
       
-      const act = document.getElementById('battle-actions'); const dis = bs.turnInProgress ? 'disabled style="opacity:0.5"' : '';
+      const act = document.getElementById('battle-actions'); 
+      const dis = bs.turnInProgress ? 'disabled style="opacity:0.5"' : '';
       act.innerHTML = pet.powers.map(pid => { const i=findShopItem(pid); return `<button class="action-btn green" onclick="usePower('${pid}')" ${dis}>${i.name}</button>`; }).join('') + `<button class="action-btn red" onclick="flee()" ${dis}>Run</button>`;
-      
-      // LOG REMOVED FROM UI
     }
 
     // --- REFINED BATTLE SYSTEM (Async/Await + Elements) ---
@@ -1857,24 +1940,213 @@
     async function saveStudentTopics() { const ts=Array.from(document.querySelectorAll('#tm-topic-list input:checked')).map(c=>c.value); await window.fbase.updateDoc(window.fbase.doc(window.db,"students",currentManagingStudent),{assignedGrade:document.getElementById('tm-grade-select').value,assignedTopics:ts}); showToast("Saved!", "success"); document.getElementById('topic-manager-modal').style.display='none'; }
 
     // MULTIPLAYER
-    let currentRoomId=null, pvpUnsubscribe=null, isHost=false, localOpponentHP=0;
+    // ⚠️ FIXED: Added localPlayerHP to track own damage for animation
+    let currentRoomId=null, pvpUnsubscribe=null, isHost=false, localOpponentHP=0, localPlayerHP=0;
+
     function showMultiplayerMenu() { document.getElementById('wilds-menu').style.display='none'; document.getElementById('multiplayer-menu').style.display='block'; }
-    async function createPvPRoom() { if(gameState.brainPoints<100) return showToast("Need 100 BP", "error"); gameState.brainPoints-=100; updateStatsDisplay(); const code=Math.floor(1000+Math.random()*9000).toString(); currentRoomId=code; isHost=true; const pet=gameState.pets.find(p=>p.id===gameState.currentPetId); await window.fbase.setDoc(window.fbase.doc(window.db,"rooms",code),{hostName:gameState.playerName,hostPet:pet,status:"waiting",turn:"host",hostHP:pet.hp,hostMaxHP:pet.maxHP,guestHP:0,guestMaxHP:0,logs:[`${gameState.playerName} created room.`]}); document.getElementById('multiplayer-menu').style.display='none'; document.getElementById('pvp-lobby-screen').style.display='block'; document.getElementById('display-room-code').innerText=code; subscribeToRoom(code); }
-    async function joinPvPRoom() { const code=document.getElementById('room-code-input').value.trim(); const pet=gameState.pets.find(p=>p.id===gameState.currentPetId); const r=await window.fbase.getDoc(window.fbase.doc(window.db,"rooms",code)); if(r.exists() && r.data().status==="waiting") { currentRoomId=code; isHost=false; await window.fbase.updateDoc(window.fbase.doc(window.db,"rooms",code),{guestName:gameState.playerName,guestPet:pet,guestHP:pet.hp,guestMaxHP:pet.maxHP,status:"connected",logs:window.fbase.arrayUnion(`${gameState.playerName} joined!`)}); document.getElementById('multiplayer-menu').style.display='none'; document.getElementById('pvp-lobby-screen').style.display='block'; document.getElementById('display-room-code').innerText=code; subscribeToRoom(code); } else showToast("Room Error", "error"); }
-    function subscribeToRoom(code) { pvpUnsubscribe = window.fbase.onSnapshot(window.fbase.doc(window.db,"rooms",code), (doc)=>{ const d=doc.data(); if(!d) return; document.getElementById('pvp-host-status').innerHTML=`Host: ${d.hostName}`; document.getElementById('pvp-guest-status').innerHTML=`Guest: ${d.guestName||'...'}`; if(d.status==='connected' && isHost) document.getElementById('pvp-start-btn').style.display='block'; if(d.status==='battle') { if(document.getElementById('pvp-lobby-screen').style.display!=='none') { document.getElementById('pvp-lobby-screen').style.display='none'; document.getElementById('battle-ui').style.display='flex'; soundManager.playBGM('boss'); } renderPvPBattle(d); } }); }
-    async function startPvPBattle() { await window.fbase.updateDoc(window.fbase.doc(window.db,"rooms",currentRoomId),{status:"battle",logs:window.fbase.arrayUnion("⚔️ BATTLE START!")}); }
-    function renderPvPBattle(d) {
-        const myPet=isHost?d.hostPet:d.guestPet; const oppPet=isHost?d.guestPet:d.hostPet; const myHP=isHost?d.hostHP:d.guestHP; const oppHP=isHost?d.guestHP:d.hostHP; const myMax=isHost?d.hostMaxHP:d.guestMaxHP; const oppMax=isHost?d.guestMaxHP:d.hostMaxHP;
-        const pVis=document.getElementById('battle-player-visual'); pVis.classList.remove('flipped-opponent'); pVis.innerHTML=myPet.image?`<img src="${myPet.image}" class="battler-image ${myPet.imageStyle}">`:myPet.emoji;
-        const eVis=document.getElementById('battle-enemy-visual'); eVis.classList.add('flipped-opponent'); eVis.innerHTML=oppPet.image?`<img src="${oppPet.image}" class="battler-image ${oppPet.imageStyle}">`:`<div class="emoji-wrapper" style="font-size:100px;">${oppPet.emoji}</div>`;
-        if(localOpponentHP > oppHP) { eVis.parentElement.appendChild(Object.assign(document.createElement('div'), {className:'floating-text crit', innerText: `-${localOpponentHP-oppHP}`})); setTimeout(()=>eVis.style.animation="",500); } localOpponentHP = oppHP;
-        document.getElementById('player-hp-bar').style.width=(myHP/myMax*100)+"%"; document.getElementById('player-hp-trail').style.width=(myHP/myMax*100)+"%"; document.getElementById('player-hp-text').innerText=`${myHP}/${myMax}`;
-        document.getElementById('enemy-hp-bar').style.width=(oppHP/oppMax*100)+"%"; document.getElementById('enemy-hp-trail').style.width=(oppHP/oppMax*100)+"%"; document.getElementById('enemy-name').innerText=isHost?d.guestName:d.hostName;
-        // LOG REMOVED
-        const act=document.getElementById('battle-actions'); const turn=(d.turn==='host'&&isHost)||(d.turn==='guest'&&!isHost);
-        if(myHP<=0 || oppHP<=0) { act.innerHTML="<h2>GAME OVER</h2>"; setTimeout(leavePvPRoom,3000); return; }
-        act.innerHTML = myPet.powers.map(pid=>{ const i=findShopItem(pid); return `<button class="action-btn green" onclick="usePvPAttack('${pid}')" ${!turn?'disabled style="opacity:0.5"':''}>${i.name}</button>`; }).join('');
+    
+    // ⚠️ FIXED: Added HP Check
+    async function createPvPRoom() { 
+        if(gameState.brainPoints<100) return showToast("Need 100 BP", "error"); 
+        const pet=gameState.pets.find(p=>p.id===gameState.currentPetId);
+        
+        // FIX: Check for dead pet
+        if(pet.hp <= 0) return showToast("Your pet is too weak! Heal it first.", "error");
+
+        gameState.brainPoints-=100; 
+        updateStatsDisplay(); 
+        
+        const code=Math.floor(1000+Math.random()*9000).toString(); 
+        currentRoomId=code; 
+        isHost=true; 
+        
+        // FIX: Reset local tracking
+        localOpponentHP = 0;
+        localPlayerHP = pet.hp;
+
+        await window.fbase.setDoc(window.fbase.doc(window.db,"rooms",code),{
+            hostName:gameState.playerName,
+            hostPet:pet,
+            status:"waiting",
+            turn:"host",
+            hostHP:pet.hp,
+            hostMaxHP:pet.maxHP,
+            guestHP:0,
+            guestMaxHP:0,
+            logs:[`${gameState.playerName} created room.`]
+        }); 
+        
+        document.getElementById('multiplayer-menu').style.display='none'; 
+        document.getElementById('pvp-lobby-screen').style.display='block'; 
+        document.getElementById('display-room-code').innerText=code; 
+        subscribeToRoom(code); 
     }
+    
+    // ⚠️ FIXED: Added HP Check
+    async function joinPvPRoom() { 
+        const code=document.getElementById('room-code-input').value.trim(); 
+        const pet=gameState.pets.find(p=>p.id===gameState.currentPetId); 
+        
+        // FIX: Check for dead pet
+        if(pet.hp <= 0) return showToast("Your pet is too weak! Heal it first.", "error");
+
+        const r=await window.fbase.getDoc(window.fbase.doc(window.db,"rooms",code)); 
+        if(r.exists() && r.data().status==="waiting") { 
+            currentRoomId=code; 
+            isHost=false; 
+            
+            // FIX: Reset local tracking
+            localOpponentHP = r.data().hostHP;
+            localPlayerHP = pet.hp;
+
+            await window.fbase.updateDoc(window.fbase.doc(window.db,"rooms",code),{
+                guestName:gameState.playerName,
+                guestPet:pet,
+                guestHP:pet.hp,
+                guestMaxHP:pet.maxHP,
+                status:"connected",
+                logs:window.fbase.arrayUnion(`${gameState.playerName} joined!`)}); 
+                
+            document.getElementById('multiplayer-menu').style.display='none'; 
+            document.getElementById('pvp-lobby-screen').style.display='block'; 
+            document.getElementById('display-room-code').innerText=code; 
+            subscribeToRoom(code); 
+        } else {
+            showToast("Room Error", "error"); 
+        }
+    }
+    
+    // ⚠️ FIXED: Added Background Image Logic
+    function subscribeToRoom(code) { 
+        pvpUnsubscribe = window.fbase.onSnapshot(window.fbase.doc(window.db,"rooms",code), (doc)=>{ 
+            const d=doc.data(); 
+            if(!d) return; 
+            
+            document.getElementById('pvp-host-status').innerHTML=`Host: ${d.hostName}`; 
+            document.getElementById('pvp-guest-status').innerHTML=`Guest: ${d.guestName||'...'}`; 
+            
+            if(d.status==='connected' && isHost) document.getElementById('pvp-start-btn').style.display='block'; 
+            
+            if(d.status==='battle') { 
+                if(document.getElementById('pvp-lobby-screen').style.display!=='none') { 
+                    document.getElementById('pvp-lobby-screen').style.display='none'; 
+                    
+                    // FIX: Set Random PvP Background
+                    const availableBGs = [...Object.values(BATTLE_BACKGROUNDS), ...ARENA_IMGS];
+                    const randomBG = availableBGs[Math.floor(Math.random() * availableBGs.length)];
+                    document.getElementById('battle-ui').style.backgroundImage = `url('${randomBG}')`;
+                    
+                    document.getElementById('battle-ui').style.display='flex'; 
+                    soundManager.playBGM('boss'); 
+                } 
+                renderPvPBattle(d); 
+            } 
+        }); 
+    }
+    async function startPvPBattle() { await window.fbase.updateDoc(window.fbase.doc(window.db,"rooms",currentRoomId),{status:"battle",logs:window.fbase.arrayUnion("⚔️ BATTLE START!")}); }
+    
+    // ⚠️ FIXED: Added Dynamic Sizing AND Animation Logic
+    function renderPvPBattle(d) {
+        const myPet = isHost ? d.hostPet : d.guestPet;
+        const oppPet = isHost ? d.guestPet : d.hostPet;
+        const myHP = isHost ? d.hostHP : d.guestHP;
+        const oppHP = isHost ? d.guestHP : d.hostHP;
+        const myMax = isHost ? d.hostMaxHP : d.guestMaxHP;
+        const oppMax = isHost ? d.guestMaxHP : d.hostMaxHP;
+
+        // Visual Elements
+        const pVis = document.getElementById('battle-player-visual');
+        const eVis = document.getElementById('battle-enemy-visual');
+
+        // CALCULATE SIZES
+        const mySize = getBattlerSize(myPet, false, false);
+        const oppSize = getBattlerSize(oppPet, false, false);
+
+        // Render Images with Dynamic Size
+        pVis.classList.remove('flipped-opponent');
+        if(myPet.image) {
+            pVis.innerHTML = `<img src="${myPet.image}" class="battler-image ${myPet.imageStyle}" style="width:${mySize}px; height:${mySize}px;">`;
+        } else {
+            pVis.innerHTML = `<div style="font-size:${mySize*0.7}px;">${myPet.emoji}</div>`;
+        }
+        
+        eVis.classList.add('flipped-opponent');
+        if(oppPet.image) {
+            eVis.innerHTML = `<img src="${oppPet.image}" class="battler-image ${oppPet.imageStyle}" style="width:${oppSize}px; height:${oppSize}px;">`;
+        } else {
+            eVis.innerHTML = `<div class="emoji-wrapper" style="font-size:${oppSize*0.7}px;">${oppPet.emoji}</div>`;
+        }
+
+        // ===============================================
+        // ⚔️ ANIMATION TRIGGER LOGIC
+        // ===============================================
+
+        // 1. Did I deal damage? (Opponent HP went DOWN)
+        if (localOpponentHP > oppHP) {
+            const dmg = localOpponentHP - oppHP;
+            
+            // Animation: I Lunge, They Shake
+            pVis.style.animation = "attackLunge 0.4s";
+            eVis.style.animation = "damageShake 0.4s";
+            
+            // Projectile: Me -> Them
+            createProjectile(myPet.image || "⚔️", pVis, eVis);
+            
+            // Floating Text & Sound
+            showFloatingText(eVis.parentElement, `-${dmg}`, "crit");
+            soundManager.playSFX('hit');
+
+            // Reset animations after they finish
+            setTimeout(() => { pVis.style.animation = ""; eVis.style.animation = ""; }, 500);
+        }
+
+        // 2. Did I take damage? (My HP went DOWN)
+        if (localPlayerHP > myHP) {
+            const dmg = localPlayerHP - myHP;
+
+            // Animation: They Lunge, I Shake
+            eVis.style.animation = "attackLunge 0.4s";
+            pVis.style.animation = "damageShake 0.4s";
+            
+            // Projectile: Them -> Me
+            createProjectile(oppPet.image || "⚔️", eVis, pVis);
+
+            // Floating Text & Sound
+            showFloatingText(pVis.parentElement, `-${dmg}`, "crit");
+            soundManager.playSFX('hit');
+
+            // Reset animations after they finish
+            setTimeout(() => { pVis.style.animation = ""; eVis.style.animation = ""; }, 500);
+        }
+
+        // Update Trackers
+        localOpponentHP = oppHP;
+        localPlayerHP = myHP;
+
+        // Render Bars
+        document.getElementById('player-hp-bar').style.width = (myHP / myMax * 100) + "%";
+        document.getElementById('player-hp-trail').style.width = (myHP / myMax * 100) + "%";
+        document.getElementById('player-hp-text').innerText = `${myHP}/${myMax}`;
+
+        document.getElementById('enemy-hp-bar').style.width = (oppHP / oppMax * 100) + "%";
+        document.getElementById('enemy-hp-trail').style.width = (oppHP / oppMax * 100) + "%";
+        document.getElementById('enemy-name').innerText = isHost ? d.guestName : d.hostName;
+
+        const act = document.getElementById('battle-actions');
+        const turn = (d.turn === 'host' && isHost) || (d.turn === 'guest' && !isHost);
+
+        if (myHP <= 0 || oppHP <= 0) {
+            act.innerHTML = "<h2>GAME OVER</h2>";
+            setTimeout(leavePvPRoom, 3000);
+            return;
+        }
+
+        act.innerHTML = myPet.powers.map(pid => {
+            const i = findShopItem(pid);
+            return `<button class="action-btn green" onclick="usePvPAttack('${pid}')" ${!turn ? 'disabled style="opacity:0.5"' : ''}>${i.name}</button>`;
+        }).join('');
+    }
+
     async function usePvPAttack(pid) { const item=findShopItem(pid); const r=window.fbase.doc(window.db,"rooms",currentRoomId); soundManager.playSFX('attack'); await window.fbase.runTransaction(window.db, async(t)=>{ const d=(await t.get(r)).data(); const turn=(d.turn==='host'&&isHost)||(d.turn==='guest'&&!isHost); if(!turn) return; const dmg=(item.damage||10); t.update(r,{hostHP:isHost?d.hostHP:Math.max(0,d.hostHP-dmg), guestHP:isHost?Math.max(0,d.guestHP-dmg):d.guestHP, turn:isHost?'guest':'host', logs:window.fbase.arrayUnion(`${isHost?d.hostName:d.guestName} used ${item.name}!`) }); }); }
     function leavePvPRoom() { if(pvpUnsubscribe) pvpUnsubscribe(); currentRoomId=null; document.getElementById('pvp-lobby-screen').style.display='none'; document.getElementById('battle-ui').style.display='none'; document.getElementById('wilds-menu').style.display='block'; soundManager.playBGM('wilds'); }
     function readQuestionAloud() { if (gameState.currentQuestion) { const d=document.createElement('div'); d.innerHTML=gameState.currentQuestion.q; const t=d.textContent||d.innerText||""; if ('speechSynthesis' in window) { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.rate = 0.9; window.speechSynthesis.speak(u); } } }
