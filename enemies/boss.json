@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Grinchy",
+    "element": ["shadow", "earth"],
+    "isBoss": true,
+    "hp": 300,
+    "damage": 25,
+    "xp": 150,
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/enemy/9.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "💀"
+  }
+]
+
