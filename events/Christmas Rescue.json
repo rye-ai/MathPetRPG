@@ -1,0 +1,109 @@
+{
+  "file": "christmas_rescue.json",
+  "meta": {
+    "title": "Christmas Rescue: The Stolen Heart",
+    "description": "Navigate Grinchy's snowy fortress, solve the seasonal quiz, and retrieve the stolen Christmas Heart.",
+    "status": "active"
+  },
+  "startMap": "map_maze",
+  "maps": {
+    "map_maze": {
+      "name": "The Snowy Approach",
+      "layout": [
+        [9, 9, 9, 9, 9, 9, 9, 9, 9, 9],
+        [9, 5, 5, 5, 9, 5, 5, 5, 5, 9],
+        [9, 5, 9, 5, 9, 5, 9, 9, 5, 9],
+        [9, 5, 9, 5, 5, 5, 9, 5, 5, 9],
+        [9, 5, 9, 9, 9, 3, 9, 5, 9, 9],
+        [9, 5, 5, 5, 5, 5, 5, 5, 5, 9],
+        [9, 9, 9, 9, 9, 9, 9, 9, 5, 9],
+        [9, 5, 5, 5, 5, 5, 5, 5, 5, 2],
+        [9, 9, 9, 9, 9, 9, 9, 9, 9, 9]
+      ],
+      "start": {
+        "x": 1,
+        "y": 1
+      },
+      "npcs": [
+        {
+          "x": 2,
+          "y": 4,
+          "name": "Snow Elf Helper",
+          "sprite": "🧝",
+          "dialogue": [
+            "Grinchy's barrier is strong! Only those with quick winter wisdom can pass.",
+            "Solve my puzzle to proceed to the arena."
+          ],
+          "action": "gate_christmas_quiz"
+        }
+      ],
+      "enemies": [
+        { "x": 7, "y": 2, "enemyId": "Snowbell Snapper" },
+        { "x": 6, "y": 6, "enemyId": "Canous" },
+        { "x": 4, "y": 5, "enemyId": "Carolgeist" }
+      ],
+      "portals": [
+        {
+          "x": 9,
+          "y": 7,
+          "toMap": "map_arena",
+          "toX": 1,
+          "toY": 1
+        }
+      ]
+    },
+    "map_arena": {
+      "name": "Grinchy's Peak",
+      "layout": [
+        [3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+        [3, 5, 5, 5, 5, 5, 5, 5, 5, 3],
+        [3, 5, 9, 9, 9, 9, 9, 9, 5, 3],
+        [3, 5, 9, 5, 5, 5, 5, 9, 5, 3],
+        [3, 5, 9, 5, 7, 5, 5, 9, 5, 3],
+        [3, 5, 9, 5, 5, 5, 5, 9, 5, 3],
+        [3, 5, 9, 9, 9, 9, 9, 9, 5, 3],
+        [3, 5, 5, 5, 5, 5, 5, 5, 5, 3],
+        [3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+      ],
+      "start": {
+        "x": 1,
+        "y": 1
+      },
+      "enemies": [
+        { "x": 2, "y": 7, "enemyId": "Buller" },
+        { "x": 7, "y": 7, "enemyId": "Snowbell Snapper" }
+      ],
+      "gates": [
+        {
+          "x": 4,
+          "y": 4,
+          "action": "gate_grinchy_boss"
+        }
+      ]
+    }
+  },
+  "gates": {
+    "gate_christmas_quiz": {
+      "type": "academic_challenge",
+      "questionCount": 3,
+      "onSuccess": "flag_path_unlocked",
+      "questionSetId": "holiday_math_3_q"
+    },
+    "gate_grinchy_boss": {
+      "type": "battle",
+      "enemyName": "Grinchy",
+      "enemyImage": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/enemies/christmasenemy/5.png",
+      "hp": 300,
+      "dialogueBefore": ["I stole the Heart and now Christmas is MINE! Face my fury!", "Prepare to lose, hero!"],
+      "dialogueAfter": ["*Grinchy collapses.* The Christmas Heart is recovered! You saved the day!"],
+      "rewardPetData": {
+        "id": "event_glacior_01",
+        "name": "Baby Glacior",
+        "image": "https://placehold.co/100x100/ADD8E6/0000FF?text=GLACIOR",
+        "emoji": "❄️",
+        "hp": 60,
+        "element": "ice"
+      }
+    }
+  }
+}
