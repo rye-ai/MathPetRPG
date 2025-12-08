@@ -1,5 +1,4 @@
 {
-  "file": "christmas_rescue.json",
   "meta": {
     "title": "Christmas Rescue: The Stolen Heart",
     "description": "Navigate Grinchy's snowy fortress, solve the seasonal quiz, and retrieve the stolen Christmas Heart.",
@@ -20,10 +19,7 @@
         [9, 5, 5, 5, 5, 5, 5, 5, 5, 2],
         [9, 9, 9, 9, 9, 9, 9, 9, 9, 9]
       ],
-      "start": {
-        "x": 1,
-        "y": 1
-      },
+      "start": { "x": 1, "y": 1 },
       "npcs": [
         {
           "x": 2,
@@ -65,19 +61,19 @@
         [3, 5, 5, 5, 5, 5, 5, 5, 5, 3],
         [3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
       ],
-      "start": {
-        "x": 1,
-        "y": 1
-      },
+      "start": { "x": 1, "y": 1 },
       "enemies": [
         { "x": 2, "y": 7, "enemyId": "Buller" },
         { "x": 7, "y": 7, "enemyId": "Snowbell Snapper" }
       ],
-      "gates": [
+      "npcs": [
         {
-          "x": 4,
-          "y": 4,
-          "action": "gate_grinchy_boss"
+            "x": 4, 
+            "y": 4, 
+            "name": "Grinchy", 
+            "sprite": "👺", 
+            "dialogue": ["You dare approach me?"], 
+            "action": "gate_grinchy_boss"
         }
       ]
     }
@@ -96,42 +92,41 @@
       "hp": 300,
       "dialogueBefore": ["I stole the Heart and now Christmas is MINE! Face my fury!", "Prepare to lose, hero!"],
       "dialogueAfter": ["*Grinchy collapses.* The Christmas Heart is recovered! You saved the day!"],
+      "onSuccess": "quest_complete",
       "rewardPetData": {
-        "id": "family_magma_wolf", 
-    "base": {
-      "id": "magma_wolf_01",         
-      "name": "Rudolf",          
-      "rarity": "epic",
-      "element": ["light", "ice"],
-      "baseHP": 50,
-      "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/pets/christmaspet/1.png",
-      "imageStyle": "blend-multiply",
-      "emoji": "🐺"
-    },
-    "evolutions": [
-      {
-        "level": 10,
-        "cost": 100,
-        "baseHP": 100,
-        "rarity": "epic",
-        "element": ["light", "ice"],
-        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/pets/christmaspet/1.png",
-        "imageStyle": "blend-multiply"
-        // Note: I didn't put "name" here, so it stays "Magma Wolf"
-      },
-      {
-        "name": "Hellfire Fenrir",    
-        "level": 20,
-        "cost": 200,
-        "baseHP": 200,
-        "rarity": "legendary",
-        "element": ["light", "ice"],
-        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/pets/christmaspet/1.png",
-        "imageStyle": "blend-multiply"
-        // I put "name" here, so it renames to "Hellfire Fenrir"
+        "id": "family_magma_wolf",
+        "base": {
+          "id": "magma_wolf_01",
+          "name": "Rudolf",
+          "rarity": "epic",
+          "element": ["light", "ice"],
+          "baseHP": 50,
+          "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/pets/christmaspet/1.png",
+          "imageStyle": "blend-multiply",
+          "emoji": "🐺"
+        },
+        "evolutions": [
+          {
+            "level": 10,
+            "cost": 100,
+            "baseHP": 100,
+            "rarity": "epic",
+            "element": ["light", "ice"],
+            "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/pets/christmaspet/1.png",
+            "imageStyle": "blend-multiply"
+          },
+          {
+            "name": "Hellfire Fenrir",
+            "level": 20,
+            "cost": 200,
+            "baseHP": 200,
+            "rarity": "legendary",
+            "element": ["light", "ice"],
+            "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/pets/christmaspet/1.png",
+            "imageStyle": "blend-multiply"
+          }
+        ]
       }
-    ]
+    }
   }
-]
-
-      
+}
