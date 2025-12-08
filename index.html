@@ -35,7 +35,7 @@
   <style>
     :root {
         --bg-login: url('https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/Untitled%20design.png'); 
-        --bg-game:  url('https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/Untitled%20design%20(1).png'); 
+        --bg-game:  url('https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/Untitled%20design.png'); 
     }
 
     body { 
@@ -1708,7 +1708,7 @@
         
         soundManager.playSFX('attack');
         pVis.style.animation = "attackLunge 0.3s";
-        createProjectile(move.icon, pVis, eVis);
+        createProjectile(move.image || move.icon, pVis, eVis);
         await wait(500); 
         pVis.style.animation = "";
 
@@ -1864,11 +1864,145 @@
     async function loadQuest(fileUrl) {
         try { let url = fileUrl; if(!url.startsWith('http')) url = getGhUrl(url); const res = await fetch(url); if(res.ok) { window.currentQuestData = await res.json(); startAdventure(window.currentQuestData); } else { showToast("Quest file missing!", "error"); } } catch(e) { showToast("Error loading quest.", "error"); }
     }
+    function drawAdventureMap() { 
+        if (!advCtx) return; 
+        
+        // 1. Clear Canvas
+        advCtx.clearRect(0,0,advCanvas.width, advCanvas.height); 
+        
+        // 2. Draw Map Tiles
+        for(let r=0; r<advMap.length; r++) { 
+            for(let c=0; c<advMap[0].length; c++) { 
+                const tile = advMap[r][c]; 
+                const x = c*TILE_SIZE; 
+                const y = r*TILE_SIZE; 
+                
+                if (tile === 9) { // WALL / ROCK
+                    advCtx.fillStyle = '#4a5568'; 
+                    advCtx.fillRect(x,y,TILE_SIZE,TILE_SIZE); 
+                    advCtx.font = '20px Arial'; 
+                    advCtx.fillStyle = '#2d3748'; 
+                    advCtx.fillText('🪨', x+8, y+28); 
+                } 
+                else if (tile === 5) { // SNOW
+                    advCtx.fillStyle = '#e2e8f0'; 
+                    advCtx.fillRect(x,y,TILE_SIZE,TILE_SIZE); 
+                    advCtx.font = '16px Arial'; 
+                    advCtx.fillStyle = '#cbd5e0'; 
+                    advCtx.fillText('❄️', x+8, y+26); 
+                }
+                else if (tile === 2) { // PORTAL / GOAL
+                    advCtx.fillStyle = '#9f7aea'; 
+                    advCtx.fillRect(x,y,TILE_SIZE,TILE_SIZE); 
+                    advCtx.fillText('🌀', x+8, y+26); 
+                } 
+                else if (tile === 3) { // WATER
+                    advCtx.fillStyle = '#4fc3f7'; 
+                    advCtx.fillRect(x,y,TILE_SIZE,TILE_SIZE); 
+                    advCtx.fillStyle = '#0288d1';
+                    advCtx.fillText('~', x+10, y+25); 
+                } 
+                else if (tile === 4) { // SAND
+                    advCtx.fillStyle = '#f6e05e'; 
+                    advCtx.fillRect(x,y,TILE_SIZE,TILE_SIZE); 
+                } 
+                else if (tile === 1) { // VOID/BLOCK
+                    advCtx.fillStyle = '#2d3748'; 
+                    advCtx.fillRect(x,y,TILE_SIZE,TILE_SIZE); 
+                } 
+                else { // DEFAULT GRASS (0 or undefined)
+                    advCtx.fillStyle = '#66bb6a'; 
+                    advCtx.fillRect(x,y,TILE_SIZE,TILE_SIZE); 
+                } 
+            } 
+        } 
 
-    function startAdventure(qData) { document.getElementById('adventure-list-view').style.display = 'none'; document.getElementById('adventure-play-view').style.display = 'block'; document.getElementById('quest-title-display').innerText = qData.meta ? qData.meta.title : "Adventure"; currentAdvMapKey = qData.startMap || Object.keys(qData.maps)[0]; loadAdventureMap(currentAdvMapKey); advCanvas = document.getElementById('adventure-canvas'); advCtx = advCanvas.getContext('2d'); advCanvas.onclick = (e) => { const rect = advCanvas.getBoundingClientRect(); const clickX = (e.clientX - rect.left) * (advCanvas.width / rect.width); const clickY = (e.clientY - rect.top) * (advCanvas.height / rect.height); const tileX = Math.floor(clickX / TILE_SIZE); const tileY = Math.floor(clickY / TILE_SIZE); const npc = advNpcs.find(n => n.x === tileX && n.y === tileY); if(npc && Math.abs(tileX - questX) + Math.abs(tileY - questY) <= 1) { interactNPC(npc); } }; }
-    function loadAdventureMap(mapKey) { const mapData = window.currentQuestData.maps[mapKey]; if(!mapData) return; currentAdvMapKey = mapKey; advMap = mapData.layout; advNpcs = mapData.npcs || []; if(mapData.start) { questX = mapData.start.x; questY = mapData.start.y; } setTimeout(drawAdventureMap, 100); }
-    function drawAdventureMap() { if (!advCtx) return; advCtx.clearRect(0,0,advCanvas.width, advCanvas.height); for(let r=0; r<advMap.length; r++) { for(let c=0; c<advMap[0].length; c++) { const tile = advMap[r][c]; const x = c*TILE_SIZE; const y = r*TILE_SIZE; if (tile === 2) { advCtx.fillStyle = '#9f7aea'; advCtx.fillRect(x,y,TILE_SIZE,TILE_SIZE); advCtx.fillText('🌀', x+8, y+26); } else if (tile === 1) { advCtx.fillStyle = '#2d3748'; advCtx.fillRect(x,y,TILE_SIZE,TILE_SIZE); } else if (tile === 3) { advCtx.fillStyle = '#4fc3f7'; advCtx.fillRect(x,y,TILE_SIZE,TILE_SIZE); } else if (tile === 4) { advCtx.fillStyle = '#f6e05e'; advCtx.fillRect(x,y,TILE_SIZE,TILE_SIZE); } else { advCtx.fillStyle = '#66bb6a'; advCtx.fillRect(x,y,TILE_SIZE,TILE_SIZE); } } } advNpcs.forEach(n => { const nx = n.x * TILE_SIZE; const ny = n.y * TILE_SIZE; advCtx.fillStyle = 'rgba(0,0,0,0.3)'; advCtx.beginPath(); advCtx.ellipse(nx+20, ny+35, 10, 5, 0, 0, Math.PI*2); advCtx.fill(); if (n.sprite && n.sprite.startsWith('http')) { const img = new Image(); img.src = n.sprite; if(img.complete) advCtx.drawImage(img, nx, ny, TILE_SIZE, TILE_SIZE); else { img.onload = () => advCtx.drawImage(img, nx, ny, TILE_SIZE, TILE_SIZE); } } else { advCtx.fillStyle = '#fff'; advCtx.font = '24px Arial'; advCtx.fillText(n.sprite || '🧙', nx+5, ny+30); } }); const px = questX * TILE_SIZE; const py = questY * TILE_SIZE; advCtx.fillStyle = 'rgba(0,0,0,0.3)'; advCtx.beginPath(); advCtx.ellipse(px+20, py+35, 10, 5, 0, 0, Math.PI*2); advCtx.fill(); if(playerImage.complete && playerImage.naturalWidth > 0) { advCtx.drawImage(playerImage, px, py, TILE_SIZE, TILE_SIZE); } else { advCtx.fillStyle = 'blue'; advCtx.beginPath(); advCtx.arc(px+20, py+20, 15, 0, Math.PI*2); advCtx.fill(); } }
-    function handleQuestDPad(key) { let dx=0, dy=0; if(key==='ArrowUp') dy=-1; if(key==='ArrowDown') dy=1; if(key==='ArrowLeft') dx=-1; if(key==='ArrowRight') dx=1; const nx = questX+dx; const ny = questY+dy; if(ny < 0 || ny >= advMap.length || nx < 0 || nx >= advMap[0].length) return; const tile = advMap[ny][nx]; if(tile === 1) return; const mapData = window.currentQuestData.maps[currentAdvMapKey]; if(mapData.portals) { const portal = mapData.portals.find(p => p.x === nx && p.y === ny); if(portal) { questX = portal.toX; questY = portal.toY; loadAdventureMap(portal.toMap); return; } } questX = nx; questY = ny; drawAdventureMap(); }
+        // 3. Draw NPCs (Moved from global scope to here)
+        if (advNpcs && Array.isArray(advNpcs)) {
+            advNpcs.forEach(n => { 
+                const nx = n.x * TILE_SIZE; 
+                const ny = n.y * TILE_SIZE; 
+                
+                // Shadow
+                advCtx.fillStyle = 'rgba(0,0,0,0.3)'; 
+                advCtx.beginPath(); 
+                advCtx.ellipse(nx+20, ny+35, 10, 5, 0, 0, Math.PI*2); 
+                advCtx.fill(); 
+
+                if (n.sprite && n.sprite.startsWith('http')) { 
+                    const img = new Image(); 
+                    img.src = n.sprite; 
+                    // Note: Preloading is better, but this works for basic rendering
+                    advCtx.drawImage(img, nx, ny, TILE_SIZE, TILE_SIZE); 
+                } else { 
+                    advCtx.fillStyle = '#fff'; 
+                    advCtx.font = '24px Arial'; 
+                    advCtx.fillText(n.sprite || '🧙', nx+5, ny+30); 
+                } 
+                
+                // Interaction Indicator
+                if (Math.abs(n.x - questX) + Math.abs(n.y - questY) <= 1) {
+                    advCtx.font = '20px Arial';
+                    advCtx.fillStyle = 'yellow';
+                    advCtx.fillText('❗', nx+10, ny);
+                }
+            }); 
+        }
+
+        // 4. Draw Player (Moved from global scope to here)
+        const px = questX * TILE_SIZE; 
+        const py = questY * TILE_SIZE; 
+        
+        // Player Shadow
+        advCtx.fillStyle = 'rgba(0,0,0,0.3)'; 
+        advCtx.beginPath(); 
+        advCtx.ellipse(px+20, py+35, 10, 5, 0, 0, Math.PI*2); 
+        advCtx.fill(); 
+        
+        if(playerImage.complete && playerImage.naturalWidth > 0) { 
+            advCtx.drawImage(playerImage, px, py, TILE_SIZE, TILE_SIZE); 
+        } else { 
+            advCtx.fillStyle = 'blue'; 
+            advCtx.beginPath(); 
+            advCtx.arc(px+20, py+20, 15, 0, Math.PI*2); 
+            advCtx.fill(); 
+        } 
+    }
+
+    function handleQuestDPad(key) { 
+        let dx=0, dy=0; 
+        if(key==='ArrowUp') dy=-1; 
+        if(key==='ArrowDown') dy=1; 
+        if(key==='ArrowLeft') dx=-1; 
+        if(key==='ArrowRight') dx=1; 
+        
+        const nx = questX+dx; 
+        const ny = questY+dy; 
+        
+        // Bounds Check
+        if(ny < 0 || ny >= advMap.length || nx < 0 || nx >= advMap[0].length) return; 
+        
+        const tile = advMap[ny][nx]; 
+        
+        // COLLISION CHECK: Block ID 1 (Void) and ID 9 (Walls)
+        if(tile === 1 || tile === 9) return; 
+        
+        // Portal Logic
+        const mapData = window.currentQuestData.maps[currentAdvMapKey]; 
+        if(mapData.portals) { 
+            const portal = mapData.portals.find(p => p.x === nx && p.y === ny); 
+            if(portal) { 
+                questX = portal.toX; 
+                questY = portal.toY; 
+                loadAdventureMap(portal.toMap); 
+                return; 
+            } 
+        } 
+        
+        questX = nx; 
+        questY = ny; 
+        drawAdventureMap(); 
+    }
     function interactNPC(npc) { const dBox = document.getElementById('quest-dialog'); document.getElementById('quest-npc-name').innerText = npc.name; document.getElementById('quest-text').innerText = npc.dialogue[0]; dBox.style.display = 'block'; const btn = document.getElementById('quest-action-btn'); btn.innerText = "Continue"; btn.onclick = () => { dBox.style.display = 'none'; if(npc.action) triggerQuestAction(npc.action); }; }
     function triggerQuestAction(actionKey) { const gate = window.currentQuestData.gates ? window.currentQuestData.gates[actionKey] : null; if(!gate) return; if(gate.type === 'academic_challenge') { if(confirm(`🔒 LOCKED! Answer ${gate.questionCount} questions to pass?`)) { startAcademicGate(gate.questionCount, gate.onSuccess); } } else if (gate.type === 'battle') { if(confirm(`⚠️ BATTLE: Fight?`)) { gameState.questBattleActive = true; gameState.questSuccessKey = gate.onSuccess; startBattle(7, true, false); } } else if (gate.type === 'item') { gameState.questProgress.flags.push(gate.onSuccess); alert(`You found: ${gate.itemName || 'Hidden Item'}!`); if(gate.reward) addBP(gate.reward); } }
     function startAcademicGate(count, successKey) { switchTab('study'); let wins = 0; const originalCheck = window.checkAnswer; window.checkAnswer = (val) => { let input = val || document.getElementById('answer-input').value; if(input == gameState.currentQuestion.a) { wins++; soundManager.playSFX('correct'); if(wins >= count) { alert("🎉 Gate Unlocked!"); window.checkAnswer = originalCheck; switchTab('adventure'); gameState.questProgress.flags.push(successKey); } else { generateNextQuestion(); } } else { alert("❌ Failed! Try again later."); window.checkAnswer = originalCheck; switchTab('adventure'); } }; generateNextQuestion(); }
