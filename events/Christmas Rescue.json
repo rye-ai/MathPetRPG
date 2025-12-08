@@ -97,13 +97,41 @@
       "dialogueBefore": ["I stole the Heart and now Christmas is MINE! Face my fury!", "Prepare to lose, hero!"],
       "dialogueAfter": ["*Grinchy collapses.* The Christmas Heart is recovered! You saved the day!"],
       "rewardPetData": {
-        "id": "event_glacior_01",
-        "name": "Baby Glacior",
-        "image": "https://placehold.co/100x100/ADD8E6/0000FF?text=GLACIOR",
-        "emoji": "❄️",
-        "hp": 60,
-        "element": "ice"
+        "id": "family_magma_wolf", 
+    "base": {
+      "id": "magma_wolf_01",         
+      "name": "Rudolf",          
+      "rarity": "epic",
+      "element": ["light", "ice"],
+      "baseHP": 50,
+      "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/pets/christmaspet/1.png",
+      "imageStyle": "blend-multiply",
+      "emoji": "🐺"
+    },
+    "evolutions": [
+      {
+        "level": 10,
+        "cost": 100,
+        "baseHP": 100,
+        "rarity": "epic",
+        "element": ["light", "ice"],
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/pets/christmaspet/1.png",
+        "imageStyle": "blend-multiply"
+        // Note: I didn't put "name" here, so it stays "Magma Wolf"
+      },
+      {
+        "name": "Hellfire Fenrir",    
+        "level": 20,
+        "cost": 200,
+        "baseHP": 200,
+        "rarity": "legendary",
+        "element": ["light", "ice"],
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/pets/christmaspet/1.png",
+        "imageStyle": "blend-multiply"
+        // I put "name" here, so it renames to "Hellfire Fenrir"
       }
-    }
+    ]
   }
-}
+]
+
+      
