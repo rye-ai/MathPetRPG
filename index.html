@@ -33,12 +33,9 @@
   
   <!-- Custom Game Styles -->
   <style>
-    /* =========================================
-       🖼️ BACKGROUND CONFIGURATION
-       ========================================= */
     :root {
         --bg-login: url('https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/Untitled%20design.png'); 
-        --bg-game:  url('https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/Untitled%20design%20(1).png'); 
+        --bg-game:  url('https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/Untitled%20design.png'); 
     }
 
     body { 
@@ -210,6 +207,8 @@
     .grade-group { border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 10px; background: #f7fafc; overflow: hidden; }
     .grade-summary { display: flex; justify-content: space-between; padding: 12px 15px; font-weight: bold; font-size: 16px; background: #e9eef2; cursor: pointer; }
     .grade-student-list { background: white; }
+    /* New Monitoring Badge Style */
+    .assigned-topic-badge { display: inline-block; background: #e0f2fe; color: #0284c7; font-size: 11px; padding: 3px 8px; border-radius: 12px; margin: 2px; border: 1px solid #7dd3fc; }
 
     #evolution-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a202c; z-index: 5000; display: none; align-items: center; justify-content: center; flex-direction: column; color: white; text-align: center; transition: opacity 0.5s; }
     .evo-message { font-size: clamp(20px, 5vw, 40px); font-weight: bold; margin-bottom: 40px; opacity: 0; }
@@ -269,8 +268,43 @@
                <div style="background:#fff; border:2px solid #e2e8f0; border-radius:15px; overflow:hidden;"><div style="background:#f7fafc; padding:15px; border-bottom:2px solid #e2e8f0; font-weight:bold; color:#4a5568; display:flex; justify-content:space-between; align-items:center;"><label style="display:flex; align-items:center; cursor:pointer;"><input type="checkbox" id="select-all-students" onchange="toggleAllStudents(this.checked)" style="margin-right:8px; transform:scale(1.2);"><span>Enrolled Students</span></label><button class="action-btn blue" style="width:auto; padding:5px 10px; font-size:12px; margin-top:-2px;" onclick="loadStudentList()">Refresh List</button></div><div id="bulk-action-bar" style="background:#ebf8ff; padding:10px 15px; border-bottom:1px solid #cceeff; display:none; justify-content:space-between; align-items:center;"><span id="bulk-selected-count" style="font-weight:bold; color:#5a67d8;">0 Selected</span><button class="action-btn green" style="width:auto; padding:5px 10px; font-size:12px;" onclick="openBulkTopicManager()">Assign Selected Topics</button></div><div id="student-list-container" style="max-height: 500px; overflow-y: auto;"><div style="padding:20px; text-align:center; color:gray;">Loading list...</div></div></div>
            </div>
        </div>
-       <div id="topic-manager-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;"><div style="background:white; padding:30px; border-radius:15px; width:500px; max-width:90%;"><h2 style="font-size:22px; font-weight:bold; color:#5a67d8; margin-bottom:10px;">Manage Student</h2><p id="tm-student-name" style="font-weight:bold; color:#2d3748; margin-bottom:15px;">Student: -</p><div style="margin-bottom:15px; background:#f7fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0;"><label style="font-weight:bold; color:#4a5568; font-size:14px;">Assigned Grade Level:</label><select id="tm-grade-select" style="width:100%; padding:8px; margin-top:5px; border:1px solid #cbd5e0; border-radius:5px;" onchange="refreshTopicManagerUI()"><option value="K">Kindergarten</option><option value="1">Grade 1</option><option value="2">Grade 2</option><option value="3">Grade 3</option><option value="4">Grade 4</option><option value="5">Grade 5</option><option value="6">Grade 6</option></select></div><label style="font-weight:bold; color:#4a5568; font-size:14px;">Assign Topics:</label><div id="tm-topic-list" style="max-height:300px; overflow-y:auto; border:1px solid #eee; padding:10px; border-radius:5px; margin-bottom:20px; margin-top:5px;">Loading topics...</div><div style="display:flex; gap:10px;"><button class="action-btn blue" onclick="saveStudentTopics()">Save Changes</button><button class="action-btn red" onclick="document.getElementById('topic-manager-modal').style.display='none'">Cancel</button></div></div></div>
+       <div id="topic-manager-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
+           <div style="background:white; padding:30px; border-radius:15px; width:500px; max-width:90%;">
+               <h2 style="font-size:22px; font-weight:bold; color:#5a67d8; margin-bottom:10px;">Manage Student</h2>
+               <p id="tm-student-name" style="font-weight:bold; color:#2d3748; margin-bottom:10px;">Student: -</p>
+               
+               <!-- MONITORING SECTION -->
+               <div style="margin-bottom:15px; background:#e0f2fe; padding:10px; border-radius:8px; border:1px solid #7dd3fc;">
+                   <label style="font-weight:bold; color:#0369a1; font-size:12px; display:block; margin-bottom:5px;">Currently Assigned Lessons (All Grades):</label>
+                   <div id="tm-current-assignments" style="display:flex; flex-wrap:wrap; max-height:80px; overflow-y:auto;">
+                       <span style="color:#64748b; font-size:12px;">Loading...</span>
+                   </div>
+               </div>
+
+               <div style="margin-bottom:15px; background:#f7fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0;">
+                   <label style="font-weight:bold; color:#4a5568; font-size:14px;">Select Grade Source:</label>
+                   <select id="tm-grade-select" style="width:100%; padding:8px; margin-top:5px; border:1px solid #cbd5e0; border-radius:5px;" onchange="refreshTopicManagerUI()">
+                       <option value="K">Kindergarten</option>
+                       <option value="1">Grade 1</option>
+                       <option value="2">Grade 2</option>
+                       <option value="3">Grade 3</option>
+                       <option value="4">Grade 4</option>
+                       <option value="5">Grade 5</option>
+                       <option value="6">Grade 6</option>
+                   </select>
+               </div>
+               
+               <label style="font-weight:bold; color:#4a5568; font-size:14px;">Add/Remove Topics:</label>
+               <div id="tm-topic-list" style="max-height:200px; overflow-y:auto; border:1px solid #eee; padding:10px; border-radius:5px; margin-bottom:20px; margin-top:5px;">Loading topics...</div>
+               
+               <div style="display:flex; gap:10px;">
+                   <button class="action-btn blue" onclick="saveStudentTopics()">Save Changes</button>
+                   <button class="action-btn red" onclick="document.getElementById('topic-manager-modal').style.display='none'">Cancel</button>
+               </div>
+           </div>
+       </div>
        <div id="bulk-assign-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;"><div style="background:white; padding:30px; border-radius:15px; width:500px; max-width:90%;"><h2 style="font-size:22px; font-weight:bold; color:#48bb78; margin-bottom:10px;">Bulk Assign Lesson</h2><p id="bulk-student-count-display" style="font-weight:bold; color:#2d3748; margin-bottom:15px;">Applying to 0 students.</p><div style="margin-bottom:15px; background:#f7fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0;"><label style="font-weight:bold; color:#4a5568; font-size:14px;">Assign Grade Level:</label><select id="bulk-grade-select" style="width:100%; padding:8px; margin-top:5px; border:1px solid #cbd5e0; border-radius:5px;" onchange="refreshBulkTopicUI()"><option value="K">Kindergarten</option><option value="1">Grade 1</option><option value="2">Grade 2</option><option value="3">Grade 3</option><option value="4">Grade 4</option><option value="5">Grade 5</option><option value="6">Grade 6</option></select></div><label style="font-weight:bold; color:#4a5568; font-size:14px;">Assign Topics:</label><div id="bulk-topic-list" style="max-height:300px; overflow-y:auto; border:1px solid #eee; padding:10px; border-radius:5px; margin-bottom:20px; margin-top:5px;">Select a Grade...</div><div style="display:flex; gap:10px;"><button class="action-btn green" onclick="saveBulkStudentTopics()">Apply to All Selected</button><button class="action-btn red" onclick="document.getElementById('bulk-assign-modal').style.display='none'">Cancel</button></div></div></div>
+       <div class="modal-overlay" id="teacher-delete-modal"><div class="confirm-modal delete-confirm-modal"><div style="font-size: 60px; margin-bottom: 10px;">🗑️</div><h2 style="color: #e53e3e;">Delete Student Account?</h2><p style="font-weight: bold; font-size: 18px;">Are you sure you want to delete account: <strong id="delete-student-name-display">STUDENT_NAME</strong>?</p><div class="confirm-warning">🚨 WARNING: All associated data will be permanently lost! This cannot be undone.</div><div class="confirm-buttons"><button class="confirm-btn no" onclick="document.getElementById('teacher-delete-modal').classList.remove('active');">Cancel</button> <button class="confirm-btn yes" id="delete-student-confirm-btn" onclick="confirmDeleteStudent()">Yes, Delete Permanently</button></div></div></div>
    </div>
   </div><!-- Main Game -->
   
@@ -357,7 +391,7 @@
   <div id="gacha-cinematic-modal"><div class="flash-overlay" id="gacha-flash-overlay"></div><div id="gacha-message" class="evo-message" style="margin-bottom: 50px; font-size: 28px; transition: opacity 1s;">Summoning Legendary Power...</div><div class="summoning-circle" id="summoning-circle"><div class="summoning-core" id="summoning-core"></div></div><div id="pet-reveal-container" style="position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; pointer-events: none;"></div><div id="gacha-cinematic-controls" style="position: absolute; bottom: 10%; opacity: 0; transition: opacity 0.5s;"></div></div>
   <div class="modal-overlay" id="arena-modal"><div class="confirm-modal"><div style="font-size: 60px; margin-bottom: 10px;">🏟️</div><h2 style="color: #d69e2e;">Championship Arena</h2><p style="font-weight: bold; font-size: 18px;">Challenge a Powerful Champion?</p><div style="background: #fffbeb; padding: 15px; border-radius: 10px; border: 2px solid #fbd38d; margin: 15px 0; text-align: left;"><div>🎟️ <strong>Ticket Cost:</strong> 1</div><div id="arena-ticket-display" style="color: #744210; font-size: 14px; margin-bottom: 10px;">(You have: 0)</div><hr style="border-color: #fbd38d; margin: 10px 0;"><div style="font-size: 14px;"><div>🏆 <strong>Win:</strong> Rare, Epic, or Legendary Egg</div><div style="color: #e53e3e;">💀 <strong>Lose:</strong> -20 Stamina</div></div></div><div class="confirm-buttons"><button class="confirm-btn no" onclick="closeArenaModal()">Leave</button> <button class="confirm-btn yes" id="enter-arena-btn" style="background: #d69e2e;">Fight! ⚔️</button></div></div></div>
   <div class="modal-overlay" id="replace-move-modal"><div class="confirm-modal"><h2 style="color: #4299e1;">🧠 Move Relearner</h2><p>Your pet already knows 4 moves!</p><p style="font-size: 14px; color: #718096;">Select a move to <strong>forget</strong> to learn <strong id="new-move-name" style="color: #48bb78;">New Move</strong>:</p><div id="replace-move-list" class="move-replace-list"></div><div class="confirm-buttons"><button class="confirm-btn no" onclick="closeReplaceModal()">Cancel</button></div></div></div>
-  <div class="modal-overlay" id="teacher-delete-modal"><div class="confirm-modal delete-confirm-modal"><div style="font-size: 60px; margin-bottom: 10px;">🗑️</div><h2 style="color: #e53e3e;">Delete Student Account?</h2><p style="font-weight: bold; font-size: 18px;">Are you sure you want to delete account: <strong id="delete-student-name-display">STUDENT_NAME</strong>?</p><div class="confirm-warning">🚨 WARNING: All associated data will be permanently lost! This cannot be undone.</div><div class="confirm-buttons"><button class="confirm-btn no" onclick="document.getElementById('teacher-delete-modal').classList.remove('active');">Cancel</button> <button class="confirm-btn yes" id="delete-student-confirm-btn">Yes, Delete Permanently</button></div></div></div>
+  <div class="modal-overlay" id="teacher-delete-modal"><div class="confirm-modal delete-confirm-modal"><div style="font-size: 60px; margin-bottom: 10px;">🗑️</div><h2 style="color: #e53e3e;">Delete Student Account?</h2><p style="font-weight: bold; font-size: 18px;">Are you sure you want to delete account: <strong id="delete-student-name-display">STUDENT_NAME</strong>?</p><div class="confirm-warning">🚨 WARNING: All associated data will be permanently lost! This cannot be undone.</div><div class="confirm-buttons"><button class="confirm-btn no" onclick="document.getElementById('teacher-delete-modal').classList.remove('active');">Cancel</button> <button class="confirm-btn yes" id="delete-student-confirm-btn" onclick="confirmDeleteStudent()">Yes, Delete Permanently</button></div></div></div>
   <div id="evolution-modal"><div id="evo-message-1" class="evo-message" style="transition: opacity 1s;">...The aura is changing...</div><div id="evo-pet-container" class="evo-pet-visual"></div><div id="evo-message-2" class="evo-message" style="transition: opacity 1s; margin-top: 40px;"></div><button id="evo-continue-btn" class="action-btn green" style="width:200px; padding:12px; margin-top: 40px; display:none;">Continue</button></div>
   <div class="modal-overlay" id="quantity-modal"><div class="confirm-modal"><h2 id="qty-item-name" style="color: #48bb78;">Buy Item</h2><div id="qty-item-visual" class="pet-preview" style="font-size: 50px;">🛒</div><p id="qty-cost-display" style="font-weight: bold; font-size: 16px; color:#92400e; margin-bottom: 20px;">Cost: 0 BP</p><label for="quantity-slider" id="quantity-label" style="display:block; font-weight:bold; margin-bottom:10px;">Quantity: 1</label><input type="range" id="quantity-slider" min="1" max="1" value="1" style="width: 100%; height: 25px; cursor: pointer;"><div style="display:flex; justify-content:space-between; font-size:12px; color:#718096; margin-bottom:20px;"><span>1</span><span id="max-affordable-qty">Max: 1</span></div><div class="confirm-buttons"><button class="confirm-btn no" onclick="document.getElementById('quantity-modal').classList.remove('active');">Cancel</button> <button class="confirm-btn green" id="qty-buy-confirm-btn" style="background: #48bb78;">Buy 1 (0 BP)</button></div></div></div>
 
@@ -454,7 +488,7 @@
     function getGhUrl(path) { return `https://raw.githubusercontent.com/${GITHUB_CONFIG.username}/${GITHUB_CONFIG.repo}/${GITHUB_CONFIG.branch}/${path}`; }
     async function fetchGithubFolder(folderPath) { try { const res = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.username}/${GITHUB_CONFIG.repo}/contents/${folderPath}?ref=${GITHUB_CONFIG.branch}`); if (res.status === 404 || !res.ok) return []; return await res.json(); } catch (e) { return []; } }
 
-    let EXTERNAL_PET_DATA = [ { id: 'shadow_dragon_line', base: { id: 'light_bearcat_baby', name: 'OlaBear', rarity: 'legendary', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/V1/43.png', imageStyle: 'blend-multiply', emoji: '❓', baseHP: 50 }, evolutions: [ { name: 'Teen Shadow Dragon', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/V1/44.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'legendary', baseHP: 100, cost: 100 }, { name: 'Elder Shadow Dragon', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/V1/43.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'legendary', baseHP: 150, cost: 200 } ] } ];
+    let EXTERNAL_PET_DATA = [ { id: 'shadow_dragon_line', base: { id: 'light_bearcat_baby', name: 'OlaBear', rarity: 'legendary', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/V1/43.png', imageStyle: 'blend-multiply', emoji: '❓', baseHP: 50 }, evolutions: [ { name: 'Teen Shadow Dragon', image: 'https://i.imgur.com/qLkaKtw.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'legendary', baseHP: 100, cost: 100 }, { name: 'Elder Shadow Dragon', image: 'https://i.imgur.com/qLkaKtw.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'legendary', baseHP: 150, cost: 200 } ] } ];
     let QUESTION_REPOSITORY = {}; const LEVEL_CAPS = { common: 50, uncommon: 50, rare: 60, epic: 75, legendary: 100 };
     const BATTLE_BACKGROUNDS = { 1: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur.png', 4: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(1).png', 5: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(3).png', 6: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(2).png', 7: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/%E2%80%9CA%20high-quality%20monster-inspired%20battle%20arena%20in%20landscape%20orientation.%20A%20large%2C%20circular%20stadium%20floor%20made%20of%20smooth%20stone%20tiles%20with%20subtle%20glowing%20patterns.%20Surrounding%20the%20arena%20are%20tall%20stadium%20walls%2C%20bright%20.jpg' }; const ARENA_IMGS = [ 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur.png', 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(1).png', 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(2).png', 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(3).png' ];
     
@@ -888,7 +922,7 @@
         // 1. Add Starter Cat
         gameState.pets.push({ id: 'starter_cat', type: 'monster_01', emoji: '🐱', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/V2/1.png', imageStyle: 'blend-multiply', name: 'Cat', hatchProgress: 100, isHatched: true, hp: 40, maxHP: 40, powers: ['claw_attack'], rarity: 'common', evolutionStage: 0, level: 1, xp: 0, maxXp: 300, element: 'normal' }); 
         
-        // 2. Add FREE Mystery Egg
+        // 2. Add FREE Mystery Egg (Common)
         const eggPool = PET_TYPES.common;
         const base = eggPool[Math.floor(Math.random() * eggPool.length)];
         const freeEgg = JSON.parse(JSON.stringify(base));
@@ -1053,13 +1087,14 @@
             newName = `${prefix}${baseName}`;
         }
 
-        const m = document.getElementById('evolution-modal'); const c = document.getElementById('evo-pet-container'); m.style.display = 'flex'; document.getElementById('evo-message-1').style.opacity = 0; document.getElementById('evo-continue-btn').style.display='none';
+        const m = document.getElementById('evolution-modal'); const c = document.getElementById('evo-pet-container'); m.style.display = 'flex'; 
         
         // Clear old text immediately to avoid flashing
         document.getElementById('evo-message-1').innerText = "";
         document.getElementById('evo-message-2').innerText = "";
         document.getElementById('evo-message-2').style.opacity = 0;
 
+        document.getElementById('evo-continue-btn').style.display='none';
         c.innerHTML = p.image ? `<img src="${p.image}" class="evo-pet-image ${p.imageStyle}">` : p.emoji; c.classList.remove('flash-and-scale');
         
         setTimeout(() => { document.getElementById('evo-message-1').innerText = "The aura is changing..."; document.getElementById('evo-message-1').style.opacity = 1; }, 500);
@@ -1115,12 +1150,12 @@
     
     function getScaledEnemy(baseEnemyTemplate, playerLevel) {
         let enemy = JSON.parse(JSON.stringify(baseEnemyTemplate));
-        // --- NERFED SCALING ---
-        const hpGrowth = (playerLevel - 1) * 5;  // Was 8
-        const dmgGrowth = Math.floor((playerLevel - 1) * 0.4); // Was 0.8
+        // --- NERFED SCALING (5x HP instead of 8x, 0.4x Dmg instead of 0.8x) ---
+        const hpGrowth = (playerLevel - 1) * 5; 
+        const dmgGrowth = Math.floor((playerLevel - 1) * 0.4);
         
-        // --- BOOSTED XP ---
-        const xpGrowth = (playerLevel - 1) * 15; // Was 5 (3x Increase)
+        // --- BOOSTED XP (15x instead of 5x) ---
+        const xpGrowth = (playerLevel - 1) * 15; 
 
         enemy.hp = (enemy.hp || 30) + hpGrowth;
         enemy.damage = (enemy.damage || 5) + dmgGrowth;
@@ -1351,42 +1386,190 @@
     document.getElementById('release-confirm').addEventListener('click', () => { gameState.pets = gameState.pets.filter(p => p.id !== gameState.currentPetId); gameState.currentPetId = gameState.pets[0].id; gameState.brainPoints += 10; saveGame(); renderHub(); document.getElementById('release-modal').classList.remove('active'); });
     document.getElementById('release-cancel').addEventListener('click', () => { document.getElementById('release-modal').classList.remove('active'); });
 
+    // --- TEACHER LOGIC UPDATED ---
+    let currentStudentData = null; // Store full object for reference
+
     async function authenticateStudent(name, password) { try { const d = await window.fbase.getDoc(window.fbase.doc(window.db, "students", name)); if (d.exists() && (!d.data().password || d.data().password === password)) return { success: true, assignment: d.data().assignedGrade ? { grade: d.data().assignedGrade, topics: d.data().assignedTopics||[] } : null }; return { success: false, message: "Invalid Login" }; } catch (e) { return { success: false, message: "Error" }; } }
     function toggleTeacherLogin() { const p = document.getElementById('teacher-login-panel'); p.style.display = p.style.display === 'none' ? 'block' : 'none'; }
     function checkTeacherPin() { if (document.getElementById('teacher-pin').value === "1030") { document.getElementById('teacher-dashboard-screen').style.display = 'block'; loadStudentList(); } else showToast("Wrong PIN", "error"); }
     async function createStudentAccount() { const u=document.getElementById('new-student-user').value; const p=document.getElementById('new-student-pass').value; if(!u||!p) return; await window.fbase.setDoc(window.fbase.doc(window.db,"students",u),{username:u,password:p,assignedGrade:document.getElementById('new-student-grade').value,assignedTopics:[],createdAt:new Date()}); showToast("Created!", "success"); loadStudentList(); }
     function toggleAllStudents(c) { document.querySelectorAll('.student-select-checkbox').forEach(cb => cb.checked = c); updateBulkActionBar(); }
     function updateBulkActionBar() { const c = document.querySelectorAll('.student-select-checkbox:checked').length; const b = document.getElementById('bulk-action-bar'); document.getElementById('bulk-selected-count').innerText = `${c} Selected`; b.style.display = c > 0 ? 'flex' : 'none'; }
+    
     async function loadStudentList() {
-    const d = document.getElementById('student-list-container');
-    d.innerHTML = '<div style="padding:20px;text-align:center;color:gray;">Loading class roster...</div>';
-    const q = await window.fbase.getDocs(window.fbase.collection(window.db, "students"));
-    const grouped = {};
-    q.forEach(doc => {
-        const s = doc.data(); const g = s.assignedGrade || "Unassigned"; const bp = (s.saveData && s.saveData.brainPoints) ? s.saveData.brainPoints : 0;
-        if (!grouped[g]) grouped[g] = [];
-        grouped[g].push(`
-            <div class="student-list-item">
-                <input type="checkbox" class="student-select-checkbox" data-username="${s.username}" onchange="updateBulkActionBar()">
-                <div class="student-info" style="display:flex; flex-direction:column; align-items:flex-start;">
-    <div style="font-size:16px; font-weight:bold;">${s.username}</div>
-    <div style="font-size:12px; background:#fef3c7; color:#92400e; padding:2px 8px; border-radius:10px; margin-top:2px;">🧠 ${bp} BP</div>
-</div>
-                <div style="display:flex; gap:5px;">
-                    <button class="action-btn green" style="width:auto; padding:5px 10px; font-size:12px;" onclick="giveStudentBP('${s.username}')">🎁 +BP</button>
-                    <button class="action-btn blue" style="width:auto; padding:5px 10px; font-size:12px;" onclick="openTopicManager('${s.username}','${s.assignedGrade}')">Manage</button>
-                </div>
-            </div>`);
-    });
-    let finalHtml = ''; const grades = Object.keys(grouped).sort(); 
-    if (grades.length === 0) { d.innerHTML = '<div style="padding:20px;text-align:center;">No students found.</div>'; return; }
-    grades.forEach(grade => { finalHtml += `<div class="grade-group"><div class="grade-summary" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'"><span>📂 Grade ${grade}</span><span>${grouped[grade].length} Students ▼</span></div><div class="grade-student-list">${grouped[grade].join('')}</div></div>`; }); d.innerHTML = finalHtml; }
+        const d = document.getElementById('student-list-container');
+        d.innerHTML = '<div style="padding:20px;text-align:center;color:gray;">Loading class roster...</div>';
+        const q = await window.fbase.getDocs(window.fbase.collection(window.db, "students"));
+        const grouped = {};
+        q.forEach(doc => {
+            const s = doc.data(); const g = s.assignedGrade || "Unassigned"; const bp = (s.saveData && s.saveData.brainPoints) ? s.saveData.brainPoints : 0;
+            if (!grouped[g]) grouped[g] = [];
+            grouped[g].push(`
+                <div class="student-list-item">
+                    <input type="checkbox" class="student-select-checkbox" data-username="${s.username}" onchange="updateBulkActionBar()">
+                    <div class="student-info" style="display:flex; flex-direction:column; align-items:flex-start;">
+                        <div style="font-size:16px; font-weight:bold;">${s.username}</div>
+                        <div style="font-size:12px; background:#fef3c7; color:#92400e; padding:2px 8px; border-radius:10px; margin-top:2px;">🧠 ${bp} BP</div>
+                    </div>
+                    <div style="display:flex; gap:5px;">
+                        <button class="action-btn green" style="width:auto; padding:5px 10px; font-size:12px;" onclick="giveStudentBP('${s.username}')">🎁 +BP</button>
+                        <button class="action-btn blue" style="width:auto; padding:5px 10px; font-size:12px;" onclick="openTopicManager('${s.username}')">Manage</button>
+                        <button class="action-btn red" style="width:auto; padding:5px 10px; font-size:12px;" onclick="openDeleteModal('${s.username}')">🗑️</button>
+                    </div>
+                </div>`);
+        });
+        let finalHtml = ''; const grades = Object.keys(grouped).sort(); 
+        if (grades.length === 0) { d.innerHTML = '<div style="padding:20px;text-align:center;">No students found.</div>'; return; }
+        grades.forEach(grade => { finalHtml += `<div class="grade-group"><div class="grade-summary" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'"><span>📂 Grade ${grade}</span><span>${grouped[grade].length} Students ▼</span></div><div class="grade-student-list">${grouped[grade].join('')}</div></div>`; }); d.innerHTML = finalHtml; 
+    }
+
+    let studentToDelete = null;
+    function openDeleteModal(username) {
+        studentToDelete = username;
+        document.getElementById('delete-student-name-display').innerText = username;
+        document.getElementById('teacher-delete-modal').classList.add('active');
+    }
+    async function confirmDeleteStudent() {
+        if(!studentToDelete) return;
+        await window.fbase.deleteDoc(window.fbase.doc(window.db, "students", studentToDelete));
+        document.getElementById('teacher-delete-modal').classList.remove('active');
+        showToast("Student Deleted", "success");
+        loadStudentList();
+    }
 
     async function giveStudentBP(username) { const amount = prompt(`How many Brain Points (BP) for ${username}?`, "50"); if (!amount || isNaN(amount)) return; const val = parseInt(amount); if (val <= 0) return; const docRef = window.fbase.doc(window.db, "students", username); try { await window.fbase.updateDoc(docRef, { "saveData.brainPoints": window.fbase.increment(val) }); showToast(`✅ Sent ${val} BP to ${username}!`, "success"); } catch (e) { try { await window.fbase.setDoc(docRef, { saveData: { brainPoints: val } }, { merge: true }); showToast(`✅ Sent ${val} BP to ${username}!`, "success"); } catch (err) { showToast("Error giving points.", "error"); } } }
-    let currentManagingStudent = null;
-    async function openTopicManager(s, g) { currentManagingStudent = s; document.getElementById('tm-student-name').innerText=s; document.getElementById('tm-grade-select').value=g||'K'; document.getElementById('topic-manager-modal').style.display='flex'; refreshTopicManagerUI(); }
-    async function refreshTopicManagerUI() { const g=document.getElementById('tm-grade-select').value; const d=document.getElementById('tm-topic-list'); d.innerHTML='Loading...'; let files=[]; if(GITHUB_CONFIG.enabled) files=await fetchGithubFolder(`questions/grade_${g}`); d.innerHTML=''; if(files.length>0) files.filter(f=>f.name.endsWith('.json')).forEach(f=>d.innerHTML+=`<label class="topic-checkbox-label"><input type="checkbox" value="${f.download_url}"> ${f.name}</label>`); else Object.keys(QUESTION_REPOSITORY[g]||{}).forEach(t=>d.innerHTML+=`<label class="topic-checkbox-label"><input type="checkbox" value="INTERNAL:${t}"> ${t}</label>`); }
-    async function saveStudentTopics() { const ts=Array.from(document.querySelectorAll('#tm-topic-list input:checked')).map(c=>c.value); await window.fbase.updateDoc(window.fbase.doc(window.db,"students",currentManagingStudent),{assignedGrade:document.getElementById('tm-grade-select').value,assignedTopics:ts}); showToast("Saved!", "success"); document.getElementById('topic-manager-modal').style.display='none'; }
+    
+    // --- INDIVIDUAL MANAGEMENT (FIXED) ---
+    async function openTopicManager(username) { 
+        currentManagingStudent = username; 
+        document.getElementById('tm-student-name').innerText=username; 
+        document.getElementById('topic-manager-modal').style.display='flex';
+        
+        // 1. Fetch Latest Data
+        const docSnap = await window.fbase.getDoc(window.fbase.doc(window.db, "students", username));
+        if (docSnap.exists()) {
+            currentStudentData = docSnap.data();
+            // Default dropdown to assigned grade or K
+            document.getElementById('tm-grade-select').value = currentStudentData.assignedGrade || 'K';
+            
+            // 2. Render "Currently Assigned" List at Top
+            renderCurrentAssignmentsList();
+        }
+        
+        refreshTopicManagerUI(); 
+    }
+    
+    function renderCurrentAssignmentsList() {
+        const listContainer = document.getElementById('tm-current-assignments');
+        if (!currentStudentData.assignedTopics || currentStudentData.assignedTopics.length === 0) {
+            listContainer.innerHTML = '<span style="color:#94a3b8; font-size:12px;">No lessons assigned yet.</span>';
+            return;
+        }
+        
+        listContainer.innerHTML = currentStudentData.assignedTopics.map(t => {
+            // Make name readable: remove .json and path
+            let cleanName = t;
+            if (t.includes('/')) cleanName = t.split('/').pop();
+            cleanName = cleanName.replace('.json', '').replace(/%20/g, ' ');
+            if (t.startsWith('INTERNAL:')) cleanName = t.replace('INTERNAL:', '') + " (Built-in)";
+            
+            return `<span class="assigned-topic-badge">${cleanName}</span>`;
+        }).join('');
+    }
+
+    async function refreshTopicManagerUI() { 
+        const g=document.getElementById('tm-grade-select').value; 
+        const d=document.getElementById('tm-topic-list'); 
+        d.innerHTML='Loading...'; 
+        let files=[]; 
+        if(GITHUB_CONFIG.enabled) files=await fetchGithubFolder(`questions/grade_${g}`); 
+        d.innerHTML=''; 
+        
+        // 3. Helper to check if box should be ticked
+        const isChecked = (val) => {
+            return (currentStudentData && currentStudentData.assignedTopics && currentStudentData.assignedTopics.includes(val)) ? 'checked' : '';
+        };
+        
+        if(files.length>0) {
+            files.filter(f=>f.name.endsWith('.json')).forEach(f=> {
+                d.innerHTML+=`<label class="topic-checkbox-label" style="display:block; margin:5px 0;"><input type="checkbox" value="${f.download_url}" ${isChecked(f.download_url)}> ${f.name}</label>`;
+            });
+        } else {
+            Object.keys(QUESTION_REPOSITORY[g]||{}).forEach(t=> {
+                const val = `INTERNAL:${t}`;
+                d.innerHTML+=`<label class="topic-checkbox-label" style="display:block; margin:5px 0;"><input type="checkbox" value="${val}" ${isChecked(val)}> ${t}</label>`;
+            });
+        }
+    }
+    
+    async function saveStudentTopics() { 
+        // 4. Non-Destructive Save Logic
+        const checkboxes = document.querySelectorAll('#tm-topic-list input');
+        
+        // Start with existing list so we don't delete unseen grades
+        let finalTopics = new Set(currentStudentData.assignedTopics || []);
+        
+        checkboxes.forEach(cb => {
+            if (cb.checked) {
+                finalTopics.add(cb.value); // Add if checked
+            } else {
+                finalTopics.delete(cb.value); // Remove ONLY if present and unchecked
+            }
+        });
+        
+        const newGrade = document.getElementById('tm-grade-select').value;
+
+        await window.fbase.updateDoc(window.fbase.doc(window.db,"students",currentManagingStudent), {
+            assignedGrade: newGrade,
+            assignedTopics: Array.from(finalTopics)
+        }); 
+        
+        showToast("Saved!", "success"); 
+        document.getElementById('topic-manager-modal').style.display='none'; 
+    }
+
+    // --- BULK ASSIGN LOGIC ---
+    function openBulkTopicManager() {
+        const selected = document.querySelectorAll('.student-select-checkbox:checked');
+        if(selected.length === 0) return showToast("No students selected", "error");
+        document.getElementById('bulk-student-count-display').innerText = `Applying to ${selected.length} students.`;
+        document.getElementById('bulk-assign-modal').style.display = 'flex';
+        refreshBulkTopicUI();
+    }
+
+    async function refreshBulkTopicUI() {
+        const g = document.getElementById('bulk-grade-select').value;
+        const d = document.getElementById('bulk-topic-list');
+        d.innerHTML='Loading...'; 
+        let files=[]; 
+        if(GITHUB_CONFIG.enabled) files=await fetchGithubFolder(`questions/grade_${g}`); 
+        d.innerHTML=''; 
+        if(files.length>0) files.filter(f=>f.name.endsWith('.json')).forEach(f=>d.innerHTML+=`<label class="topic-checkbox-label" style="display:block; margin:5px 0;"><input type="checkbox" value="${f.download_url}"> ${f.name}</label>`); 
+        else Object.keys(QUESTION_REPOSITORY[g]||{}).forEach(t=>d.innerHTML+=`<label class="topic-checkbox-label" style="display:block; margin:5px 0;"><input type="checkbox" value="INTERNAL:${t}"> ${t}</label>`);
+    }
+
+    async function saveBulkStudentTopics() {
+        const selectedStudents = Array.from(document.querySelectorAll('.student-select-checkbox:checked')).map(cb => cb.dataset.username);
+        const topics = Array.from(document.querySelectorAll('#bulk-topic-list input:checked')).map(cb => cb.value);
+        const grade = document.getElementById('bulk-grade-select').value;
+
+        if (selectedStudents.length === 0) return showToast("No students selected", "error");
+
+        const batch = window.fbase.writeBatch(window.db);
+        
+        selectedStudents.forEach(user => {
+            const ref = window.fbase.doc(window.db, "students", user);
+            const updateData = { assignedGrade: grade };
+            if (topics.length > 0) {
+                updateData.assignedTopics = window.fbase.arrayUnion(...topics);
+            }
+            batch.update(ref, updateData);
+        });
+
+        await batch.commit();
+        showToast(`Added topics to ${selectedStudents.length} students!`, "success");
+        document.getElementById('bulk-assign-modal').style.display='none';
+    }
 
     let currentRoomId=null, pvpUnsubscribe=null, isHost=false, localOpponentHP=0, localPlayerHP=0;
     function showMultiplayerMenu() { document.getElementById('wilds-menu').style.display='none'; document.getElementById('multiplayer-menu').style.display='block'; }
