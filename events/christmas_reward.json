@@ -1,0 +1,9 @@
+{
+  "name": "Rudolf",          
+      "rarity": "epic",
+      "element": ["light", "ice"],
+      "baseHP": 70,
+      "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/pets/christmaspet/1.png",
+      "imageStyle": "blend-multiply",
+      "emoji": "🐺"
+}
