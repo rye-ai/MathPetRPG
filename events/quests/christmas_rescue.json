@@ -1,36 +1,36 @@
 {
   "meta": {
     "title": "Quest for the Christmas Heart",
-    "description": "Navigate the blocked paths, defeat the Ultimate Minions, and reclaim the Heart from Grinchy!"
+    "description": "Defeat Grinchy's minions and retrieve the stolen Christmas Heart!"
   },
   "startMap": "map_1",
   "maps": {
     "map_1": {
       "layout": [
         [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-        [2, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 2],
-        [2, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 2],
-        [2, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 2],
-        [2, 9, 9, 9, 9, 9, 5, 9, 9, 9, 9, 2],
-        [2, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 2],
-        [2, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 2],
-        [2, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 2],
-        [2, 9, 9, 9, 9, 9, 5, 9, 9, 9, 9, 2],
-        [2, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 2],
-        [2, 5, 5, 5, 5, 5, 5, 5, 5, 5, 8, 2],
+        [2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2],
+        [2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2],
+        [2, 2, 2, 2, 2, 0, 2, 2, 2, 2, 2, 2],
+        [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2],
+        [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2],
+        [2, 2, 2, 2, 2, 2, 0, 2, 2, 2, 2, 2],
+        [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2],
+        [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2],
+        [2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 2, 2],
+        [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 2],
         [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
       ],
       "start": { "x": 1, "y": 1 },
       "portals": [ { "x": 10, "y": 10, "toMap": "map_2" } ],
       "npcs": [
         {
-          "x": 6, "y": 4, "name": "Village Elder", "sprite": "🎅",
-          "dialogue": ["The gate is locked!", "Answer my questions to open the path."],
+          "x": 5, "y": 3, "name": "Village Elder", "sprite": "🎅",
+          "dialogue": ["The bridge is out!", "Solve this to fix it."],
           "action": "gate_npc_1", "hideOnFlag": "solved_npc_1"
         },
         {
-          "x": 6, "y": 8, "name": "Ultimate Snowbell Snapper", "sprite": "🐢",
-          "dialogue": ["SNAP! I am the wall now!"],
+          "x": 6, "y": 6, "name": "Ultimate Snowbell Snapper", "sprite": "🐢",
+          "dialogue": ["SNAP! You shall not pass!"],
           "action": "gate_monster_1", "hideOnFlag": "defeated_m1"
         }
       ]
@@ -38,29 +38,29 @@
     "map_2": {
       "layout": [
         [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-        [2, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 2],
-        [2, 5, 2, 2, 2, 2, 2, 2, 2, 2, 5, 2],
-        [2, 5, 2, 5, 5, 5, 5, 5, 5, 2, 5, 2],
-        [2, 5, 2, 5, 2, 2, 2, 2, 5, 2, 5, 2],
-        [2, 5, 2, 5, 2, 8, 5, 2, 5, 2, 5, 2],
-        [2, 5, 2, 5, 2, 5, 2, 2, 5, 2, 5, 2],
-        [2, 5, 2, 5, 2, 5, 2, 2, 5, 2, 5, 2],
-        [2, 5, 2, 5, 5, 5, 5, 5, 5, 2, 5, 2],
-        [2, 5, 2, 2, 2, 2, 2, 2, 2, 2, 5, 2],
-        [2, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 2],
+        [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2],
+        [2, 0, 2, 2, 2, 2, 2, 2, 2, 2, 0, 2],
+        [2, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 2],
+        [2, 0, 2, 0, 2, 2, 2, 2, 0, 2, 0, 2],
+        [2, 0, 2, 0, 2, 0, 0, 2, 0, 2, 0, 2],
+        [2, 0, 2, 0, 2, 0, 0, 2, 0, 2, 0, 2],
+        [2, 0, 2, 0, 2, 2, 2, 2, 0, 2, 0, 2],
+        [2, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 2],
+        [2, 0, 2, 2, 2, 2, 2, 2, 2, 2, 0, 2],
+        [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 2],
         [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
       ],
       "start": { "x": 1, "y": 1 },
-      "portals": [ { "x": 5, "y": 5, "toMap": "map_3" } ],
+      "portals": [ { "x": 10, "y": 10, "toMap": "map_3" } ],
       "npcs": [
         {
-          "x": 6, "y": 10, "name": "Lost Elf", "sprite": "🧝",
-          "dialogue": ["This maze is tricky.", "Help me solve the route!"],
+          "x": 1, "y": 5, "name": "Lost Elf", "sprite": "🧝",
+          "dialogue": ["I am stuck in this maze.", "Help me calculate the way out!"],
           "action": "gate_npc_2", "hideOnFlag": "solved_npc_2"
         },
         {
-          "x": 5, "y": 7, "name": "Ultimate Canous", "sprite": "🐺",
-          "dialogue": ["Only Grinchy enters here!"],
+          "x": 10, "y": 5, "name": "Ultimate Canous", "sprite": "🐺",
+          "dialogue": ["Grrr! This forest is mine!"],
           "action": "gate_monster_2", "hideOnFlag": "defeated_m2"
         }
       ]
@@ -68,29 +68,29 @@
     "map_3": {
       "layout": [
         [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-        [3, 5, 5, 5, 5, 3, 3, 3, 5, 5, 5, 3],
-        [3, 5, 5, 5, 5, 3, 3, 3, 5, 5, 5, 3],
-        [3, 5, 5, 5, 5, 3, 3, 3, 5, 5, 5, 3],
-        [3, 5, 5, 5, 5, 5, 3, 3, 5, 5, 5, 3],
-        [3, 3, 3, 3, 3, 5, 3, 3, 5, 5, 5, 3],
-        [3, 5, 5, 5, 3, 5, 3, 3, 5, 5, 5, 3],
-        [3, 5, 5, 5, 3, 5, 5, 5, 5, 5, 5, 3],
         [3, 5, 5, 5, 3, 3, 3, 3, 3, 3, 3, 3],
-        [3, 5, 5, 5, 3, 5, 5, 5, 5, 5, 8, 3],
         [3, 5, 5, 5, 3, 5, 5, 5, 5, 5, 5, 3],
+        [3, 5, 5, 5, 3, 5, 5, 5, 5, 5, 5, 3],
+        [3, 3, 0, 3, 3, 5, 5, 5, 5, 5, 5, 3],
+        [3, 3, 3, 3, 3, 3, 3, 3, 0, 3, 3, 3],
+        [3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 3],
+        [3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 3],
+        [3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 3],
+        [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+        [3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 8, 3],
         [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
       ],
-      "start": { "x": 1, "y": 2 },
-      "portals": [ { "x": 10, "y": 9, "toMap": "map_4" } ],
+      "start": { "x": 1, "y": 1 },
+      "portals": [ { "x": 10, "y": 10, "toMap": "map_4" } ],
       "npcs": [
         {
-          "x": 5, "y": 4, "name": "Snowman Guard", "sprite": "☃️",
-          "dialogue": ["I am the bridge.", "Solve to cross!"],
+          "x": 2, "y": 4, "name": "Snowman Guard", "sprite": "☃️",
+          "dialogue": ["The ice bridge is broken.", "Math is the only glue!"],
           "action": "gate_npc_3", "hideOnFlag": "solved_npc_3"
         },
         {
-          "x": 4, "y": 9, "name": "Ultimate Carolgeist", "sprite": "👻",
-          "dialogue": ["The water is frozen with fear!"],
+          "x": 8, "y": 5, "name": "Ultimate Carolgeist", "sprite": "👻",
+          "dialogue": ["Freezing winds stop you here!"],
           "action": "gate_monster_3", "hideOnFlag": "defeated_m3"
         }
       ]
@@ -98,29 +98,29 @@
     "map_4": {
       "layout": [
         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        [1, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 1],
+        [1, 5, 5, 5, 1, 5, 5, 5, 5, 5, 5, 1],
+        [1, 5, 1, 5, 1, 5, 1, 1, 1, 1, 5, 1],
+        [1, 5, 1, 5, 1, 5, 1, 1, 1, 1, 5, 1],
+        [1, 5, 1, 5, 0, 5, 1, 1, 1, 1, 5, 1],
         [1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1],
+        [1, 5, 1, 5, 5, 5, 5, 5, 5, 5, 5, 1],
+        [1, 5, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 5, 1, 5, 0, 5, 5, 5, 5, 5, 5, 1],
         [1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1],
-        [1, 5, 1, 1, 5, 5, 5, 5, 1, 1, 5, 1],
-        [1, 5, 1, 1, 5, 1, 1, 5, 1, 1, 5, 1],
-        [1, 5, 1, 1, 5, 1, 1, 5, 1, 1, 5, 1],
-        [1, 5, 1, 1, 5, 1, 1, 5, 1, 1, 5, 1],
-        [1, 5, 1, 1, 5, 1, 1, 5, 1, 1, 5, 1],
-        [1, 5, 5, 5, 5, 1, 1, 5, 5, 5, 5, 1],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8, 1],
+        [1, 5, 5, 5, 5, 5, 5, 5, 5, 5, 8, 1],
         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
       ],
       "start": { "x": 1, "y": 1 },
       "portals": [ { "x": 10, "y": 10, "toMap": "map_5" } ],
       "npcs": [
         {
-          "x": 10, "y": 5, "name": "Yeti Guide", "sprite": "🦍",
-          "dialogue": ["The cliff is narrow.", "Careful step required!"],
+          "x": 4, "y": 4, "name": "Yeti Guide", "sprite": "🦍",
+          "dialogue": ["The cliff is too steep.", "Answer to build a ladder!"],
           "action": "gate_npc_4", "hideOnFlag": "solved_npc_4"
         },
         {
           "x": 4, "y": 8, "name": "Ultimate Buller", "sprite": "🐂",
-          "dialogue": ["I am the final wall before the Lair!"],
+          "dialogue": ["This is the final barrier!"],
           "action": "gate_monster_4", "hideOnFlag": "defeated_m4"
         }
       ]
@@ -145,12 +145,12 @@
       "npcs": [
         {
           "x": 5, "y": 5, "name": "Grinchy", "sprite": "👺",
-          "dialogue": ["I hate happiness!", "You cannot have the Heart!"],
+          "dialogue": ["I hate happiness!", "The Heart stays with me!"],
           "action": "gate_boss", "hideOnFlag": "grinchy_defeated"
         },
         {
           "x": 5, "y": 1, "name": "The Heart", "sprite": "❤️",
-          "dialogue": ["Warmth returns to the land!"],
+          "dialogue": ["You saved Christmas!"],
           "action": null
         }
       ]
@@ -178,8 +178,8 @@
         "type": "Rudolf_01",
         "rarity": "epic",
         "element": ["light", "ice"],
-        "hp": 50,
-        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/pets/christmaspet/1.png",
+        "hp": 60,
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/xmasreward/1.png",
         "imageStyle": "blend-multiply",
         "emoji": "🐺",
         "evolutions": [
@@ -189,7 +189,7 @@
             "baseHP": 100,
             "rarity": "epic",
             "element": ["light", "ice"],
-            "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/pets/christmaspet/2.png",
+            "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/xmasreward/1.png",
             "imageStyle": "blend-multiply"
           },
           {
@@ -198,7 +198,7 @@
             "baseHP": 200,
             "rarity": "legendary",
             "element": ["light", "ice"],
-            "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/pets/christmaspet/1.png",
+            "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/xmasreward/1.png",
             "imageStyle": "blend-multiply"
           }
         ]
