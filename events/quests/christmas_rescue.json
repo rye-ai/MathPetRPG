@@ -1,174 +1,187 @@
 {
   "meta": {
-    "title": "The Quest for the Christmas Heart"
+    "title": "Quest for the Christmas Heart",
+    "description": "Navigate the blocked paths, defeat the Ultimate Minions, and reclaim the Heart from Grinchy!"
   },
-  "startMap": "snowy_village",
+  "startMap": "map_1",
   "maps": {
-    "snowy_village": {
+    "map_1": {
       "layout": [
-        [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9],
-        [9, 5, 5, 5, 5, 5, 5, 5, 9, 5, 5, 9],
-        [9, 5, 9, 9, 9, 9, 9, 5, 9, 5, 5, 9],
-        [9, 5, 9, 5, 5, 5, 9, 5, 9, 5, 5, 9],
-        [9, 5, 9, 5, 9, 5, 9, 5, 5, 5, 5, 9],
-        [9, 5, 5, 5, 9, 5, 5, 5, 9, 9, 9, 9],
-        [9, 9, 9, 9, 9, 9, 9, 5, 9, 2, 9, 9], 
-        [9, 5, 5, 5, 5, 5, 5, 5, 9, 5, 9, 9], 
-        [9, 5, 9, 9, 9, 9, 9, 9, 9, 0, 9, 9], 
-        [9, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 9],
-        [9, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 9],
-        [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9]
+        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+        [2, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 2],
+        [2, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 2],
+        [2, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 2],
+        [2, 9, 9, 9, 9, 9, 5, 9, 9, 9, 9, 2],
+        [2, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 2],
+        [2, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 2],
+        [2, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 2],
+        [2, 9, 9, 9, 9, 9, 5, 9, 9, 9, 9, 2],
+        [2, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 2],
+        [2, 5, 5, 5, 5, 5, 5, 5, 5, 5, 8, 2],
+        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
       ],
       "start": { "x": 1, "y": 1 },
+      "portals": [ { "x": 10, "y": 10, "toMap": "map_2" } ],
       "npcs": [
         {
-          "name": "Elves Gatekeeper",
-          "x": 9,
-          "y": 8,
-          "sprite": "🧝",
-          "dialogue": [
-            "Halt! The path ahead is dangerous.",
-            "Answer 3 math questions to open the gate!"
-          ],
-          "action": "elf_challenge",
-          "hideOnFlag": "elf_challenge_complete"
-        }
-      ],
-      "portals": [
+          "x": 6, "y": 4, "name": "Village Elder", "sprite": "🎅",
+          "dialogue": ["The gate is locked!", "Answer my questions to open the path."],
+          "action": "gate_npc_1", "hideOnFlag": "solved_npc_1"
+        },
         {
-          "x": 9,
-          "y": 6,
-          "toMap": "icy_gauntlet",
-          "toX": 1,
-          "toY": 1
+          "x": 6, "y": 8, "name": "Ultimate Snowbell Snapper", "sprite": "🐢",
+          "dialogue": ["SNAP! I am the wall now!"],
+          "action": "gate_monster_1", "hideOnFlag": "defeated_m1"
         }
       ]
     },
-    "icy_gauntlet": {
+    "map_2": {
       "layout": [
-        [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9],
-        [9, 5, 5, 5, 9, 5, 5, 5, 5, 5, 5, 9],
-        [9, 9, 9, 5, 9, 5, 9, 9, 9, 9, 5, 9],
-        [9, 5, 0, 5, 9, 5, 9, 5, 5, 9, 5, 9],
-        [9, 5, 9, 9, 9, 5, 9, 5, 9, 9, 5, 9],
-        [9, 5, 5, 5, 5, 5, 9, 5, 5, 5, 5, 9],
-        [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 0, 9],
-        [9, 5, 5, 5, 5, 5, 5, 5, 5, 9, 0, 9],
-        [9, 5, 9, 9, 9, 9, 9, 9, 5, 9, 0, 9],
-        [9, 5, 5, 5, 5, 5, 5, 9, 5, 9, 0, 9],
-        [9, 9, 9, 9, 9, 9, 5, 9, 5, 5, 2, 9],
-        [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9]
+        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+        [2, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 2],
+        [2, 5, 2, 2, 2, 2, 2, 2, 2, 2, 5, 2],
+        [2, 5, 2, 5, 5, 5, 5, 5, 5, 2, 5, 2],
+        [2, 5, 2, 5, 2, 2, 2, 2, 5, 2, 5, 2],
+        [2, 5, 2, 5, 2, 8, 5, 2, 5, 2, 5, 2],
+        [2, 5, 2, 5, 2, 5, 2, 2, 5, 2, 5, 2],
+        [2, 5, 2, 5, 2, 5, 2, 2, 5, 2, 5, 2],
+        [2, 5, 2, 5, 5, 5, 5, 5, 5, 2, 5, 2],
+        [2, 5, 2, 2, 2, 2, 2, 2, 2, 2, 5, 2],
+        [2, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 2],
+        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
       ],
+      "start": { "x": 1, "y": 1 },
+      "portals": [ { "x": 5, "y": 5, "toMap": "map_3" } ],
       "npcs": [
         {
-          "name": "Snowbell Snapper",
-          "x": 3,
-          "y": 3,
-          "sprite": "❄️",
-          "dialogue": ["ROAR! The cold never bothered me, but it will kill you!"],
-          "action": "battle_snapper",
-          "hideOnFlag": "snapper_defeated"
+          "x": 6, "y": 10, "name": "Lost Elf", "sprite": "🧝",
+          "dialogue": ["This maze is tricky.", "Help me solve the route!"],
+          "action": "gate_npc_2", "hideOnFlag": "solved_npc_2"
         },
         {
-          "name": "Canous",
-          "x": 6,
-          "y": 6,
-          "sprite": "🔥",
-          "dialogue": ["You won't get past me, little adventurer!"],
-          "action": "battle_canous",
-          "hideOnFlag": "canous_defeated"
-        },
-        {
-          "name": "Carolgeist",
-          "x": 10,
-          "y": 8,
-          "sprite": "👻",
-          "dialogue": ["Silent night... deadly fight!"],
-          "action": "battle_carolgeist",
-          "hideOnFlag": "carolgeist_defeated"
-        }
-      ],
-      "portals": [
-        {
-          "x": 10,
-          "y": 10,
-          "toMap": "grinchys_lair",
-          "toX": 6,
-          "toY": 10
+          "x": 5, "y": 7, "name": "Ultimate Canous", "sprite": "🐺",
+          "dialogue": ["Only Grinchy enters here!"],
+          "action": "gate_monster_2", "hideOnFlag": "defeated_m2"
         }
       ]
     },
-    "grinchys_lair": {
+    "map_3": {
+      "layout": [
+        [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+        [3, 5, 5, 5, 5, 3, 3, 3, 5, 5, 5, 3],
+        [3, 5, 5, 5, 5, 3, 3, 3, 5, 5, 5, 3],
+        [3, 5, 5, 5, 5, 3, 3, 3, 5, 5, 5, 3],
+        [3, 5, 5, 5, 5, 5, 3, 3, 5, 5, 5, 3],
+        [3, 3, 3, 3, 3, 5, 3, 3, 5, 5, 5, 3],
+        [3, 5, 5, 5, 3, 5, 3, 3, 5, 5, 5, 3],
+        [3, 5, 5, 5, 3, 5, 5, 5, 5, 5, 5, 3],
+        [3, 5, 5, 5, 3, 3, 3, 3, 3, 3, 3, 3],
+        [3, 5, 5, 5, 3, 5, 5, 5, 5, 5, 8, 3],
+        [3, 5, 5, 5, 3, 5, 5, 5, 5, 5, 5, 3],
+        [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+      ],
+      "start": { "x": 1, "y": 2 },
+      "portals": [ { "x": 10, "y": 9, "toMap": "map_4" } ],
+      "npcs": [
+        {
+          "x": 5, "y": 4, "name": "Snowman Guard", "sprite": "☃️",
+          "dialogue": ["I am the bridge.", "Solve to cross!"],
+          "action": "gate_npc_3", "hideOnFlag": "solved_npc_3"
+        },
+        {
+          "x": 4, "y": 9, "name": "Ultimate Carolgeist", "sprite": "👻",
+          "dialogue": ["The water is frozen with fear!"],
+          "action": "gate_monster_3", "hideOnFlag": "defeated_m3"
+        }
+      ]
+    },
+    "map_4": {
       "layout": [
         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        [1, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 1],
-        [1, 9, 4, 4, 4, 4, 4, 4, 4, 4, 9, 1],
-        [1, 9, 4, 9, 9, 9, 9, 9, 9, 4, 9, 1],
-        [1, 9, 4, 9, 3, 3, 3, 3, 9, 4, 9, 1],
-        [1, 9, 4, 9, 3, 9, 9, 3, 9, 4, 9, 1],
-        [1, 9, 4, 9, 3, 0, 3, 3, 9, 4, 9, 1],
-        [1, 9, 4, 9, 9, 0, 9, 9, 9, 4, 9, 1],
-        [1, 9, 4, 4, 4, 0, 4, 4, 4, 4, 9, 1],
-        [1, 9, 9, 9, 9, 0, 9, 9, 9, 9, 9, 1],
-        [1, 9, 4, 4, 4, 4, 4, 4, 4, 4, 9, 1],
+        [1, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 1],
+        [1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1],
+        [1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1],
+        [1, 5, 1, 1, 5, 5, 5, 5, 1, 1, 5, 1],
+        [1, 5, 1, 1, 5, 1, 1, 5, 1, 1, 5, 1],
+        [1, 5, 1, 1, 5, 1, 1, 5, 1, 1, 5, 1],
+        [1, 5, 1, 1, 5, 1, 1, 5, 1, 1, 5, 1],
+        [1, 5, 1, 1, 5, 1, 1, 5, 1, 1, 5, 1],
+        [1, 5, 5, 5, 5, 1, 1, 5, 5, 5, 5, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8, 1],
         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
       ],
+      "start": { "x": 1, "y": 1 },
+      "portals": [ { "x": 10, "y": 10, "toMap": "map_5" } ],
       "npcs": [
         {
-          "name": "Grinchy",
-          "x": 6,
-          "y": 6,
-          "sprite": "👹",
-          "dialogue": ["Mwahaha! I stole the heart, and I will steal your lunch money too!"],
-          "action": "battle_grinchy",
-          "hideOnFlag": "grinchy_defeated"
-        }
-      ],
-      "portals": [
+          "x": 10, "y": 5, "name": "Yeti Guide", "sprite": "🦍",
+          "dialogue": ["The cliff is narrow.", "Careful step required!"],
+          "action": "gate_npc_4", "hideOnFlag": "solved_npc_4"
+        },
         {
-          "x": 6,
-          "y": 10,
-          "toMap": "snowy_village",
-          "toX": 1,
-          "toY": 1
+          "x": 4, "y": 8, "name": "Ultimate Buller", "sprite": "🐂",
+          "dialogue": ["I am the final wall before the Lair!"],
+          "action": "gate_monster_4", "hideOnFlag": "defeated_m4"
+        }
+      ]
+    },
+    "map_5": {
+      "layout": [
+        [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9],
+        [9, 5, 5, 5, 5, 3, 3, 5, 5, 5, 5, 9],
+        [9, 5, 9, 9, 5, 3, 3, 5, 9, 9, 5, 9],
+        [9, 5, 9, 5, 5, 5, 5, 5, 5, 9, 5, 9],
+        [9, 5, 9, 5, 3, 3, 3, 3, 5, 9, 5, 9],
+        [9, 5, 5, 5, 3, 5, 5, 3, 5, 5, 5, 9],
+        [9, 5, 9, 5, 3, 5, 5, 3, 5, 9, 5, 9],
+        [9, 5, 9, 5, 3, 3, 3, 3, 5, 9, 5, 9],
+        [9, 5, 9, 5, 5, 5, 5, 5, 5, 9, 5, 9],
+        [9, 5, 9, 9, 9, 5, 9, 9, 9, 9, 5, 9],
+        [9, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 9],
+        [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9]
+      ],
+      "start": { "x": 5, "y": 10 },
+      "portals": [],
+      "npcs": [
+        {
+          "x": 5, "y": 5, "name": "Grinchy", "sprite": "👺",
+          "dialogue": ["I hate happiness!", "You cannot have the Heart!"],
+          "action": "gate_boss", "hideOnFlag": "grinchy_defeated"
+        },
+        {
+          "x": 5, "y": 1, "name": "The Heart", "sprite": "❤️",
+          "dialogue": ["Warmth returns to the land!"],
+          "action": null
         }
       ]
     }
   },
   "gates": {
-    "elf_challenge": {
-      "type": "academic_challenge",
-      "questionCount": 3,
-      "onSuccess": "elf_challenge_complete"
-    },
-    "battle_snapper": {
-      "type": "battle",
-      "enemyId": "Snowbell Snapper",
-      "onSuccess": "snapper_defeated"
-    },
-    "battle_canous": {
-      "type": "battle",
-      "enemyId": "Canous",
-      "onSuccess": "canous_defeated"
-    },
-    "battle_carolgeist": {
-      "type": "battle",
-      "enemyId": "Carolgeist",
-      "onSuccess": "carolgeist_defeated"
-    },
-    "battle_grinchy": {
-      "type": "battle",
-      "enemyId": "Grinchy",
+    "gate_npc_1": { "type": "academic_challenge", "questionCount": 3, "onSuccess": "solved_npc_1" },
+    "gate_monster_1": { "type": "battle", "enemyId": "Ultimate Snowbell Snapper", "onSuccess": "defeated_m1" },
+    
+    "gate_npc_2": { "type": "academic_challenge", "questionCount": 3, "onSuccess": "solved_npc_2" },
+    "gate_monster_2": { "type": "battle", "enemyId": "Ultimate Canous", "onSuccess": "defeated_m2" },
+
+    "gate_npc_3": { "type": "academic_challenge", "questionCount": 3, "onSuccess": "solved_npc_3" },
+    "gate_monster_3": { "type": "battle", "enemyId": "Ultimate Carolgeist", "onSuccess": "defeated_m3" },
+
+    "gate_npc_4": { "type": "academic_challenge", "questionCount": 3, "onSuccess": "solved_npc_4" },
+    "gate_monster_4": { "type": "battle", "enemyId": "Ultimate Buller", "onSuccess": "defeated_m4" },
+
+    "gate_boss": { 
+      "type": "battle", 
+      "enemyId": "Grinchy", 
       "onSuccess": "grinchy_defeated",
       "rewardData": {
         "name": "Rudolf",
-        "type": "rudolf_01",
+        "type": "Rudolf_01",
         "rarity": "epic",
         "element": ["light", "ice"],
         "hp": 50,
         "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/pets/christmaspet/1.png",
         "imageStyle": "blend-multiply",
-        "emoji": "🦌",
+        "emoji": "🐺",
         "evolutions": [
           {
             "level": 10,
