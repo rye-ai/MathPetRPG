@@ -9,6 +9,45 @@
     "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/enemy/9.png",
     "imageStyle": "blend-multiply",
     "emoji": "💀"
+  },
+  {
+    "name": " Ultimate Snowbell Snapper",
+    "element": "ice",
+    "hp": 50,
+    "damage": 5,
+    "xp": 15,
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/enemies/christmasenemy/1.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "🌱"
+  },
+  {
+    "name": "Ultimate Canous",
+    "element": "ice",
+    "hp": 50,
+    "damage": 8,
+    "xp": 20,
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/enemies/christmasenemy/2.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "🪨"
+  },
+ {
+    "name": "Ultimate Carolgeist",
+    "element": ["shadow", "ice"],
+    "hp": 60,
+    "damage": 8,
+    "xp": 20,
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/enemies/christmasenemy/3.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "🪨"
+  },
+ {
+    "name": "Ultimate Buller",
+    "element": ["earth", "ice"],
+    "hp": 70,
+    "damage": 8,
+    "xp": 20,
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/enemies/christmasenemy/4.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "🪨"
   }
 ]
-
