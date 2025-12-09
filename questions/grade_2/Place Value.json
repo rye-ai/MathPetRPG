@@ -1,0 +1,527 @@
+[
+  {
+    "q": "How many Hundreds, Tens, and Ones are shown?",
+    "a": "1 Hundred, 3 Tens, 4 Ones",
+    "qVisualHTML": "<div style='display: flex; gap: 10px; justify-content: center; align-items: flex-end;'><svg width='90' height='90'><rect x='5' y='5' width='80' height='80' fill='#4299e1' stroke='black' stroke-width='2'/></svg><svg width='60' height='90'><rect x='5' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='25' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='45' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/></svg><svg width='40' height='90'><rect x='5' y='75' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='25' y='75' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='5' y='55' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='25' y='55' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/></svg></div>",
+    "options": [
+      "1 Hundred, 3 Tens, 4 Ones",
+      "1 Hundred, 4 Tens, 3 Ones",
+      "13 Hundreds, 4 Tens, 0 Ones",
+      "3 Hundreds, 1 Ten, 4 Ones"
+    ]
+  },
+  {
+    "q": "What digit is in the **Tens** place of the number **582**?",
+    "a": "8",
+    "options": [
+      "5",
+      "8",
+      "2",
+      "80"
+    ]
+  },
+  {
+    "q": "What number is represented by these blocks?",
+    "a": "250",
+    "qVisualHTML": "<div style='display: flex; gap: 10px; justify-content: center; align-items: flex-end;'><svg width='170' height='90'><rect x='5' y='5' width='80' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='90' y='5' width='80' height='80' fill='#4299e1' stroke='black' stroke-width='2'/></svg><svg width='100' height='90'><rect x='5' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='25' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='45' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='65' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='85' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/></svg></div>",
+    "options": [
+      "205",
+      "250",
+      "520",
+      "25"
+    ]
+  },
+  {
+    "q": "How many Hundreds, Tens, and Ones are shown?",
+    "a": "2 Hundreds, 1 Ten, 5 Ones",
+    "qVisualHTML": "<div style='display: flex; gap: 10px; justify-content: center; align-items: flex-end;'><svg width='170' height='90'><rect x='5' y='5' width='80' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='90' y='5' width='80' height='80' fill='#4299e1' stroke='black' stroke-width='2'/></svg><svg width='20' height='90'><rect x='5' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/></svg><svg width='60' height='90'><rect x='5' y='75' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='25' y='75' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='45' y='75' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='5' y='55' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='25' y='55' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/></svg></div>",
+    "options": [
+      "2 Hundreds, 1 Ten, 5 Ones",
+      "2 Hundreds, 5 Tens, 1 One",
+      "1 Hundred, 2 Tens, 5 Ones",
+      "2 Hundreds, 15 Tens, 0 Ones"
+    ]
+  },
+  {
+    "q": "What is the **value** of the digit 4 in **439**?",
+    "a": "400",
+    "options": [
+      "4",
+      "40",
+      "400",
+      "439"
+    ]
+  },
+  {
+    "q": "Which number has a **7** in the Ones place?",
+    "a": "147",
+    "options": [
+      "721",
+      "174",
+      "147",
+      "700"
+    ]
+  },
+  {
+    "q": "How many Hundreds, Tens, and Ones are shown?",
+    "a": "3 Hundreds, 0 Tens, 2 Ones",
+    "qVisualHTML": "<div style='display: flex; gap: 10px; justify-content: center; align-items: flex-end;'><svg width='260' height='90'><rect x='5' y='5' width='80' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='90' y='5' width='80' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='175' y='5' width='80' height='80' fill='#4299e1' stroke='black' stroke-width='2'/></svg><svg width='20' height='90'><rect x='5' y='75' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='5' y='55' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/></svg></div>",
+    "options": [
+      "3 Hundreds, 0 Tens, 2 Ones",
+      "3 Hundreds, 2 Tens, 0 Ones",
+      "2 Hundreds, 0 Tens, 3 Ones",
+      "30 Hundreds, 0 Tens, 2 Ones"
+    ]
+  },
+  {
+    "q": "In the number **906**, what digit is in the **Tens** place?",
+    "a": "0",
+    "options": [
+      "9",
+      "0",
+      "6",
+      "90"
+    ]
+  },
+  {
+    "q": "How many Hundreds, Tens, and Ones are shown?",
+    "a": "1 Hundred, 4 Tens, 6 Ones",
+    "qVisualHTML": "<div style='display: flex; gap: 10px; justify-content: center; align-items: flex-end;'><svg width='90' height='90'><rect x='5' y='5' width='80' height='80' fill='#4299e1' stroke='black' stroke-width='2'/></svg><svg width='80' height='90'><rect x='5' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='25' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='45' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='65' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/></svg><svg width='40' height='90'><rect x='5' y='75' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='25' y='75' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='5' y='55' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='25' y='55' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='5' y='35' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='25' y='35' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/></svg></div>",
+    "options": [
+      "1 Hundred, 4 Tens, 6 Ones",
+      "1 Hundred, 6 Tens, 4 Ones",
+      "4 Hundreds, 1 Ten, 6 Ones",
+      "14 Hundreds, 6 Tens, 0 Ones"
+    ]
+  },
+  {
+    "q": "What number is represented by these blocks?",
+    "a": "43",
+    "qVisualHTML": "<div style='display: flex; gap: 10px; justify-content: center; align-items: flex-end;'><svg width='80' height='90'><rect x='5' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='25' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='45' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='65' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/></svg><svg width='20' height='90'><rect x='5' y='75' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='5' y='55' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='5' y='35' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/></svg></div>",
+    "options": [
+      "43",
+      "34",
+      "430",
+      "304"
+    ]
+  },
+  {
+    "q": "What digit is in the **Hundreds** place of **615**?",
+    "a": "6",
+    "options": [
+      "1",
+      "5",
+      "6",
+      "600"
+    ]
+  },
+  {
+    "q": "How many Hundreds, Tens, and Ones are shown?",
+    "a": "0 Hundreds, 5 Tens, 2 Ones",
+    "qVisualHTML": "<div style='display: flex; gap: 10px; justify-content: center; align-items: flex-end;'><svg width='100' height='90'><rect x='5' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='25' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='45' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='65' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='85' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/></svg><svg width='20' height='90'><rect x='5' y='75' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='5' y='55' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/></svg></div>",
+    "options": [
+      "0 Hundreds, 5 Tens, 2 Ones",
+      "5 Hundreds, 0 Tens, 2 Ones",
+      "2 Hundreds, 5 Tens, 0 Ones",
+      "0 Hundreds, 2 Tens, 5 Ones"
+    ]
+  },
+  {
+    "q": "What is the **value** of the digit 2 in **825**?",
+    "a": "20",
+    "options": [
+      "2",
+      "20",
+      "200",
+      "25"
+    ]
+  },
+  {
+    "q": "In the number **192**, which digit represents the **Ones**?",
+    "a": "2",
+    "options": [
+      "1",
+      "9",
+      "2",
+      "192"
+    ]
+  },
+  {
+    "q": "How many Hundreds, Tens, and Ones are shown?",
+    "a": "1 Hundred, 1 Ten, 1 One",
+    "qVisualHTML": "<div style='display: flex; gap: 10px; justify-content: center; align-items: flex-end;'><svg width='90' height='90'><rect x='5' y='5' width='80' height='80' fill='#4299e1' stroke='black' stroke-width='2'/></svg><svg width='20' height='90'><rect x='5' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/></svg><svg width='20' height='90'><rect x='5' y='75' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/></svg></div>",
+    "options": [
+      "1 Hundred, 1 Ten, 1 One",
+      "1 Hundred, 10 Tens, 1 One",
+      "100 Hundreds, 10 Tens, 1 One",
+      "0 Hundreds, 11 Tens, 1 One"
+    ]
+  },
+  {
+    "q": "Which number has **9** hundreds, **0** tens, and **8** ones?",
+    "a": "908",
+    "options": [
+      "980",
+      "908",
+      "809",
+      "890"
+    ]
+  },
+  {
+    "q": "What number is represented by these blocks?",
+    "a": "305",
+    "qVisualHTML": "<div style='display: flex; gap: 10px; justify-content: center; align-items: flex-end;'><svg width='260' height='90'><rect x='5' y='5' width='80' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='90' y='5' width='80' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='175' y='5' width='80' height='80' fill='#4299e1' stroke='black' stroke-width='2'/></svg><svg width='40' height='90'><rect x='5' y='75' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='25' y='75' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='5' y='55' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='25' y='55' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='5' y='35' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/></svg></div>",
+    "options": [
+      "350",
+      "305",
+      "503",
+      "35"
+    ]
+  },
+  {
+    "q": "What is the **value** of the digit 7 in **714**?",
+    "a": "700",
+    "options": [
+      "7",
+      "70",
+      "700",
+      "71"
+    ]
+  },
+  {
+    "q": "How many Hundreds, Tens, and Ones are shown?",
+    "a": "2 Hundreds, 3 Tens, 0 Ones",
+    "qVisualHTML": "<div style='display: flex; gap: 10px; justify-content: center; align-items: flex-end;'><svg width='170' height='90'><rect x='5' y='5' width='80' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='90' y='5' width='80' height='80' fill='#4299e1' stroke='black' stroke-width='2'/></svg><svg width='60' height='90'><rect x='5' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='25' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='45' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/></svg></div>",
+    "options": [
+      "2 Hundreds, 3 Tens, 0 Ones",
+      "2 Hundreds, 0 Tens, 3 Ones",
+      "3 Hundreds, 2 Tens, 0 Ones",
+      "0 Hundreds, 2 Tens, 3 Ones"
+    ]
+  },
+  {
+    "q": "What digit is in the **Tens** place of **44**?",
+    "a": "4",
+    "options": [
+      "4",
+      "40",
+      "44",
+      "0"
+    ]
+  },
+  {
+    "q": "How many Hundreds, Tens, and Ones are shown?",
+    "a": "0 Hundreds, 1 Ten, 8 Ones",
+    "qVisualHTML": "<div style='display: flex; gap: 10px; justify-content: center; align-items: flex-end;'><svg width='20' height='90'><rect x='5' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/></svg><svg width='60' height='90'><rect x='5' y='75' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='25' y='75' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='45' y='75' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='5' y='55' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='25' y='55' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='45' y='55' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='5' y='35' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='25' y='35' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/></svg></div>",
+    "options": [
+      "0 Hundreds, 1 Ten, 8 Ones",
+      "1 Hundred, 0 Tens, 8 Ones",
+      "1 Hundred, 8 Tens, 0 Ones",
+      "0 Hundreds, 8 Tens, 1 One"
+    ]
+  },
+  {
+    "q": "Which number has a **3** in the Tens place?",
+    "a": "135",
+    "options": [
+      "315",
+      "513",
+      "135",
+      "300"
+    ]
+  },
+  {
+    "q": "How many Hundreds, Tens, and Ones are shown?",
+    "a": "4 Hundreds, 0 Tens, 1 One",
+    "qVisualHTML": "<div style='display: flex; gap: 10px; justify-content: center; align-items: flex-end;'><svg width='340' height='90'><rect x='5' y='5' width='80' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='90' y='5' width='80' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='175' y='5' width='80' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='260' y='5' width='80' height='80' fill='#4299e1' stroke='black' stroke-width='2'/></svg><svg width='20' height='90'><rect x='5' y='75' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/></svg></div>",
+    "options": [
+      "4 Hundreds, 0 Tens, 1 One",
+      "4 Hundreds, 1 Ten, 0 Ones",
+      "1 Hundred, 4 Tens, 0 Ones",
+      "4 Hundreds, 10 Tens, 1 One"
+    ]
+  },
+  {
+    "q": "What digit is in the **Hundreds** place of **800**?",
+    "a": "8",
+    "options": [
+      "0",
+      "8",
+      "80",
+      "100"
+    ]
+  },
+  {
+    "q": "What number is represented by these blocks?",
+    "a": "122",
+    "qVisualHTML": "<div style='display: flex; gap: 10px; justify-content: center; align-items: flex-end;'><svg width='90' height='90'><rect x='5' y='5' width='80' height='80' fill='#4299e1' stroke='black' stroke-width='2'/></svg><svg width='40' height='90'><rect x='5' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='25' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/></svg><svg width='40' height='90'><rect x='5' y='75' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='25' y='75' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/></svg></div>",
+    "options": [
+      "122",
+      "221",
+      "120",
+      "212"
+    ]
+  },
+  {
+    "q": "What is the **value** of the digit 5 in **605**?",
+    "a": "5",
+    "options": [
+      "5",
+      "50",
+      "500",
+      "605"
+    ]
+  },
+  {
+    "q": "How many Hundreds, Tens, and Ones are shown?",
+    "a": "1 Hundred, 2 Tens, 0 Ones",
+    "qVisualHTML": "<div style='display: flex; gap: 10px; justify-content: center; align-items: flex-end;'><svg width='90' height='90'><rect x='5' y='5' width='80' height='80' fill='#4299e1' stroke='black' stroke-width='2'/></svg><svg width='40' height='90'><rect x='5' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='25' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/></svg></div>",
+    "options": [
+      "1 Hundred, 2 Tens, 0 Ones",
+      "1 Hundred, 0 Tens, 2 Ones",
+      "2 Hundreds, 1 Ten, 0 Ones",
+      "12 Hundreds, 0 Tens, 0 Ones"
+    ]
+  },
+  {
+    "q": "In the number **374**, which digit is in the **Ones** place?",
+    "a": "4",
+    "options": [
+      "3",
+      "7",
+      "4",
+      "40"
+    ]
+  },
+  {
+    "q": "How many Hundreds, Tens, and Ones are shown?",
+    "a": "0 Hundreds, 2 Tens, 3 Ones",
+    "qVisualHTML": "<div style='display: flex; gap: 10px; justify-content: center; align-items: flex-end;'><svg width='40' height='90'><rect x='5' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='25' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/></svg><svg width='20' height='90'><rect x='5' y='75' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='5' y='55' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='5' y='35' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/></svg></div>",
+    "options": [
+      "0 Hundreds, 2 Tens, 3 Ones",
+      "2 Hundreds, 3 Tens, 0 Ones",
+      "3 Hundreds, 2 Tens, 0 Ones",
+      "0 Hundreds, 3 Tens, 2 Ones"
+    ]
+  },
+  {
+    "q": "Which number has **4** hundreds, **6** tens, and **0** ones?",
+    "a": "460",
+    "options": [
+      "406",
+      "460",
+      "640",
+      "604"
+    ]
+  },
+  {
+    "q": "What number is represented by these blocks?",
+    "a": "104",
+    "qVisualHTML": "<div style='display: flex; gap: 10px; justify-content: center; align-items: flex-end;'><svg width='90' height='90'><rect x='5' y='5' width='80' height='80' fill='#4299e1' stroke='black' stroke-width='2'/></svg><svg width='40' height='90'><rect x='5' y='75' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='25' y='75' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='5' y='55' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='25' y='55' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/></svg></div>",
+    "options": [
+      "140",
+      "104",
+      "401",
+      "14"
+    ]
+  },
+  {
+    "q": "What digit is in the **Tens** place of **29**?",
+    "a": "2",
+    "options": [
+      "2",
+      "9",
+      "0",
+      "20"
+    ]
+  },
+  {
+    "q": "How many Hundreds, Tens, and Ones are shown?",
+    "a": "2 Hundreds, 0 Tens, 4 Ones",
+    "qVisualHTML": "<div style='display: flex; gap: 10px; justify-content: center; align-items: flex-end;'><svg width='170' height='90'><rect x='5' y='5' width='80' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='90' y='5' width='80' height='80' fill='#4299e1' stroke='black' stroke-width='2'/></svg><svg width='40' height='90'><rect x='5' y='75' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='25' y='75' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='5' y='55' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='25' y='55' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/></svg></div>",
+    "options": [
+      "2 Hundreds, 0 Tens, 4 Ones",
+      "2 Hundreds, 4 Tens, 0 Ones",
+      "4 Hundreds, 0 Tens, 2 Ones",
+      "20 Hundreds, 4 Tens, 0 Ones"
+    ]
+  },
+  {
+    "q": "What is the **value** of the digit 9 in **901**?",
+    "a": "900",
+    "options": [
+      "9",
+      "90",
+      "900",
+      "901"
+    ]
+  },
+  {
+    "q": "How many Hundreds, Tens, and Ones are shown?",
+    "a": "3 Hundreds, 1 Ten, 0 Ones",
+    "qVisualHTML": "<div style='display: flex; gap: 10px; justify-content: center; align-items: flex-end;'><svg width='260' height='90'><rect x='5' y='5' width='80' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='90' y='5' width='80' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='175' y='5' width='80' height='80' fill='#4299e1' stroke='black' stroke-width='2'/></svg><svg width='20' height='90'><rect x='5' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/></svg></div>",
+    "options": [
+      "3 Hundreds, 1 Ten, 0 Ones",
+      "3 Hundreds, 0 Tens, 1 One",
+      "1 Hundred, 3 Tens, 0 Ones",
+      "31 Hundreds, 0 Tens, 0 Ones"
+    ]
+  },
+  {
+    "q": "In the number **115**, which digit is in the **Tens** place?",
+    "a": "1",
+    "options": [
+      "1",
+      "5",
+      "0",
+      "10"
+    ]
+  },
+  {
+    "q": "What number is represented by these blocks?",
+    "a": "53",
+    "qVisualHTML": "<div style='display: flex; gap: 10px; justify-content: center; align-items: flex-end;'><svg width='100' height='90'><rect x='5' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='25' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='45' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='65' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='85' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/></svg><svg width='20' height='90'><rect x='5' y='75' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='5' y='55' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='5' y='35' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/></svg></div>",
+    "options": [
+      "53",
+      "35",
+      "503",
+      "530"
+    ]
+  },
+  {
+    "q": "What digit is in the **Hundreds** place of **56**?",
+    "a": "0",
+    "options": [
+      "5",
+      "6",
+      "0",
+      "56"
+    ]
+  },
+  {
+    "q": "How many Hundreds, Tens, and Ones are shown?",
+    "a": "0 Hundreds, 0 Tens, 6 Ones",
+    "qVisualHTML": "<div style='display: flex; gap: 10px; justify-content: center; align-items: flex-end;'><svg width='40' height='90'><rect x='5' y='75' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='25' y='75' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='5' y='55' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='25' y='55' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='5' y='35' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='25' y='35' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/></svg></div>",
+    "options": [
+      "0 Hundreds, 0 Tens, 6 Ones",
+      "0 Hundreds, 6 Tens, 0 Ones",
+      "6 Hundreds, 0 Tens, 0 Ones",
+      "0 Hundreds, 0 Tens, 5 Ones"
+    ]
+  },
+  {
+    "q": "What is the **value** of the digit 0 in **208**?",
+    "a": "0",
+    "options": [
+      "0",
+      "10",
+      "100",
+      "20"
+    ]
+  },
+  {
+    "q": "How many Hundreds, Tens, and Ones are shown?",
+    "a": "1 Hundred, 3 Tens, 2 Ones",
+    "qVisualHTML": "<div style='display: flex; gap: 10px; justify-content: center; align-items: flex-end;'><svg width='90' height='90'><rect x='5' y='5' width='80' height='80' fill='#4299e1' stroke='black' stroke-width='2'/></svg><svg width='60' height='90'><rect x='5' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='25' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='45' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/></svg><svg width='20' height='90'><rect x='5' y='75' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='5' y='55' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/></svg></div>",
+    "options": [
+      "1 Hundred, 3 Tens, 2 Ones",
+      "1 Hundred, 2 Tens, 3 Ones",
+      "3 Hundreds, 1 Ten, 2 Ones",
+      "13 Hundreds, 2 Tens, 0 Ones"
+    ]
+  },
+  {
+    "q": "In the number **999**, what is the value of the 9 in the **Tens** place?",
+    "a": "90",
+    "options": [
+      "9",
+      "90",
+      "900",
+      "999"
+    ]
+  },
+  {
+    "q": "What number is represented by these blocks?",
+    "a": "210",
+    "qVisualHTML": "<div style='display: flex; gap: 10px; justify-content: center; align-items: flex-end;'><svg width='170' height='90'><rect x='5' y='5' width='80' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='90' y='5' width='80' height='80' fill='#4299e1' stroke='black' stroke-width='2'/></svg><svg width='20' height='90'><rect x='5' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/></svg></div>",
+    "options": [
+      "210",
+      "201",
+      "120",
+      "21"
+    ]
+  },
+  {
+    "q": "Which number has **5** hundreds, **2** tens, and **1** one?",
+    "a": "521",
+    "options": [
+      "125",
+      "521",
+      "512",
+      "251"
+    ]
+  },
+  {
+    "q": "How many Hundreds, Tens, and Ones are shown?",
+    "a": "0 Hundreds, 4 Tens, 5 Ones",
+    "qVisualHTML": "<div style='display: flex; gap: 10px; justify-content: center; align-items: flex-end;'><svg width='80' height='90'><rect x='5' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='25' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='45' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='65' y='5' width='15' height='80' fill='#4299e1' stroke='black' stroke-width='2'/></svg><svg width='40' height='90'><rect x='5' y='75' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='25' y='75' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='5' y='55' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='25' y='55' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='5' y='35' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/></svg></div>",
+    "options": [
+      "0 Hundreds, 4 Tens, 5 Ones",
+      "4 Hundreds, 5 Tens, 0 Ones",
+      "0 Hundreds, 5 Tens, 4 Ones",
+      "5 Hundreds, 0 Tens, 4 Ones"
+    ]
+  },
+  {
+    "q": "What digit is in the **Ones** place of **88**?",
+    "a": "8",
+    "options": [
+      "8",
+      "0",
+      "80",
+      "88"
+    ]
+  },
+  {
+    "q": "What is the **value** of the digit 1 in **318**?",
+    "a": "10",
+    "options": [
+      "1",
+      "10",
+      "100",
+      "318"
+    ]
+  },
+  {
+    "q": "How many Hundreds, Tens, and Ones are shown?",
+    "a": "1 Hundred, 0 Tens, 5 Ones",
+    "qVisualHTML": "<div style='display: flex; gap: 10px; justify-content: center; align-items: flex-end;'><svg width='90' height='90'><rect x='5' y='5' width='80' height='80' fill='#4299e1' stroke='black' stroke-width='2'/></svg><svg width='40' height='90'><rect x='5' y='75' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='25' y='75' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='5' y='55' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='25' y='55' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/><rect x='5' y='35' width='15' height='15' fill='#ecc94b' stroke='black' stroke-width='2'/></svg></div>",
+    "options": [
+      "1 Hundred, 0 Tens, 5 Ones",
+      "1 Hundred, 5 Tens, 0 Ones",
+      "5 Hundreds, 0 Tens, 1 One",
+      "10 Hundreds, 0 Tens, 5 Ones"
+    ]
+  },
+  {
+    "q": "What number is represented by these blocks?",
+    "a": "300",
+    "qVisualHTML": "<div style='display: flex; gap: 10px; justify-content: center; align-items: flex-end;'><svg width='260' height='90'><rect x='5' y='5' width='80' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='90' y='5' width='80' height='80' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='175' y='5' width='80' height='80' fill='#4299e1' stroke='black' stroke-width='2'/></svg></div>",
+    "options": [
+      "300",
+      "30",
+      "3",
+      "3000"
+    ]
+  },
+  {
+    "q": "What digit is in the **Hundreds** place of **100**?",
+    "a": "1",
+    "options": [
+      "0",
+      "1",
+      "10",
+      "100"
+    ]
+  }
+]
