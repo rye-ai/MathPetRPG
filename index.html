@@ -35,7 +35,7 @@
   <style>
     :root {
         --bg-login: url('https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/Untitled%20design.png'); 
-        --bg-game:  url('https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/Untitled%20design.png'); 
+        --bg-game:  url('https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/Untitled%20design%20(1).png'); 
     }
 
     body { 
@@ -388,69 +388,121 @@
     </div>
    </div>
    
+   <!-- TEACHER DASHBOARD (Fixed & Reorganized) -->
    <div id="teacher-dashboard-screen" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:2100; padding:40px; overflow-y:auto;">
        <div style="max-width:1000px; margin:0 auto;">
-           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;"><h1 style="font-size:32px; font-weight:bold; color:#5a67d8;">👩‍🏫 Teacher Dashboard</h1><button class="action-btn red" style="width:auto; padding:10px 20px;" onclick="location.reload()">Log Out</button></div>
+           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+               <h1 style="font-size:32px; font-weight:bold; color:#5a67d8;">👩‍🏫 Teacher Dashboard</h1>
+               <button class="action-btn red" style="width:auto; padding:10px 20px;" onclick="location.reload()">Log Out</button>
+           </div>
+           
            <div style="display:grid; grid-template-columns: 1fr 1.5fr; gap:40px;">
+               <!-- LEFT COLUMN: Controls -->
                <div>
-                   <div style="background:#f7fafc; padding:25px; border-radius:15px; border:2px solid #e2e8f0; margin-bottom: 20px;"><h2 style="font-size:20px; font-weight:bold; margin-bottom:15px;">Create Student Account</h2><input type="text" id="new-student-user" class="login-input" placeholder="Username"><input type="password" id="new-student-pass" class="login-input" placeholder="Password"><label style="display:block; font-weight:bold; margin-top:10px;">Assign Grade:</label><select id="new-student-grade" class="login-input"><option value="K">Kindergarten</option><option value="1">Grade 1</option><option value="2">Grade 2</option><option value="3">Grade 3</option><option value="4">Grade 4</option><option value="5">Grade 5</option><option value="6">Grade 6</option></select><button class="action-btn green" onclick="createStudentAccount()">Create Account</button></div>
-                    <div style="background:#fffbeb; padding:20px; border-radius:15px; border:2px solid #fbd38d;"><h2 style="color:#d69e2e; font-size:16px; font-weight:bold; margin-bottom:5px;">Instructions</h2><p style="font-size:13px; line-height:1.4; color:#744210;">1. Create accounts for your students here.<br>2. Click "Manage" on the right to assign specific topics.<br>3. Students can only see topics you check.<br>4. Use the checkboxes to assign topics to multiple students at once!</p></div>
-               </div>
-               <div style="background:#fff; border:2px solid #e2e8f0; border-radius:15px; overflow:hidden;">
-                   <div style="background:#f7fafc; padding:15px; border-bottom:2px solid #e2e8f0; font-weight:bold; color:#4a5568; display:flex; justify-content:space-between; align-items:center;"><label style="display:flex; align-items:center; cursor:pointer;"><input type="checkbox" id="select-all-students" onchange="toggleAllStudents(this.checked)" style="margin-right:8px; transform:scale(1.2);"><span>Enrolled Students</span></label><button class="action-btn blue" style="width:auto; padding:5px 10px; font-size:12px; margin-top:-2px;" onclick="loadStudentList()">Refresh List</button></div><div id="bulk-action-bar" style="background:#ebf8ff; padding:10px 15px; border-bottom:1px solid #cceeff; display:none; justify-content:space-between; align-items:center;"><span id="bulk-selected-count" style="font-weight:bold; color:#5a67d8;">0 Selected</span><button class="action-btn green" style="width:auto; padding:5px 10px; font-size:12px;" onclick="openBulkTopicManager()">Assign Selected Topics</button></div><div id="student-list-container" style="max-height: 500px; overflow-y: auto;"><div style="padding:20px; text-align:center; color:gray;">Loading list...</div></div>
-                   
-                   <!-- NEW TEACHER FEATURE: SUMMON BOSS -->
-                   <div style="background:#2d3748; padding:20px; border-radius:15px; border:2px solid #4a5568; margin-top: 20px; color: white;">
+                   <!-- 1. Create Student -->
+                   <div style="background:#f7fafc; padding:25px; border-radius:15px; border:2px solid #e2e8f0; margin-bottom: 20px;">
+                       <h2 style="font-size:20px; font-weight:bold; margin-bottom:15px;">Create Student Account</h2>
+                       <input type="text" id="new-student-user" class="login-input" placeholder="Username">
+                       <input type="password" id="new-student-pass" class="login-input" placeholder="Password">
+                       <label style="display:block; font-weight:bold; margin-top:10px;">Assign Grade:</label>
+                       <select id="new-student-grade" class="login-input">
+                           <option value="K">Kindergarten</option>
+                           <option value="1">Grade 1</option>
+                           <option value="2">Grade 2</option>
+                           <option value="3">Grade 3</option>
+                           <option value="4">Grade 4</option>
+                           <option value="5">Grade 5</option>
+                           <option value="6">Grade 6</option>
+                       </select>
+                       <button class="action-btn green" onclick="createStudentAccount()">Create Account</button>
+                   </div>
+
+                   <!-- 2. SUMMON BOSS (Now Visible Here!) -->
+                   <div style="background:#2d3748; padding:20px; border-radius:15px; border:2px solid #4a5568; margin-bottom: 20px; color: white;">
                         <h2 style="color:#f6ad55; font-weight:bold; margin-bottom:10px;">☠️ Create Raid Boss</h2>
                         <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                            <input type="text" id="t-boss-name" class="login-input" placeholder="Boss Name (e.g. Titan Golem)">
-                            <input type="number" id="t-boss-hp" class="login-input" placeholder="Total HP (e.g. 50000)">
+                            <input type="text" id="t-boss-name" class="login-input" placeholder="Boss Name (e.g. Titan)">
+                            <input type="number" id="t-boss-hp" class="login-input" placeholder="HP (e.g. 50000)">
+                            
+                            <!-- ATTACK INPUT -->
+                            <input type="number" id="t-boss-atk" class="login-input" placeholder="Attack (e.g. 50)" style="grid-column: span 2;">
+                            
                             <input type="text" id="t-boss-img" class="login-input" placeholder="Image URL" style="grid-column: span 2;">
                             <input type="text" id="t-boss-reward-url" class="login-input" placeholder="Reward JSON URL (e.g. events/boss_reward.json)" value="events/boss_reward.json" style="grid-column: span 2;">
                         </div>
                         <button class="action-btn red" onclick="teacherSummonRaid()">SUMMON RAID BOSS</button>
                    </div>
+               </div>
 
+               <!-- RIGHT COLUMN: Student List -->
+               <div style="background:#fff; border:2px solid #e2e8f0; border-radius:15px; overflow:hidden; display:flex; flex-direction:column; max-height:80vh;">
+                   <div style="background:#f7fafc; padding:15px; border-bottom:2px solid #e2e8f0; font-weight:bold; color:#4a5568; display:flex; justify-content:space-between; align-items:center;">
+                       <label style="display:flex; align-items:center; cursor:pointer;">
+                           <input type="checkbox" id="select-all-students" onchange="toggleAllStudents(this.checked)" style="margin-right:8px; transform:scale(1.2);">
+                           <span>Enrolled Students</span>
+                       </label>
+                       <button class="action-btn blue" style="width:auto; padding:5px 10px; font-size:12px; margin-top:-2px;" onclick="loadStudentList()">Refresh List</button>
+                   </div>
+                   <div id="bulk-action-bar" style="background:#ebf8ff; padding:10px 15px; border-bottom:1px solid #cceeff; display:none; justify-content:space-between; align-items:center;">
+                       <span id="bulk-selected-count" style="font-weight:bold; color:#5a67d8;">0 Selected</span>
+                       <button class="action-btn green" style="width:auto; padding:5px 10px; font-size:12px;" onclick="openBulkTopicManager()">Assign Selected Topics</button>
+                   </div>
+                   <div id="student-list-container" style="flex:1; overflow-y: auto;">
+                       <div style="padding:20px; text-align:center; color:gray;">Loading list...</div>
+                   </div>
                </div>
            </div>
        </div>
-       <div id="topic-manager-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
+
+       <!-- Modals included inside dashboard -->
+       <div id="topic-manager-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:2200;">
            <div style="background:white; padding:30px; border-radius:15px; width:500px; max-width:90%;">
                <h2 style="font-size:22px; font-weight:bold; color:#5a67d8; margin-bottom:10px;">Manage Student</h2>
                <p id="tm-student-name" style="font-weight:bold; color:#2d3748; margin-bottom:10px;">Student: -</p>
-               
-               <!-- MONITORING SECTION -->
                <div style="margin-bottom:15px; background:#e0f2fe; padding:10px; border-radius:8px; border:1px solid #7dd3fc;">
-                   <label style="font-weight:bold; color:#0369a1; font-size:12px; display:block; margin-bottom:5px;">Currently Assigned Lessons (All Grades):</label>
-                   <div id="tm-current-assignments" style="display:flex; flex-wrap:wrap; max-height:80px; overflow-y:auto;">
-                       <span style="color:#64748b; font-size:12px;">Loading...</span>
-                   </div>
+                   <label style="font-weight:bold; color:#0369a1; font-size:12px; display:block; margin-bottom:5px;">Currently Assigned Lessons:</label>
+                   <div id="tm-current-assignments" style="display:flex; flex-wrap:wrap; max-height:80px; overflow-y:auto;"><span style="color:#64748b; font-size:12px;">Loading...</span></div>
                </div>
-
                <div style="margin-bottom:15px; background:#f7fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0;">
                    <label style="font-weight:bold; color:#4a5568; font-size:14px;">Select Grade Source:</label>
                    <select id="tm-grade-select" style="width:100%; padding:8px; margin-top:5px; border:1px solid #cbd5e0; border-radius:5px;" onchange="refreshTopicManagerUI()">
-                       <option value="K">Kindergarten</option>
-                       <option value="1">Grade 1</option>
-                       <option value="2">Grade 2</option>
-                       <option value="3">Grade 3</option>
-                       <option value="4">Grade 4</option>
-                       <option value="5">Grade 5</option>
-                       <option value="6">Grade 6</option>
+                       <option value="K">K</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option>
                    </select>
                </div>
-               
-               <label style="font-weight:bold; color:#4a5568; font-size:14px;">Add/Remove Topics:</label>
-               <div id="tm-topic-list" style="max-height:200px; overflow-y:auto; border:1px solid #eee; padding:10px; border-radius:5px; margin-bottom:20px; margin-top:5px;">Loading topics...</div>
-               
+               <div id="tm-topic-list" style="max-height:200px; overflow-y:auto; border:1px solid #eee; padding:10px; border-radius:5px; margin-bottom:20px;">Loading...</div>
                <div style="display:flex; gap:10px;">
                    <button class="action-btn blue" onclick="saveStudentTopics()">Save Changes</button>
                    <button class="action-btn red" onclick="document.getElementById('topic-manager-modal').style.display='none'">Cancel</button>
                </div>
            </div>
        </div>
-       <div id="bulk-assign-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;"><div style="background:white; padding:30px; border-radius:15px; width:500px; max-width:90%;"><h2 style="font-size:22px; font-weight:bold; color:#48bb78; margin-bottom:10px;">Bulk Assign Lesson</h2><p id="bulk-student-count-display" style="font-weight:bold; color:#2d3748; margin-bottom:15px;">Applying to 0 students.</p><div style="margin-bottom:15px; background:#f7fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0;"><label style="font-weight:bold; color:#4a5568; font-size:14px;">Assign Grade Level:</label><select id="bulk-grade-select" style="width:100%; padding:8px; margin-top:5px; border:1px solid #cbd5e0; border-radius:5px;" onchange="refreshBulkTopicUI()"><option value="K">Kindergarten</option><option value="1">Grade 1</option><option value="2">Grade 2</option><option value="3">Grade 3</option><option value="4">Grade 4</option><option value="5">Grade 5</option><option value="6">Grade 6</option></select></div><label style="font-weight:bold; color:#4a5568; font-size:14px;">Assign Topics:</label><div id="bulk-topic-list" style="max-height:300px; overflow-y:auto; border:1px solid #eee; padding:10px; border-radius:5px; margin-bottom:20px; margin-top:5px;">Select a Grade...</div><div style="display:flex; gap:10px;"><button class="action-btn green" onclick="saveBulkStudentTopics()">Apply to All Selected</button><button class="action-btn red" onclick="document.getElementById('bulk-assign-modal').style.display='none'">Cancel</button></div></div></div>
-       <div class="modal-overlay" id="teacher-delete-modal"><div class="confirm-modal delete-confirm-modal"><div style="font-size: 60px; margin-bottom: 10px;">🗑️</div><h2 style="color: #e53e3e;">Delete Student Account?</h2><p style="font-weight: bold; font-size: 18px;">Are you sure you want to delete account: <strong id="delete-student-name-display">STUDENT_NAME</strong>?</p><div class="confirm-warning">🚨 WARNING: All associated data will be permanently lost! This cannot be undone.</div><div class="confirm-buttons"><button class="confirm-btn no" onclick="document.getElementById('teacher-delete-modal').classList.remove('active');">Cancel</button> <button class="confirm-btn yes" id="delete-student-confirm-btn" onclick="confirmDeleteStudent()">Yes, Delete Permanently</button></div></div></div>
+
+       <div id="bulk-assign-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:2200;">
+           <div style="background:white; padding:30px; border-radius:15px; width:500px; max-width:90%;">
+               <h2 style="font-size:22px; font-weight:bold; color:#48bb78; margin-bottom:10px;">Bulk Assign</h2>
+               <p id="bulk-student-count-display" style="margin-bottom:15px;">...</p>
+               <select id="bulk-grade-select" style="width:100%; padding:8px; margin-bottom:10px;" onchange="refreshBulkTopicUI()">
+                   <option value="K">K</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option>
+               </select>
+               <div id="bulk-topic-list" style="max-height:300px; overflow-y:auto; border:1px solid #eee; padding:10px; margin-bottom:20px;">Loading...</div>
+               <div style="display:flex; gap:10px;">
+                   <button class="action-btn green" onclick="saveBulkStudentTopics()">Apply</button>
+                   <button class="action-btn red" onclick="document.getElementById('bulk-assign-modal').style.display='none'">Cancel</button>
+               </div>
+           </div>
+       </div>
+
+       <div class="modal-overlay" id="teacher-delete-modal" style="z-index:2300;">
+           <div class="confirm-modal delete-confirm-modal">
+               <div style="font-size: 60px;">🗑️</div>
+               <h2 style="color: #e53e3e;">Delete Account?</h2>
+               <p>Delete <strong id="delete-student-name-display">STUDENT</strong>?</p>
+               <div class="confirm-buttons">
+                   <button class="confirm-btn no" onclick="document.getElementById('teacher-delete-modal').classList.remove('active');">Cancel</button> 
+                   <button class="confirm-btn yes" id="delete-student-confirm-btn" onclick="confirmDeleteStudent()">Delete</button>
+               </div>
+           </div>
+       </div>
    </div>
   </div><!-- Main Game -->
   
@@ -958,9 +1010,49 @@
         
         console.log("☁️ Connecting to GitHub Content...");
 
-        try { const res = await fetch(getGhUrl('enemies/forest.json')); if(res.ok) MONSTER_TYPES = await res.json(); } catch(e) {}
-        try { const res = await fetch(getGhUrl('enemies/boss.json')); if(res.ok) BOSS_TYPES = await res.json(); } catch(e) {}
-        try { const res = await fetch(getGhUrl('enemies/arena.json')); if(res.ok) ARENA_MONSTERS = await res.json(); } catch(e) {}
+        // ===============================================
+        // DYNAMIC ENEMY LOADER (AUTO-FETCH FROM GITHUB)
+        // ===============================================
+        try {
+            console.log("📂 Scanning 'enemies' folder...");
+            // 1. Get list of all files in the 'enemies' folder
+            const enemyFiles = await fetchGithubFolder('enemies');
+            
+            if (enemyFiles && Array.isArray(enemyFiles)) {
+                for (const file of enemyFiles) {
+                    // Only process JSON files
+                    if (file.name.endsWith('.json')) {
+                        try {
+                            const res = await fetch(file.download_url);
+                            if (res.ok) {
+                                const data = await res.json();
+                                if (Array.isArray(data)) {
+                                    // 2. Sort them into the right categories based on filename
+                                    if (file.name.includes('boss')) {
+                                        BOSS_TYPES = [...BOSS_TYPES, ...data];
+                                        console.log(`💀 Loaded Bosses from: ${file.name}`);
+                                    } 
+                                    else if (file.name.includes('arena')) {
+                                        ARENA_MONSTERS = [...ARENA_MONSTERS, ...data];
+                                        console.log(`⚔️ Loaded Arena foes from: ${file.name}`);
+                                    } 
+                                    else {
+                                        // Everything else (forest.json, christmas.json, etc.) goes to Wilds
+                                        MONSTER_TYPES = [...MONSTER_TYPES, ...data];
+                                        console.log(`🌲 Loaded Wild Monsters from: ${file.name}`);
+                                    }
+                                }
+                            }
+                        } catch (err) { 
+                            console.warn("Skipped invalid file:", file.name); 
+                        }
+                    }
+                }
+            }
+        } catch (e) { 
+            console.error("Could not fetch enemy folder list. Check GitHub config."); 
+        }
+        // ===============================================
         
         // 1. Load Event List (Quest Board)
         try {
@@ -1111,7 +1203,26 @@
       ctx.font = "bold 14px Arial"; ctx.fillStyle = "rgba(0,0,0,0.5)"; ctx.fillRect(5, 5, 120, 25); ctx.fillStyle = "white"; ctx.fillText(currentMapName || "Wilds", 10, 22);
     }
 
-    function handleKeyDown(e) { if(gameState.inBattle) return; if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].indexOf(e.key) > -1) e.preventDefault(); handleDPad(e.key); }
+    function handleKeyDown(e) { 
+        if(gameState.inBattle) return; 
+        
+        // Prevent scrolling with arrows
+        if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].indexOf(e.key) > -1) {
+            e.preventDefault(); 
+        }
+
+        // Check if we are in Adventure Mode or Wilds Mode
+        const isAdventure = document.getElementById('screen-adventure').classList.contains('active');
+        const isQuestPlaying = document.getElementById('adventure-play-view').style.display !== 'none';
+
+        if (isAdventure && isQuestPlaying) {
+            // Use Adventure Controls
+            handleQuestDPad(e.key);
+        } else {
+            // Use Wilds Controls
+            handleDPad(e.key);
+        }
+    }
     function handleDPad(key) { if (gameState.inBattle) return; let dx = 0; let dy = 0; if (key === 'ArrowUp') dy = -1; if (key === 'ArrowDown') dy = 1; if (key === 'ArrowLeft') dx = -1; if (key === 'ArrowRight') dx = 1; if (dx !== 0 || dy !== 0) tryMove(dx, dy); }
     
     function tryMove(dx, dy) {
@@ -1504,8 +1615,150 @@
     function openReplaceModal(item) { gameState.tempMoveToLearn=item; document.getElementById('new-move-name').innerText=item.name; const list=document.getElementById('replace-move-list'); list.innerHTML=''; const p=gameState.pets.find(pet=>pet.id===gameState.currentPetId); p.powers.forEach((pid,i)=>{const m=findShopItem(pid); const d=document.createElement('div'); d.className='move-replace-btn'; d.innerHTML=`${m.name} <span>🗑️</span>`; d.onclick=()=>confirmReplaceMove(i); list.appendChild(d);}); document.getElementById('replace-move-modal').classList.add('active'); }
     function closeReplaceModal() { document.getElementById('replace-move-modal').classList.remove('active'); gameState.tempMoveToLearn=null; }
     function confirmReplaceMove(i) { const p=gameState.pets.find(pet=>pet.id===gameState.currentPetId); p.powers.splice(i,1); p.powers.push(gameState.tempMoveToLearn.id); gameState.brainPoints-=gameState.tempMoveToLearn.price; saveGame(); renderShop(); closeReplaceModal(); showToast("Move Learned!", "success"); }
-    function startExploration() { const p = gameState.pets.find(pet => pet.id === gameState.currentPetId); if(p.hp <= 0 || !p.isHatched || p.powers.length===0 || gameState.stamina<=0) { showToast("Cannot explore!", "error"); return; } gameState.inBattle = false; gameState.battleState = null; document.getElementById('wilds-menu').style.display = 'none'; document.getElementById('rpg-wrapper').style.display = 'block'; initRPG(); soundManager.playBGM('wilds'); }
-    function stopExploration() { document.getElementById('wilds-menu').style.display = 'block'; document.getElementById('rpg-wrapper').style.display = 'none'; soundManager.playBGM('hub'); }
+    // ==========================================
+    // FIXED EXPLORATION & MAP ENGINE
+    // (Paste this ABOVE 'function getArenaEnemy')
+    // ==========================================
+
+    function startExploration() { 
+        const p = gameState.pets.find(pet => pet.id === gameState.currentPetId); 
+        
+        // 1. Safety Checks
+        if(!p) { showToast("No pet selected!", "error"); return; }
+        if(p.hp <= 0) { showToast("Your pet has fainted! Heal first.", "error"); return; }
+        if(!p.isHatched) { showToast("You need a hatched pet!", "error"); return; }
+        if(!p.powers || p.powers.length === 0) { showToast("You need at least 1 power!", "error"); return; }
+        if(gameState.stamina <= 0) { showToast("No Stamina! Study to get Energy.", "error"); return; }
+        
+        // 2. Prepare Game State
+        gameState.inBattle = false; 
+        gameState.battleState = null; 
+        
+        // 3. Switch Screens
+        document.getElementById('wilds-menu').style.display = 'none'; 
+        document.getElementById('rpg-wrapper').style.display = 'block'; 
+        
+        // 4. Start the Map Engine
+        initRPG(); 
+        soundManager.playBGM('wilds'); 
+    }
+
+    function stopExploration() { 
+        document.getElementById('wilds-menu').style.display = 'block'; 
+        document.getElementById('rpg-wrapper').style.display = 'none'; 
+        soundManager.playBGM('hub'); 
+    }
+
+    function initRPG() {
+      // Initialize Canvas
+      canvas = document.getElementById('rpg-canvas'); 
+      ctx = canvas.getContext('2d');
+      
+      const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+      
+      // Load Player Sprite
+      if (pet && pet.image && pet.image.length > 5) {
+          playerImage.src = pet.image; 
+      } else {
+          playerImage.src = HUMAN_SPRITE_URL; 
+      }
+      
+      injectRandomArena(); 
+      
+      // Draw Map
+      if(playerImage.complete) {
+          drawMap();
+      } else {
+          playerImage.onload = () => drawMap(); 
+      }
+      
+      // Attach Controls
+      document.removeEventListener('keydown', handleKeyDown); 
+      document.addEventListener('keydown', handleKeyDown);
+      initSwipe(); 
+      
+      // Click Interaction
+      canvas.onclick = (e) => {
+          if (gameState.inBattle) return; 
+          const rect = canvas.getBoundingClientRect(); 
+          const clickX = (e.clientX - rect.left) * (canvas.width / rect.width); 
+          const clickY = (e.clientY - rect.top) * (canvas.height / rect.height);
+          const tileX = Math.floor(clickX / TILE_SIZE); 
+          const tileY = Math.floor(clickY / TILE_SIZE);
+          
+          if (tileX < 0 || tileX >= MAP_COLS || tileY < 0 || tileY >= MAP_ROWS) return;
+          
+          // Check distance
+          if (Math.abs(tileX - gameState.mapX) + Math.abs(tileY - gameState.mapY) <= 2) { 
+              const t = currentMapData[tileY][tileX]; 
+              if (t === 8) checkArenaEntry(); 
+              else if (t === 7) confirmBossBattle(7); 
+          }
+      };
+      
+      // Update UI
+      document.getElementById('wild-hp-display').innerText = `HP: ${pet.hp}/${pet.maxHP}`;
+    }
+
+    function drawMap() {
+      if (!ctx) return; 
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw Tiles
+      for (let r = 0; r < MAP_ROWS; r++) {
+        for (let c = 0; c < MAP_COLS; c++) {
+          const tile = currentMapData[r][c]; 
+          const x = c * TILE_SIZE; 
+          const y = r * TILE_SIZE;
+          
+          if (tile === 2) { ctx.fillStyle = '#2e7d32'; ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE); ctx.font = '24px Arial'; ctx.fillStyle = '#1b5e20'; ctx.fillText('🌲', x+5, y+30); } 
+          else if (tile === 3) { ctx.fillStyle = '#4fc3f7'; ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE); ctx.font = '16px Arial'; ctx.fillStyle = '#0288d1'; ctx.fillText('~', x+10, y+25); } 
+          else if (tile === 1) { ctx.fillStyle = '#66bb6a'; ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE); ctx.font = '10px Arial'; ctx.fillStyle = '#388e3c'; ctx.fillText('w', x+5, y+15); ctx.fillText('w', x+20, y+30); } 
+          else if (tile === 4) { ctx.fillStyle = '#f6e05e'; ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE); ctx.font = '10px Arial'; ctx.fillStyle = '#d69e2e'; ctx.fillText('.', x+10, y+15); ctx.fillText('.', x+25, y+30); }
+          else if (tile === 5) { ctx.fillStyle = '#e2e8f0'; ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE); ctx.font = '16px Arial'; ctx.fillStyle = '#cbd5e0'; ctx.fillText('❄️', x+8, y+26); }
+          else if (tile === 6) { ctx.fillStyle = '#66bb6a'; ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE); ctx.font = '16px Arial'; ctx.fillStyle = '#ed64a6'; ctx.fillText('🌸', x+5, y+28); }
+          else if (tile === 9) { ctx.fillStyle = '#4a5568'; ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE); ctx.font = '20px Arial'; ctx.fillStyle = '#2d3748'; ctx.fillText('🪨', x+8, y+28); }
+          else if (tile === 7) { ctx.fillStyle = '#2d3748'; ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE); ctx.font = '16px Arial'; ctx.fillStyle = '#e53e3e'; ctx.fillText('💀', x+10, y+25); } 
+          else if (tile === 8) { 
+              if (arenaIcon.complete && arenaIcon.naturalWidth > 0) { 
+                  ctx.fillStyle = '#edf2f7'; ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE); ctx.drawImage(arenaIcon, x, y, TILE_SIZE, TILE_SIZE); 
+              } else { 
+                  ctx.fillStyle = '#edf2f7'; ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE); ctx.font = '18px Arial'; ctx.fillStyle = '#d69e2e'; ctx.fillText('🏟️', x+5, y+28); 
+              } 
+          } 
+          else { ctx.fillStyle = '#d7ccc8'; ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE); }
+        }
+      }
+      
+      // Draw Player
+      const px = gameState.mapX * TILE_SIZE; 
+      const py = gameState.mapY * TILE_SIZE;
+      
+      // Selection Box
+      ctx.strokeStyle = 'rgba(255, 255, 0, 0.5)'; 
+      ctx.lineWidth = 3; 
+      ctx.strokeRect(px, py, TILE_SIZE, TILE_SIZE);
+      
+      if (playerImage.complete && playerImage.naturalWidth !== 0) {
+          ctx.drawImage(playerImage, px, py, TILE_SIZE, TILE_SIZE);
+      } else { 
+          // Fallback circle if image fails
+          ctx.fillStyle = 'red'; 
+          ctx.beginPath(); 
+          ctx.arc(px + TILE_SIZE/2, py + TILE_SIZE/2, TILE_SIZE/3, 0, Math.PI * 2); 
+          ctx.fill(); 
+          ctx.strokeStyle = 'white'; 
+          ctx.lineWidth = 2; 
+          ctx.stroke(); 
+      }
+      
+      // Map Name
+      ctx.font = "bold 14px Arial"; 
+      ctx.fillStyle = "rgba(0,0,0,0.5)"; 
+      ctx.fillRect(5, 5, 120, 25); 
+      ctx.fillStyle = "white"; 
+      ctx.fillText(currentMapName || "Wilds", 10, 22);
+    }
     function getArenaEnemy() { const pool = [...PET_TYPES.rare, ...PET_TYPES.epic, ...PET_TYPES.legendary]; const base = pool[Math.floor(Math.random() * pool.length)]; return { name: "Champion " + base.name, image: base.image, imageStyle: base.imageStyle, emoji: base.emoji, hp: Math.floor(base.baseHP * 2.5), damage: Math.floor(base.baseHP * 0.3), xp: 100 }; }
     
     function getScaledEnemy(baseEnemyTemplate, playerLevel) {
@@ -1535,22 +1788,69 @@
     function getElIcon(t) { if(Array.isArray(t)) return t.map(x=>ELEMENT_ICONS[x]).join(''); return ELEMENT_ICONS[t] || '⚪'; }
     function getElementMultiplier(moveType, targetInput) { if (!moveType || !targetInput) return 1.0; const atk = moveType.toLowerCase(); const targetTypes = Array.isArray(targetInput) ? targetInput : [targetInput]; let totalMultiplier = 1.0; targetTypes.forEach(defType => { const def = defType.toLowerCase(); const typeData = TYPE_CHART[atk]; if (typeData) { if (typeData.strong.includes(def)) totalMultiplier *= 2.0; else if (typeData.weak.includes(def)) totalMultiplier *= 0.5; } }); return totalMultiplier; }
 
-    function startBattle(tileType, isBoss, isArena) {
+    function startBattle(tileType, isBoss, isArena, specificEnemy = null) {
         const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
-        if (!pet.element) { for (const rarity in PET_TYPES) { const def = PET_TYPES[rarity].find(d => d.id === pet.type); if (def) { pet.element = def.element; break; } } if (!pet.element) pet.element = 'normal'; }
+        
+        // Element failsafe
+        if (!pet.element) { 
+            for (const rarity in PET_TYPES) { 
+                const def = PET_TYPES[rarity].find(d => d.id === pet.type); 
+                if (def) { pet.element = def.element; break; } 
+            } 
+            if (!pet.element) pet.element = 'normal'; 
+        }
         
         let enemy;
-        if (isArena) { const baseArena = getArenaEnemy(); enemy = getScaledEnemy(baseArena, pet.level + 2); } 
-        else if (isBoss) { enemy = getScaledEnemy(BOSS_TYPES[0], pet.level + 5); } 
-        else { const randomBase = MONSTER_TYPES[Math.floor(Math.random() * MONSTER_TYPES.length)]; enemy = getScaledEnemy(randomBase, pet.level); }
+        
+        // 1. SPECIFIC ENEMY (From Quest JSON)
+        if (specificEnemy) {
+            enemy = getScaledEnemy(specificEnemy, pet.level);
+        }
+        // 2. Arena Logic
+        else if (isArena) { 
+            const baseArena = getArenaEnemy(); 
+            enemy = getScaledEnemy(baseArena, pet.level + 2); 
+        } 
+        // 3. Boss Logic
+        else if (isBoss) { 
+            enemy = getScaledEnemy(BOSS_TYPES[0], pet.level + 5); 
+        } 
+        // 4. Random Wild Logic
+        else { 
+            const randomBase = MONSTER_TYPES[Math.floor(Math.random() * MONSTER_TYPES.length)]; 
+            enemy = getScaledEnemy(randomBase, pet.level); 
+        }
 
         gameState.inBattle = true;
-        gameState.battleState = { enemy: enemy, playerHP: pet.hp, enemyHP: enemy.hp, isBoss: isBoss, isArena: isArena, turnInProgress: false, log: [`A wild ${enemy.name} appeared!`], showBag: false };
+        gameState.battleState = { 
+            enemy: enemy, 
+            playerHP: pet.hp, 
+            enemyHP: enemy.hp, 
+            isBoss: isBoss, 
+            isArena: isArena, 
+            turnInProgress: false, 
+            log: [`A wild ${enemy.name} appeared!`], 
+            showBag: false 
+        };
+        
         soundManager.playBGM(isBoss || isArena ? 'boss' : 'battle');
         const bg = isArena ? ARENA_IMGS[0] : (BATTLE_BACKGROUNDS[tileType] || BATTLE_BACKGROUNDS[1]);
-        document.getElementById('battle-ui').style.backgroundImage = `url('${bg}')`;
+        
+        // --- UI SWITCHING FIX (The part you asked about) ---
+        // 1. Force the Wilds Screen to be active (where Battle UI lives)
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('screen-wilds').classList.add('active');
+        
+        // 2. Hide other Wilds components so only Battle is visible
+        document.getElementById('wilds-menu').style.display = 'none'; 
         document.getElementById('rpg-wrapper').style.display = 'none'; 
+        document.getElementById('multiplayer-menu').style.display = 'none';
+        document.getElementById('raid-arena').style.display = 'none'; // Also hide raid if active
+
+        // 3. Show Battle UI
+        document.getElementById('battle-ui').style.backgroundImage = `url('${bg}')`;
         document.getElementById('battle-ui').style.display = 'flex'; 
+        
         renderBattle();
     }
     
@@ -1786,48 +2086,126 @@
     }
 
     function winBattle() { 
-        soundManager.stopBGM(); soundManager.playSFX('victory'); 
-        const p = gameState.pets.find(pet => pet.id === gameState.currentPetId); const bs = gameState.battleState; 
+        soundManager.stopBGM(); 
+        soundManager.playSFX('victory'); 
+        
+        const p = gameState.pets.find(pet => pet.id === gameState.currentPetId); 
+        const bs = gameState.battleState; 
+        
+        // Update Stats
         p.hp = bs.playerHP; 
-        const bp = bs.isBoss ? 100 : (bs.isArena?50:20); addBP(bp); 
-        p.xp += (bs.enemy.xp||15); if(p.xp>=p.maxXp) { p.level++; p.xp=0; p.maxXp=p.level*300+200; p.maxHP+=10; p.hp=p.maxHP; soundManager.playSFX('levelUp'); } 
+        const bp = bs.isBoss ? 100 : (bs.isArena ? 50 : 20); 
+        addBP(bp); 
+        p.xp += (bs.enemy.xp || 15); 
+        
+        // Level Up Logic
+        if(p.xp >= p.maxXp) { 
+            p.level++; 
+            p.xp = 0; 
+            p.maxXp = p.level * 300 + 200; 
+            p.maxHP += 10; 
+            p.hp = p.maxHP; 
+            soundManager.playSFX('levelUp'); 
+            showToast(`Level Up! ${p.name} is now Lvl ${p.level}`, "success");
+        } 
+        
         showToast(`Victory! +${bp} BP`, "success"); 
         
-        if (!bs.isBoss && !bs.isArena && Math.random() < 0.1) {
-            const eggPool = [...PET_TYPES.common, ...PET_TYPES.uncommon]; const basePet = eggPool[Math.floor(Math.random() * eggPool.length)];
-            const newEgg = JSON.parse(JSON.stringify(basePet)); newEgg.type = basePet.id; newEgg.id = 'egg_' + Date.now(); newEgg.isHatched = false; newEgg.hatchProgress = 0; newEgg.level = 1; newEgg.xp = 0; newEgg.maxXp = 100; newEgg.powers = []; newEgg.maxHP = basePet.baseHP; newEgg.hp = basePet.baseHP;
-            gameState.pets.push(newEgg); setTimeout(() => { showToast("✨ Found a Mystery Egg! ✨", "success"); }, 1500);
+        // Random Egg Drop (Only in Wilds)
+        if (!bs.isBoss && !bs.isArena && !gameState.questBattleActive && Math.random() < 0.1) {
+            const eggPool = [...PET_TYPES.common, ...PET_TYPES.uncommon]; 
+            const basePet = eggPool[Math.floor(Math.random() * eggPool.length)];
+            const newEgg = JSON.parse(JSON.stringify(basePet)); 
+            newEgg.type = basePet.id; 
+            newEgg.id = 'egg_' + Date.now(); 
+            newEgg.isHatched = false; 
+            newEgg.hatchProgress = 0; 
+            newEgg.level = 1; 
+            newEgg.xp = 0; 
+            newEgg.maxXp = 100; 
+            newEgg.powers = []; 
+            newEgg.maxHP = basePet.baseHP; 
+            newEgg.hp = basePet.baseHP;
+            gameState.pets.push(newEgg); 
+            setTimeout(() => { showToast("✨ Found a Mystery Egg! ✨", "success"); }, 1500);
         }
 
-        gameState.inBattle = false; document.getElementById('battle-ui').style.display = 'none'; 
+        gameState.inBattle = false; 
+        document.getElementById('battle-ui').style.display = 'none'; 
         
+        // --- RETURN LOGIC (FIXED) ---
         if (gameState.questBattleActive) {
+            // Case A: Return to Adventure
             gameState.questBattleActive = false;
             
             if (gameState.questSuccessKey) {
                 gameState.questProgress.flags.push(gameState.questSuccessKey);
+                
+                // Handle Rewards
                 if(gameState.pendingQuestRewardData) {
-                    giveCustomEventPet(gameState.pendingQuestRewardData);
+                    // Logic to give reward would go here (e.g., adding to array)
+                    // For now, we assume direct inventory add or handling elsewhere
+                    const r = gameState.pendingQuestRewardData;
+                    
+                    // Simple injection for immediate reward
+                    const newPet = { ...r, id: 'quest_reward_'+Date.now(), isHatched: true, level: 1, xp: 0, maxXp: 100 };
+                    
+                    // Register Evolutions if present
+                    if (r.evolutions && r.type) {
+                        EVOLUTION_CHAINS[r.type] = r.evolutions;
+                    }
+                    
+                    gameState.pets.push(newPet);
+                    showToast(`Reward: ${r.name} obtained!`, "success");
+                    
                     gameState.pendingQuestRewardData = null; 
                 } 
-                else if(gameState.pendingQuestReward) {
-                    giveEventPet(gameState.pendingQuestReward);
-                    gameState.pendingQuestReward = null; 
-                } else {
+                else {
                     alert("⚔️ Enemy Defeated! The path is open!");
                 }
             }
+            
+            // Switch Tab Back
             switchTab('adventure'); 
+            document.getElementById('adventure-list-view').style.display = 'none';
+            document.getElementById('adventure-play-view').style.display = 'block';
             drawAdventureMap(); 
-        } else {
-            document.getElementById('rpg-wrapper').style.display = 'block'; initRPG(); soundManager.playBGM('wilds');
+        } 
+        else {
+            // Case B: Return to Wilds
+            document.getElementById('rpg-wrapper').style.display = 'block'; 
+            initRPG(); 
+            soundManager.playBGM('wilds');
         }
         
         saveGame(); 
     }
 
     function loseBattle() { soundManager.stopBGM(); const p = gameState.pets.find(pet => pet.id === gameState.currentPetId); p.hp=0; showToast("Defeated...", "error"); gameState.inBattle=false; document.getElementById('battle-ui').style.display='none'; document.getElementById('wilds-menu').style.display='block'; saveGame(); setTimeout(() => soundManager.playBGM('hub'), 2000); }
-    function flee() { if(gameState.battleState.isArena) return showToast("No Running in Arena!", "error"); gameState.inBattle=false; document.getElementById('battle-ui').style.display='none'; document.getElementById('rpg-wrapper').style.display='block'; initRPG(); soundManager.playBGM('wilds'); }
+    function flee() { 
+    if(gameState.battleState.isArena) return showToast("No Running in Arena!", "error"); 
+    
+    gameState.inBattle = false; 
+    document.getElementById('battle-ui').style.display = 'none'; 
+    soundManager.stopBGM();
+
+    // CHECK: Are we in an Adventure Quest?
+    if (gameState.questBattleActive) {
+        // Yes: Go back to Quest Map
+        gameState.questBattleActive = false; 
+        switchTab('adventure'); 
+        document.getElementById('adventure-play-view').style.display = 'block'; 
+        document.getElementById('adventure-list-view').style.display = 'none';
+        drawAdventureMap(); 
+        showToast("You ran away safely...", "info");
+    } 
+    else {
+        // No: Go back to Wilds (Normal behavior)
+        document.getElementById('rpg-wrapper').style.display = 'block'; 
+        initRPG(); 
+        soundManager.playBGM('wilds'); 
+    }
+}
     function switchTab(t) { 
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.querySelectorAll('.tab').forEach(b => b.classList.remove('active')); document.querySelector(`.tab[data-tab="${t}"]`).classList.add('active'); document.getElementById('screen-' + t).classList.add('active'); 
         if(t==='wilds') soundManager.playBGM('wilds'); else soundManager.playBGM('hub'); 
@@ -1861,115 +2239,215 @@
         }).join('');
     }
 
+// ==========================================
+    // COMPLETE ADVENTURE ENGINE (FIXED)
+    // ==========================================
+
     async function loadQuest(fileUrl) {
-        try { let url = fileUrl; if(!url.startsWith('http')) url = getGhUrl(url); const res = await fetch(url); if(res.ok) { window.currentQuestData = await res.json(); startAdventure(window.currentQuestData); } else { showToast("Quest file missing!", "error"); } } catch(e) { showToast("Error loading quest.", "error"); }
+        let url = fileUrl;
+        if (!url.startsWith('http')) url = getGhUrl(url);
+        
+        console.log("Loading quest:", url);
+
+        try {
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            
+            const qData = await res.json();
+            window.currentQuestData = qData;
+            startAdventure(qData); // Now works because startAdventure is defined below
+        } catch(e) { 
+            console.error(e);
+            showToast("Error loading quest: " + e.message, "error"); 
+        }
     }
-    function drawAdventureMap() { 
-        if (!advCtx) return; 
-        
-        // 1. Clear Canvas
-        advCtx.clearRect(0,0,advCanvas.width, advCanvas.height); 
-        
-        // 2. Draw Map Tiles
-        for(let r=0; r<advMap.length; r++) { 
-            for(let c=0; c<advMap[0].length; c++) { 
-                const tile = advMap[r][c]; 
-                const x = c*TILE_SIZE; 
-                const y = r*TILE_SIZE; 
-                
-                if (tile === 9) { // WALL / ROCK
-                    advCtx.fillStyle = '#4a5568'; 
-                    advCtx.fillRect(x,y,TILE_SIZE,TILE_SIZE); 
-                    advCtx.font = '20px Arial'; 
-                    advCtx.fillStyle = '#2d3748'; 
-                    advCtx.fillText('🪨', x+8, y+28); 
-                } 
-                else if (tile === 5) { // SNOW
-                    advCtx.fillStyle = '#e2e8f0'; 
-                    advCtx.fillRect(x,y,TILE_SIZE,TILE_SIZE); 
-                    advCtx.font = '16px Arial'; 
-                    advCtx.fillStyle = '#cbd5e0'; 
-                    advCtx.fillText('❄️', x+8, y+26); 
-                }
-                else if (tile === 2) { // PORTAL / GOAL
-                    advCtx.fillStyle = '#9f7aea'; 
-                    advCtx.fillRect(x,y,TILE_SIZE,TILE_SIZE); 
-                    advCtx.fillText('🌀', x+8, y+26); 
-                } 
-                else if (tile === 3) { // WATER
-                    advCtx.fillStyle = '#4fc3f7'; 
-                    advCtx.fillRect(x,y,TILE_SIZE,TILE_SIZE); 
-                    advCtx.fillStyle = '#0288d1';
-                    advCtx.fillText('~', x+10, y+25); 
-                } 
-                else if (tile === 4) { // SAND
-                    advCtx.fillStyle = '#f6e05e'; 
-                    advCtx.fillRect(x,y,TILE_SIZE,TILE_SIZE); 
-                } 
-                else if (tile === 1) { // VOID/BLOCK
-                    advCtx.fillStyle = '#2d3748'; 
-                    advCtx.fillRect(x,y,TILE_SIZE,TILE_SIZE); 
-                } 
-                else { // DEFAULT GRASS (0 or undefined)
-                    advCtx.fillStyle = '#66bb6a'; 
-                    advCtx.fillRect(x,y,TILE_SIZE,TILE_SIZE); 
-                } 
-            } 
-        } 
 
-        // 3. Draw NPCs (Moved from global scope to here)
-        if (advNpcs && Array.isArray(advNpcs)) {
-            advNpcs.forEach(n => { 
-                const nx = n.x * TILE_SIZE; 
-                const ny = n.y * TILE_SIZE; 
-                
-                // Shadow
-                advCtx.fillStyle = 'rgba(0,0,0,0.3)'; 
-                advCtx.beginPath(); 
-                advCtx.ellipse(nx+20, ny+35, 10, 5, 0, 0, Math.PI*2); 
-                advCtx.fill(); 
+    function startAdventure(qData) { 
+        if (!qData || !qData.maps) return showToast("Invalid Quest Data", "error");
 
-                if (n.sprite && n.sprite.startsWith('http')) { 
-                    const img = new Image(); 
-                    img.src = n.sprite; 
-                    // Note: Preloading is better, but this works for basic rendering
-                    advCtx.drawImage(img, nx, ny, TILE_SIZE, TILE_SIZE); 
-                } else { 
-                    advCtx.fillStyle = '#fff'; 
-                    advCtx.font = '24px Arial'; 
-                    advCtx.fillText(n.sprite || '🧙', nx+5, ny+30); 
-                } 
-                
-                // Interaction Indicator
-                if (Math.abs(n.x - questX) + Math.abs(n.y - questY) <= 1) {
-                    advCtx.font = '20px Arial';
-                    advCtx.fillStyle = 'yellow';
-                    advCtx.fillText('❗', nx+10, ny);
-                }
-            }); 
+        // 1. Switch to Adventure Screen
+        document.getElementById('adventure-list-view').style.display = 'none'; 
+        document.getElementById('adventure-play-view').style.display = 'block'; 
+        
+        if (qData.meta && qData.meta.title) {
+            document.getElementById('quest-title-display').innerText = qData.meta.title;
         }
 
-        // 4. Draw Player (Moved from global scope to here)
-        const px = questX * TILE_SIZE; 
-        const py = questY * TILE_SIZE; 
+        // 2. Initialize Canvas
+        advCanvas = document.getElementById('adventure-canvas'); 
+        advCtx = advCanvas.getContext('2d'); 
         
-        // Player Shadow
-        advCtx.fillStyle = 'rgba(0,0,0,0.3)'; 
-        advCtx.beginPath(); 
-        advCtx.ellipse(px+20, py+35, 10, 5, 0, 0, Math.PI*2); 
-        advCtx.fill(); 
+        // --- FIX: LOAD PET IMAGE FOR QUEST ---
+        const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+        if (pet && pet.image && pet.image.length > 5) {
+            playerImage.src = pet.image; 
+        } else {
+            playerImage.src = HUMAN_SPRITE_URL; // Fallback
+        }
+
+        // 3. Load First Map
+        const startKey = qData.startMap || Object.keys(qData.maps)[0]; 
+        loadAdventureMap(startKey); 
+
+        // 4. Input Listener
+        advCanvas.onclick = (e) => { 
+            const rect = advCanvas.getBoundingClientRect(); 
+            const clickX = (e.clientX - rect.left) * (advCanvas.width / rect.width); 
+            const clickY = (e.clientY - rect.top) * (advCanvas.height / rect.height); 
+            const tileX = Math.floor(clickX / TILE_SIZE); 
+            const tileY = Math.floor(clickY / TILE_SIZE); 
+            
+            const npc = advNpcs.find(n => n.x === tileX && n.y === tileY); 
+            if(npc && Math.abs(tileX - questX) + Math.abs(tileY - questY) <= 1) { 
+                interactNPC(npc); 
+            } 
+        };
         
-        if(playerImage.complete && playerImage.naturalWidth > 0) { 
-            advCtx.drawImage(playerImage, px, py, TILE_SIZE, TILE_SIZE); 
-        } else { 
-            advCtx.fillStyle = 'blue'; 
-            advCtx.beginPath(); 
-            advCtx.arc(px+20, py+20, 15, 0, Math.PI*2); 
-            advCtx.fill(); 
-        } 
+        // 5. KEYBOARD LISTENER (This was missing!)
+        document.removeEventListener('keydown', handleKeyDown); 
+        document.addEventListener('keydown', handleKeyDown);
     }
 
+    function loadAdventureMap(mapKey) { 
+        const mapData = window.currentQuestData.maps[mapKey]; 
+        if(!mapData) return showToast("Map missing: " + mapKey, "error");
+
+        currentAdvMapKey = mapKey; 
+        advMap = mapData.layout; 
+        advNpcs = mapData.npcs || []; 
+        
+        if(mapData.start) { 
+            questX = mapData.start.x; 
+            questY = mapData.start.y; 
+        } 
+        
+        // Slight delay to ensure context is ready
+        setTimeout(drawAdventureMap, 50); 
+    }
+    // Expert Feature: Check if NPC should be rendered/collided with
+    function isNpcVisible(npc) {
+        if (npc.hideOnFlag && gameState.questProgress.flags.includes(npc.hideOnFlag)) {
+            return false; // Player has flag -> NPC disappears
+        }
+        if (npc.showOnFlag && !gameState.questProgress.flags.includes(npc.showOnFlag)) {
+            return false; // Player missing flag -> NPC hidden
+        }
+        return true; // Visible
+    }
+
+    function drawAdventureMap() { 
+    if (!advCtx || !advMap || advMap.length === 0) return; 
+    
+    advCtx.clearRect(0,0,advCanvas.width, advCanvas.height); 
+    
+    // Draw Tiles
+    for(let r=0; r<advMap.length; r++) { 
+        for(let c=0; c<advMap[0].length; c++) { 
+            const tile = advMap[r][c]; 
+            const x = c*TILE_SIZE; 
+            const y = r*TILE_SIZE; 
+            
+            if (tile === 9) { // ROCK (Blocked)
+                advCtx.fillStyle = '#4a5568'; advCtx.fillRect(x,y,TILE_SIZE,TILE_SIZE); 
+                advCtx.font = '20px Arial'; advCtx.fillStyle = '#2d3748'; advCtx.fillText('🪨', x+8, y+28); 
+            } 
+            else if (tile === 2) { // TREE (Blocked) - NEW!
+                advCtx.fillStyle = '#2e7d32'; advCtx.fillRect(x,y,TILE_SIZE,TILE_SIZE); 
+                advCtx.font = '24px Arial'; advCtx.fillStyle = '#1b5e20'; advCtx.fillText('🌲', x+5, y+30); 
+            }
+            else if (tile === 8) { // PORTAL (Walkable) - NEW NUMBER!
+                advCtx.fillStyle = '#9f7aea'; advCtx.fillRect(x,y,TILE_SIZE,TILE_SIZE); 
+                advCtx.font = '20px Arial'; advCtx.fillStyle = 'white'; advCtx.fillText('🌀', x+8, y+28); 
+            } 
+            else if (tile === 5) { // SNOW
+                advCtx.fillStyle = '#e2e8f0'; advCtx.fillRect(x,y,TILE_SIZE,TILE_SIZE); 
+                advCtx.font = '16px Arial'; advCtx.fillStyle = '#cbd5e0'; advCtx.fillText('❄️', x+8, y+26); 
+            }
+            else if (tile === 3) { // WATER (Blocked)
+                advCtx.fillStyle = '#4fc3f7'; advCtx.fillRect(x,y,TILE_SIZE,TILE_SIZE); 
+                advCtx.fillStyle = '#0288d1'; advCtx.fillText('~', x+10, y+25); 
+            } 
+            else if (tile === 4) { // SAND
+                advCtx.fillStyle = '#f6e05e'; advCtx.fillRect(x,y,TILE_SIZE,TILE_SIZE); 
+            } 
+            else if (tile === 1) { // VOID (Blocked)
+                advCtx.fillStyle = '#1a202c'; advCtx.fillRect(x,y,TILE_SIZE,TILE_SIZE); 
+            } 
+            else { // GRASS (0)
+                advCtx.fillStyle = '#66bb6a'; advCtx.fillRect(x,y,TILE_SIZE,TILE_SIZE); 
+            } 
+        } 
+    } 
+
+    // Draw NPCs
+    if (advNpcs && Array.isArray(advNpcs)) {
+        advNpcs.forEach(n => { 
+            // Check visibility
+            if (n.hideOnFlag && gameState.questProgress.flags.includes(n.hideOnFlag)) return;
+            if (n.showOnFlag && !gameState.questProgress.flags.includes(n.showOnFlag)) return;
+
+            const nx = n.x * TILE_SIZE; 
+            const ny = n.y * TILE_SIZE; 
+            
+            // Shadow
+            advCtx.fillStyle = 'rgba(0,0,0,0.3)'; advCtx.beginPath(); 
+            advCtx.ellipse(nx+20, ny+35, 10, 5, 0, 0, Math.PI*2); advCtx.fill(); 
+
+            // Sprite
+            if (n.sprite && n.sprite.startsWith('http')) { 
+                const img = new Image(); img.src = n.sprite; 
+                advCtx.drawImage(img, nx, ny, TILE_SIZE, TILE_SIZE); 
+            } else { 
+                advCtx.fillStyle = '#fff'; advCtx.font = '24px Arial'; 
+                advCtx.fillText(n.sprite || '🧙', nx+5, ny+30); 
+            } 
+            
+            // Quest Marker
+            if (Math.abs(n.x - questX) + Math.abs(n.y - questY) <= 1) {
+                advCtx.font = '20px Arial'; advCtx.fillStyle = 'yellow'; advCtx.fillText('❗', nx+10, ny);
+            }
+        }); 
+    }
+
+    // Draw Player
+    const px = questX * TILE_SIZE; 
+    const py = questY * TILE_SIZE; 
+    
+    // Player Shadow
+    advCtx.fillStyle = 'rgba(0,0,0,0.3)'; advCtx.beginPath(); 
+    advCtx.ellipse(px+20, py+35, 10, 5, 0, 0, Math.PI*2); advCtx.fill(); 
+    
+    // Player Image
+    if(playerImage.complete && playerImage.naturalWidth > 0) { 
+        advCtx.drawImage(playerImage, px, py, TILE_SIZE, TILE_SIZE); 
+    } else { 
+        advCtx.fillStyle = 'blue'; advCtx.beginPath(); advCtx.arc(px+20, py+20, 15, 0, Math.PI*2); advCtx.fill(); 
+    } 
+}
+function checkAdventureRandomEncounter(tileType) {
+        // 1. Define "Safe" tiles (e.g., portals shouldn't trigger battles)
+        // Tiles: 0=Grass, 4=Sand, 5=Snow. These are "Wild" areas.
+        if (![0, 4, 5].includes(tileType)) return;
+
+        // 2. Chance Check (e.g., 8% chance per step)
+        if (Math.random() < 0.08) {
+            console.log("⚔️ Random Adventure Encounter!");
+            
+            // --- FIX IS HERE: TELL THE GAME WE ARE IN A QUEST BATTLE ---
+        gameState.questBattleActive = true; 
+        // -----------------------------------------------------------
+
+            
+            // 3. Stop movement and Start Battle
+            // We pass 'false' for boss/arena, and 'null' for specific enemy 
+            // so the game picks a random one from your loaded lists.
+            startBattle(tileType, false, false, null); 
+        }
+    }
     function handleQuestDPad(key) { 
+        // 1. Safety Check: Ensure map data exists
+        if(!window.currentQuestData || !advMap) return;
+
         let dx=0, dy=0; 
         if(key==='ArrowUp') dy=-1; 
         if(key==='ArrowDown') dy=1; 
@@ -1979,34 +2457,136 @@
         const nx = questX+dx; 
         const ny = questY+dy; 
         
-        // Bounds Check
-        if(ny < 0 || ny >= advMap.length || nx < 0 || nx >= advMap[0].length) return; 
-        
+        // --- FIX 1: Stop player from walking off the edge of the map ---
+        if(ny < 0 || ny >= advMap.length) return; // Check Row exists
+        if(nx < 0 || nx >= advMap[ny].length) return; // Check Column exists
+
+        // --- FIX 2: Check for NPC collision ---
+        // (Only blocks if the NPC is currently visible)
+        const npc = advNpcs.find(n => n.x === nx && n.y === ny && isNpcVisible(n));
+        if (npc) {
+            interactNPC(npc);
+            return; 
+        }
+
+        // --- FIX 3: Check for Wall/Rock/Tree collision ---
         const tile = advMap[ny][nx]; 
         
-        // COLLISION CHECK: Block ID 1 (Void) and ID 9 (Walls)
-        if(tile === 1 || tile === 9) return; 
+        // LIST OF BLOCKED TILES:
+        // 1 = Void (Black)
+        // 9 = Rock/Wall
+        // 2 = Tree (Add this if you want Trees to stop you)
+        // 3 = Water (Add this if you want Water to stop you)
+        const blockedTiles = [1, 9, 2, 3]; 
+
+        // If the target tile is in the list, STOP.
+        if(blockedTiles.includes(tile)) return; 
         
-        // Portal Logic
+        // --- Portal Check ---
+        // Note: If you made '2' a solid tree above, ensure your Portals are tile '8' in your JSON!
         const mapData = window.currentQuestData.maps[currentAdvMapKey]; 
         if(mapData.portals) { 
             const portal = mapData.portals.find(p => p.x === nx && p.y === ny); 
             if(portal) { 
-                questX = portal.toX; 
-                questY = portal.toY; 
                 loadAdventureMap(portal.toMap); 
                 return; 
             } 
         } 
         
+        // Move Player
         questX = nx; 
         questY = ny; 
         drawAdventureMap(); 
+        
+        // Random Encounter Check
+        checkAdventureRandomEncounter(tile);
     }
-    function interactNPC(npc) { const dBox = document.getElementById('quest-dialog'); document.getElementById('quest-npc-name').innerText = npc.name; document.getElementById('quest-text').innerText = npc.dialogue[0]; dBox.style.display = 'block'; const btn = document.getElementById('quest-action-btn'); btn.innerText = "Continue"; btn.onclick = () => { dBox.style.display = 'none'; if(npc.action) triggerQuestAction(npc.action); }; }
-    function triggerQuestAction(actionKey) { const gate = window.currentQuestData.gates ? window.currentQuestData.gates[actionKey] : null; if(!gate) return; if(gate.type === 'academic_challenge') { if(confirm(`🔒 LOCKED! Answer ${gate.questionCount} questions to pass?`)) { startAcademicGate(gate.questionCount, gate.onSuccess); } } else if (gate.type === 'battle') { if(confirm(`⚠️ BATTLE: Fight?`)) { gameState.questBattleActive = true; gameState.questSuccessKey = gate.onSuccess; startBattle(7, true, false); } } else if (gate.type === 'item') { gameState.questProgress.flags.push(gate.onSuccess); alert(`You found: ${gate.itemName || 'Hidden Item'}!`); if(gate.reward) addBP(gate.reward); } }
-    function startAcademicGate(count, successKey) { switchTab('study'); let wins = 0; const originalCheck = window.checkAnswer; window.checkAnswer = (val) => { let input = val || document.getElementById('answer-input').value; if(input == gameState.currentQuestion.a) { wins++; soundManager.playSFX('correct'); if(wins >= count) { alert("🎉 Gate Unlocked!"); window.checkAnswer = originalCheck; switchTab('adventure'); gameState.questProgress.flags.push(successKey); } else { generateNextQuestion(); } } else { alert("❌ Failed! Try again later."); window.checkAnswer = originalCheck; switchTab('adventure'); } }; generateNextQuestion(); }
-    function exitAdventure() { document.getElementById('adventure-list-view').style.display='grid'; document.getElementById('adventure-play-view').style.display='none'; }
+
+    // --- Helpers ---
+    function interactNPC(npc) { 
+        const dBox = document.getElementById('quest-dialog'); 
+        document.getElementById('quest-npc-name').innerText = npc.name; 
+        document.getElementById('quest-text').innerText = npc.dialogue[0]; 
+        dBox.style.display = 'block'; 
+        
+        const btn = document.getElementById('quest-action-btn'); 
+        btn.innerText = "Continue"; 
+        btn.onclick = () => { 
+            dBox.style.display = 'none'; 
+            if(npc.action) triggerQuestAction(npc.action); 
+        }; 
+    }
+
+    function triggerQuestAction(actionKey) { 
+        const gate = window.currentQuestData.gates ? window.currentQuestData.gates[actionKey] : null; 
+        if(!gate) return; 
+        
+        if(gate.type === 'academic_challenge') { 
+            if(confirm(`🔒 LOCKED! Answer ${gate.questionCount} questions to pass?`)) { 
+                startAcademicGate(gate.questionCount, gate.onSuccess); 
+            } 
+        } 
+        else if (gate.type === 'battle') { 
+            // --- NEW: Monster Lookup Logic ---
+            let targetMonster = null;
+            if (gate.enemyId) {
+                // Look for monster in your existing lists
+                targetMonster = MONSTER_TYPES.find(m => m.name === gate.enemyId || m.id === gate.enemyId) ||
+                                BOSS_TYPES.find(b => b.name === gate.enemyId || b.id === gate.enemyId);
+            }
+            // ---------------------------------
+
+            const name = targetMonster ? targetMonster.name : "Monster";
+
+            if(confirm(`⚠️ BATTLE: Fight ${name}?`)) { 
+                gameState.questBattleActive = true; 
+                gameState.questSuccessKey = gate.onSuccess; 
+                
+                if (gate.rewardData) gameState.pendingQuestRewardData = gate.rewardData;
+                
+                // Pass the specific monster to startBattle
+                startBattle(7, true, false, targetMonster); 
+            } 
+        } 
+        else if (gate.type === 'item') { 
+            gameState.questProgress.flags.push(gate.onSuccess); 
+            alert(`You found: ${gate.itemName || 'Hidden Item'}!`); 
+            if(gate.reward) addBP(gate.reward); 
+        } 
+    }
+
+    function startAcademicGate(count, successKey) { 
+        switchTab('study'); 
+        let wins = 0; 
+        const originalCheck = window.checkAnswer; 
+        
+        window.checkAnswer = (val) => { 
+            let input = val || document.getElementById('answer-input').value; 
+            // Simple check logic for gate
+            if(input == gameState.currentQuestion.a) { 
+                wins++; 
+                soundManager.playSFX('correct'); 
+                if(wins >= count) { 
+                    alert("🎉 Gate Unlocked!"); 
+                    window.checkAnswer = originalCheck; 
+                    switchTab('adventure'); 
+                    gameState.questProgress.flags.push(successKey); 
+                } else { 
+                    generateNextQuestion(); 
+                } 
+            } else { 
+                alert("❌ Failed! Try again later."); 
+                window.checkAnswer = originalCheck; 
+                switchTab('adventure'); 
+            } 
+        }; 
+        generateNextQuestion(); 
+    }
+
+    function exitAdventure() { 
+        document.getElementById('adventure-list-view').style.display='grid'; 
+        document.getElementById('adventure-play-view').style.display='none'; 
+    }
 
 
     // --- TEACHER LOGIC ---
@@ -2179,41 +2759,37 @@
     async function teacherSummonRaid() {
         const name = document.getElementById('t-boss-name').value;
         const hp = parseInt(document.getElementById('t-boss-hp').value);
+        
+        // NEW: Get Attack Value (Default to 15 if empty)
+        const atk = parseInt(document.getElementById('t-boss-atk').value) || 15;
+        
         const img = document.getElementById('t-boss-img').value;
         const rewardUrl = document.getElementById('t-boss-reward-url').value;
 
         if (!name || !hp) return showToast("Name and HP required", "error");
 
         const bossData = {
-            name, 
-            hp, 
-            maxHP: hp, 
-            image: img, 
-            rewardUrl, 
+            name: name, 
+            hp: hp, 
+            maxHP: hp,
+            attack: atk, // <--- SAVING ATTACK HERE
+            image: img || '', 
+            rewardUrl: rewardUrl || '', 
             active: true,
-            damageDealers: {} // Map: { "username": totalDamage }
+            summonedAt: new Date().toISOString(),
+            damageDealers: {} 
         };
 
-        await window.fbase.setDoc(window.fbase.doc(window.db, "world_boss", "active"), bossData);
-        showToast("Raid Boss Summoned!", "success");
+        try {
+            await window.fbase.setDoc(window.fbase.doc(window.db, "world_boss", "active"), bossData);
+            showToast(`Summoned ${name} with ${atk} ATK!`, "success");
+        } catch (e) {
+            console.error(e);
+            showToast("Error summoning boss.", "error");
+        }
     }
 
     // 2. Student: Check Entry
-    function joinRaid() {
-        if (gameState.brainPoints < 100) return showToast("Need 100 BP to enter!", "error");
-        
-        gameState.brainPoints -= 100;
-        updateStatsDisplay();
-        saveGame();
-
-        switchTab('wilds'); // Hide other screens
-        document.getElementById('wilds-menu').style.display = 'none';
-        document.getElementById('screen-raid').style.display = 'block';
-        document.getElementById('raid-lobby').style.display = 'none';
-        document.getElementById('raid-arena').style.display = 'flex';
-
-        initRaidListener();
-    }
 
     // 3. Real-time Listener & Leaderboard
     function initRaidListener() {
@@ -2348,62 +2924,389 @@
         setTimeout(() => { raidCooldown = false; btn.style.opacity = 1; }, 800);
     }
 
-    // 5. Victory & Rewards
+    // 5. Victory & Rewards (Updated for Battle UI)
+    let hasClaimedRaidReward = false; // Prevents double claiming glitches
+
     async function handleRaidVictory() {
-        if (raidUnsub) raidUnsub();
+        if (hasClaimedRaidReward) return; // Stop if already claimed
+        hasClaimedRaidReward = true; 
+
+        if (raidListenerUnsub) raidListenerUnsub(); // Stop listening
         
-        document.getElementById('raid-arena').innerHTML = `
-            <div style="text-align:center; margin-top:50px;">
-                <h1 style="color:#48bb78; font-size:50px;">VICTORY!</h1>
-                <p>The Titan has fallen.</p>
-                <div id="raid-reward-container">Fetching rewards...</div>
-                <button class="action-btn" onclick="exitRaid()">Leave</button>
+        soundManager.stopBGM();
+        soundManager.playSFX('victory');
+
+        // HIJACK THE BATTLE UI FOR VICTORY
+        const battlePanel = document.getElementById('battle-ui');
+        
+        // Create a Victory Overlay inside the battle screen
+        battlePanel.innerHTML = `
+            <div style="
+                position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.85); display: flex; flex-direction: column;
+                align-items: center; justify-content: center; z-index: 100; color: white;
+                animation: popIn 0.5s;
+            ">
+                <h1 style="color:#48bb78; font-size:50px; text-shadow:0 0 20px #fff; margin-bottom: 10px;">VICTORY!</h1>
+                <p style="font-size: 20px; margin-bottom: 20px;">The Titan has fallen.</p>
+                
+                <div id="raid-reward-content" style="text-align:center; min-height: 150px;">
+                    <div class="egg-shaking" style="font-size:60px;">🎁</div>
+                    <p>Fetching Reward...</p>
+                </div>
+
+                <button class="action-btn red" style="width: 200px; margin-top: 20px;" onclick="location.reload()">Back to Hub</button>
             </div>
         `;
 
         // Fetch Reward Data
-        if (currentRaidData.rewardUrl) {
+        if (currentRaidData && currentRaidData.rewardUrl) {
             try {
-                // Check if URL is raw GitHub or relative
                 let url = currentRaidData.rewardUrl;
                 if(!url.startsWith('http')) url = `https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/${url}`;
                 
                 const res = await fetch(url);
                 const petData = await res.json();
                 
+                // Register Evolutions if present
+                if (petData.evolutions && petData.type) {
+                    EVOLUTION_CHAINS[petData.type] = petData.evolutions;
+                }
+                
                 // Add to Inventory
                 const newPet = {
                     id: 'raid_reward_' + Date.now(),
-                    ...petData, // Spread properties from JSON
-                    level: 1,
+                    ...petData, 
+                    level: 5, // Bonus level for Raid reward
                     hp: petData.hp || 50,
                     maxHP: petData.hp || 50,
-                    xp: 0, maxXp: 100,
+                    xp: 0, maxXp: 400,
                     isHatched: true
                 };
                 
                 gameState.pets.push(newPet);
+                addBP(500); // BP Bonus
                 saveGame();
 
-                document.getElementById('raid-reward-container').innerHTML = `
-                    <h3>You earned: ${newPet.name}!</h3>
-                    <img src="${newPet.image}" style="width:150px;">
-                    <p>+500 BP</p>
-                `;
-                addBP(500);
+                // Show the Pet
+                const rewardContainer = document.getElementById('raid-reward-content');
+                if(rewardContainer) {
+                    rewardContainer.innerHTML = `
+                        <h3 style="color:#f6e05e; font-size: 24px;">${newPet.name}</h3>
+                        ${newPet.image ? `<img src="${newPet.image}" style="width:150px; height:150px; object-fit:contain; filter:drop-shadow(0 0 10px white);">` : `<div style="font-size:80px">${newPet.emoji}</div>`}
+                        <div style="color:#48bb78; font-weight:bold; margin-top:10px;">+500 Brain Points</div>
+                    `;
+                }
 
             } catch(e) {
-                document.getElementById('raid-reward-container').innerHTML = "Error loading reward pet.";
+                console.error("Reward Error", e);
+                const rewardContainer = document.getElementById('raid-reward-content');
+                if(rewardContainer) rewardContainer.innerHTML = "<p>Reward Error (Check Network)</p><p>+500 BP added.</p>";
+                addBP(500);
             }
+        } else {
+            // No specific pet reward, just BP
+            addBP(500);
+            const rewardContainer = document.getElementById('raid-reward-content');
+            if(rewardContainer) rewardContainer.innerHTML = "<h3 style='color:#f6e05e'>Reward: 500 BP</h3>";
+        }
+    }
+function joinRaid() {
+        // 1. Check Requirements
+        if (gameState.brainPoints < 100) return showToast("Need 100 BP to enter!", "error");
+        
+        // Safety check for active pet
+        const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+        if (!pet) return showToast("No pet selected!", "error");
+        if (pet.hp <= 0) return showToast("Your current pet is fainted!", "error");
+
+        // 2. Pay Entry Fee
+        gameState.brainPoints -= 100;
+        updateStatsDisplay();
+        saveGame();
+
+        // 3. Hide all other screens
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('screen-wilds').classList.add('active'); 
+        
+        document.getElementById('wilds-menu').style.display = 'none';
+        document.getElementById('rpg-wrapper').style.display = 'none';
+        document.getElementById('multiplayer-menu').style.display = 'none';
+        document.getElementById('raid-arena').style.display = 'none'; // Hide old Raid UI
+        
+        // 4. Show Battle UI with Boss Background
+        const ui = document.getElementById('battle-ui');
+        ui.style.display = 'flex';
+        ui.style.backgroundImage = `url('https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(3).png')`; 
+
+        // 5. Start the specific Raid Engine
+        startRaidEngine();
+    }
+
+    // --- Raid Engine State ---
+    let raidListenerUnsub = null;
+    let localRaidData = { attack: 15 }; // <--- NEW: Defaults to 15
+
+    function startRaidEngine() {
+        gameState.inBattle = true;
+        document.getElementById('enemy-name').innerText = "Loading Titan...";
+        
+        // Connect to Firebase Live Data
+        const docRef = window.fbase.doc(window.db, "world_boss", "active");
+        
+        raidListenerUnsub = window.fbase.onSnapshot(docRef, (doc) => {
+            // Handle Victory/Inactive/Missing
+            if (!doc.exists() || !doc.data().active || doc.data().hp <= 0) {
+                if(typeof handleRaidVictory === 'function') {
+                    handleRaidVictory();
+                } else {
+                    showToast("Raid is over!", "info");
+                    exitRaidBattle();
+                }
+                return;
+            }
+
+            const data = doc.data();
+            
+            // --- CAPTURE BOSS DATA ---
+            localRaidData = data; // Stores attack power for later
+            // -------------------------
+
+            // Update Boss Visuals
+            const enemyVis = document.getElementById('battle-enemy-visual');
+            if (!enemyVis.innerHTML.includes(data.image)) {
+                enemyVis.classList.add('flipped-opponent');
+                enemyVis.innerHTML = `<img src="${data.image}" class="battler-image" style="width:300px; height:300px; filter:drop-shadow(0 0 15px red);">`;
+            }
+
+            // Update Boss HP (Real-time)
+            document.getElementById('enemy-name').innerHTML = `☠️ ${data.name} (Raid)`;
+            document.getElementById('enemy-hp-bar').style.width = (data.hp / data.maxHP * 100) + "%";
+            
+            // Render Player Side
+            renderRaidPlayerSide();
+        });
+    }
+    function renderRaidPlayerSide() {
+        const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+        
+        // Render Player Visual
+        const pVis = document.getElementById('battle-player-visual');
+        pVis.classList.remove('flipped-opponent');
+        pVis.innerHTML = pet.image 
+            ? `<img src="${pet.image}" class="battler-image ${pet.imageStyle}" style="width:200px; height:200px;">` 
+            : `<div style="font-size:100px;">${pet.emoji}</div>`;
+
+        // Update Player HP Bar
+        document.getElementById('player-battle-name').innerText = pet.name;
+        document.getElementById('player-hp-bar').style.width = (pet.hp / pet.maxHP * 100) + "%";
+        document.getElementById('player-hp-text').innerText = `${pet.hp}/${pet.maxHP}`;
+
+        // Render Actions (Special Raid Buttons)
+        const btnGrid = document.getElementById('battle-actions');
+        
+        // Map existing powers to 'useRaidMove'
+        let buttons = pet.powers.map(pid => {
+            const move = findShopItem(pid);
+            return `<button class="action-btn green" onclick="useRaidMove('${pid}')">${move.name}</button>`;
+        }).join('');
+        
+        buttons += `<button class="action-btn blue" onclick="openSwapMenu()">🔄 Squad</button>`;
+        buttons += `<button class="action-btn red" onclick="exitRaidBattle()">🏃 Escape</button>`;
+        
+        // Inject Buttons
+        if(document.getElementById('action-buttons-grid')) {
+            document.getElementById('action-buttons-grid').innerHTML = buttons;
+        } else {
+            btnGrid.innerHTML = `<div id="action-buttons-grid" class="battle-actions">${buttons}</div>`;
         }
     }
 
-    function exitRaid() {
-        if (raidUnsub) raidUnsub();
-        document.getElementById('screen-raid').style.display = 'none';
-        document.getElementById('wilds-menu').style.display = 'block';
-        switchTab('wilds');
+    // --- The Connector (Animation + Database Transaction) ---
+    let isRaidTurnProcessing = false;
+
+    async function useRaidMove(moveId) {
+        if (isRaidTurnProcessing) return;
+        
+        const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+        if (pet.hp <= 0) return showToast("Pet fainted! Swap now!", "error");
+
+        isRaidTurnProcessing = true;
+        const move = findShopItem(moveId);
+
+        // A. ANIMATION PHASE
+        const pVis = document.getElementById('battle-player-visual');
+        const eVis = document.getElementById('battle-enemy-visual');
+        
+        soundManager.playSFX('attack');
+        pVis.style.animation = "attackLunge 0.3s";
+        createProjectile(move.image || move.icon, pVis, eVis);
+        
+        await new Promise(r => setTimeout(r, 400)); 
+        pVis.style.animation = "";
+        eVis.style.animation = "damageShake 0.4s";
+        soundManager.playSFX('hit');
+
+        // B. DATABASE PHASE
+        const dmg = 20 + (pet.level * 3) + Math.floor(Math.random()*10); 
+        const myUser = gameState.playerName;
+        const ref = window.fbase.doc(window.db, "world_boss", "active");
+
+        try {
+            await window.fbase.runTransaction(window.db, async (t) => {
+                const doc = await t.get(ref);
+                if (!doc.exists()) throw "Boss Dead";
+                const d = doc.data();
+                
+                const newHP = Math.max(0, d.hp - dmg);
+                const dealers = d.damageDealers || {};
+                const myTotal = dealers[myUser] || 0;
+
+                t.update(ref, { 
+                    hp: newHP,
+                    [`damageDealers.${myUser}`]: myTotal + dmg
+                });
+            });
+            
+            showFloatingText(eVis.parentElement, `-${dmg}`, "crit");
+
+        } catch(e) {
+            console.log("Raid Error:", e);
+        }
+
+        // C. BOSS COUNTER-ATTACK PHASE
+        if (Math.random() < 0.3) {
+            setTimeout(() => {
+                eVis.style.animation = "attackLunge 0.3s";
+                soundManager.playSFX('hit');
+                pVis.style.animation = "damageShake 0.4s";
+                
+                const bossDmg = 10 + Math.floor(Math.random() * 15);
+                pet.hp = Math.max(0, pet.hp - bossDmg);
+                showFloatingText(pVis.parentElement, `-${bossDmg}`, "weak");
+                
+                renderRaidPlayerSide(); // Update HP bar UI
+                saveGame();
+
+                // --- CRITICAL FIX: SQUAD WIPE CHECK ---
+                if (pet.hp <= 0) {
+                     // 1. Check if anyone else in the squad is alive
+                     const squadIds = (gameState.team && gameState.team.length > 0) ? gameState.team : [gameState.currentPetId];
+                     const hasLivingPet = squadIds.some(id => {
+                         const p = gameState.pets.find(x => x.id === id);
+                         return p && p.hp > 0;
+                     });
+
+                     if (hasLivingPet) {
+                         // Reserves available -> Swap
+                         showToast(`${pet.name} Fainted! Swap!`, "error");
+                         openSwapMenu(true); 
+                     } else {
+                         // No reserves -> GAME OVER -> KICK OUT
+                         showToast("☠️ SQUAD WIPED! Retreating...", "error");
+                         setTimeout(() => {
+                             exitRaidBattle();
+                         }, 2000);
+                     }
+                }
+                // -------------------------------------
+            }, 600);
+        }
+
+        // Reset Turn Lock
+        setTimeout(() => { isRaidTurnProcessing = false; }, 1000);
     }
+
+    // --- NEW RAID SUMMARY & EXIT LOGIC ---
+
+function showRaidSummary() {
+    // 1. Get Data from the local capture
+    const dealers = localRaidData.damageDealers || {};
+    
+    // 2. Sort Players by Damage (Highest first)
+    const sorted = Object.entries(dealers).sort(([,a], [,b]) => b - a);
+    
+    // 3. Find My Stats
+    const myDmg = dealers[gameState.playerName] || 0;
+    const myRank = sorted.findIndex(x => x[0] === gameState.playerName) + 1;
+
+    // 4. Define Reward Logic
+    const getReward = (rank) => {
+        if (rank === 1) return 1000;
+        if (rank === 2) return 800;
+        if (rank === 3) return 600;
+        if (rank <= 5) return 400;
+        return 200; 
+    };
+
+    // 5. Build HTML List
+    let listHtml = sorted.slice(0, 5).map((entry, i) => {
+        const rank = i + 1;
+        const isMe = entry[0] === gameState.playerName;
+        const reward = getReward(rank);
+        let medal = rank === 1 ? "🥇" : (rank === 2 ? "🥈" : (rank === 3 ? "🥉" : `#${rank}`));
+
+        return `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px; border-bottom:1px solid #eee; ${isMe ? 'background:#ebf8ff; color:#2b6cb0;' : ''}">
+            <span style="font-weight:bold;">${medal} ${entry[0]}</span>
+            <div style="text-align:right;">
+                <div style="font-weight:bold; font-size:13px;">${entry[1]} dmg</div>
+                <div style="color:#d69e2e; font-size:11px; font-weight:bold;">+${reward} BP</div>
+            </div>
+        </div>`;
+    }).join('');
+
+    // 6. Calculate My Reward
+    const myPotentialBP = myRank > 0 ? getReward(myRank) : 0;
+
+    // 7. Show Modal
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay active';
+    modal.style.zIndex = "3000";
+    modal.innerHTML = `
+        <div class="confirm-modal" style="max-width: 400px; padding: 20px;">
+            <h2 style="color:#d69e2e; margin-bottom:5px;">📊 Battle Report</h2>
+            <p style="font-size:12px; color:#718096; margin-bottom:15px;">Rewards distributed on Victory</p>
+            
+            <div style="background:white; border:2px solid #e2e8f0; border-radius:10px; margin-bottom:15px; max-height:220px; overflow-y:auto; text-align:left;">
+                ${listHtml}
+                ${sorted.length > 5 ? `<div style="text-align:center; padding:8px; color:gray; font-size:12px; border-top:1px dashed #ccc;">... and ${sorted.length - 5} others ...<br><span style="color:#d69e2e; font-weight:bold;">(The Rest: +200 BP)</span></div>` : ''}
+            </div>
+
+            <div style="background:#2d3748; color:white; padding:15px; border-radius:10px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
+                <div style="text-align:left;">
+                    <div style="font-size:11px; color:#a0aec0;">YOUR RANK</div>
+                    <div style="font-size:20px; font-weight:bold; color:#f6e05e;">#${myRank > 0 ? myRank : '-'}</div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-size:11px; color:#a0aec0;">ESTIMATED PAYOUT</div>
+                    <div style="font-size:20px; font-weight:bold; color:#48bb78;">+${myPotentialBP} BP</div>
+                </div>
+            </div>
+
+            <button class="confirm-btn no" style="width:100%;" onclick="this.parentElement.parentElement.remove(); finalizeExit();">
+                Return to Camp
+            </button>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+// UPDATED EXIT FUNCTION
+function exitRaidBattle() {
+    if (raidListenerUnsub) raidListenerUnsub();
+    gameState.inBattle = false;
+    soundManager.stopBGM();
+    
+    // Instead of leaving immediately, show the report!
+    showRaidSummary();
+}
+
+function finalizeExit() {
+    document.getElementById('battle-ui').style.display = 'none';
+    document.getElementById('wilds-menu').style.display = 'block';
+    soundManager.playBGM('wilds');
+}
   </script>
 </body>
 </html>
