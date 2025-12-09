@@ -6,20 +6,29 @@
   "maps": {
     "snowy_village": {
       "layout": [
-        [9, 9, 9, 9, 9],
-        [9, 5, 0, 5, 9],
-        [9, 9, 0, 9, 9],
-        [9, 9, 2, 9, 9],
-        [9, 9, 9, 9, 9]
+        [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9],
+        [9, 5, 5, 5, 5, 5, 5, 5, 9, 5, 5, 9],
+        [9, 5, 9, 9, 9, 9, 9, 5, 9, 5, 5, 9],
+        [9, 5, 9, 5, 5, 5, 9, 5, 9, 5, 5, 9],
+        [9, 5, 9, 5, 9, 5, 9, 5, 5, 5, 5, 9],
+        [9, 5, 5, 5, 9, 5, 5, 5, 9, 9, 9, 9],
+        [9, 9, 9, 9, 9, 9, 9, 5, 9, 2, 9, 9], 
+        [9, 5, 5, 5, 5, 5, 5, 5, 9, 5, 9, 9], 
+        [9, 5, 9, 9, 9, 9, 9, 9, 9, 0, 9, 9], 
+        [9, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 9],
+        [9, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 9],
+        [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9]
       ],
+      "start": { "x": 1, "y": 1 },
       "npcs": [
         {
           "name": "Elves Gatekeeper",
-          "x": 2,
-          "y": 2,
+          "x": 9,
+          "y": 8,
           "sprite": "🧝",
           "dialogue": [
-            "Halt! Answer my 3 math questions to prove you are ready to start."
+            "Halt! The path ahead is dangerous.",
+            "Answer 3 math questions to open the gate!"
           ],
           "action": "elf_challenge",
           "hideOnFlag": "elf_challenge_complete"
@@ -27,167 +36,101 @@
       ],
       "portals": [
         {
-          "x": 2,
-          "y": 3,
-          "toMap": "icy_gauntlet_1",
-          "toX": 2,
-          "toY": 3
+          "x": 9,
+          "y": 6,
+          "toMap": "icy_gauntlet",
+          "toX": 1,
+          "toY": 1
         }
       ]
     },
-    "icy_gauntlet_1": {
+    "icy_gauntlet": {
       "layout": [
-        [9, 9, 9, 9, 9],
-        [9, 0, 0, 0, 9],
-        [9, 9, 0, 9, 9],
-        [9, 9, 2, 9, 9],
-        [9, 9, 9, 9, 9]
+        [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9],
+        [9, 5, 5, 5, 9, 5, 5, 5, 5, 5, 5, 9],
+        [9, 9, 9, 5, 9, 5, 9, 9, 9, 9, 5, 9],
+        [9, 5, 0, 5, 9, 5, 9, 5, 5, 9, 5, 9],
+        [9, 5, 9, 9, 9, 5, 9, 5, 9, 9, 5, 9],
+        [9, 5, 5, 5, 5, 5, 9, 5, 5, 5, 5, 9],
+        [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 0, 9],
+        [9, 5, 5, 5, 5, 5, 5, 5, 5, 9, 0, 9],
+        [9, 5, 9, 9, 9, 9, 9, 9, 5, 9, 0, 9],
+        [9, 5, 5, 5, 5, 5, 5, 9, 5, 9, 0, 9],
+        [9, 9, 9, 9, 9, 9, 5, 9, 5, 5, 2, 9],
+        [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9]
       ],
       "npcs": [
         {
           "name": "Snowbell Snapper",
-          "x": 2,
-          "y": 2,
+          "x": 3,
+          "y": 3,
           "sprite": "❄️",
-          "dialogue": [
-            "ROAR! Pass and perish!"
-          ],
+          "dialogue": ["ROAR! The cold never bothered me, but it will kill you!"],
           "action": "battle_snapper",
           "hideOnFlag": "snapper_defeated"
-        }
-      ],
-      "portals": [
-        {
-          "x": 2,
-          "y": 3,
-          "toMap": "icy_gauntlet_2",
-          "toX": 2,
-          "toY": 3
-        }
-      ]
-    },
-    "icy_gauntlet_2": {
-      "layout": [
-        [9, 9, 9, 9, 9],
-        [9, 0, 0, 0, 9],
-        [9, 9, 0, 9, 9],
-        [9, 9, 2, 9, 9],
-        [9, 9, 9, 9, 9]
-      ],
-      "npcs": [
+        },
         {
           "name": "Canous",
-          "x": 2,
-          "y": 2,
+          "x": 6,
+          "y": 6,
           "sprite": "🔥",
-          "dialogue": [
-            "You won't get past me, little adventurer!"
-          ],
+          "dialogue": ["You won't get past me, little adventurer!"],
           "action": "battle_canous",
           "hideOnFlag": "canous_defeated"
-        }
-      ],
-      "portals": [
-        {
-          "x": 2,
-          "y": 3,
-          "toMap": "icy_gauntlet_3",
-          "toX": 2,
-          "toY": 3
-        }
-      ]
-    },
-    "icy_gauntlet_3": {
-      "layout": [
-        [9, 9, 9, 9, 9],
-        [9, 0, 0, 0, 9],
-        [9, 9, 0, 9, 9],
-        [9, 9, 2, 9, 9],
-        [9, 9, 9, 9, 9]
-      ],
-      "npcs": [
+        },
         {
           "name": "Carolgeist",
-          "x": 2,
-          "y": 2,
+          "x": 10,
+          "y": 8,
           "sprite": "👻",
-          "dialogue": [
-            "Silent night... deadly fight!"
-          ],
+          "dialogue": ["Silent night... deadly fight!"],
           "action": "battle_carolgeist",
           "hideOnFlag": "carolgeist_defeated"
         }
       ],
       "portals": [
         {
-          "x": 2,
-          "y": 3,
-          "toMap": "icy_gauntlet_4",
-          "toX": 2,
-          "toY": 3
-        }
-      ]
-    },
-    "icy_gauntlet_4": {
-      "layout": [
-        [9, 9, 9, 9, 9],
-        [9, 0, 0, 0, 9],
-        [9, 9, 0, 9, 9],
-        [9, 9, 2, 9, 9],
-        [9, 9, 9, 9, 9]
-      ],
-      "npcs": [
-        {
-          "name": "Buller",
-          "x": 2,
-          "y": 2,
-          "sprite": "🐃",
-          "dialogue": [
-            "My horns will make you regret this!"
-          ],
-          "action": "battle_buller",
-          "hideOnFlag": "buller_defeated"
-        }
-      ],
-      "portals": [
-        {
-          "x": 2,
-          "y": 3,
+          "x": 10,
+          "y": 10,
           "toMap": "grinchys_lair",
-          "toX": 2,
-          "toY": 3
+          "toX": 6,
+          "toY": 10
         }
       ]
     },
     "grinchys_lair": {
       "layout": [
-        [1, 1, 1, 1, 1],
-        [1, 9, 9, 9, 1],
-        [1, 9, 0, 9, 1],
-        [1, 9, 2, 9, 1],
-        [1, 9, 9, 9, 1],
-        [1, 1, 1, 1, 1]
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 1],
+        [1, 9, 4, 4, 4, 4, 4, 4, 4, 4, 9, 1],
+        [1, 9, 4, 9, 9, 9, 9, 9, 9, 4, 9, 1],
+        [1, 9, 4, 9, 3, 3, 3, 3, 9, 4, 9, 1],
+        [1, 9, 4, 9, 3, 9, 9, 3, 9, 4, 9, 1],
+        [1, 9, 4, 9, 3, 0, 3, 3, 9, 4, 9, 1],
+        [1, 9, 4, 9, 9, 0, 9, 9, 9, 4, 9, 1],
+        [1, 9, 4, 4, 4, 0, 4, 4, 4, 4, 9, 1],
+        [1, 9, 9, 9, 9, 0, 9, 9, 9, 9, 9, 1],
+        [1, 9, 4, 4, 4, 4, 4, 4, 4, 4, 9, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
       ],
       "npcs": [
         {
           "name": "Grinchy",
-          "x": 2,
-          "y": 2,
+          "x": 6,
+          "y": 6,
           "sprite": "👹",
-          "dialogue": [
-            "Mwahaha! The Christmas Heart is mine!"
-          ],
+          "dialogue": ["Mwahaha! I stole the heart, and I will steal your lunch money too!"],
           "action": "battle_grinchy",
           "hideOnFlag": "grinchy_defeated"
         }
       ],
       "portals": [
         {
-          "x": 2,
-          "y": 3,
-          "toMap": "icy_gauntlet_4",
-          "toX": 2,
-          "toY": 3
+          "x": 6,
+          "y": 10,
+          "toMap": "snowy_village",
+          "toX": 1,
+          "toY": 1
         }
       ]
     }
@@ -213,24 +156,19 @@
       "enemyId": "Carolgeist",
       "onSuccess": "carolgeist_defeated"
     },
-    "battle_buller": {
-      "type": "battle",
-      "enemyId": "Buller",
-      "onSuccess": "buller_defeated"
-    },
     "battle_grinchy": {
       "type": "battle",
       "enemyId": "Grinchy",
       "onSuccess": "grinchy_defeated",
       "rewardData": {
         "name": "Rudolf",
-        "type": "Rudolf_01",
+        "type": "rudolf_01",
         "rarity": "epic",
         "element": ["light", "ice"],
         "hp": 50,
         "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/pets/christmaspet/1.png",
         "imageStyle": "blend-multiply",
-        "emoji": "🐺",
+        "emoji": "🦌",
         "evolutions": [
           {
             "level": 10,
