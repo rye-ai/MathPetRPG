@@ -1,9 +1,32 @@
 {
-  "name": "Rudolf",          
+  "name": "Groochy",
+  "type": "tree_01",
+  "rarity": "epic",
+  "element": ["grass", "ice"],
+  "hp": 60,
+  "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/xmasreward/1.png",
+  "imageStyle": "blend-multiply",
+  "emoji": "🐺",
+  "evolutions": [
+    {
+      "name": "Rudolf Flyer", 
+      "level": 10,
+      "cost": 100,
+      "baseHP": 100,
       "rarity": "epic",
-      "element": ["light", "ice"],
-      "baseHP": 70,
-      "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/pets/christmaspet/1.png",
-      "imageStyle": "blend-multiply",
-      "emoji": "🐺"
+      "element": ["grass", "ice"],
+      "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/xmasreward/2.png",
+      "imageStyle": "blend-multiply"
+    },
+    {
+      "name": "Rudolf Legend",
+      "level": 20,
+      "cost": 200,
+      "baseHP": 200,
+      "rarity": "legendary",
+      "element": ["grass", "ice"],
+      "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/xmasreward/3.png",
+      "imageStyle": "blend-multiply"
+    }
+  ]
 }
