@@ -169,7 +169,7 @@
         "rarity": "epic",
         "element": ["light", "ice"],
         "hp": 60,
-        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/xmasreward/1.png",
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/pets/christmaspet/1.png",
         "imageStyle": "blend-multiply",
         "emoji": "🐺",
         "evolutions": [
@@ -179,7 +179,7 @@
             "baseHP": 100,
             "rarity": "epic",
             "element": ["light", "ice"],
-            "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/xmasreward/1.png",
+            "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/pets/christmaspet/2.png",
             "imageStyle": "blend-multiply"
           },
           {
@@ -188,7 +188,7 @@
             "baseHP": 200,
             "rarity": "legendary",
             "element": ["light", "ice"],
-            "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/xmasreward/1.png",
+            "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/pets/christmaspet/3.png",
             "imageStyle": "blend-multiply"
           }
         ]
