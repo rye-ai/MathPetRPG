@@ -1,1 +1,352 @@
-
+[
+  {
+    "id": "family_myatt",
+    "base": {
+      "id": "myatt_01",
+      "name": "Myatt",
+      "rarity": "rare",
+      "element": "ice",
+      "baseHP": 50,
+      "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/rare/1.png",
+      "imageStyle": "blend-multiply",
+      "emoji": "❄️"
+    },
+    "evolutions": [
+      {
+        "name": "Myatt",
+        "level": 10,
+        "cost": 100,
+        "baseHP": 100,
+        "rarity": "rare",
+        "element": "ice",
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/rare/2.png",
+        "imageStyle": "blend-multiply"
+      },
+      {
+        "name": "Myatt",
+        "level": 20,
+        "cost": 200,
+        "baseHP": 200,
+        "rarity": "epic",
+        "element": "ice",
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/rare/3.png",
+        "imageStyle": "blend-multiply"
+      }
+    ]
+  },
+  {
+    "id": "family_chrystianake",
+    "base": {
+      "id": "chrystianake_01",
+      "name": "Chrystianake",
+      "rarity": "rare",
+      "element": "wind",
+      "baseHP": 50,
+      "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/rare/4.png",
+      "imageStyle": "blend-multiply",
+      "emoji": "🐍"
+    },
+    "evolutions": [
+      {
+        "name": "Chrystianake",
+        "level": 10,
+        "cost": 100,
+        "baseHP": 100,
+        "rarity": "rare",
+        "element": "wind",
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/rare/5.png",
+        "imageStyle": "blend-multiply"
+      },
+      {
+        "name": "Chrystianake",
+        "level": 20,
+        "cost": 200,
+        "baseHP": 200,
+        "rarity": "epic",
+        "element": "wind",
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/rare/6.png",
+        "imageStyle": "blend-multiply"
+      }
+    ]
+  },
+  {
+    "id": "family_jorborg",
+    "base": {
+      "id": "jorborg_01",
+      "name": "Jorborg",
+      "rarity": "rare",
+      "element": ["shadow", "water"],
+      "baseHP": 50,
+      "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/rare/7.png",
+      "imageStyle": "blend-multiply",
+      "emoji": "🤖"
+    },
+    "evolutions": [
+      {
+        "name": "Jorborg",
+        "level": 10,
+        "cost": 100,
+        "baseHP": 100,
+        "rarity": "rare",
+        "element": ["shadow", "water"],
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/rare/8.png",
+        "imageStyle": "blend-multiply"
+      },
+      {
+        "name": "Jorborg",
+        "level": 20,
+        "cost": 200,
+        "baseHP": 200,
+        "rarity": "epic",
+        "element": ["shadow", "water"],
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/rare/9.png",
+        "imageStyle": "blend-multiply"
+      }
+    ]
+  },
+  {
+    "id": "family_noahsaur",
+    "base": {
+      "id": "noahsaur_01",
+      "name": "Noahsaur",
+      "rarity": "rare",
+      "element": "fire",
+      "baseHP": 50,
+      "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/rare/10.png",
+      "imageStyle": "blend-multiply",
+      "emoji": "🦖"
+    },
+    "evolutions": [
+      {
+        "name": "Noahsaur",
+        "level": 10,
+        "cost": 100,
+        "baseHP": 100,
+        "rarity": "rare",
+        "element": "fire",
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/rare/11.png",
+        "imageStyle": "blend-multiply"
+      },
+      {
+        "name": "Noahsaur",
+        "level": 20,
+        "cost": 200,
+        "baseHP": 200,
+        "rarity": "epic",
+        "element": "fire",
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/rare/12.png",
+        "imageStyle": "blend-multiply"
+      }
+    ]
+  },
+  {
+    "id": "family_semustang",
+    "base": {
+      "id": "semustang_01",
+      "name": "Semustang",
+      "rarity": "rare",
+      "element": ["electric", "fire"],
+      "baseHP": 50,
+      "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/rare/13.png",
+      "imageStyle": "blend-multiply",
+      "emoji": "🐴"
+    },
+    "evolutions": [
+      {
+        "name": "Semustang",
+        "level": 10,
+        "cost": 100,
+        "baseHP": 100,
+        "rarity": "rare",
+        "element": ["electric", "fire"],
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/rare/14.png",
+        "imageStyle": "blend-multiply"
+      },
+      {
+        "name": "Semustang",
+        "level": 20,
+        "cost": 200,
+        "baseHP": 200,
+        "rarity": "epic",
+        "element": ["electric", "fire"],
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/rare/15.png",
+        "imageStyle": "blend-multiply"
+      }
+    ]
+  },
+  {   
+    "id": "family_liark",
+    "base": {
+      "id": "liark_01",
+      "name": "Liark",
+      "rarity": "rare",
+      "element": ["water", "fire"],
+      "baseHP": 50,
+      "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/rare/16.png",
+      "imageStyle": "blend-multiply",
+      "emoji": "🦈"
+    },
+    "evolutions": [
+      {
+        "name": "Liark",
+        "level": 10,
+        "cost": 100,
+        "baseHP": 100,
+        "rarity": "rare",
+        "element": ["water", "fire"],
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/rare/17.png",
+        "imageStyle": "blend-multiply"
+      },
+      {
+        "name": "Liark",
+        "level": 20,
+        "cost": 200,
+        "baseHP": 200,
+        "rarity": "epic",
+        "element": ["water", "fire"],
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/rare/18.png",
+        "imageStyle": "blend-multiply"
+      }
+    ]
+  },
+  {
+    "id": "family_wonkey",
+    "base": {
+      "id": "wonkey_01",
+      "name": "Wonkey",
+      "rarity": "rare",
+      "element": "grass",
+      "baseHP": 50,
+      "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/rare/19.png",
+      "imageStyle": "blend-multiply",
+      "emoji": "🐒"
+    },
+    "evolutions": [
+      {
+        "name": "Wonkey",
+        "level": 10,
+        "cost": 100,
+        "baseHP": 100,
+        "rarity": "rare",
+        "element": "ice",
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/rare/20.png",
+        "imageStyle": "blend-multiply"
+      },
+      {
+        "name": "Wonkey",
+        "level": 20,
+        "cost": 200,
+        "baseHP": 200,
+        "rarity": "epic",
+        "element": "fire",
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/rare/21.png",
+        "imageStyle": "blend-multiply"
+      }
+    ]
+  },
+  {
+    "id": "family_msfrolch",
+    "base": {
+      "id": "msfrolch_01",
+      "name": "Ms.Frolch",
+      "rarity": "epic",
+      "element": ["ice", "light"],
+      "baseHP": 60,
+      "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/rare/22.png",
+      "imageStyle": "blend-multiply",
+      "emoji": "👸"
+    },
+    "evolutions": [
+      {
+        "name": "Ms.Frolch",
+        "level": 10,
+        "cost": 100,
+        "baseHP": 120,
+        "rarity": "epic",
+        "element": ["ice", "light"],
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/rare/23.png",
+        "imageStyle": "blend-multiply"
+      },
+      {
+        "name": "Ms.Frolch",
+        "level": 20,
+        "cost": 200,
+        "baseHP": 250,
+        "rarity": "legendary",
+        "element": ["ice", "light"],
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/rare/24.png",
+        "imageStyle": "blend-multiply"
+      }
+    ]
+  },
+  {
+    "id": "family_jaxire",
+    "base": {
+      "id": "jaxire_01",
+      "name": "Jaxire",
+      "rarity": "rare",
+      "element": "fire",
+      "baseHP": 50,
+      "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/rare/25.png",
+      "imageStyle": "blend-multiply",
+      "emoji": "🦁"
+    },
+    "evolutions": [
+      {
+        "name": "Jaxire",
+        "level": 10,
+        "cost": 100,
+        "baseHP": 100,
+        "rarity": "rare",
+        "element": "fire",
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/rare/26.png",
+        "imageStyle": "blend-multiply"
+      },
+      {
+        "name": "Jaxire",
+        "level": 20,
+        "cost": 200,
+        "baseHP": 200,
+        "rarity": "epic",
+        "element": "fire",
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/rare/27.png",
+        "imageStyle": "blend-multiply"
+      }
+    ]
+  },
+  {
+    "id": "family_romzilla",
+    "base": {
+      "id": "romzilla_01",
+      "name": "Romzilla",
+      "rarity": "rare",
+      "element": "electric",
+      "baseHP": 50,
+      "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/rare/28.png",
+      "imageStyle": "blend-multiply",
+      "emoji": "⚡"
+    },
+    "evolutions": [
+      {
+        "name": "Romzilla",
+        "level": 10,
+        "cost": 100,
+        "baseHP": 100,
+        "rarity": "rare",
+        "element": "electric",
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/rare/29.png",
+        "imageStyle": "blend-multiply"
+      },
+      {
+        "name": "Romzilla",
+        "level": 20,
+        "cost": 200,
+        "baseHP": 200,
+        "rarity": "epic",
+        "element": "electric",
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/rare/30.png",
+        "imageStyle": "blend-multiply"
+      }
+    ]
+  }
+]
