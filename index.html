@@ -367,6 +367,35 @@
     .log-entry.player { color: #68d391; } /* Green for player */
     .log-entry.enemy { color: #fc8181; }  /* Red for enemy */
     .log-entry.crit { color: #f6e05e; font-weight: bold; } /* Gold for crit */
+    
+    /* --- NEW REWARD ANIMATIONS --- */
+.confetti-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9000; overflow: hidden; }
+.confetti { position: absolute; width: 10px; height: 10px; background-color: #f00; animation: fall linear forwards; }
+
+@keyframes fall {
+  to { transform: translateY(100vh) rotate(720deg); }
+}
+
+.reward-card-glow {
+  background: radial-gradient(circle, #fff 0%, #f6e05e 40%, #d69e2e 100%);
+  padding: 30px; border-radius: 20px;
+  box-shadow: 0 0 50px #f6e05e, 0 0 100px rgba(255,215,0,0.5);
+  animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  text-align: center;
+  position: relative;
+  border: 4px solid #fff;
+}
+
+.reward-shine {
+  position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+  background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
+  transform: rotate(45deg);
+  animation: shineMove 3s infinite linear;
+  pointer-events: none;
+}
+
+@keyframes shineMove { 0% { transform: translateX(-100%) rotate(45deg); } 100% { transform: translateX(100%) rotate(45deg); } }
+    
   </style>
   </head>
  <body><!-- Login Screen -->
@@ -813,7 +842,7 @@
     function getGhUrl(path) { return `https://raw.githubusercontent.com/${GITHUB_CONFIG.username}/${GITHUB_CONFIG.repo}/${GITHUB_CONFIG.branch}/${path}`; }
     async function fetchGithubFolder(folderPath) { try { const res = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.username}/${GITHUB_CONFIG.repo}/contents/${folderPath}?ref=${GITHUB_CONFIG.branch}`); if (res.status === 404 || !res.ok) return []; return await res.json(); } catch (e) { return []; } }
 
-    let EXTERNAL_PET_DATA = [ { id: 'shadow_dragon_line', base: { id: 'light_bearcat_baby', name: 'OlaBear', rarity: 'legendary', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/V1/43.png', imageStyle: 'blend-multiply', emoji: '❓', baseHP: 50 }, evolutions: [ { name: 'Teen Shadow Dragon', image: 'https://i.imgur.com/qLkaKtw.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'legendary', baseHP: 100, cost: 100 }, { name: 'Elder Shadow Dragon', image: 'https://i.imgur.com/qLkaKtw.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'legendary', baseHP: 150, cost: 200 } ] } ];
+    let EXTERNAL_PET_DATA = [ { id: 'shadow_dragon_line', base: { id: 'light_bearcat_baby', name: 'OlaBear', rarity: 'legendary', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/V1/43.png', imageStyle: 'blend-multiply', emoji: '❓', baseHP: 50 }, evolutions: [ { name: 'Teen Shadow Dragon', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/V1/43.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'legendary', baseHP: 100, cost: 100 }, { name: 'Elder Shadow Dragon', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/V1/43.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'legendary', baseHP: 150, cost: 200 } ] } ];
     let QUESTION_REPOSITORY = {}; const LEVEL_CAPS = { common: 50, uncommon: 50, rare: 60, epic: 75, legendary: 100 };
     const BATTLE_BACKGROUNDS = { 1: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur.png', 4: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(1).png', 5: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(3).png', 6: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(2).png', 7: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/%E2%80%9CA%20high-quality%20monster-inspired%20battle%20arena%20in%20landscape%20orientation.%20A%20large%2C%20circular%20stadium%20floor%20made%20of%20smooth%20stone%20tiles%20with%20subtle%20glowing%20patterns.%20Surrounding%20the%20arena%20are%20tall%20stadium%20walls%2C%20bright%20.jpg' }; const ARENA_IMGS = [ 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur.png', 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(1).png', 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(2).png', 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(3).png' ];
     
@@ -1126,33 +1155,49 @@
 
     function repairSaveData() {
         let fixed = false;
-        // Init new systems if missing
+        
+        // 1. Init missing systems
         if(gameState.combo === undefined) { gameState.combo = 0; fixed=true; }
         if(gameState.dailyStreak === undefined) { gameState.dailyStreak = 0; fixed=true; }
         if(!gameState.questProgress) { gameState.questProgress = { active: false, flags: [] }; fixed=true; }
-        // NEW: Ensure team exists
         if(!gameState.team) { gameState.team = [gameState.currentPetId]; fixed=true; }
 
+        // --- 2. FIX SQUAD GHOSTS (The Fix for You) ---
+        // Filter the team to ONLY keep pets that actually exist in your inventory
+        const initialTeamSize = gameState.team.length;
+        gameState.team = gameState.team.filter(teamId => 
+            gameState.pets.some(p => p.id === teamId)
+        );
+        
+        if (gameState.team.length !== initialTeamSize) {
+            console.log("👻 Removed Ghost Pets from Squad");
+            fixed = true;
+        }
+        
+        // If squad ended up empty, add current pet
+        if (gameState.team.length === 0 && gameState.pets.length > 0) {
+            gameState.team.push(gameState.pets[0].id);
+            fixed = true;
+        }
+        // ---------------------------------------------
+
+        // 3. Fix Pet Data
         gameState.pets.forEach(p => {
-            if (!p.type || p.type.startsWith('egg_')) {
-                for(const r in PET_TYPES) {
-                    const match = PET_TYPES[r].find(t => t.name === p.name);
-                    if (match) { p.type = match.id; p.element = match.element || 'normal'; fixed = true; }
-                }
-            }
+            if (!p.powers || !Array.isArray(p.powers)) { p.powers = []; fixed = true; }
+            
             if (isNaN(p.hp) || isNaN(p.maxHP) || !p.maxHP) {
-                for(const r in PET_TYPES) {
-                    const match = PET_TYPES[r].find(t => t.id === p.type);
-                    if (match) { p.maxHP = match.baseHP + ((p.level - 1) * 10); p.hp = p.maxHP; fixed = true; }
-                }
+                p.maxHP = 50 + ((p.level||1) * 10);
+                p.hp = p.maxHP; 
+                fixed = true;
             }
         });
+        
         if (fixed) saveGame();
     }
     
     // RPG Variables
     const TILE_SIZE = 40; 
-    let canvas, ctx, playerImage = new Image(), arenaIcon = new Image(); const HUMAN_SPRITE_URL = "https://i.imgur.com/J6eL2tY.png"; arenaIcon.src = 'https://i.imgur.com/cTaTVl8.png';
+    let canvas, ctx, playerImage = new Image(), arenaIcon = new Image(); const HUMAN_SPRITE_URL = "https://i.imgur.com/J6eL2tY.png"; arenaIcon.src = 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/Copy%20of%20Zyfire%20(1).png';
 
     function isWalkable(tile) { return tile === 0 || tile === 1 || tile === 4 || tile === 5 || tile === 6; }
 
@@ -2092,26 +2137,24 @@
         const p = gameState.pets.find(pet => pet.id === gameState.currentPetId); 
         const bs = gameState.battleState; 
         
-        // Update Stats
+        // 1. Update Stats (Health, BP, XP)
         p.hp = bs.playerHP; 
         const bp = bs.isBoss ? 100 : (bs.isArena ? 50 : 20); 
         addBP(bp); 
         p.xp += (bs.enemy.xp || 15); 
         
-        // Level Up Logic
+        // 2. Level Up Logic
         if(p.xp >= p.maxXp) { 
             p.level++; 
             p.xp = 0; 
             p.maxXp = p.level * 300 + 200; 
-            p.maxHP += 10; 
+            p.maxHP = 50 + (p.level * 10); // Standard HP Formula
             p.hp = p.maxHP; 
             soundManager.playSFX('levelUp'); 
             showToast(`Level Up! ${p.name} is now Lvl ${p.level}`, "success");
         } 
         
-        showToast(`Victory! +${bp} BP`, "success"); 
-        
-        // Random Egg Drop (Only in Wilds)
+        // 3. Random Egg Drop (Only in Wilds, NOT Quests/Arena)
         if (!bs.isBoss && !bs.isArena && !gameState.questBattleActive && Math.random() < 0.1) {
             const eggPool = [...PET_TYPES.common, ...PET_TYPES.uncommon]; 
             const basePet = eggPool[Math.floor(Math.random() * eggPool.length)];
@@ -2133,46 +2176,76 @@
         gameState.inBattle = false; 
         document.getElementById('battle-ui').style.display = 'none'; 
         
-        // --- RETURN LOGIC (FIXED) ---
+        // ===============================================
+        // 4. QUEST BATTLE RETURN LOGIC (The New Part)
+        // ===============================================
         if (gameState.questBattleActive) {
-            // Case A: Return to Adventure
-            gameState.questBattleActive = false;
+            gameState.questBattleActive = false; // Reset flag
             
+            // A. Register Success Flag (Opens gates etc)
             if (gameState.questSuccessKey) {
                 gameState.questProgress.flags.push(gameState.questSuccessKey);
-                
-                // Handle Rewards
-                if(gameState.pendingQuestRewardData) {
-                    // Logic to give reward would go here (e.g., adding to array)
-                    // For now, we assume direct inventory add or handling elsewhere
-                    const r = gameState.pendingQuestRewardData;
-                    
-                    // Simple injection for immediate reward
-                    const newPet = { ...r, id: 'quest_reward_'+Date.now(), isHatched: true, level: 1, xp: 0, maxXp: 100 };
-                    
-                    // Register Evolutions if present
-                    if (r.evolutions && r.type) {
-                        EVOLUTION_CHAINS[r.type] = r.evolutions;
-                    }
-                    
-                    gameState.pets.push(newPet);
-                    showToast(`Reward: ${r.name} obtained!`, "success");
-                    
-                    gameState.pendingQuestRewardData = null; 
-                } 
-                else {
-                    alert("⚔️ Enemy Defeated! The path is open!");
-                }
             }
-            
-            // Switch Tab Back
-            switchTab('adventure'); 
-            document.getElementById('adventure-list-view').style.display = 'none';
-            document.getElementById('adventure-play-view').style.display = 'block';
-            drawAdventureMap(); 
+
+            // B. Handle Special Quest Reward
+            if (gameState.pendingQuestRewardData) {
+                const r = gameState.pendingQuestRewardData;
+                
+                // Register Evolutions if present
+                if (r.evolutions && r.type) {
+                    EVOLUTION_CHAINS[r.type] = r.evolutions;
+                }
+
+                const newPet = { 
+                    ...r, 
+                    id: 'quest_reward_' + Date.now(), 
+                    isHatched: false, // Reward is an Egg
+                    hatchProgress: 0, 
+                    powers: [], 
+                    level: 1, xp: 0, maxXp: 100 
+                };
+                
+                gameState.pets.push(newPet);
+                
+                // --- TRIGGER THE CEREMONY ---
+                // Show the adventure map background
+                document.getElementById('adventure-list-view').style.display = 'none';
+                document.getElementById('adventure-play-view').style.display = 'block';
+                drawAdventureMap();
+
+                // Determine Visual
+                const visual = r.image 
+                    ? `<img src="${r.image}" style="width:150px; height:150px; object-fit:contain;">` 
+                    : r.emoji;
+
+                triggerRewardCeremony(
+                    "QUEST COMPLETE!", 
+                    `You found a ${r.name} Egg!`, 
+                    visual, 
+                    () => { 
+                        switchTab('adventure'); // Go back to map
+                    }
+                );
+                
+                gameState.pendingQuestRewardData = null; // Clear data
+                saveGame();
+                return; // Stop here, let the ceremony handle the rest
+            } 
+            else {
+                // No Reward, just a victory (like beating a guard)
+                alert("⚔️ Enemy Defeated! The path is open!");
+                
+                switchTab('adventure'); 
+                document.getElementById('adventure-list-view').style.display = 'none';
+                document.getElementById('adventure-play-view').style.display = 'block';
+                drawAdventureMap(); 
+            }
         } 
         else {
-            // Case B: Return to Wilds
+            // ===============================================
+            // 5. STANDARD WILD BATTLE RETURN
+            // ===============================================
+            showToast(`Victory! +${bp} BP`, "success"); 
             document.getElementById('rpg-wrapper').style.display = 'block'; 
             initRPG(); 
             soundManager.playBGM('wilds');
@@ -2218,8 +2291,34 @@
     function saveGame() { if(gameState.playerName) { localStorage.setItem('math_rpg_' + gameState.playerName, JSON.stringify(gameState)); saveProgressToFirebase(); } }
     function logout() { location.reload(); }
     function releasePet() { if(gameState.pets.length<=1) return; window.petToRelease = gameState.pets.find(p => p.id === gameState.currentPetId); const m = document.getElementById('release-modal'); m.classList.add('active'); }
-    document.getElementById('release-confirm').addEventListener('click', () => { gameState.pets = gameState.pets.filter(p => p.id !== gameState.currentPetId); gameState.currentPetId = gameState.pets[0].id; gameState.brainPoints += 10; saveGame(); renderHub(); document.getElementById('release-modal').classList.remove('active'); });
-    document.getElementById('release-cancel').addEventListener('click', () => { document.getElementById('release-modal').classList.remove('active'); });
+    document.getElementById('release-confirm').addEventListener('click', () => { 
+    const idToRemove = gameState.currentPetId;
+
+    // 1. Remove from Inventory
+    gameState.pets = gameState.pets.filter(p => p.id !== idToRemove); 
+    
+    // 2. Remove from Squad (The Missing Link!)
+    if (gameState.team) {
+        gameState.team = gameState.team.filter(id => id !== idToRemove);
+    }
+
+    // 3. Select a new pet
+    if (gameState.pets.length > 0) {
+        gameState.currentPetId = gameState.pets[0].id;
+        // Ensure team isn't empty
+        if (!gameState.team || gameState.team.length === 0) {
+            gameState.team = [gameState.currentPetId];
+        }
+    } else {
+        // Game Over safety (shouldn't happen if button is hidden for last pet)
+        gameState.currentPetId = null;
+    }
+
+    gameState.brainPoints += 10; 
+    saveGame(); 
+    renderHub(); 
+    document.getElementById('release-modal').classList.remove('active'); 
+});
 
     // --- ADVENTURE MODE SYSTEM (RESTORATION) ---
     // ... (Your adventure functions remain here, skipping duplicate copy for brevity, they are assumed present as per instruction "Do not delete existing features") ... 
@@ -2549,10 +2648,20 @@ function checkAdventureRandomEncounter(tileType) {
             } 
         } 
         else if (gate.type === 'item') { 
-            gameState.questProgress.flags.push(gate.onSuccess); 
-            alert(`You found: ${gate.itemName || 'Hidden Item'}!`); 
-            if(gate.reward) addBP(gate.reward); 
-        } 
+        gameState.questProgress.flags.push(gate.onSuccess); 
+        
+        const rewardName = gate.itemName || 'Hidden Item';
+        const rewardAmt = gate.reward || 0;
+        
+        triggerRewardCeremony(
+            "TREASURE FOUND!",
+            `You discovered: ${rewardName}`,
+            "💎", 
+            () => {
+                if(rewardAmt > 0) addBP(rewardAmt);
+            }
+        );
+    }
     }
 
     function startAcademicGate(count, successKey) { 
@@ -3306,6 +3415,55 @@ function finalizeExit() {
     document.getElementById('battle-ui').style.display = 'none';
     document.getElementById('wilds-menu').style.display = 'block';
     soundManager.playBGM('wilds');
+}
+
+// --- REWARD CEREMONY SYSTEM ---
+
+function triggerRewardCeremony(title, message, visualHTML, callback) {
+    soundManager.playSFX('victory');
+    startConfetti();
+
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay active';
+    modal.style.zIndex = "5000";
+    modal.innerHTML = `
+        <div class="reward-card-glow">
+            <div class="reward-shine"></div>
+            <h1 style="color:#d97706; font-size:36px; margin-bottom:10px; text-shadow:2px 2px 0 #fff;">${title}</h1>
+            <p style="font-weight:bold; color:#744210; font-size:18px; margin-bottom:20px;">${message}</p>
+            <div style="font-size:100px; margin:20px 0; filter:drop-shadow(0 10px 20px rgba(0,0,0,0.3)); animation: subtleFloat 2s infinite;">
+                ${visualHTML}
+            </div>
+            <button class="gacha-btn" style="margin-top:20px; font-size:24px;" id="claim-reward-btn">CLAIM REWARD!</button>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    document.getElementById('claim-reward-btn').onclick = () => {
+        modal.remove();
+        if(callback) callback();
+    };
+}
+
+function startConfetti() {
+    const colors = ['#ff0', '#f00', '#0f0', '#00f', '#f0f', '#0ff'];
+    const container = document.createElement('div');
+    container.className = 'confetti-container';
+    document.body.appendChild(container);
+
+    for (let i = 0; i < 100; i++) {
+        const c = document.createElement('div');
+        c.className = 'confetti';
+        c.style.left = Math.random() * 100 + 'vw';
+        c.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        c.style.animationDuration = (Math.random() * 2 + 2) + 's';
+        c.style.width = (Math.random() * 10 + 5) + 'px';
+        c.style.height = c.style.width;
+        container.appendChild(c);
+    }
+
+    setTimeout(() => container.remove(), 5000); // Cleanup after 5s
 }
   </script>
 </body>
