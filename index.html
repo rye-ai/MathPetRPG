@@ -638,7 +638,7 @@
         <div id="raid-lobby" style="text-align:center; padding-top: 50px;">
             <h1 style="font-size: 40px; color:#e53e3e;">☠️ WORLD RAID</h1>
             <p>Join the class to defeat the Titan!</p>
-            <button class="action-btn red" style="width: 200px; font-size: 20px;" onclick="joinRaid()">Enter Raid (100 BP)</button>
+            <button class="action-btn red" style="width: 200px; font-size: 20px;" onclick="joinRaid()">Enter Raid (1 BP)</button>
         </div>
 
         <div id="raid-arena" style="display:none; height:100%; flex-direction:column;">
@@ -728,6 +728,39 @@
       <h2 id="hatch-text" style="color:white; margin-top:20px; font-size:32px;">It's hatching!</h2>
       <button id="hatch-finish-btn" class="action-btn green" style="width:200px; display:none; margin-top:20px;">Awesome!</button>
   </div>
+  
+  <!-- BULK USE MODAL -->
+<div class="modal-overlay" id="use-quantity-modal" style="z-index: 4000;">
+    <div class="confirm-modal">
+        <h2 id="use-qty-title" style="color: #4299e1;">Use Item</h2>
+        <div id="use-qty-visual" class="pet-preview" style="font-size: 50px;">🧪</div>
+        
+        <p id="use-qty-desc" style="font-weight: bold; color:#2d3748; margin-bottom: 20px;">
+            You have: 0
+        </p>
+
+        <label id="use-qty-label" style="display:block; font-weight:bold; margin-bottom:10px;">
+            Use: 1
+        </label>
+        
+        <input type="range" id="use-qty-slider" min="1" max="1" value="1" 
+               style="width: 100%; height: 25px; cursor: pointer; accent-color: #4299e1;">
+        
+        <div style="display:flex; justify-content:space-between; font-size:12px; color:#718096; margin-bottom:20px;">
+            <span>1</span>
+            <span id="use-qty-max">Max: 1</span>
+        </div>
+
+        <div class="confirm-buttons">
+            <button class="confirm-btn no" onclick="document.getElementById('use-quantity-modal').classList.remove('active')">
+                Cancel
+            </button> 
+            <button class="confirm-btn yes" id="use-qty-confirm-btn" style="background: #4299e1;">
+                Confirm
+            </button>
+        </div>
+    </div>
+</div>
   
   <!-- Daily Reward Modal -->
   <div class="modal-overlay" id="daily-modal"><div class="confirm-modal"><h2>📅 Daily Reward</h2><p>Welcome back! Keep your streak alive.</p><div class="calendar-grid" id="daily-calendar"></div><button class="confirm-btn green" style="margin-top:20px; width:100%;" onclick="document.getElementById('daily-modal').classList.remove('active')">Collect Reward</button></div></div>
@@ -943,7 +976,7 @@
     ];
 
     let BOSS_TYPES = [
-       { id: 'Shadow King', emoji: '💀', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/enemy/9.png', imageStyle: 'blend-multiply', name: 'Shadow King', hp: 150, damage: 20, xp: 100, isBoss: true, element: 'shadow' }
+       { id: 'Shadow King', emoji: '💀', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/enemy/9.png', imageStyle: 'blend-multiply', name: 'Shadow King', hp: 300, damage: 20, xp: 100, isBoss: true, element: 'shadow' }
     ];
     
     let ARENA_MONSTERS = [
@@ -961,7 +994,7 @@
         power_items: [ 
             { id: 'claw_attack', name: 'Claw Attack', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/power/2.png', icon: '🦅', price: 80, desc: 'Normal damage', damage: 10, element: 'normal' }, 
             { id: 'fire_spell', name: 'Fire Spell', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/power/1.png', icon: '🔥', price: 120, desc: 'Burn the target', damage: 15, element: 'fire' }, 
-            { id: 'quick_dodge', name: 'Quick Dodge', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/power/3.png', icon: '💨', price: 100, desc: '50% dodge chance', dodge: 0.5, element: 'normal' }, 
+            { id: 'quick_dodge', name: 'Cloud Strike', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/power/3.png', icon: '💨', price: 100, desc: 'Normal damage', damage: 15, element: 'normal' }, 
             { id: 'ice_blast', name: 'Ice Blast', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/power/4.png', icon: '❄️', price: 110, desc: 'Freezing cold', damage: 12, element: 'ice' }, 
             { id: 'thunder_strike', name: 'Thunder Strike', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/power/5.png', icon: '⚡', price: 150, desc: 'Shocking hit', damage: 18, element: 'electric' }, 
             { id: 'water_wave', name: 'Water Wave', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/power/6.png', icon: '🌊', price: 90, desc: 'Soaking wet', damage: 11, element: 'water' }, 
@@ -1546,11 +1579,38 @@
     function renderCollection() { return gameState.pets.map(p => `<div class="pet-card ${p.id===gameState.currentPetId?'active':''}" onclick="switchPet('${p.id}')"><div class="pet-card-visual">${!p.isHatched?'🥚':(p.image?`<img src="${p.image}" class="${p.imageStyle}" style="width:40px;height:40px;">`:p.emoji)}</div><div style="font-size:12px;">${p.isHatched ? p.name : "Mystery Egg"}</div></div>`).join(''); }
 
     function renderInventory(isEgg) { 
-        let h = ""; const i = gameState.inventory;
-        if(!isEgg) { if(i['health_potion']) h += `<div class="inventory-item"><div>🧪</div><div>x${i['health_potion']}</div><button class="buy-btn" onclick="useItem('health_potion')">Use</button></div>`; if(i['stamina_potion']) h += `<div class="inventory-item"><div>⚡</div><div>x${i['stamina_potion']}</div><button class="buy-btn" onclick="useItem('stamina_potion')">Use</button></div>`; if(i['xp_potion']) h += `<div class="inventory-item"><div>🌟</div><div>x${i['xp_potion']}</div><button class="buy-btn" onclick="useItem('xp_potion')">Use</button></div>`; } 
-        else { if(i['premium_food']) h += `<div class="inventory-item"><div>🥩</div><div>x${i['premium_food']}</div><button class="buy-btn" onclick="useItem('premium_food')">+20%</button></div>`; if(i['warmer']) h += `<div class="inventory-item"><div>🔥</div><div>x${i['warmer']}</div><button class="buy-btn" onclick="useItem('warmer')">+10%</button></div>`; if(i['hatching_machine']) h += `<div class="inventory-item"><div>⚙️</div><div>x${i['hatching_machine']}</div><button class="buy-btn" onclick="useItem('hatching_machine')">+50%</button></div>`; }
-        return h || "<p style='color:#718096'>Empty.</p>";
+    let h = ""; 
+    const i = gameState.inventory;
+    
+    // Helper to generate button
+    const btn = (key, name, icon) => {
+        const count = i[key] || 0;
+        if(count <= 0) return '';
+        
+        // --- LOGIC CHANGE: Only allow Bulk Mode for XP Potion ---
+        const action = (key === 'xp_potion' && count > 1) 
+            ? `openUseQuantityModal('${key}')` 
+            : `useItem('${key}')`;
+
+        return `<div class="inventory-item">
+            <div style="font-size:20px;">${icon}</div>
+            <div style="font-weight:bold; font-size:12px;">x${count}</div>
+            <button class="buy-btn" style="padding:4px 8px; font-size:12px;" onclick="${action}">Use</button>
+        </div>`;
+    };
+
+    if(!isEgg) { 
+        h += btn('health_potion', 'Health', '🧪');
+        h += btn('stamina_potion', 'Stamina', '⚡');
+        h += btn('xp_potion', 'XP Potion', '🌟');
+    } else { 
+        if(i['premium_food']) h += `<div class="inventory-item"><div>🥩</div><div>x${i['premium_food']}</div><button class="buy-btn" onclick="useItem('premium_food')">+20%</button></div>`; 
+        if(i['warmer']) h += `<div class="inventory-item"><div>🔥</div><div>x${i['warmer']}</div><button class="buy-btn" onclick="useItem('warmer')">+10%</button></div>`; 
+        if(i['hatching_machine']) h += `<div class="inventory-item"><div>⚙️</div><div>x${i['hatching_machine']}</div><button class="buy-btn" onclick="useItem('hatching_machine')">+50%</button></div>`; 
     }
+    
+    return h || "<p style='color:#718096'>Empty.</p>";
+}
     function renderPowersList(p) { return p.powers.length===0?"None.":p.powers.map(pid=>{const i=findShopItem(pid);return i?`<div style="padding:5px;">${i.image?`<img src="${i.image}" style="width:20px;">`:i.icon} ${i.name}</div>`:'';}).join(''); }
     function switchPet(id) { gameState.currentPetId = id; saveGame(); renderHub(); }
     
@@ -2544,62 +2604,63 @@ function checkAdventureRandomEncounter(tileType) {
         }
     }
     function handleQuestDPad(key) { 
-        // 1. Safety Check: Ensure map data exists
-        if(!window.currentQuestData || !advMap) return;
+    // 1. Safety Check: Ensure map data exists
+    if(!window.currentQuestData || !advMap) return;
 
-        let dx=0, dy=0; 
-        if(key==='ArrowUp') dy=-1; 
-        if(key==='ArrowDown') dy=1; 
-        if(key==='ArrowLeft') dx=-1; 
-        if(key==='ArrowRight') dx=1; 
-        
-        const nx = questX+dx; 
-        const ny = questY+dy; 
-        
-        // --- FIX 1: Stop player from walking off the edge of the map ---
-        if(ny < 0 || ny >= advMap.length) return; // Check Row exists
-        if(nx < 0 || nx >= advMap[ny].length) return; // Check Column exists
-
-        // --- FIX 2: Check for NPC collision ---
-        // (Only blocks if the NPC is currently visible)
-        const npc = advNpcs.find(n => n.x === nx && n.y === ny && isNpcVisible(n));
-        if (npc) {
-            interactNPC(npc);
-            return; 
-        }
-
-        // --- FIX 3: Check for Wall/Rock/Tree collision ---
-        const tile = advMap[ny][nx]; 
-        
-        // LIST OF BLOCKED TILES:
-        // 1 = Void (Black)
-        // 9 = Rock/Wall
-        // 2 = Tree (Add this if you want Trees to stop you)
-        // 3 = Water (Add this if you want Water to stop you)
-        const blockedTiles = [1, 9, 2, 3]; 
-
-        // If the target tile is in the list, STOP.
-        if(blockedTiles.includes(tile)) return; 
-        
-        // --- Portal Check ---
-        // Note: If you made '2' a solid tree above, ensure your Portals are tile '8' in your JSON!
-        const mapData = window.currentQuestData.maps[currentAdvMapKey]; 
-        if(mapData.portals) { 
-            const portal = mapData.portals.find(p => p.x === nx && p.y === ny); 
-            if(portal) { 
-                loadAdventureMap(portal.toMap); 
-                return; 
-            } 
-        } 
-        
-        // Move Player
-        questX = nx; 
-        questY = ny; 
-        drawAdventureMap(); 
-        
-        // Random Encounter Check
-        checkAdventureRandomEncounter(tile);
+    // --- NEW: STAMINA CHECK ---
+    if (gameState.stamina <= 0) {
+        showToast("No Stamina! Study to get Energy.", "error");
+        return;
     }
+
+    let dx=0, dy=0; 
+    if(key==='ArrowUp') dy=-1; 
+    if(key==='ArrowDown') dy=1; 
+    if(key==='ArrowLeft') dx=-1; 
+    if(key==='ArrowRight') dx=1; 
+    
+    const nx = questX+dx; 
+    const ny = questY+dy; 
+    
+    // Boundary Checks
+    if(ny < 0 || ny >= advMap.length) return; 
+    if(nx < 0 || nx >= advMap[ny].length) return; 
+
+    // NPC Collision
+    const npc = advNpcs.find(n => n.x === nx && n.y === ny && isNpcVisible(n));
+    if (npc) {
+        interactNPC(npc);
+        return; 
+    }
+
+    // Blocked Tiles (Walls, Trees, Water)
+    const tile = advMap[ny][nx]; 
+    const blockedTiles = [1, 9, 2, 3]; 
+    if(blockedTiles.includes(tile)) return; 
+    
+    // Portal Logic
+    const mapData = window.currentQuestData.maps[currentAdvMapKey]; 
+    if(mapData.portals) { 
+        const portal = mapData.portals.find(p => p.x === nx && p.y === ny); 
+        if(portal) { 
+            loadAdventureMap(portal.toMap); 
+            return; 
+        } 
+    } 
+    
+    // --- SUCCESSFUL MOVE ---
+    questX = nx; 
+    questY = ny; 
+    
+    // --- NEW: CONSUME STAMINA & UPDATE UI ---
+    gameState.stamina = Math.max(0, gameState.stamina - 1);
+    updateStatsDisplay();
+
+    drawAdventureMap(); 
+    
+    // Random Encounter Check
+    checkAdventureRandomEncounter(tile);
+}
 
     // --- Helpers ---
     function interactNPC(npc) { 
@@ -3121,36 +3182,158 @@ function checkAdventureRandomEncounter(tileType) {
         }
     }
 function joinRaid() {
-        // 1. Check Requirements
-        if (gameState.brainPoints < 100) return showToast("Need 100 BP to enter!", "error");
-        
-        // Safety check for active pet
-        const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
-        if (!pet) return showToast("No pet selected!", "error");
-        if (pet.hp <= 0) return showToast("Your current pet is fainted!", "error");
+    // 1. Check Requirements
+    if (gameState.brainPoints < 1) return showToast("Need 1 BP to enter!", "error");
+    
+    // Safety check for active pet
+    const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+    if (!pet) return showToast("No pet selected!", "error");
+    if (pet.hp <= 0) return showToast("Your current pet is fainted!", "error");
 
-        // 2. Pay Entry Fee
-        gameState.brainPoints -= 100;
-        updateStatsDisplay();
-        saveGame();
+    // 2. Pay Entry Fee
+    gameState.brainPoints -= 1;
+    updateStatsDisplay();
+    saveGame();
 
-        // 3. Hide all other screens
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById('screen-wilds').classList.add('active'); 
-        
-        document.getElementById('wilds-menu').style.display = 'none';
-        document.getElementById('rpg-wrapper').style.display = 'none';
-        document.getElementById('multiplayer-menu').style.display = 'none';
-        document.getElementById('raid-arena').style.display = 'none'; // Hide old Raid UI
-        
-        // 4. Show Battle UI with Boss Background
-        const ui = document.getElementById('battle-ui');
-        ui.style.display = 'flex';
-        ui.style.backgroundImage = `url('https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(3).png')`; 
+    // 3. Hide all other screens
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-wilds').classList.add('active'); 
+    
+    document.getElementById('wilds-menu').style.display = 'none';
+    document.getElementById('rpg-wrapper').style.display = 'none';
+    document.getElementById('multiplayer-menu').style.display = 'none';
+    document.getElementById('raid-arena').style.display = 'none'; // Hide old Raid UI
+    
+    // 4. Show Battle UI with Boss Background
+    const ui = document.getElementById('battle-ui');
+    ui.style.display = 'flex';
+    ui.style.backgroundImage = `url('https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(3).png')`; 
 
-        // 5. Start the specific Raid Engine
-        startRaidEngine();
+    // 5. Start the specific Raid Engine
+    startRaidEngine();
+}
+
+// --- GLOBAL RAID FUNCTIONS (Fixed & Un-nested) ---
+
+window.prepareRaidAttack = function(moveId) {
+    console.log("⚔️ Attack button clicked for move:", moveId);
+
+    // 1. Check/Reset Lock
+    // We check if the variable exists globally. If not, we assume safe to proceed.
+    if (typeof isRaidTurnProcessing !== 'undefined') {
+        if(isRaidTurnProcessing === true) {
+            console.log("⏳ Turn is processing... ignoring click.");
+            return;
+        }
+    } else {
+        // If variable is missing, define it globally to prevent errors
+        window.isRaidTurnProcessing = false;
     }
+
+    // 2. Determine Question Source (Assigned vs Random)
+    let qData = null;
+
+    try {
+        if (window.gameState && window.gameState.activeQuestionPool && window.gameState.activeQuestionPool.length > 0) {
+            const randIndex = Math.floor(Math.random() * window.gameState.activeQuestionPool.length);
+            const sourceQ = window.gameState.activeQuestionPool[randIndex];
+            
+            if (sourceQ && typeof sourceQ === 'object') {
+                qData = {
+                    text: sourceQ.qVisualHTML || sourceQ.q || "Solve this problem:",
+                    a: sourceQ.a,
+                    options: sourceQ.options
+                };
+            }
+        }
+    } catch (err) {
+        console.error("Error loading topic question:", err);
+    }
+
+    // Fallback
+    if (!qData) {
+        if (typeof MathEngine !== 'undefined') {
+            qData = MathEngine.generate(window.gameState.grade || '1');
+        } else {
+            qData = { text: "5 + 5 = ?", a: 10, options: [5, 10, 15, 20] };
+        }
+    }
+
+    const answer = qData.a;
+
+    // 3. Create Overlay
+    const battleUI = document.getElementById('battle-ui');
+    if (!battleUI) return console.error("Battle UI not found!");
+
+    const existing = document.getElementById('raid-math-overlay');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = "raid-math-overlay";
+    overlay.style.cssText = `
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.85); z-index: 200;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        color: white; animation: popIn 0.2s;
+    `;
+
+    overlay.innerHTML = `
+        <div style="font-size: 20px; color: #a0aec0; margin-bottom: 10px;">⚠️ MATH CRIT CHANCE ⚠️</div>
+        <div style="font-size: 32px; font-weight: bold; margin-bottom: 30px; text-align:center; max-width:90%;">
+            ${qData.text}
+        </div>
+        <div id="raid-math-options" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 80%;"></div>
+        <button onclick="document.getElementById('raid-math-overlay').remove()" style="margin-top:20px; background:none; border:none; color:#aaa; cursor:pointer;">Cancel</button>
+    `;
+
+    battleUI.appendChild(overlay);
+
+    // 4. Generate Options
+    const optsContainer = overlay.querySelector('#raid-math-options');
+    let finalOptions = [];
+
+    if (qData.options && Array.isArray(qData.options) && qData.options.length > 0) {
+        finalOptions = [...qData.options];
+    } else {
+        let optionsSet = new Set([answer]);
+        const numericAns = parseFloat(answer);
+        if (!isNaN(numericAns)) {
+            while(optionsSet.size < 4) {
+                let offset = Math.floor(Math.random() * 10) - 5;
+                if(offset !== 0) optionsSet.add(numericAns + offset);
+            }
+        } else {
+            optionsSet.add("Yes");
+            optionsSet.add("No");
+        }
+        finalOptions = Array.from(optionsSet);
+    }
+
+    finalOptions.sort(() => Math.random() - 0.5).forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = "mcq-btn";
+        btn.style.fontSize = "20px";
+        btn.style.minHeight = "60px";
+        btn.innerHTML = opt; 
+        btn.onclick = function() { resolveRaidMath(moveId, opt, answer); };
+        optsContainer.appendChild(btn);
+    });
+};
+
+window.resolveRaidMath = function(moveId, selected, correct) {
+    const overlay = document.getElementById('raid-math-overlay');
+    if(overlay) overlay.remove();
+
+    if (selected == correct) {
+        showFloatingText(document.body, "MATH CRIT! (2x)", "crit");
+        soundManager.playSFX('correct');
+        useRaidMove(moveId, 2.0, 1.0); 
+    } else {
+        showFloatingText(document.body, "WRONG! (Vuln Up)", "weak");
+        soundManager.playSFX('wrong');
+        useRaidMove(moveId, 0.5, 2.0);
+    }
+};
 
     // --- Raid Engine State ---
     let raidListenerUnsub = null;
@@ -3197,134 +3380,156 @@ function joinRaid() {
         });
     }
     function renderRaidPlayerSide() {
-        const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
-        
-        // Render Player Visual
-        const pVis = document.getElementById('battle-player-visual');
-        pVis.classList.remove('flipped-opponent');
-        pVis.innerHTML = pet.image 
-            ? `<img src="${pet.image}" class="battler-image ${pet.imageStyle}" style="width:200px; height:200px;">` 
-            : `<div style="font-size:100px;">${pet.emoji}</div>`;
+    const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+    
+    // 1. Render Visuals
+    const pVis = document.getElementById('battle-player-visual');
+    pVis.classList.remove('flipped-opponent');
+    pVis.innerHTML = pet.image 
+        ? `<img src="${pet.image}" class="battler-image ${pet.imageStyle}" style="width:200px; height:200px;">` 
+        : `<div style="font-size:100px;">${pet.emoji}</div>`;
 
-        // Update Player HP Bar
-        document.getElementById('player-battle-name').innerText = pet.name;
-        document.getElementById('player-hp-bar').style.width = (pet.hp / pet.maxHP * 100) + "%";
-        document.getElementById('player-hp-text').innerText = `${pet.hp}/${pet.maxHP}`;
+    document.getElementById('player-battle-name').innerText = pet.name;
+    document.getElementById('player-hp-bar').style.width = (pet.hp / pet.maxHP * 100) + "%";
+    document.getElementById('player-hp-text').innerText = `${Math.ceil(pet.hp)}/${pet.maxHP}`;
 
-        // Render Actions (Special Raid Buttons)
-        const btnGrid = document.getElementById('battle-actions');
-        
-        // Map existing powers to 'useRaidMove'
-        let buttons = pet.powers.map(pid => {
-            const move = findShopItem(pid);
-            return `<button class="action-btn green" onclick="useRaidMove('${pid}')">${move.name}</button>`;
-        }).join('');
-        
-        buttons += `<button class="action-btn blue" onclick="openSwapMenu()">🔄 Squad</button>`;
-        buttons += `<button class="action-btn red" onclick="exitRaidBattle()">🏃 Escape</button>`;
-        
-        // Inject Buttons
-        if(document.getElementById('action-buttons-grid')) {
-            document.getElementById('action-buttons-grid').innerHTML = buttons;
-        } else {
-            btnGrid.innerHTML = `<div id="action-buttons-grid" class="battle-actions">${buttons}</div>`;
-        }
+    // 2. Render Buttons (Using FORCE logic)
+    const btnGrid = document.getElementById('battle-actions');
+    
+    let buttons = pet.powers.map(pid => {
+        const move = findShopItem(pid);
+        // We use window.FORCE_RAID_ATTACK to bypass any scope issues
+        return `<button class="action-btn green" style="border:2px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.3);" onclick="window.FORCE_RAID_ATTACK('${pid}')">${move.name}</button>`;
+    }).join('');
+    
+    buttons += `<button class="action-btn blue" onclick="openSwapMenu()">🔄 Squad</button>`;
+    buttons += `<button class="action-btn red" onclick="exitRaidBattle()">🏃 Escape</button>`;
+    
+    if(document.getElementById('action-buttons-grid')) {
+        document.getElementById('action-buttons-grid').innerHTML = buttons;
+    } else {
+        btnGrid.innerHTML = `<div id="action-buttons-grid" class="battle-actions">${buttons}</div>`;
     }
+}
 
     // --- The Connector (Animation + Database Transaction) ---
-    let isRaidTurnProcessing = false;
+    // ===============================================
+// RAID BATTLE ENGINE (40% Boss Attack Chance)
+// ===============================================
 
-    async function useRaidMove(moveId) {
-        if (isRaidTurnProcessing) return;
-        
-        const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
-        if (pet.hp <= 0) return showToast("Pet fainted! Swap now!", "error");
+let isRaidTurnProcessing = false;
 
-        isRaidTurnProcessing = true;
-        const move = findShopItem(moveId);
+async function useRaidMove(moveId, playerMult = 1.0, bossMult = 1.0) {
+    if (isRaidTurnProcessing) return;
+    
+    const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+    if (pet.hp <= 0) return showToast("Pet fainted! Swap now!", "error");
 
-        // A. ANIMATION PHASE
-        const pVis = document.getElementById('battle-player-visual');
-        const eVis = document.getElementById('battle-enemy-visual');
-        
-        soundManager.playSFX('attack');
-        pVis.style.animation = "attackLunge 0.3s";
-        createProjectile(move.image || move.icon, pVis, eVis);
-        
-        await new Promise(r => setTimeout(r, 400)); 
-        pVis.style.animation = "";
-        eVis.style.animation = "damageShake 0.4s";
-        soundManager.playSFX('hit');
+    isRaidTurnProcessing = true;
+    const move = findShopItem(moveId);
 
-        // B. DATABASE PHASE
-        const dmg = 20 + (pet.level * 3) + Math.floor(Math.random()*10); 
-        const myUser = gameState.playerName;
-        const ref = window.fbase.doc(window.db, "world_boss", "active");
+    // A. PLAYER ATTACK ANIMATION
+    const pVis = document.getElementById('battle-player-visual');
+    const eVis = document.getElementById('battle-enemy-visual');
+    
+    soundManager.playSFX('attack');
+    pVis.style.animation = "attackLunge 0.3s";
+    createProjectile(move.image || move.icon, pVis, eVis);
+    
+    await new Promise(r => setTimeout(r, 400)); 
+    pVis.style.animation = "";
+    eVis.style.animation = "damageShake 0.4s";
+    soundManager.playSFX('hit');
 
-        try {
-            await window.fbase.runTransaction(window.db, async (t) => {
-                const doc = await t.get(ref);
-                if (!doc.exists()) throw "Boss Dead";
-                const d = doc.data();
-                
-                const newHP = Math.max(0, d.hp - dmg);
-                const dealers = d.damageDealers || {};
-                const myTotal = dealers[myUser] || 0;
+    // B. DATABASE UPDATE (Player Damage)
+    const baseDmg = 20 + (pet.level * 3);
+    const random = Math.floor(Math.random() * 10);
+    const finalDmg = Math.floor((baseDmg + random) * playerMult); 
 
-                t.update(ref, { 
-                    hp: newHP,
-                    [`damageDealers.${myUser}`]: myTotal + dmg
-                });
-            });
+    const myUser = gameState.playerName;
+    const ref = window.fbase.doc(window.db, "world_boss", "active");
+
+    try {
+        await window.fbase.runTransaction(window.db, async (t) => {
+            const doc = await t.get(ref);
+            if (!doc.exists()) throw "Boss Dead";
+            const d = doc.data();
             
-            showFloatingText(eVis.parentElement, `-${dmg}`, "crit");
+            const newHP = Math.max(0, d.hp - finalDmg);
+            const dealers = d.damageDealers || {};
+            const myTotal = dealers[myUser] || 0;
 
-        } catch(e) {
-            console.log("Raid Error:", e);
-        }
+            t.update(ref, { 
+                hp: newHP,
+                [`damageDealers.${myUser}`]: myTotal + finalDmg
+            });
+        });
+        
+        // Show Damage Number
+        const typeClass = playerMult > 1 ? "crit" : (playerMult < 1 ? "weak" : "super");
+        showFloatingText(eVis.parentElement, `-${finalDmg}`, typeClass);
 
-        // C. BOSS COUNTER-ATTACK PHASE
-        if (Math.random() < 0.3) {
-            setTimeout(() => {
-                eVis.style.animation = "attackLunge 0.3s";
-                soundManager.playSFX('hit');
-                pVis.style.animation = "damageShake 0.4s";
-                
-                const bossDmg = 10 + Math.floor(Math.random() * 15);
-                pet.hp = Math.max(0, pet.hp - bossDmg);
-                showFloatingText(pVis.parentElement, `-${bossDmg}`, "weak");
-                
-                renderRaidPlayerSide(); // Update HP bar UI
-                saveGame();
-
-                // --- CRITICAL FIX: SQUAD WIPE CHECK ---
-                if (pet.hp <= 0) {
-                     // 1. Check if anyone else in the squad is alive
-                     const squadIds = (gameState.team && gameState.team.length > 0) ? gameState.team : [gameState.currentPetId];
-                     const hasLivingPet = squadIds.some(id => {
-                         const p = gameState.pets.find(x => x.id === id);
-                         return p && p.hp > 0;
-                     });
-
-                     if (hasLivingPet) {
-                         // Reserves available -> Swap
-                         showToast(`${pet.name} Fainted! Swap!`, "error");
-                         openSwapMenu(true); 
-                     } else {
-                         // No reserves -> GAME OVER -> KICK OUT
-                         showToast("☠️ SQUAD WIPED! Retreating...", "error");
-                         setTimeout(() => {
-                             exitRaidBattle();
-                         }, 2000);
-                     }
-                }
-                // -------------------------------------
-            }, 600);
-        }
-
-        // Reset Turn Lock
-        setTimeout(() => { isRaidTurnProcessing = false; }, 1000);
+    } catch(e) {
+        console.log("Raid Error:", e);
     }
+
+    // C. BOSS COUNTER-ATTACK (Delayed)
+    setTimeout(() => {
+        // --- 1. CHANCE CHECK (40%) ---
+        // Math.random() gives a number between 0 and 1.
+        // If it's greater than 0.4, that's the 60% chance to MISS.
+        if (Math.random() > 0.4) {
+            showFloatingText(pVis.parentElement, "DODGED!", "heal"); // Green Text
+            isRaidTurnProcessing = false; // UNLOCK TURN
+            return; // Stop here, boss does not attack
+        }
+
+        // --- 2. BOSS ATTACKS (If the 40% check passed) ---
+        eVis.style.animation = "attackLunge 0.3s";
+        soundManager.playSFX('hit');
+        pVis.style.animation = "damageShake 0.4s";
+        
+        // Get Boss Stats
+        // Note: localRaidData comes from the 'startRaidEngine' listener
+        const baseAtk = (typeof localRaidData !== 'undefined' && localRaidData.attack) ? localRaidData.attack : 15;
+        
+        const variance = Math.floor(baseAtk * 0.2); 
+        const rawBossDmg = baseAtk + (Math.floor(Math.random() * variance * 2) - variance);
+        
+        // Apply Math Penalty (If you got the question wrong, boss hits harder)
+        const finalBossDmg = Math.floor(rawBossDmg * bossMult);
+
+        pet.hp = Math.max(0, pet.hp - finalBossDmg);
+        
+        const dmgColor = bossMult > 1 ? "crit" : "weak"; 
+        showFloatingText(pVis.parentElement, `-${finalBossDmg}`, dmgColor);
+        
+        // Update UI
+        if (typeof renderRaidPlayerSide === 'function') renderRaidPlayerSide();
+        saveGame();
+
+        // Check for Faint
+        if (pet.hp <= 0) {
+             const squadIds = (gameState.team && gameState.team.length > 0) ? gameState.team : [gameState.currentPetId];
+             const hasLivingPet = squadIds.some(id => {
+                 const p = gameState.pets.find(x => x.id === id);
+                 return p && p.hp > 0;
+             });
+
+             if (hasLivingPet) {
+                 showToast(`${pet.name} Fainted! Swap!`, "error");
+                 if (typeof openSwapMenu === 'function') openSwapMenu(true); 
+             } else {
+                 showToast("☠️ SQUAD WIPED! Retreating...", "error");
+                 setTimeout(() => { if (typeof exitRaidBattle === 'function') exitRaidBattle(); }, 2000);
+             }
+        }
+        
+        // UNLOCK TURN
+        setTimeout(() => { isRaidTurnProcessing = false; }, 500);
+
+    }, 800); 
+}
 
     // --- NEW RAID SUMMARY & EXIT LOGIC ---
 
@@ -3465,6 +3670,382 @@ function startConfetti() {
 
     setTimeout(() => container.remove(), 5000); // Cleanup after 5s
 }
+// --- FORCE FIX FOR RAID POPUP ---
+
+// 1. Reset the lock globally so buttons are clickable
+window.isRaidTurnProcessing = false; 
+
+// 2. Define the new function attached to window
+window.openRaidMathPopup = function(moveId) {
+    console.log("🟢 Raid Button Clicked:", moveId);
+
+    // Safety Unlock: If the turn isn't actually animating, unlock it.
+    // This fixes the "Button doesn't do anything" bug.
+    const pVis = document.getElementById('battle-player-visual');
+    if (pVis.style.animation === "") {
+        window.isRaidTurnProcessing = false;
+    }
+
+    if (window.isRaidTurnProcessing) {
+        console.log("⏳ Busy...");
+        return; 
+    }
+
+    // A. GET QUESTION DATA
+    let qData = null;
+    
+    // Check Assigned Topics
+    try {
+        if (window.gameState && window.gameState.activeQuestionPool && window.gameState.activeQuestionPool.length > 0) {
+            const randIndex = Math.floor(Math.random() * window.gameState.activeQuestionPool.length);
+            const sourceQ = window.gameState.activeQuestionPool[randIndex];
+            if (sourceQ && typeof sourceQ === 'object') {
+                qData = {
+                    text: sourceQ.qVisualHTML || sourceQ.q || "Solve:",
+                    a: sourceQ.a,
+                    options: sourceQ.options
+                };
+            }
+        }
+    } catch(e) { console.error(e); }
+
+    // Fallback to Grade Math
+    if (!qData) {
+        qData = MathEngine.generate(window.gameState.grade || '1');
+    }
+
+    const answer = qData.a;
+
+    // B. SHOW POPUP (FORCE UI)
+    const battleUI = document.getElementById('battle-ui');
+    
+    // Clean up old popups
+    const old = document.getElementById('raid-math-overlay');
+    if (old) old.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = "raid-math-overlay";
+    overlay.style.cssText = `
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.9); z-index: 9999;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        color: white; animation: popIn 0.2s;
+    `;
+
+    overlay.innerHTML = `
+        <div style="font-size: 20px; color: #f6e05e; margin-bottom: 10px;">⚡ DOUBLE DAMAGE CHANCE ⚡</div>
+        <div style="font-size: 32px; font-weight: bold; margin-bottom: 30px; text-align:center; max-width:90%;">
+            ${qData.text}
+        </div>
+        <div id="raid-math-options" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 80%;"></div>
+        <button onclick="document.getElementById('raid-math-overlay').remove()" style="margin-top:30px; padding:10px; background:#e53e3e; color:white; border:none; border-radius:5px;">Cancel</button>
+    `;
+
+    battleUI.appendChild(overlay);
+
+    // C. GENERATE OPTIONS
+    const optsContainer = overlay.querySelector('#raid-math-options');
+    let finalOptions = [];
+
+    if (qData.options && qData.options.length > 0) {
+        finalOptions = [...qData.options];
+    } else {
+        // Number Generator
+        let optionsSet = new Set([answer]);
+        const numericAns = parseFloat(answer);
+        if (!isNaN(numericAns)) {
+            while(optionsSet.size < 4) {
+                let offset = Math.floor(Math.random() * 10) - 5;
+                if(offset !== 0) optionsSet.add(numericAns + offset);
+            }
+        } else {
+            optionsSet.add("Yes"); optionsSet.add("No");
+        }
+        finalOptions = Array.from(optionsSet);
+    }
+
+    finalOptions.sort(() => Math.random() - 0.5).forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = "mcq-btn";
+        btn.style.fontSize = "22px";
+        btn.style.minHeight = "60px";
+        btn.innerHTML = opt; 
+        btn.onclick = function() { 
+            document.getElementById('raid-math-overlay').remove();
+            
+            if (opt == answer) {
+                showFloatingText(document.body, "CRITICAL! (2x)", "crit");
+                soundManager.playSFX('correct');
+                useRaidMove(moveId, 2.0, 1.0); 
+            } else {
+                showFloatingText(document.body, "MISS! (Vuln Up)", "weak");
+                soundManager.playSFX('wrong');
+                useRaidMove(moveId, 0.5, 2.0);
+            }
+        };
+        optsContainer.appendChild(btn);
+    });
+};
+
+// ===============================================
+// FORCE RAID POPUP (WITH BP REWARDS + 1s DELAY)
+// ===============================================
+
+window.FORCE_RAID_ATTACK = function(moveId) {
+    console.log("🚀 Force Attack Clicked:", moveId);
+
+    // 1. DATA EXTRACTION
+    let mainContent = "Solve:"; 
+    let extraVisual = "";       
+    let qAnswer = null;
+    let qOptions = [];
+
+    try {
+        if (typeof gameState !== 'undefined' && gameState.activeQuestionPool && gameState.activeQuestionPool.length > 0) {
+            const randIndex = Math.floor(Math.random() * gameState.activeQuestionPool.length);
+            const sourceQ = gameState.activeQuestionPool[randIndex];
+            
+            if (sourceQ && typeof sourceQ === 'object') {
+                if (sourceQ.q) mainContent = sourceQ.q;
+                else if (sourceQ.text) mainContent = sourceQ.text;
+
+                if (sourceQ.qVisualHTML) extraVisual = sourceQ.qVisualHTML;
+
+                qAnswer = sourceQ.a;
+                qOptions = sourceQ.options;
+            }
+        }
+    } catch(e) { console.error("Topic Error:", e); }
+
+    // Fallback
+    if (!qAnswer) {
+        const g = (typeof gameState !== 'undefined' && gameState.grade) ? gameState.grade : '1';
+        const fallback = MathEngine.generate(g);
+        mainContent = fallback.q;
+        extraVisual = fallback.qVisualHTML || "";
+        qAnswer = fallback.a;
+        qOptions = fallback.options;
+    }
+
+    // 2. CREATE OVERLAY
+    const existing = document.getElementById('force-raid-overlay');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'force-raid-overlay';
+    overlay.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.95); z-index: 10000;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        backdrop-filter: blur(5px); animation: popIn 0.2s; padding: 15px;
+    `;
+
+    // 3. RENDER CONTENT
+    overlay.innerHTML = `
+        <div id="raid-question-container" style="width: 100%; max-width: 600px; display:flex; flex-direction:column; align-items:center;">
+            <div style="font-size: 20px; color: #f6e05e; font-weight:bold; margin-bottom: 15px; text-shadow: 0 0 10px red;">
+                ⚡ DOUBLE DAMAGE CHANCE ⚡
+            </div>
+            
+            <div style="
+                background: white; color: #2d3748; border-radius: 20px; padding: 25px; 
+                width: 100%; margin-bottom: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+                display: flex; flex-direction: column; align-items: center; text-align: center;
+            ">
+                <div style="margin-bottom: 15px; width: 100%;">
+                    ${extraVisual}
+                </div>
+                <div style="font-size: 32px; font-weight: bold; line-height: 1.3;">
+                    ${mainContent}
+                </div>
+            </div>
+
+            <div id="force-math-options" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%;"></div>
+            
+            <button onclick="document.getElementById('force-raid-overlay').remove()" 
+                style="margin-top:25px; padding:10px 30px; background:#e53e3e; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">
+                Cancel
+            </button>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    // 4. GENERATE OPTIONS
+    const optsContainer = document.getElementById('force-math-options');
+    let finalOptions = [];
+
+    if (qOptions && Array.isArray(qOptions) && qOptions.length > 0) {
+        finalOptions = [...qOptions];
+    } else {
+        let optionsSet = new Set([qAnswer]);
+        const numericAns = parseFloat(qAnswer);
+        if (!isNaN(numericAns)) {
+            while(optionsSet.size < 4) {
+                let offset = Math.floor(Math.random() * 10) - 5;
+                if(offset !== 0) optionsSet.add(numericAns + offset);
+            }
+        } else {
+            optionsSet.add("Yes"); optionsSet.add("No");
+        }
+        finalOptions = Array.from(optionsSet);
+    }
+
+    finalOptions.sort(() => Math.random() - 0.5).forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = "mcq-btn";
+        btn.style.cssText = "font-size: 24px; min-height: 80px; width: 100%; cursor: pointer; border-radius: 15px; border: 4px solid #cbd5e0; background: white; color: #2d3748; box-shadow: 0 5px 0 #a0aec0;";
+        btn.innerHTML = opt; 
+        
+        // --- CLICK HANDLER WITH BP REWARD ---
+        btn.onclick = function() { 
+            const isCorrect = (opt == qAnswer);
+            
+            // 1. BP LOGIC
+            let bpMsg = "";
+            if (isCorrect) {
+                addBP(10); // Native function to add BP
+                bpMsg = "+10 Brain Points!";
+            } else {
+                // Safe Deduction (Native logic)
+                const deduction = Math.min(gameState.brainPoints, 5);
+                gameState.brainPoints -= deduction;
+                updateStatsDisplay();
+                saveGame();
+                bpMsg = `-${deduction} Brain Points`;
+            }
+
+            // 2. PLAY SOUND
+            soundManager.playSFX(isCorrect ? 'correct' : 'wrong');
+
+            // 3. SHOW FEEDBACK
+            const container = document.getElementById('raid-question-container');
+            if(container) {
+                container.innerHTML = `
+                    <div style="animation: popIn 0.3s; text-align:center;">
+                        <div style="font-size: 80px; margin-bottom: 10px;">
+                            ${isCorrect ? '✅' : '❌'}
+                        </div>
+                        <h1 style="color: ${isCorrect ? '#48bb78' : '#f56565'}; font-size: 40px; font-weight:bold; text-shadow: 0 2px 5px black; margin:0;">
+                            ${isCorrect ? 'CORRECT!' : 'INCORRECT!'}
+                        </h1>
+                        <p style="color: white; font-size: 20px; font-weight:bold; margin-top: 5px;">
+                            ${isCorrect ? 'DOUBLE DAMAGE ACTIVATED!' : 'Damage Reduced...'}
+                        </p>
+                        <!-- BP MESSAGE -->
+                        <p style="color: ${isCorrect ? '#f6e05e' : '#fc8181'}; font-size: 18px; font-weight:bold; margin-top: 5px;">
+                            ${bpMsg}
+                        </p>
+                    </div>
+                `;
+            }
+
+            // 4. WAIT 1 SECOND THEN ATTACK
+            setTimeout(() => {
+                document.getElementById('force-raid-overlay').remove();
+                if (isCorrect) {
+                    useRaidMove(moveId, 2.0, 1.0); 
+                } else {
+                    useRaidMove(moveId, 0.5, 2.0);
+                }
+            }, 1000); 
+        };
+        optsContainer.appendChild(btn);
+    });
+};
+
+// ===============================================
+// BULK ITEM USAGE SYSTEM (XP ONLY)
+// ===============================================
+
+let currentUsingItem = null;
+
+window.openUseQuantityModal = function(itemId) {
+    const count = gameState.inventory[itemId] || 0;
+    if (count <= 0) return;
+
+    currentUsingItem = findShopItem(itemId); 
+    if (!currentUsingItem) return;
+
+    const modal = document.getElementById('use-quantity-modal');
+    const slider = document.getElementById('use-qty-slider');
+    const title = document.getElementById('use-qty-title');
+    const visual = document.getElementById('use-qty-visual');
+    const desc = document.getElementById('use-qty-desc');
+    const label = document.getElementById('use-qty-label');
+    const maxText = document.getElementById('use-qty-max');
+    const confirmBtn = document.getElementById('use-qty-confirm-btn');
+
+    // Setup UI
+    title.innerText = `Use ${currentUsingItem.name}`;
+    visual.innerText = currentUsingItem.icon || '🌟';
+    desc.innerText = `You have: ${count}`;
+    
+    // Setup Slider
+    slider.min = 1;
+    slider.max = count;
+    slider.value = 1;
+    maxText.innerText = `Max: ${count}`;
+    
+    // Update Label function
+    const updateLabel = () => {
+        label.innerText = `Use: ${slider.value}`;
+    };
+    slider.oninput = updateLabel;
+    updateLabel();
+
+    // Confirm Action
+    confirmBtn.onclick = () => {
+        confirmBulkUse(itemId, parseInt(slider.value));
+        modal.classList.remove('active');
+    };
+
+    modal.classList.add('active');
+};
+
+window.confirmBulkUse = function(itemId, quantity) {
+    if (quantity <= 0) return;
+    
+    // 1. Remove items
+    gameState.inventory[itemId] -= quantity;
+    if (gameState.inventory[itemId] < 0) gameState.inventory[itemId] = 0;
+
+    // 2. Apply Effects (XP Only)
+    const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+    let msg = "";
+
+    if (itemId === 'xp_potion') {
+        const totalXP = quantity * 100;
+        pet.xp += totalXP;
+        
+        let levelsGained = 0;
+        // Loop level up logic
+        while (pet.xp >= pet.maxXp) {
+            const maxLvl = LEVEL_CAPS[pet.rarity] || 100;
+            if (pet.level >= maxLvl) {
+                pet.xp = pet.maxXp; 
+                break;
+            }
+            
+            pet.level++;
+            pet.xp -= pet.maxXp;
+            pet.maxXp = pet.level * 300 + 200;
+            pet.maxHP = 50 + (pet.level * 10);
+            pet.hp = pet.maxHP; 
+            levelsGained++;
+        }
+        
+        soundManager.playSFX('levelUp');
+        msg = levelsGained > 0 
+            ? `Leveled up ${levelsGained} times!` 
+            : `Added ${totalXP} XP!`;
+    }
+
+    saveGame();
+    renderHub();
+    updateStatsDisplay();
+    showToast(msg, "success");
+};
   </script>
 </body>
 </html>
