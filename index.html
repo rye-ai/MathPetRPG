@@ -1634,7 +1634,14 @@
     }
 
     // UPDATED MATH LOGIC: CONNECTS MATH TO BATTLE (BURST MODE)
+    // --- SPAM FIX VARIABLE ---
+    let isProcessingAnswer = false;
+
+    // UPDATED MATH LOGIC: CONNECTS MATH TO BATTLE (BURST MODE)
     function checkAnswer(val) { 
+        // 1. STOP SPAM: If already processing, ignore click
+        if (isProcessingAnswer) return;
+
         let input = val; 
         if (input === undefined) { 
             input = document.getElementById('answer-input').value; 
@@ -1644,6 +1651,9 @@
         const fb = document.getElementById('feedback'); 
         
         if (input == gameState.currentQuestion.a) { 
+            // 2. LOCK: Block clicks
+            isProcessingAnswer = true;
+
             // Correct Answer
             soundManager.playSFX('correct'); 
             addBP(10); 
@@ -1652,7 +1662,7 @@
             gameState.combo = (gameState.combo || 0) + 1;
             
             if (gameState.combo >= 3) {
-                gameState.burstMode = true; // <--- THIS FLAG IS KEY
+                gameState.burstMode = true; 
                 fb.innerText = "🔥 BRAIN BURST ACTIVATED! Next Attack CRIT! 🔥";
                 fb.className = "feedback correct";
                 // Visual feedback
@@ -1663,20 +1673,26 @@
                 document.querySelector('.quiz-container').style.boxShadow = "none";
             }
             
+            // Dim buttons to show they are locked
+            document.querySelectorAll('.mcq-btn').forEach(btn => btn.style.opacity = "0.5");
+
             setTimeout(() => {
                 generateNextQuestion(); 
-                // Reset visual glow after moving to next question
+                // 3. UNLOCK: Allow clicks again
+                isProcessingAnswer = false;
+                
+                // Reset visual glow
                 if(gameState.combo < 3) document.querySelector('.quiz-container').style.boxShadow = "none";
             }, 1000); 
 
         } else { 
-            // Wrong Answer
+            // Wrong Answer (No lock needed here)
             const d = Math.min(gameState.brainPoints, 5); 
             gameState.brainPoints -= d; 
             updateStatsDisplay(); 
             
             gameState.combo = 0; 
-            gameState.burstMode = false; // Lose the buff
+            gameState.burstMode = false; 
             document.querySelector('.quiz-container').style.boxShadow = "none";
             
             saveGame(); 
