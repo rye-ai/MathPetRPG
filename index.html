@@ -52,7 +52,22 @@
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     
     /* Login & Setup Screen */
-    .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-login) no-repeat center center fixed; background-size: cover; z-index: 2000; display: flex; align-items: center; justify-content: center; overflow-y: auto; padding: 20px; }
+    /* Update or Check this CSS block */
+.login-overlay { 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100vw; /* Force full viewport width */
+    height: 100vh; /* Force full viewport height */
+    background: var(--bg-login) no-repeat center center fixed; 
+    background-size: cover; 
+    z-index: 5000; /* Increased Z-Index to be sure */
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    overflow-y: auto; 
+    padding: 20px; 
+}
     .login-overlay.hidden { display: none; }
     .login-box { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.5); border-radius: 20px; padding: 30px; box-shadow: 0 10px 50px rgba(0,0,0,0.5); text-align: center; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative; }
     .login-title { font-size: clamp(24px, 5vw, 32px); color: #5a67d8; margin-bottom: 10px; font-weight: bold; }
@@ -404,20 +419,86 @@
     <div class="login-icon" style="font-size: 40px; margin-bottom: 10px;">🏫</div>
     <h1 class="login-title">Math Pet Adventure</h1>
     <p style="color: #4a5568; margin-bottom: 20px; font-size: 14px; font-weight:bold;">Customize your learning journey!</p>
+    
+    <!-- STUDENT LOGIN FORM -->
     <form id="setup-form">
      <div class="setup-section"><label class="setup-label">1. Username</label><input type="text" id="student-name" class="login-input" placeholder="Enter Username" required></div>
      <div class="setup-section"><label class="setup-label">2. Password</label><input type="password" id="student-pass" class="login-input" placeholder="Enter Password" required></div>
      <button type="submit" class="login-btn">Start Adventure! 🚀</button>
     </form>
+
+    <!-- SECRET TRIGGER -->
     <div style="margin-top: 30px; font-size: 10px; color: #4a5568; cursor: pointer; text-transform: uppercase; letter-spacing: 1px;" onclick="toggleTeacherLogin()">raymondanacaya</div>
+    
+    <!-- TEACHER/ADMIN LOGIN PANEL (Clean Version) -->
     <div id="teacher-login-panel" style="display:none; margin-top:20px; border-top:1px solid #eee; padding-top:20px;">
-        <h3 style="color:#d69e2e; font-weight:bold; margin-bottom:10px;">Teacher Login</h3>
-        <input type="password" id="teacher-pin" class="login-input" placeholder="Enter Admin PIN">
-        <button class="action-btn blue" onclick="checkTeacherPin()">Access Dashboard</button>
+        <h3 style="color:#d69e2e; font-weight:bold; margin-bottom:10px;">Staff Access</h3>
+        <input type="text" id="teacher-username" class="login-input" placeholder="Username (e.g. admin)">
+        <input type="password" id="teacher-pass" class="login-input" placeholder="Password">
+        <button class="action-btn blue" onclick="loginTeacher()">Log In</button>
     </div>
    </div>
+  </div>
+ <!-- ADMIN DASHBOARD (Hidden, High Security) -->
+<div id="admin-dashboard-screen" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#2d3748; z-index:2200; padding:40px; overflow-y:auto; color:white;">
+    <div style="max-width:1000px; margin:0 auto;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; border-bottom:1px solid #4a5568; padding-bottom:20px;">
+            <h1 style="font-size:32px; font-weight:bold; color:#f6ad55;">🛡️ HEADMASTER ADMIN</h1>
+            <button class="action-btn red" style="width:auto;" onclick="location.reload()">Log Out</button>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:40px;">
+            
+            <!-- COLUMN 1: MANAGE TEACHERS -->
+            <div style="background:rgba(0,0,0,0.3); padding:20px; border-radius:15px; border:1px solid #4a5568;">
+                <h2 style="color:#63b3ed; border-bottom:1px solid #4a5568; padding-bottom:10px; margin-bottom:15px;">👨‍🏫 Create Teacher Account</h2>
+                <input type="text" id="admin-new-teacher-user" class="login-input" placeholder="Teacher Username" style="background:#4a5568; color:white; border-color:#718096;">
+                <input type="password" id="admin-new-teacher-pass" class="login-input" placeholder="Password" style="background:#4a5568; color:white; border-color:#718096;">
+                <button class="action-btn blue" onclick="adminCreateTeacher()">Create Account</button>
+                
+                <h3 style="margin-top:20px; color:#cbd5e0;">Existing Teachers</h3>
+                <div id="admin-teacher-list" style="max-height:200px; overflow-y:auto; font-size:14px; color:#a0aec0;">Loading...</div>
+            </div>
+
+            <!-- COLUMN 2: SUMMON BOSS (Fixed: Added Image Input) -->
+            <div style="background:rgba(0,0,0,0.3); padding:20px; border-radius:15px; border:1px solid #4a5568;">
+                <h2 style="color:#f56565; border-bottom:1px solid #4a5568; padding-bottom:10px; margin-bottom:15px;">☠️ Summon World Boss</h2>
+                
+                <input type="text" id="admin-boss-name" class="login-input" placeholder="Boss Name (e.g. Titan)" value="Titan" style="background:#4a5568; color:white; border-color:#718096;">
+                <input type="number" id="admin-boss-hp" class="login-input" placeholder="HP" value="50000" style="background:#4a5568; color:white; border-color:#718096;">
+                <input type="number" id="admin-boss-atk" class="login-input" placeholder="Attack" value="20" style="background:#4a5568; color:white; border-color:#718096;">
+                
+                <!-- MISSING INPUTS ADDED HERE -->
+                <input type="text" id="admin-boss-img" class="login-input" placeholder="Image URL (e.g. https://...)" style="background:#4a5568; color:white; border-color:#718096;">
+                <input type="text" id="admin-boss-reward" class="login-input" placeholder="Reward JSON URL" value="events/boss_reward.json" style="background:#4a5568; color:white; border-color:#718096;">
+                
+                <div style="margin:15px 0; background:#1a202c; padding:10px; border-radius:10px;">
+                    <label style="font-weight:bold; color:#f6ad55; display:block; margin-bottom:5px;">Target:</label>
+                    <label style="display:block; margin-bottom:5px;">
+                        <input type="radio" name="boss-target" value="global" checked onchange="toggleTeacherCheckboxes(false)"> 
+                        🌍 Global (All Students)
+                    </label>
+                    <label style="display:block;">
+                        <input type="radio" name="boss-target" value="specific" onchange="toggleTeacherCheckboxes(true)"> 
+                        🎯 Specific Classes
+                    </label>
+                </div>
+
+                <div id="admin-boss-teacher-select" style="display:none; margin-bottom:15px; max-height:100px; overflow-y:auto; background:#1a202c; padding:5px;">
+                    <!-- Teacher checkboxes injected here -->
+                </div>
+
+                <div style="display:flex; gap:10px;">
+                    <button class="action-btn red" onclick="adminSummonBoss()">SUMMON BOSS</button>
+                    <button class="action-btn" style="background:#718096;" onclick="adminEndRaid()">🛑 END RAID</button>
+                </div>
+            </div>
+            </div>
+    </div>
+</div>
    
    <!-- TEACHER DASHBOARD (Fixed & Reorganized) -->
+   <!-- TEACHER DASHBOARD (Clean & Verified) -->
    <div id="teacher-dashboard-screen" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:2100; padding:40px; overflow-y:auto;">
        <div style="max-width:1000px; margin:0 auto;">
            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
@@ -446,20 +527,32 @@
                        <button class="action-btn green" onclick="createStudentAccount()">Create Account</button>
                    </div>
 
-                   <!-- 2. SUMMON BOSS (Now Visible Here!) -->
+                   <!-- 2. CLASS RAID CONTROLS -->
                    <div style="background:#2d3748; padding:20px; border-radius:15px; border:2px solid #4a5568; margin-bottom: 20px; color: white;">
-                        <h2 style="color:#f6ad55; font-weight:bold; margin-bottom:10px;">☠️ Create Raid Boss</h2>
+                        <h2 style="color:#f6ad55; font-weight:bold; margin-bottom:10px;">☠️ Class Raid Boss</h2>
                         <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                            <input type="text" id="t-boss-name" class="login-input" placeholder="Boss Name (e.g. Titan)">
-                            <input type="number" id="t-boss-hp" class="login-input" placeholder="HP (e.g. 50000)">
                             
-                            <!-- ATTACK INPUT -->
-                            <input type="number" id="t-boss-atk" class="login-input" placeholder="Attack (e.g. 50)" style="grid-column: span 2;">
-                            
-                            <input type="text" id="t-boss-img" class="login-input" placeholder="Image URL" style="grid-column: span 2;">
-                            <input type="text" id="t-boss-reward-url" class="login-input" placeholder="Reward JSON URL (e.g. events/boss_reward.json)" value="events/boss_reward.json" style="grid-column: span 2;">
+                            <!-- Updated Inputs with Dark Background and White Text -->
+                            <input type="text" id="t-boss-name" class="login-input" placeholder="Boss Name" value="Titan" 
+                                   style="background:#4a5568; color:white; border-color:#718096;">
+                                   
+                            <input type="number" id="t-boss-hp" class="login-input" placeholder="HP" value="10000" 
+                                   style="background:#4a5568; color:white; border-color:#718096;">
+                                   
+                            <input type="number" id="t-boss-atk" class="login-input" placeholder="Atk" value="15" 
+                                   style="grid-column: span 2; background:#4a5568; color:white; border-color:#718096;">
+                                   
+                            <input type="text" id="t-boss-img" class="login-input" placeholder="Image URL" 
+                                   style="grid-column: span 2; background:#4a5568; color:white; border-color:#718096;">
+                                   
+                            <input type="text" id="t-boss-reward-url" class="login-input" placeholder="Reward JSON" value="events/boss_reward.json" 
+                                   style="grid-column: span 2; background:#4a5568; color:white; border-color:#718096;">
                         </div>
-                        <button class="action-btn red" onclick="teacherSummonRaid()">SUMMON RAID BOSS</button>
+                        
+                        <div style="display:flex; gap:10px; margin-top:10px;">
+                            <button class="action-btn red" onclick="teacherSummonRaid()">SUMMON</button>
+                            <button class="action-btn" style="background:#718096;" onclick="teacherEndRaid()">🛑 STOP</button>
+                        </div>
                    </div>
                </div>
 
@@ -468,13 +561,16 @@
                    <div style="background:#f7fafc; padding:15px; border-bottom:2px solid #e2e8f0; font-weight:bold; color:#4a5568; display:flex; justify-content:space-between; align-items:center;">
                        <label style="display:flex; align-items:center; cursor:pointer;">
                            <input type="checkbox" id="select-all-students" onchange="toggleAllStudents(this.checked)" style="margin-right:8px; transform:scale(1.2);">
-                           <span>Enrolled Students</span>
+                           <span>My Students</span>
                        </label>
-                       <button class="action-btn blue" style="width:auto; padding:5px 10px; font-size:12px; margin-top:-2px;" onclick="loadStudentList()">Refresh List</button>
+                       <div>
+                           <button class="action-btn blue" style="width:auto; padding:5px 10px; font-size:12px; margin-top:-2px;" onclick="loadStudentList()">Refresh</button>
+                           <button class="action-btn" style="width:auto; padding:5px 10px; font-size:12px; margin-top:-2px; background:#d69e2e; margin-left:5px;" onclick="claimLegacyStudents()">⚠️ Claim Old</button>
+                       </div>
                    </div>
                    <div id="bulk-action-bar" style="background:#ebf8ff; padding:10px 15px; border-bottom:1px solid #cceeff; display:none; justify-content:space-between; align-items:center;">
                        <span id="bulk-selected-count" style="font-weight:bold; color:#5a67d8;">0 Selected</span>
-                       <button class="action-btn green" style="width:auto; padding:5px 10px; font-size:12px;" onclick="openBulkTopicManager()">Assign Selected Topics</button>
+                       <button class="action-btn green" style="width:auto; padding:5px 10px; font-size:12px;" onclick="openBulkTopicManager()">Assign Topics</button>
                    </div>
                    <div id="student-list-container" style="flex:1; overflow-y: auto;">
                        <div style="padding:20px; text-align:center; color:gray;">Loading list...</div>
@@ -533,9 +629,59 @@
            </div>
        </div>
    </div>
+       <!-- Modals included inside dashboard -->
+       <div id="topic-manager-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:2200;">
+           <div style="background:white; padding:30px; border-radius:15px; width:500px; max-width:90%;">
+               <h2 style="font-size:22px; font-weight:bold; color:#5a67d8; margin-bottom:10px;">Manage Student</h2>
+               <p id="tm-student-name" style="font-weight:bold; color:#2d3748; margin-bottom:10px;">Student: -</p>
+               <div style="margin-bottom:15px; background:#e0f2fe; padding:10px; border-radius:8px; border:1px solid #7dd3fc;">
+                   <label style="font-weight:bold; color:#0369a1; font-size:12px; display:block; margin-bottom:5px;">Currently Assigned Lessons:</label>
+                   <div id="tm-current-assignments" style="display:flex; flex-wrap:wrap; max-height:80px; overflow-y:auto;"><span style="color:#64748b; font-size:12px;">Loading...</span></div>
+               </div>
+               <div style="margin-bottom:15px; background:#f7fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0;">
+                   <label style="font-weight:bold; color:#4a5568; font-size:14px;">Select Grade Source:</label>
+                   <select id="tm-grade-select" style="width:100%; padding:8px; margin-top:5px; border:1px solid #cbd5e0; border-radius:5px;" onchange="refreshTopicManagerUI()">
+                       <option value="K">K</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                   </select>
+               </div>
+               <div id="tm-topic-list" style="max-height:200px; overflow-y:auto; border:1px solid #eee; padding:10px; border-radius:5px; margin-bottom:20px;">Loading...</div>
+               <div style="display:flex; gap:10px;">
+                   <button class="action-btn blue" onclick="saveStudentTopics()">Save Changes</button>
+                   <button class="action-btn red" onclick="document.getElementById('topic-manager-modal').style.display='none'">Cancel</button>
+               </div>
+           </div>
+       </div>
+
+       <div id="bulk-assign-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:2200;">
+           <div style="background:white; padding:30px; border-radius:15px; width:500px; max-width:90%;">
+               <h2 style="font-size:22px; font-weight:bold; color:#48bb78; margin-bottom:10px;">Bulk Assign</h2>
+               <p id="bulk-student-count-display" style="margin-bottom:15px;">...</p>
+               <select id="bulk-grade-select" style="width:100%; padding:8px; margin-bottom:10px;" onchange="refreshBulkTopicUI()">
+                   <option value="K">K</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option>
+               </select>
+               <div id="bulk-topic-list" style="max-height:300px; overflow-y:auto; border:1px solid #eee; padding:10px; margin-bottom:20px;">Loading...</div>
+               <div style="display:flex; gap:10px;">
+                   <button class="action-btn green" onclick="saveBulkStudentTopics()">Apply</button>
+                   <button class="action-btn red" onclick="document.getElementById('bulk-assign-modal').style.display='none'">Cancel</button>
+               </div>
+           </div>
+       </div>
+
+       <div class="modal-overlay" id="teacher-delete-modal" style="z-index:2300;">
+           <div class="confirm-modal delete-confirm-modal">
+               <div style="font-size: 60px;">🗑️</div>
+               <h2 style="color: #e53e3e;">Delete Account?</h2>
+               <p>Delete <strong id="delete-student-name-display">STUDENT</strong>?</p>
+               <div class="confirm-buttons">
+                   <button class="confirm-btn no" onclick="document.getElementById('teacher-delete-modal').classList.remove('active');">Cancel</button> 
+                   <button class="confirm-btn yes" id="delete-student-confirm-btn" onclick="confirmDeleteStudent()">Delete</button>
+               </div>
+           </div>
+       </div>
   </div><!-- Main Game -->
   
-  <div class="game-container">
+  <!-- We add an ID and force it to be hidden initially -->
+<div class="game-container" id="main-game-ui" style="display: none;">
    <header class="header">
     <div class="player-info"><span style="font-size: 24px; margin-right: 5px;">👤</span><div><div style="font-weight: bold; font-size: 16px;" id="display-name">Player</div><div style="font-size: 12px; color: #718096;" id="display-grade">Grade: -</div></div><button class="logout-btn" onclick="logout()">Logout</button></div>
     <div class="stats-container"><button id="mute-btn" onclick="toggleAudio()" style="background:none; border:none; font-size:24px; cursor:pointer;" title="Mute/Unmute">🔊</button><div class="stamina-display">⚡ <span id="stamina-display">100</span>/100</div><div class="currency-display">🧠 <span id="bp-display">0</span> BP</div></div>
@@ -874,7 +1020,7 @@
     const GITHUB_CONFIG = { enabled: true, username: "rye-ai", repo: "MathPetRPG", branch: "main" };
     function getGhUrl(path) { return `https://raw.githubusercontent.com/${GITHUB_CONFIG.username}/${GITHUB_CONFIG.repo}/${GITHUB_CONFIG.branch}/${path}`; }
     async function fetchGithubFolder(folderPath) { try { const res = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.username}/${GITHUB_CONFIG.repo}/contents/${folderPath}?ref=${GITHUB_CONFIG.branch}`); if (res.status === 404 || !res.ok) return []; return await res.json(); } catch (e) { return []; } }
-
+    let currentLoggedTeacher = null; // Stores "MrSmith" after login
     let EXTERNAL_PET_DATA = [ { id: 'shadow_dragon_line', base: { id: 'light_bearcat_baby', name: 'OlaBear', rarity: 'legendary', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/V1/43.png', imageStyle: 'blend-multiply', emoji: '❓', baseHP: 50 }, evolutions: [ { name: 'Teen Shadow Dragon', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/V1/43.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'legendary', baseHP: 100, cost: 100 }, { name: 'Elder Shadow Dragon', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/V1/43.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'legendary', baseHP: 150, cost: 200 } ] } ];
     let QUESTION_REPOSITORY = {}; const LEVEL_CAPS = { common: 50, uncommon: 50, rare: 60, epic: 75, legendary: 100 };
     const BATTLE_BACKGROUNDS = { 1: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur.png', 4: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(1).png', 5: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(3).png', 6: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(2).png', 7: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/%E2%80%9CA%20high-quality%20monster-inspired%20battle%20arena%20in%20landscape%20orientation.%20A%20large%2C%20circular%20stadium%20floor%20made%20of%20smooth%20stone%20tiles%20with%20subtle%20glowing%20patterns.%20Surrounding%20the%20arena%20are%20tall%20stadium%20walls%2C%20bright%20.jpg' }; const ARENA_IMGS = [ 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur.png', 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(1).png', 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(2).png', 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(3).png' ];
@@ -1359,8 +1505,24 @@
       if (auth.assignment?.grade) { gameState.grade = auth.assignment.grade; gameState.selectedTopics = auth.assignment.topics || []; }
       await loadAssignmentAndQuestions(auth.assignment);
       checkDailyLogin();
-      document.getElementById('display-name').innerText = gameState.playerName; document.getElementById('display-grade').innerText = `Grade: ${gameState.grade}`;
-      updateStatsDisplay(); document.getElementById('login-overlay').classList.add('hidden'); soundManager.playBGM('hub'); generateNextQuestion(); renderHub();
+      document.getElementById('display-name').innerText = gameState.playerName; 
+      document.getElementById('display-grade').innerText = `Grade: ${gameState.grade}`;
+      updateStatsDisplay();
+      
+      // --- START OF FIX ---
+      
+      // 1. Hide the Login Screen completely
+      document.getElementById('login-overlay').style.display = 'none';
+      
+      // 2. Show the Game UI (We use 'flex' to maintain your layout)
+      // Note: If this line causes an error, check that your HTML div has id="main-game-ui"
+      document.getElementById('main-game-ui').style.display = 'flex'; 
+      
+      // --- END OF FIX ---
+      
+      soundManager.playBGM('hub'); 
+      generateNextQuestion(); 
+      renderHub();
     });
 
     function loadExternalPets() {
@@ -2763,24 +2925,100 @@ function checkAdventureRandomEncounter(tileType) {
     let currentStudentData = null; 
 
     async function authenticateStudent(name, password) { try { const d = await window.fbase.getDoc(window.fbase.doc(window.db, "students", name)); if (d.exists() && (!d.data().password || d.data().password === password)) return { success: true, assignment: d.data().assignedGrade ? { grade: d.data().assignedGrade, topics: d.data().assignedTopics||[] } : null }; return { success: false, message: "Invalid Login" }; } catch (e) { return { success: false, message: "Error" }; } }
-    function toggleTeacherLogin() { const p = document.getElementById('teacher-login-panel'); p.style.display = p.style.display === 'none' ? 'block' : 'none'; }
-    function checkTeacherPin() { if (document.getElementById('teacher-pin').value === "1030") { document.getElementById('teacher-dashboard-screen').style.display = 'block'; loadStudentList(); } else showToast("Wrong PIN", "error"); }
-    async function createStudentAccount() { const u=document.getElementById('new-student-user').value; const p=document.getElementById('new-student-pass').value; if(!u||!p) return; await window.fbase.setDoc(window.fbase.doc(window.db,"students",u),{username:u,password:p,assignedGrade:document.getElementById('new-student-grade').value,assignedTopics:[],createdAt:new Date()}); showToast("Created!", "success"); loadStudentList(); }
+    // Function to show/hide the teacher login box
+function toggleTeacherLogin() { 
+    const panel = document.getElementById('teacher-login-panel');
+    if (panel) {
+        panel.style.display = (panel.style.display === 'none') ? 'block' : 'none';
+    } else {
+        console.error("Error: Could not find element with id 'teacher-login-panel'");
+    }
+}
+    async function checkTeacherPin() { 
+    const inputPin = document.getElementById('teacher-pin').value;
+    
+    // 1. Calculate the Hash of what was typed
+    const hashedInput = await sha256(inputPin);
+
+    // 2. Compare against the known Hash of "1030"
+    // Hash: 3691308f2a4c2f6983f2880d32e29c84e17067c9c043232c4cb72960e81726a4
+    const SECRET_HASH = "3691308f2a4c2f6983f2880d32e29c84e17067c9c043232c4cb72960e81726a4";
+
+    if (hashedInput === SECRET_HASH) { 
+        document.getElementById('teacher-dashboard-screen').style.display = 'block'; 
+        loadStudentList(); 
+        document.getElementById('teacher-pin').value = ""; // Clear the field for safety
+        showToast("Welcome, Teacher!", "success");
+    } else { 
+        showToast("Wrong PIN", "error"); 
+    } 
+}
+    async function createStudentAccount() { 
+    if (!currentLoggedTeacher) return showToast("Error: No teacher logged in", "error");
+
+    const u = document.getElementById('new-student-user').value.trim(); 
+    const p = document.getElementById('new-student-pass').value.trim(); 
+    
+    if(!u || !p) return showToast("Missing Info", "error"); 
+    
+    // Check if student exists globally (usernames must be unique)
+    const check = await window.fbase.getDoc(window.fbase.doc(window.db, "students", u));
+    if(check.exists()) return showToast("Username taken!", "error");
+
+    await window.fbase.setDoc(window.fbase.doc(window.db,"students",u), {
+        username: u,
+        password: p,
+        assignedGrade: document.getElementById('new-student-grade').value,
+        assignedTopics: [],
+        teacherId: currentLoggedTeacher, // <--- THIS LINKS THE STUDENT TO THE TEACHER
+        createdAt: new Date()
+    }); 
+    
+    showToast(`Created student: ${u}`, "success"); 
+    loadStudentList(); // Refresh list
+}
     function toggleAllStudents(c) { document.querySelectorAll('.student-select-checkbox').forEach(cb => cb.checked = c); updateBulkActionBar(); }
     function updateBulkActionBar() { const c = document.querySelectorAll('.student-select-checkbox:checked').length; const b = document.getElementById('bulk-action-bar'); document.getElementById('bulk-selected-count').innerText = `${c} Selected`; b.style.display = c > 0 ? 'flex' : 'none'; }
     
     async function loadStudentList() {
-        const d = document.getElementById('student-list-container'); d.innerHTML = '<div style="padding:20px;text-align:center;color:gray;">Loading class roster...</div>';
-        const q = await window.fbase.getDocs(window.fbase.collection(window.db, "students")); const grouped = {};
-        q.forEach(doc => {
-            const s = doc.data(); const g = s.assignedGrade || "Unassigned"; const bp = (s.saveData && s.saveData.brainPoints) ? s.saveData.brainPoints : 0;
-            if (!grouped[g]) grouped[g] = [];
-            grouped[g].push(`<div class="student-list-item"><input type="checkbox" class="student-select-checkbox" data-username="${s.username}" onchange="updateBulkActionBar()"><div class="student-info" style="display:flex; flex-direction:column; align-items:flex-start;"><div style="font-size:16px; font-weight:bold;">${s.username}</div><div style="font-size:12px; background:#fef3c7; color:#92400e; padding:2px 8px; border-radius:10px; margin-top:2px;">🧠 ${bp} BP</div></div><div style="display:flex; gap:5px;"><button class="action-btn green" style="width:auto; padding:5px 10px; font-size:12px;" onclick="giveStudentBP('${s.username}')">🎁 +BP</button><button class="action-btn blue" style="width:auto; padding:5px 10px; font-size:12px;" onclick="openTopicManager('${s.username}')">Manage</button><button class="action-btn red" style="width:auto; padding:5px 10px; font-size:12px;" onclick="openDeleteModal('${s.username}')">🗑️</button></div></div>`);
-        });
-        let finalHtml = ''; const grades = Object.keys(grouped).sort(); 
-        if (grades.length === 0) { d.innerHTML = '<div style="padding:20px;text-align:center;">No students found.</div>'; return; }
-        grades.forEach(grade => { finalHtml += `<div class="grade-group"><div class="grade-summary" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'"><span>📂 Grade ${grade}</span><span>${grouped[grade].length} Students ▼</span></div><div class="grade-student-list">${grouped[grade].join('')}</div></div>`; }); d.innerHTML = finalHtml; 
+    if (!currentLoggedTeacher) return;
+
+    const d = document.getElementById('student-list-container'); 
+    d.innerHTML = '<div style="padding:20px;text-align:center;color:gray;">Loading class roster...</div>';
+    
+    // FETCH ALL STUDENTS
+    // (Ideally, we would use a Firestore Query here, but client-side filtering is easier for now)
+    const q = await window.fbase.getDocs(window.fbase.collection(window.db, "students")); 
+    
+    const grouped = {};
+    let count = 0;
+
+    q.forEach(doc => {
+        const s = doc.data();
+        
+        // --- FILTER: ONLY SHOW MY STUDENTS ---
+        if (s.teacherId !== currentLoggedTeacher) return; 
+        
+        count++;
+        const g = s.assignedGrade || "Unassigned"; 
+        const bp = (s.saveData && s.saveData.brainPoints) ? s.saveData.brainPoints : 0;
+        
+        if (!grouped[g]) grouped[g] = [];
+        grouped[g].push(`<div class="student-list-item"><input type="checkbox" class="student-select-checkbox" data-username="${s.username}" onchange="updateBulkActionBar()"><div class="student-info" style="display:flex; flex-direction:column; align-items:flex-start;"><div style="font-size:16px; font-weight:bold;">${s.username}</div><div style="font-size:12px; background:#fef3c7; color:#92400e; padding:2px 8px; border-radius:10px; margin-top:2px;">🧠 ${bp} BP</div></div><div style="display:flex; gap:5px;"><button class="action-btn green" style="width:auto; padding:5px 10px; font-size:12px;" onclick="giveStudentBP('${s.username}')">🎁 +BP</button><button class="action-btn blue" style="width:auto; padding:5px 10px; font-size:12px;" onclick="openTopicManager('${s.username}')">Manage</button><button class="action-btn red" style="width:auto; padding:5px 10px; font-size:12px;" onclick="openDeleteModal('${s.username}')">🗑️</button></div></div>`);
+    });
+    
+    if (count === 0) { 
+        d.innerHTML = '<div style="padding:20px;text-align:center;">No students found for your class.</div>'; 
+        return; 
     }
+
+    let finalHtml = ''; 
+    const grades = Object.keys(grouped).sort(); 
+    grades.forEach(grade => { 
+        finalHtml += `<div class="grade-group"><div class="grade-summary" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'"><span>📂 Grade ${grade}</span><span>${grouped[grade].length} Students ▼</span></div><div class="grade-student-list">${grouped[grade].join('')}</div></div>`; 
+    }); 
+    d.innerHTML = finalHtml; 
+}
 
     let studentToDelete = null;
     function openDeleteModal(username) { studentToDelete = username; document.getElementById('delete-student-name-display').innerText = username; document.getElementById('teacher-delete-modal').classList.add('active'); }
@@ -2925,78 +3163,116 @@ function checkAdventureRandomEncounter(tileType) {
     let raidUnsub = null;
     let currentRaidData = null;
 
-    // 1. Teacher: Summon
-    async function teacherSummonRaid() {
-        const name = document.getElementById('t-boss-name').value;
-        const hp = parseInt(document.getElementById('t-boss-hp').value);
-        
-        // NEW: Get Attack Value (Default to 15 if empty)
-        const atk = parseInt(document.getElementById('t-boss-atk').value) || 15;
-        
-        const img = document.getElementById('t-boss-img').value;
-        const rewardUrl = document.getElementById('t-boss-reward-url').value;
+    // ===============================================
+// FIXED TEACHER SUMMON (Complete Logic)
+// ===============================================
+async function teacherSummonRaid() {
+    console.log("👉 Teacher Summon Clicked");
 
-        if (!name || !hp) return showToast("Name and HP required", "error");
+    if (!currentLoggedTeacher) {
+        return showToast("Error: You are not logged in.", "error");
+    }
 
+    try {
+        // 1. Get Values from HTML
+        const nameEl = document.getElementById('t-boss-name');
+        const hpEl = document.getElementById('t-boss-hp');
+        const atkEl = document.getElementById('t-boss-atk');
+        const imgEl = document.getElementById('t-boss-img');
+        const rewEl = document.getElementById('t-boss-reward-url');
+
+        if (!nameEl || !hpEl) {
+            alert("Error: Input boxes are missing from the HTML!");
+            return;
+        }
+
+        const name = nameEl.value || "Class Boss";
+        const hp = parseInt(hpEl.value) || 5000;
+        const atk = parseInt(atkEl.value) || 15;
+        const img = imgEl.value || "";
+        const reward = rewEl.value || "";
+
+        // 2. DEFINE THE DATA (This is what was missing before!)
         const bossData = {
-            name: name, 
-            hp: hp, 
+            name: name,
+            hp: hp,
             maxHP: hp,
-            attack: atk, // <--- SAVING ATTACK HERE
-            image: img || '', 
-            rewardUrl: rewardUrl || '', 
+            attack: atk,
+            image: img,
+            rewardUrl: reward,
             active: true,
-            summonedAt: new Date().toISOString(),
+            summonedBy: currentLoggedTeacher,
             damageDealers: {} 
         };
 
+        // 3. Send to Firebase (To the Teacher's specific ID)
+        await window.fbase.setDoc(window.fbase.doc(window.db, "world_boss", `teacher_${currentLoggedTeacher}`), bossData);
+        
+        alert("✅ Class Boss Summoned Successfully!");
+
+    } catch (e) {
+        console.error("Teacher Summon Error:", e);
+        alert("Summon Failed: " + e.message);
+    }
+}
+
+async function checkClassBoss() {
+    if (!gameState.playerName) return;
+    
+    let tid = gameState.teacherId;
+    
+    if (!tid) {
         try {
-            await window.fbase.setDoc(window.fbase.doc(window.db, "world_boss", "active"), bossData);
-            showToast(`Summoned ${name} with ${atk} ATK!`, "success");
-        } catch (e) {
-            console.error(e);
-            showToast("Error summoning boss.", "error");
-        }
+            const s = await window.fbase.getDoc(window.fbase.doc(window.db, "students", gameState.playerName));
+            if (s.exists()) tid = s.data().teacherId;
+            if (tid) gameState.teacherId = tid;
+        } catch(e) {}
     }
 
-    // 2. Student: Check Entry
-
-    // 3. Real-time Listener & Leaderboard
-    function initRaidListener() {
-        const docRef = window.fbase.doc(window.db, "world_boss", "active");
-        
-        raidUnsub = window.fbase.onSnapshot(docRef, (doc) => {
-            if (!doc.exists()) {
-                exitRaid(); 
-                return showToast("No active raid.", "info");
-            }
-
+    if (tid) {
+        window.fbase.onSnapshot(window.fbase.doc(window.db, "world_boss", `teacher_${tid}`), (doc) => {
             const data = doc.data();
-            currentRaidData = data;
             
-            // Update Boss UI
-            document.getElementById('raid-boss-hp-text').innerText = `${Math.ceil(data.hp)} / ${data.maxHP}`;
-            document.getElementById('raid-boss-bar').style.width = (data.hp / data.maxHP * 100) + "%";
-            
-            const vis = document.getElementById('raid-boss-visual');
-            if (data.image) vis.innerHTML = `<img src="${data.image}" style="width:200px; height:200px; object-fit:contain; filter:drop-shadow(0 0 10px red);">`;
-
-            // Render Squad Icons (Who is alive?)
-            const squad = getSquad();
-            const prev = document.getElementById('raid-squad-preview');
-            prev.innerHTML = squad.map(p => 
-                `<div style="font-size:20px; opacity:${p.hp>0?1:0.3}">${p.emoji}</div>`
-            ).join('');
-
-            // Render Leaderboard
-            renderLeaderboard(data.damageDealers);
-
-            // Check Victory
-            if (data.hp <= 0 && data.active) {
-                handleRaidVictory();
+            // SAME LOGIC AS GLOBAL
+            if (doc.exists() && data.active) {
+                if (data.hp <= 0) {
+                     if (currentRunDamage === 0) {
+                        alert("Class Boss already defeated!");
+                        finalizeExit();
+                    } else {
+                        handleRaidVictory();
+                    }
+                } else {
+                    setupRaidData(data, `teacher_${tid}`);
+                }
+            } else {
+                // NO BOSS AT ALL -> KICK OUT
+                alert("No Active Raid found.");
+                finalizeExit();
             }
         });
+    } else {
+        alert("No Global Raid and No Class Assigned.");
+        finalizeExit();
     }
+}
+
+// Helper to update UI
+function setupRaidData(data, docId) {
+    currentRaidData = data;
+    localRaidData = data; 
+    
+    document.getElementById('raid-boss-hp-text').innerText = `${Math.ceil(data.hp)} / ${data.maxHP}`;
+    document.getElementById('raid-boss-bar').style.width = (data.hp / data.maxHP * 100) + "%";
+    
+    const vis = document.getElementById('raid-boss-visual');
+    if (!vis.innerHTML.includes(data.image || '👹')) {
+         vis.innerHTML = data.image ? `<img src="${data.image}" style="width:200px; filter:drop-shadow(0 0 10px red);">` : '👹';
+    }
+    
+    renderLeaderboard(data.damageDealers);
+    window.currentRaidDocPath = docId; 
+}
 
     function renderLeaderboard(dealers) {
         if (!dealers) return;
@@ -3181,36 +3457,86 @@ function checkAdventureRandomEncounter(tileType) {
             if(rewardContainer) rewardContainer.innerHTML = "<h3 style='color:#f6e05e'>Reward: 500 BP</h3>";
         }
     }
-function joinRaid() {
-    // 1. Check Requirements
+// ===============================================
+// FIXED JOIN RAID (Checks Global vs Class)
+// ===============================================
+// ===============================================
+// FIXED JOIN RAID (Handles Multiple Boss Priority)
+// ===============================================
+async function joinRaid() {
+    // 1. Check Entry Fee
     if (gameState.brainPoints < 1) return showToast("Need 1 BP to enter!", "error");
     
-    // Safety check for active pet
+    // 2. Check Pet Health
     const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
     if (!pet) return showToast("No pet selected!", "error");
     if (pet.hp <= 0) return showToast("Your current pet is fainted!", "error");
 
-    // 2. Pay Entry Fee
+    showToast("Searching for Active Raid...", "info");
+
+    let raidPath = null;
+
+    try {
+        // --- PRIORITY 1: GLOBAL BOSS (Admin) ---
+        const globalRef = window.fbase.doc(window.db, "world_boss", "global");
+        const globalSnap = await window.fbase.getDoc(globalRef);
+
+        if (globalSnap.exists() && globalSnap.data().active && globalSnap.data().hp > 0) {
+            console.log("Found Global Boss");
+            raidPath = "global";
+        } 
+        else {
+            // --- PRIORITY 2: TEACHER BOSS ---
+            // Find Student's Teacher ID
+            let tid = gameState.teacherId;
+            if (!tid) {
+                const s = await window.fbase.getDoc(window.fbase.doc(window.db, "students", gameState.playerName));
+                if (s.exists()) {
+                    tid = s.data().teacherId;
+                    gameState.teacherId = tid; // Cache it
+                }
+            }
+
+            if (tid) {
+                const classRef = window.fbase.doc(window.db, "world_boss", `teacher_${tid}`);
+                const classSnap = await window.fbase.getDoc(classRef);
+                if (classSnap.exists() && classSnap.data().active && classSnap.data().hp > 0) {
+                    console.log("Found Class Boss for teacher:", tid);
+                    raidPath = `teacher_${tid}`;
+                }
+            }
+        }
+    } catch (e) {
+        console.error("Raid Check Error:", e);
+        return showToast("Network Error checking raids.", "error");
+    }
+
+    // If neither exists
+    if (!raidPath) {
+        return showToast("No Active Raid Found!", "error");
+    }
+
+    // 3. Deduct BP and Start
     gameState.brainPoints -= 1;
     updateStatsDisplay();
     saveGame();
 
-    // 3. Hide all other screens
+    // 4. Switch UI
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById('screen-wilds').classList.add('active'); 
     
     document.getElementById('wilds-menu').style.display = 'none';
     document.getElementById('rpg-wrapper').style.display = 'none';
     document.getElementById('multiplayer-menu').style.display = 'none';
-    document.getElementById('raid-arena').style.display = 'none'; // Hide old Raid UI
+    document.getElementById('raid-arena').style.display = 'none'; 
     
-    // 4. Show Battle UI with Boss Background
     const ui = document.getElementById('battle-ui');
     ui.style.display = 'flex';
+    // Default raid background
     ui.style.backgroundImage = `url('https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(3).png')`; 
 
-    // 5. Start the specific Raid Engine
-    startRaidEngine();
+    // 5. CRITICAL: Start the engine with the SPECIFIC path found
+    startRaidEngine(raidPath);
 }
 
 // --- GLOBAL RAID FUNCTIONS (Fixed & Un-nested) ---
@@ -3339,46 +3665,71 @@ window.resolveRaidMath = function(moveId, selected, correct) {
     let raidListenerUnsub = null;
     let localRaidData = { attack: 15 }; // <--- NEW: Defaults to 15
 
-    function startRaidEngine() {
-        gameState.inBattle = true;
-        document.getElementById('enemy-name').innerText = "Loading Titan...";
-        
-        // Connect to Firebase Live Data
-        const docRef = window.fbase.doc(window.db, "world_boss", "active");
-        
-        raidListenerUnsub = window.fbase.onSnapshot(docRef, (doc) => {
-            // Handle Victory/Inactive/Missing
-            if (!doc.exists() || !doc.data().active || doc.data().hp <= 0) {
-                if(typeof handleRaidVictory === 'function') {
-                    handleRaidVictory();
-                } else {
-                    showToast("Raid is over!", "info");
-                    exitRaidBattle();
-                }
-                return;
+    // ===============================================
+// FIXED RAID ENGINE (Listens to Correct Path)
+// ===============================================
+function startRaidEngine(path) {
+    // Default to global if no path provided (fallback)
+    const docPath = path || "global";
+    window.currentRaidDocPath = docPath; // Save for score submission
+
+    currentRunDamage = 0; 
+    gameState.inBattle = true;
+    document.getElementById('enemy-name').innerText = "Loading Titan...";
+    
+    // Connect to Firestore Live Data using the CORRECT PATH
+    const docRef = window.fbase.doc(window.db, "world_boss", docPath);
+    
+    if (raidListenerUnsub) raidListenerUnsub(); // Clear old listeners
+
+    raidListenerUnsub = window.fbase.onSnapshot(docRef, (doc) => {
+        // --- CRITICAL FIX: PREVENT INSTANT WIN ON 404 ---
+        if (!doc.exists() || !doc.data().active) {
+            // Boss is gone or deleted.
+            // Only trigger victory if we were ALREADY fighting and now it's gone.
+            if (currentRunDamage > 0) {
+                // We fought, so maybe we get a reward?
+                // Actually, simpler to just exit safely.
+                showToast("Raid ended.", "info");
+                submitRaidRun("Raid Ended"); // Submit whatever we did
+            } else {
+                // We just got here and it's gone.
+                showToast("Raid is no longer active.", "error");
+                exitRaidBattle();
             }
+            return;
+        }
 
-            const data = doc.data();
-            
-            // --- CAPTURE BOSS DATA ---
-            localRaidData = data; // Stores attack power for later
-            // -------------------------
+        const data = doc.data();
+        
+        // Check if dead
+        if (data.hp <= 0) {
+             handleRaidVictory();
+             return;
+        }
 
-            // Update Boss Visuals
-            const enemyVis = document.getElementById('battle-enemy-visual');
-            if (!enemyVis.innerHTML.includes(data.image)) {
-                enemyVis.classList.add('flipped-opponent');
-                enemyVis.innerHTML = `<img src="${data.image}" class="battler-image" style="width:300px; height:300px; filter:drop-shadow(0 0 15px red);">`;
-            }
+        // --- CAPTURE BOSS DATA ---
+        localRaidData = data; 
+        // -------------------------
 
-            // Update Boss HP (Real-time)
-            document.getElementById('enemy-name').innerHTML = `☠️ ${data.name} (Raid)`;
-            document.getElementById('enemy-hp-bar').style.width = (data.hp / data.maxHP * 100) + "%";
-            
-            // Render Player Side
-            renderRaidPlayerSide();
-        });
-    }
+        // Update Boss Visuals
+        const enemyVis = document.getElementById('battle-enemy-visual');
+        // Prevent flickering re-renders
+        if (!enemyVis.innerHTML.includes(data.image) && data.image) {
+            enemyVis.classList.add('flipped-opponent');
+            enemyVis.innerHTML = `<img src="${data.image}" class="battler-image" style="width:300px; height:300px; filter:drop-shadow(0 0 15px red);">`;
+        } else if (!data.image && enemyVis.innerText !== '👹') {
+             enemyVis.innerHTML = '<div style="font-size:100px;">👹</div>';
+        }
+
+        // Update Boss HP (Real-time)
+        document.getElementById('enemy-name').innerHTML = `☠️ ${data.name}`;
+        document.getElementById('enemy-hp-bar').style.width = (data.hp / data.maxHP * 100) + "%";
+        
+        // Render Player Side
+        renderRaidPlayerSide();
+    });
+}
     function renderRaidPlayerSide() {
     const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
     
@@ -3417,18 +3768,24 @@ window.resolveRaidMath = function(moveId, selected, correct) {
 // RAID BATTLE ENGINE (40% Boss Attack Chance)
 // ===============================================
 
-let isRaidTurnProcessing = false;
+// ===============================================
+// "SURVIVAL RUN" RAID ENGINE (Saves Max Quota)
+// ===============================================
 
-async function useRaidMove(moveId, playerMult = 1.0, bossMult = 1.0) {
+let isRaidTurnProcessing = false;
+let currentRunDamage = 0; // Accumulated damage for THIS fight only
+
+// 1. THE ATTACK FUNCTION (100% Local - No Internet Usage)
+window.useRaidMove = async function(moveId, playerMult = 1.0, bossMult = 1.0) {
     if (isRaidTurnProcessing) return;
     
     const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
-    if (pet.hp <= 0) return showToast("Pet fainted! Swap now!", "error");
+    if (pet.hp <= 0) return showToast("Pet fainted! Run ended.", "error");
 
     isRaidTurnProcessing = true;
     const move = findShopItem(moveId);
 
-    // A. PLAYER ATTACK ANIMATION
+    // --- A. ANIMATIONS ---
     const pVis = document.getElementById('battle-player-visual');
     const eVis = document.getElementById('battle-enemy-visual');
     
@@ -3441,74 +3798,51 @@ async function useRaidMove(moveId, playerMult = 1.0, bossMult = 1.0) {
     eVis.style.animation = "damageShake 0.4s";
     soundManager.playSFX('hit');
 
-    // B. DATABASE UPDATE (Player Damage)
+    // --- B. LOCAL CALCULATION ONLY ---
     const baseDmg = 20 + (pet.level * 3);
     const random = Math.floor(Math.random() * 10);
     const finalDmg = Math.floor((baseDmg + random) * playerMult); 
 
-    const myUser = gameState.playerName;
-    const ref = window.fbase.doc(window.db, "world_boss", "active");
+    // Add to our local "Score"
+    currentRunDamage += finalDmg;
 
-    try {
-        await window.fbase.runTransaction(window.db, async (t) => {
-            const doc = await t.get(ref);
-            if (!doc.exists()) throw "Boss Dead";
-            const d = doc.data();
-            
-            const newHP = Math.max(0, d.hp - finalDmg);
-            const dealers = d.damageDealers || {};
-            const myTotal = dealers[myUser] || 0;
-
-            t.update(ref, { 
-                hp: newHP,
-                [`damageDealers.${myUser}`]: myTotal + finalDmg
-            });
-        });
-        
-        // Show Damage Number
-        const typeClass = playerMult > 1 ? "crit" : (playerMult < 1 ? "weak" : "super");
-        showFloatingText(eVis.parentElement, `-${finalDmg}`, typeClass);
-
-    } catch(e) {
-        console.log("Raid Error:", e);
+    // Visuals
+    const typeClass = playerMult > 1 ? "crit" : (playerMult < 1 ? "weak" : "super");
+    showFloatingText(eVis.parentElement, `-${finalDmg}`, typeClass);
+    
+    // Fake update the Boss Bar (Visual Only)
+    const bossBar = document.getElementById('raid-boss-bar');
+    const hpText = document.getElementById('raid-boss-hp-text');
+    if (localRaidData && bossBar) {
+        // Show "Damage Done so far" in the UI somewhere if you want
+        hpText.innerText = `Run Damage: ${currentRunDamage}`;
     }
 
-    // C. BOSS COUNTER-ATTACK (Delayed)
+    // --- C. BOSS COUNTER-ATTACK ---
     setTimeout(() => {
-        // --- 1. CHANCE CHECK (40%) ---
-        // Math.random() gives a number between 0 and 1.
-        // If it's greater than 0.4, that's the 60% chance to MISS.
+        // 40% Chance for boss to hit
         if (Math.random() > 0.4) {
-            showFloatingText(pVis.parentElement, "DODGED!", "heal"); // Green Text
-            isRaidTurnProcessing = false; // UNLOCK TURN
-            return; // Stop here, boss does not attack
+            showFloatingText(pVis.parentElement, "DODGED!", "heal");
+            isRaidTurnProcessing = false;
+            return;
         }
 
-        // --- 2. BOSS ATTACKS (If the 40% check passed) ---
         eVis.style.animation = "attackLunge 0.3s";
         soundManager.playSFX('hit');
         pVis.style.animation = "damageShake 0.4s";
         
-        // Get Boss Stats
-        // Note: localRaidData comes from the 'startRaidEngine' listener
-        const baseAtk = (typeof localRaidData !== 'undefined' && localRaidData.attack) ? localRaidData.attack : 15;
-        
+        const baseAtk = (localRaidData && localRaidData.attack) ? localRaidData.attack : 15;
         const variance = Math.floor(baseAtk * 0.2); 
         const rawBossDmg = baseAtk + (Math.floor(Math.random() * variance * 2) - variance);
-        
-        // Apply Math Penalty (If you got the question wrong, boss hits harder)
         const finalBossDmg = Math.floor(rawBossDmg * bossMult);
 
         pet.hp = Math.max(0, pet.hp - finalBossDmg);
+        showFloatingText(pVis.parentElement, `-${finalBossDmg}`, bossMult > 1 ? "crit" : "weak");
         
-        const dmgColor = bossMult > 1 ? "crit" : "weak"; 
-        showFloatingText(pVis.parentElement, `-${finalBossDmg}`, dmgColor);
-        
-        // Update UI
         if (typeof renderRaidPlayerSide === 'function') renderRaidPlayerSide();
-        saveGame();
+        saveGame(); 
 
-        // Check for Faint
+        // CHECK FAINT (End the run automatically)
         if (pet.hp <= 0) {
              const squadIds = (gameState.team && gameState.team.length > 0) ? gameState.team : [gameState.currentPetId];
              const hasLivingPet = squadIds.some(id => {
@@ -3520,15 +3854,100 @@ async function useRaidMove(moveId, playerMult = 1.0, bossMult = 1.0) {
                  showToast(`${pet.name} Fainted! Swap!`, "error");
                  if (typeof openSwapMenu === 'function') openSwapMenu(true); 
              } else {
-                 showToast("☠️ SQUAD WIPED! Retreating...", "error");
-                 setTimeout(() => { if (typeof exitRaidBattle === 'function') exitRaidBattle(); }, 2000);
+                 // ALL PETS DEAD -> SUBMIT SCORE
+                 submitRaidRun("Defeated");
              }
         }
         
-        // UNLOCK TURN
-        setTimeout(() => { isRaidTurnProcessing = false; }, 500);
+        isRaidTurnProcessing = false;
 
     }, 800); 
+};
+// ===============================================
+// 1. MISSING CLEANUP FUNCTION (FIXES THE CRASH)
+// ===============================================
+function finalizeExit() {
+    console.log("🚪 Exiting Raid...");
+
+    // 1. Stop Firebase Listener
+    if (raidListenerUnsub) {
+        raidListenerUnsub();
+        raidListenerUnsub = null;
+    }
+
+    // 2. Reset Battle Flags
+    gameState.inBattle = false;
+    window.currentRaidDocPath = null;
+    currentRunDamage = 0; // Reset local damage counter
+
+    // 3. UI Cleanup
+    // Hide Battle UI
+    document.getElementById('battle-ui').style.display = 'none';
+    
+    // Show Wilds Menu (The Hub)
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-wilds').classList.add('active');
+    document.getElementById('wilds-menu').style.display = 'block';
+    document.getElementById('rpg-wrapper').style.display = 'none';
+    document.getElementById('multiplayer-menu').style.display = 'none';
+    
+    // 4. Audio
+    soundManager.stopBGM();
+    soundManager.playBGM('wilds');
+}
+
+// 2. SUBMIT SCORE (Runs only ONCE per session)
+// ===============================================
+// 2. FIXED SCORE SUBMISSION
+// ===============================================
+async function submitRaidRun(reason) {
+    if (currentRunDamage <= 0) {
+        // If we didn't do any damage, just leave immediately
+        finalizeExit();
+        return;
+    }
+
+    const dmgToSend = currentRunDamage;
+    currentRunDamage = 0; // Prevent double submission
+    
+    // Show "Sending..." in the button area so user knows it's working
+    const btnArea = document.getElementById('battle-actions');
+    if(btnArea) btnArea.innerHTML = `<div style="color:white;text-align:center;font-weight:bold;padding:10px;">📡 Uploading Score...</div>`;
+
+    const myUser = gameState.playerName;
+    // Default to global if path somehow got lost
+    const path = window.currentRaidDocPath || "global"; 
+    const ref = window.fbase.doc(window.db, "world_boss", path);
+
+    try {
+        await window.fbase.runTransaction(window.db, async (t) => {
+            const doc = await t.get(ref);
+            if (!doc.exists()) return; // Boss might have been deleted
+            
+            const d = doc.data();
+            const newHP = Math.max(0, d.hp - dmgToSend);
+            
+            // Get existing damage object or create new one
+            const dealers = d.damageDealers || {};
+            const myTotal = dealers[myUser] || 0;
+
+            t.update(ref, { 
+                hp: newHP,
+                [`damageDealers.${myUser}`]: myTotal + dmgToSend
+            });
+        });
+        
+        // Show success alert
+        alert(`⚔️ RAID RUN COMPLETE!\n\nReason: ${reason}\n🔥 Damage Dealt: ${dmgToSend}`);
+        
+    } catch(e) {
+        console.error("Submit Error:", e);
+        // Even if it fails, we must let the user exit
+        alert("Network Error: Score might not have saved, but you survived.");
+    }
+
+    // NOW call the function that was missing before
+    finalizeExit();
 }
 
     // --- NEW RAID SUMMARY & EXIT LOGIC ---
@@ -3606,20 +4025,16 @@ function showRaidSummary() {
     document.body.appendChild(modal);
 }
 
-// UPDATED EXIT FUNCTION
-function exitRaidBattle() {
-    if (raidListenerUnsub) raidListenerUnsub();
-    gameState.inBattle = false;
-    soundManager.stopBGM();
-    
-    // Instead of leaving immediately, show the report!
-    showRaidSummary();
-}
-
-function finalizeExit() {
-    document.getElementById('battle-ui').style.display = 'none';
-    document.getElementById('wilds-menu').style.display = 'block';
-    soundManager.playBGM('wilds');
+// 3. FIXED EXIT BUTTON
+// ===============================================
+window.exitRaidBattle = function() {
+    // If we have damage pending, submit it first.
+    if (currentRunDamage > 0) {
+        submitRaidRun("Escape");
+    } else {
+        // If no damage, just leave properly
+        finalizeExit();
+    }
 }
 
 // --- REWARD CEREMONY SYSTEM ---
@@ -4045,6 +4460,377 @@ window.confirmBulkUse = function(itemId, quantity) {
     renderHub();
     updateStatsDisplay();
     showToast(msg, "success");
+};
+// ===============================================
+// SECURITY HELPER: SHA-256 HASHING
+// ===============================================
+async function sha256(message) {
+    const msgBuffer = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashHex;
+}
+// ===============================================
+// MULTI-TEACHER SYSTEM
+// ===============================================
+
+// 1. REGISTER A NEW TEACHER
+async function registerNewTeacher() {
+    const user = document.getElementById('teacher-username').value.trim();
+    const pass = document.getElementById('teacher-pass').value.trim();
+
+    if (!user || !pass) return showToast("Enter Username & Password", "error");
+
+    // Check if teacher already exists
+    const docRef = window.fbase.doc(window.db, "teachers", user);
+    const docSnap = await window.fbase.getDoc(docRef);
+
+    if (docSnap.exists()) {
+        return showToast("Teacher username already exists!", "error");
+    }
+
+    // Hash the password
+    const hash = await sha256(pass);
+
+    // Save to Firestore
+    await window.fbase.setDoc(docRef, {
+        username: user,
+        passwordHash: hash,
+        joinedAt: new Date().toISOString()
+    });
+
+    showToast(`Registered Teacher: ${user}`, "success");
+}
+
+// 2. LOGIN TEACHER (Updated to fix Split Screen)
+async function loginTeacher() {
+    const user = document.getElementById('teacher-username').value.trim();
+    const pass = document.getElementById('teacher-pass').value.trim();
+
+    if (!user || !pass) return showToast("Enter credentials", "error");
+
+    // --- 1. CHECK IF ADMIN ---
+    // User: "admin", Password: "1030"
+    const ADMIN_HASH = "3691308f2a4c2f6983f2880d32e29c84e17067c9c043232c4cb72960e81726a4"; 
+    const inputHash = await sha256(pass);
+
+    if (user.toLowerCase() === "admin" && inputHash === ADMIN_HASH) {
+        // Show Admin Dashboard
+        document.getElementById('teacher-dashboard-screen').style.display = 'none'; // Hide teacher one
+        document.getElementById('admin-dashboard-screen').style.display = 'block';
+        document.getElementById('login-overlay').style.display = 'none';
+        document.getElementById('main-game-ui').style.display = 'none'; 
+        
+        loadAdminData(); // New function to load teacher list
+        return showToast("Welcome, Headmaster.", "success");
+    }
+
+    // --- 2. CHECK IF REGULAR TEACHER ---
+    const docRef = window.fbase.doc(window.db, "teachers", user);
+    const docSnap = await window.fbase.getDoc(docRef);
+
+    if (docSnap.exists() && inputHash === docSnap.data().passwordHash) {
+        // Existing Teacher Logic
+        currentLoggedTeacher = user;
+        document.getElementById('teacher-dashboard-screen').style.display = 'block';
+        document.getElementById('login-overlay').style.display = 'none';
+        document.getElementById('main-game-ui').style.display = 'none'; 
+        
+        document.getElementById('teacher-username').value = "";
+        document.getElementById('teacher-pass').value = "";
+        document.querySelector('#teacher-dashboard-screen h1').innerText = `👨‍🏫 Class: ${user}`;
+        loadStudentList(); 
+        showToast("Welcome back!", "success");
+    } else {
+        showToast("Invalid Credentials", "error");
+    }
+}
+// ===============================================
+// MIGRATION TOOL: CLAIM OLD STUDENTS
+// ===============================================
+async function claimLegacyStudents() {
+    if (!currentLoggedTeacher) return showToast("Log in as a Teacher first!", "error");
+
+    if (!confirm(`Are you sure you want to assign ALL old (unclaimed) students to "${currentLoggedTeacher}"?`)) {
+        return;
+    }
+
+    const d = document.getElementById('student-list-container');
+    d.innerHTML = '<div style="text-align:center;">Scanning database...</div>';
+
+    // 1. Get ALL students
+    const q = await window.fbase.getDocs(window.fbase.collection(window.db, "students"));
+    const batch = window.fbase.writeBatch(window.db);
+    let count = 0;
+
+    q.forEach(doc => {
+        const data = doc.data();
+        
+        // 2. Check if they are an "Orphan" (No teacherId)
+        if (!data.teacherId) {
+            // 3. Update them to belong to YOU
+            batch.update(doc.ref, { teacherId: currentLoggedTeacher });
+            count++;
+        }
+    });
+
+    if (count > 0) {
+        // 4. Save Changes
+        await batch.commit();
+        showToast(`Success! claimed ${count} students.`, "success");
+        loadStudentList(); // Refresh the list to see them
+    } else {
+        showToast("No unclaimed students found.", "info");
+        loadStudentList();
+    }
+}
+// ===============================================
+// ADMIN SYSTEM LOGIC
+// ===============================================
+
+// 1. Load Teachers List for Admin
+async function loadAdminData() {
+    const list = document.getElementById('admin-teacher-list');
+    const select = document.getElementById('admin-boss-teacher-select');
+    
+    list.innerHTML = "Loading...";
+    select.innerHTML = "";
+
+    const q = await window.fbase.getDocs(window.fbase.collection(window.db, "teachers"));
+    let html = "";
+    
+    q.forEach(doc => {
+        const t = doc.data().username;
+        html += `<div>👤 ${t}</div>`;
+        
+        // Add to checkbox list for Boss Summoning
+        select.innerHTML += `
+            <label style="display:block; cursor:pointer;">
+                <input type="checkbox" class="boss-target-teacher" value="${t}"> ${t}
+            </label>
+        `;
+    });
+    
+    list.innerHTML = html || "No teachers yet.";
+}
+
+// 2. Admin Create Teacher
+async function adminCreateTeacher() {
+    const user = document.getElementById('admin-new-teacher-user').value.trim();
+    const pass = document.getElementById('admin-new-teacher-pass').value.trim();
+
+    if(!user || !pass) return showToast("Enter details", "error");
+
+    const hash = await sha256(pass);
+    await window.fbase.setDoc(window.fbase.doc(window.db, "teachers", user), {
+        username: user, passwordHash: hash, joinedAt: new Date().toISOString()
+    });
+
+    showToast(`Teacher ${user} Created!`, "success");
+    loadAdminData(); // Refresh lists
+}
+
+// 3. Admin Toggle UI
+function toggleTeacherCheckboxes(show) {
+    document.getElementById('admin-boss-teacher-select').style.display = show ? 'block' : 'none';
+}
+
+// 4. Admin Summon Boss
+// 1. UPDATED ADMIN SUMMON (Reads Image Input Correctly)
+// ===============================================
+// FIXED ADMIN SUMMON (With Success Alert)
+// ===============================================
+// 4. Admin Summon Boss
+// ===============================================
+// ADMIN SUMMON (Writes to Correct Paths)
+// ===============================================
+async function adminSummonBoss() {
+    console.log("👉 Admin Summon Clicked");
+
+    try {
+        // 1. Get Values
+        const name = document.getElementById('admin-boss-name').value || "Titan";
+        const hp = parseInt(document.getElementById('admin-boss-hp').value) || 50000;
+        const atk = parseInt(document.getElementById('admin-boss-atk').value) || 20;
+        
+        const imgInput = document.getElementById('admin-boss-img');
+        const img = imgInput ? imgInput.value : '';
+
+        const rewInput = document.getElementById('admin-boss-reward');
+        const reward = rewInput ? rewInput.value : '';
+
+        // 2. Check Target
+        const radio = document.querySelector('input[name="boss-target"]:checked');
+        const isGlobal = radio ? (radio.value === 'global') : true;
+
+        // 3. DEFINE DATA
+        const bossData = {
+            name: name, 
+            hp: hp, 
+            maxHP: hp, 
+            attack: atk,
+            image: img, 
+            active: true, // <--- MUST BE TRUE
+            summonedBy: 'Admin',
+            rewardUrl: reward, 
+            damageDealers: {}
+        };
+
+        const batch = window.fbase.writeBatch(window.db);
+
+        // 4. Queue Updates
+        if (isGlobal) {
+            // Write to GLOBAL path
+            const ref = window.fbase.doc(window.db, "world_boss", "global");
+            batch.set(ref, bossData);
+        } else {
+            const targets = document.querySelectorAll('.boss-target-teacher:checked');
+            if(targets.length === 0) {
+                alert("Please select at least one teacher checkbox!");
+                return;
+            }
+            
+            targets.forEach(cb => {
+                // Write to CLASS path
+                const ref = window.fbase.doc(window.db, "world_boss", `teacher_${cb.value}`);
+                batch.set(ref, bossData);
+            });
+        }
+
+        // 5. Commit
+        await batch.commit();
+        alert("✅ BOSS SUMMONED!");
+
+    } catch (e) {
+        console.error("Admin Summon Error:", e);
+        alert("❌ SUMMON FAILED:\n" + e.message);
+    }
+}
+
+// 5. Admin End Raid
+async function adminEndRaid() {
+    if(!confirm("End the GLOBAL raid? (Students will stop fighting)")) return;
+    
+    // Set active: false
+    await window.fbase.updateDoc(window.fbase.doc(window.db, "world_boss", "global"), {
+        active: false,
+        hp: 0 
+    });
+    
+    showToast("🛑 Global Raid Ended", "info");
+}
+
+// 6. Teacher End Raid
+async function teacherEndRaid() {
+    if (!currentLoggedTeacher) return;
+    if(!confirm("End your class raid?")) return;
+
+    await window.fbase.updateDoc(window.fbase.doc(window.db, "world_boss", `teacher_${currentLoggedTeacher}`), {
+        active: false,
+        hp: 0
+    });
+    
+    showToast("🛑 Class Raid Ended", "info");
+}
+// ===============================================
+// SECURITY & LOGIN SYSTEM (REPAIRED)
+// ===============================================
+
+// 1. RE-ADD THE HASHING HELPER (Crucial for Admin Login)
+async function sha256(message) {
+    const msgBuffer = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// 2. REPLACEMENT LOGIN FUNCTION (With Debugging)
+// 2. LOGIN TEACHER (Bulletproof Version)
+// 2. LOGIN TEACHER (Fixed Hash for "1030")
+window.loginTeacher = async function() {
+    console.log("🔑 Login button clicked...");
+
+    const userEl = document.getElementById('teacher-username');
+    const passEl = document.getElementById('teacher-pass');
+
+    if (!userEl || !passEl) {
+        alert("Critical Error: Login text boxes are missing!");
+        return;
+    }
+
+    const user = userEl.value.trim(); 
+    const userLower = user.toLowerCase();
+    const pass = passEl.value.trim();
+
+    if (!user || !pass) return showToast("Enter credentials", "error");
+
+    // --- ADMIN CONFIGURATION ---
+    // User: "admin"
+    // Password: "1030"
+    // This hash matches the one in your error logs exactly:
+    const ADMIN_HASH = "2f1987bf98c09d2f5d2a23a6ae29fa53b9aec8f07ed1330bd439122f5a1a2c2c"; 
+    
+    try {
+        const inputHash = await sha256(pass);
+        console.log("Input Hash:", inputHash);
+
+        // 1. ADMIN CHECK
+        if (userLower === "admin" && inputHash === ADMIN_HASH) {
+            console.log("✅ Admin Credentials Verified");
+            
+            // Switch to Admin Dashboard
+            if(document.getElementById('teacher-dashboard-screen')) document.getElementById('teacher-dashboard-screen').style.display = 'none';
+            if(document.getElementById('admin-dashboard-screen')) document.getElementById('admin-dashboard-screen').style.display = 'block';
+            
+            // Hide Login & Game
+            document.getElementById('login-overlay').style.display = 'none';
+            if(document.getElementById('main-game-ui')) document.getElementById('main-game-ui').style.display = 'none';
+            
+            // Clear inputs
+            userEl.value = "";
+            passEl.value = "";
+
+            if(typeof loadAdminData === 'function') loadAdminData();
+            
+            return showToast("Welcome, Headmaster.", "success");
+        }
+
+        // 2. TEACHER CHECK (Only happens if Admin check fails)
+        console.log("Checking Database for Teacher...");
+        
+        const docRef = window.fbase.doc(window.db, "teachers", user);
+        const docSnap = await window.fbase.getDoc(docRef);
+
+        if (docSnap.exists()) {
+            const dbHash = docSnap.data().passwordHash;
+            if (inputHash === dbHash) {
+                // Teacher Success
+                currentLoggedTeacher = user;
+                document.getElementById('teacher-dashboard-screen').style.display = 'block';
+                document.getElementById('login-overlay').style.display = 'none';
+                if(document.getElementById('main-game-ui')) document.getElementById('main-game-ui').style.display = 'none';
+                
+                // Clear inputs
+                userEl.value = "";
+                passEl.value = "";
+                
+                const title = document.querySelector('#teacher-dashboard-screen h1');
+                if(title) title.innerText = `👨‍🏫 Class: ${user}`;
+                
+                if(typeof loadStudentList === 'function') loadStudentList(); 
+                showToast("Welcome back!", "success");
+            } else {
+                showToast("Wrong Password", "error");
+            }
+        } else {
+            showToast("User not found", "error");
+        }
+
+    } catch (err) {
+        console.error("Login Crash:", err);
+        alert("Login Error: " + err.message);
+    }
 };
   </script>
 </body>
