@@ -3927,62 +3927,61 @@ window.resolveRaidMath = function(moveId, selected, correct) {
 // ===============================================
 // FIXED RAID ENGINE (Fixes Missing Reward Bug)
 // ===============================================
-function startRaidEngine(path) {
+// ===============================================
+// STATIC RAID ENGINE (Maximum Read Optimization)
+// ===============================================
+async function startRaidEngine(path) {
     // Default to global if no path provided
     const docPath = path || "global";
-    window.currentRaidDocPath = docPath; // Save for score submission
+    window.currentRaidDocPath = docPath; 
 
     currentRunDamage = 0; 
     gameState.inBattle = true;
     document.getElementById('enemy-name').innerText = "Loading Titan...";
     
-    // Connect to Firestore
+    // 1. GET DOC ONCE (Saves Data!)
     const docRef = window.fbase.doc(window.db, "world_boss", docPath);
-    
-    if (typeof raidListenerUnsub !== 'undefined' && raidListenerUnsub) {
-        raidListenerUnsub(); 
+    const docSnap = await window.fbase.getDoc(docRef);
+
+    // 2. Safety Check
+    if (!docSnap.exists() || !docSnap.data().active) {
+        if (currentRunDamage > 0) {
+            submitRaidRun("Raid Ended");
+        } else {
+            showToast("Raid is no longer active.", "error");
+            exitRaidBattle();
+        }
+        return;
     }
 
-    raidListenerUnsub = window.fbase.onSnapshot(docRef, (doc) => {
-        // 1. Safety Check: If boss is deleted/inactive
-        if (!doc.exists() || !doc.data().active) {
-            if (currentRunDamage > 0) {
-                showToast("Raid ended.", "info");
-                submitRaidRun("Raid Ended"); 
-            } else {
-                showToast("Raid is no longer active.", "error");
-                exitRaidBattle();
-            }
-            return;
-        }
+    const data = docSnap.data();
 
-        const data = doc.data();
+    // 3. CAPTURE DATA
+    localRaidData = data; 
 
-        // 2. CRITICAL FIX: CAPTURE DATA *BEFORE* CHECKING DEATH
-        // This ensures the Reward URL is saved before Victory runs
-        localRaidData = data; 
-        // -----------------------------------------------------
+    // 4. Check if dead
+    if (data.hp <= 0) {
+         handleRaidVictory();
+         return;
+    }
 
-        // 3. Check if dead
-        if (data.hp <= 0) {
-             handleRaidVictory();
-             return;
-        }
+    // 5. Update Boss Visuals
+    const enemyVis = document.getElementById('battle-enemy-visual');
+    if (!enemyVis.innerHTML.includes(data.image) && data.image) {
+        enemyVis.classList.add('flipped-opponent');
+        enemyVis.innerHTML = `<img src="${data.image}" class="battler-image" style="width:300px; height:300px; filter:drop-shadow(0 0 15px red);">`;
+    } else if (!data.image && enemyVis.innerText !== '👹') {
+         enemyVis.innerHTML = '<div style="font-size:100px;">👹</div>';
+    }
 
-        // 4. Update Visuals
-        const enemyVis = document.getElementById('battle-enemy-visual');
-        if (!enemyVis.innerHTML.includes(data.image) && data.image) {
-            enemyVis.classList.add('flipped-opponent');
-            enemyVis.innerHTML = `<img src="${data.image}" class="battler-image" style="width:300px; height:300px; filter:drop-shadow(0 0 15px red);">`;
-        } else if (!data.image && enemyVis.innerText !== '👹') {
-             enemyVis.innerHTML = '<div style="font-size:100px;">👹</div>';
-        }
-
-        document.getElementById('enemy-name').innerHTML = `☠️ ${data.name}`;
-        document.getElementById('enemy-hp-bar').style.width = (data.hp / data.maxHP * 100) + "%";
-        
-        renderRaidPlayerSide();
-    });
+    // 6. Set Initial HP Display
+    document.getElementById('enemy-name').innerHTML = `☠️ ${data.name}`;
+    document.getElementById('raid-boss-hp-text').innerText = `${Math.ceil(data.hp)} / ${data.maxHP}`;
+    document.getElementById('raid-boss-bar').style.width = (data.hp / data.maxHP * 100) + "%";
+    
+    renderRaidPlayerSide();
+    
+    console.log("⚔️ Raid Started in Static Mode");
 }
     function renderRaidPlayerSide() {
     const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
@@ -4030,6 +4029,9 @@ let isRaidTurnProcessing = false;
 let currentRunDamage = 0; // Accumulated damage for THIS fight only
 
 // 1. THE ATTACK FUNCTION (100% Local - No Internet Usage)
+// ===============================================
+// RAID ATTACK LOGIC (Visual Updates Included)
+// ===============================================
 window.useRaidMove = async function(moveId, playerMult = 1.0, bossMult = 1.0) {
     if (isRaidTurnProcessing) return;
     
@@ -4052,7 +4054,7 @@ window.useRaidMove = async function(moveId, playerMult = 1.0, bossMult = 1.0) {
     eVis.style.animation = "damageShake 0.4s";
     soundManager.playSFX('hit');
 
-    // --- B. LOCAL CALCULATION ONLY ---
+    // --- B. CALCULATE DAMAGE ---
     const baseDmg = 20 + (pet.level * 3);
     const random = Math.floor(Math.random() * 10);
     const finalDmg = Math.floor((baseDmg + random) * playerMult); 
@@ -4060,21 +4062,23 @@ window.useRaidMove = async function(moveId, playerMult = 1.0, bossMult = 1.0) {
     // Add to our local "Score"
     currentRunDamage += finalDmg;
 
-    // Visuals
+    // --- C. VISUAL UPDATE (The Real-Time Feel) ---
     const typeClass = playerMult > 1 ? "crit" : (playerMult < 1 ? "weak" : "super");
     showFloatingText(eVis.parentElement, `-${finalDmg}`, typeClass);
     
-    // Fake update the Boss Bar (Visual Only)
-    const bossBar = document.getElementById('raid-boss-bar');
-    const hpText = document.getElementById('raid-boss-hp-text');
-    if (localRaidData && bossBar) {
-        // Show "Damage Done so far" in the UI somewhere if you want
-        hpText.innerText = `Run Damage: ${currentRunDamage}`;
+    // Calculate what the HP looks like locally
+    if (localRaidData) {
+        let currentDisplayHP = Math.max(0, localRaidData.hp - currentRunDamage);
+        
+        // Update the Number Text
+        document.getElementById('raid-boss-hp-text').innerText = `${Math.ceil(currentDisplayHP)} / ${localRaidData.maxHP}`;
+        
+        // Update the Green Bar
+        document.getElementById('raid-boss-bar').style.width = (currentDisplayHP / localRaidData.maxHP * 100) + "%";
     }
 
-    // --- C. BOSS COUNTER-ATTACK ---
+    // --- D. BOSS COUNTER-ATTACK ---
     setTimeout(() => {
-        // 40% Chance for boss to hit
         if (Math.random() > 0.4) {
             showFloatingText(pVis.parentElement, "DODGED!", "heal");
             isRaidTurnProcessing = false;
@@ -4096,7 +4100,6 @@ window.useRaidMove = async function(moveId, playerMult = 1.0, bossMult = 1.0) {
         if (typeof renderRaidPlayerSide === 'function') renderRaidPlayerSide();
         saveGame(); 
 
-        // CHECK FAINT (End the run automatically)
         if (pet.hp <= 0) {
              const squadIds = (gameState.team && gameState.team.length > 0) ? gameState.team : [gameState.currentPetId];
              const hasLivingPet = squadIds.some(id => {
@@ -4108,7 +4111,6 @@ window.useRaidMove = async function(moveId, playerMult = 1.0, bossMult = 1.0) {
                  showToast(`${pet.name} Fainted! Swap!`, "error");
                  if (typeof openSwapMenu === 'function') openSwapMenu(true); 
              } else {
-                 // ALL PETS DEAD -> SUBMIT SCORE
                  submitRaidRun("Defeated");
              }
         }
