@@ -19,6 +19,7 @@
       appId: "1:590511399628:web:400e68086ccfaba2e65869"
     };
 
+
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     window.db = db;
@@ -440,6 +441,7 @@
    </div>
   </div>
  <!-- ADMIN DASHBOARD (Hidden, High Security) -->
+ <!-- DANGEROUS SYSTEM PATCHER (Add this inside admin-dashboard-screen) -->
 <div id="admin-dashboard-screen" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#2d3748; z-index:2200; padding:40px; overflow-y:auto; color:white;">
     <div style="max-width:1000px; margin:0 auto;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; border-bottom:1px solid #4a5568; padding-bottom:20px;">
@@ -492,6 +494,24 @@
                     <button class="action-btn red" onclick="adminSummonBoss()">SUMMON BOSS</button>
                     <button class="action-btn" style="background:#718096;" onclick="adminEndRaid()">🛑 END RAID</button>
                 </div>
+            </div>
+            <!-- COLUMN 3: DATABASE PATCHER -->
+            <div style="background:rgba(0,0,0,0.3); padding:20px; border-radius:15px; border:2px solid #f56565; margin-top:20px; grid-column: span 2;">
+                <h2 style="color:#f56565; border-bottom:1px solid #718096; padding-bottom:10px; margin-bottom:15px;">
+                    ☣️ DATABASE PATCHER (Advanced)
+                </h2>
+                <p style="color:#cbd5e0; font-size:12px; margin-bottom:10px;">
+                    WARNING: Scripts run here affect the LIVE database. Use with caution.
+                </p>
+                <textarea id="admin-patch-code" 
+                    style="width:100%; height:150px; background:#1a202c; color:#68d391; font-family:monospace; padding:10px; border:1px solid #4a5568; border-radius:5px;" 
+                    placeholder="// Paste Javascript repair code here..."></textarea>
+                
+                <div style="margin-top:10px; display:flex; gap:10px;">
+                    <button class="action-btn red" onclick="executeAdminPatch()">🚀 RUN PATCH</button>
+                    <button class="action-btn blue" onclick="loadRudolfPatch()">📋 Load Rudolf Fix</button>
+                </div>
+                <div id="patch-logs" style="margin-top:10px; color:#a0aec0; font-size:12px; font-family:monospace;">Waiting...</div>
             </div>
             </div>
     </div>
@@ -1730,29 +1750,50 @@
     }
 
     function renderHub() {
-      const c = document.getElementById('hub-content'); const p = gameState.pets.find(pet => pet.id === gameState.currentPetId);
+      const c = document.getElementById('hub-content'); 
+      const p = gameState.pets.find(pet => pet.id === gameState.currentPetId);
+      
       if (!p) { c.innerHTML = "<div class='no-pet-message'>No pet selected.</div>"; return; }
       
-      if (!gameState.team) gameState.team = [p.id]; // Safety
+      // Safety check for Squad
+      if (!gameState.team) gameState.team = [p.id]; 
 
-      if(!p.level) p.level = 1; if(!p.xp) p.xp = 0; if(!p.maxXp) p.maxXp = 100; const currentStage = typeof p.evolutionStage === 'number' ? p.evolutionStage : 0;
+      // Safety checks for Stats
+      if(!p.level) p.level = 1; 
+      if(!p.xp) p.xp = 0; 
+      if(!p.maxXp) p.maxXp = 100; 
+      const currentStage = typeof p.evolutionStage === 'number' ? p.evolutionStage : 0;
       
       let v = p.image ? `<img src="${p.image}" class="pet-image ${p.imageStyle||''}" alt="${p.name}">` : `<div style="font-size:80px">${p.emoji}</div>`;
       
+      // 1. INCUBATOR VIEW (If egg)
       if (!p.isHatched) { 
           c.innerHTML = `<div style="text-align:center; padding:20px;"><h2>🥚 Incubator</h2><div class="pet-visual" style="font-size:100px;">🥚</div><h3>${p.isHatched ? p.name : "Mystery Egg"}</h3><div style="margin:20px 0;">${p.hatchProgress}% <div class="hatch-bar-container"><div class="hatch-bar" style="width: ${p.hatchProgress}%;"></div></div></div>${p.hatchProgress >= 100 ? `<button class="action-btn green" onclick="hatchPet()">✨ HATCH NOW! ✨</button>` : `<p style="color:#718096">Use Items in Shop to speed up!</p>`}<div style="margin-top:20px;">${renderInventory(true)}</div></div><div class="pet-collection">${renderCollection()}</div>`; return; 
       }
       
+      // =======================================================
+      // 2. EVOLUTION FIX (Check Local & Global)
+      // =======================================================
       let ch = EVOLUTION_CHAINS[p.type]; 
+      
+      // If not in main file, check the pet's backpack for instructions
+      if (!ch && p.savedEvolutions) {
+          ch = p.savedEvolutions;
+          // Temporarily register it globally so the evolve function knows what to do
+          EVOLUTION_CHAINS[p.type] = p.savedEvolutions;
+      }
+      // =======================================================
+
       const nextEvo = (ch && ch[currentStage]) ? ch[currentStage] : null;
       const can = nextEvo && p.level >= nextEvo.level;
 
       let ev = nextEvo ? `<div class="evolution-info"><h3>🧬 Evolution</h3><p>Next: <strong>${nextEvo.name || ('Teen ' + p.name)}</strong></p><button class="evolution-btn" ${can?'':'disabled'} onclick="evolvePet()">${can?`✨ Evolve (Lvl ${nextEvo.level})`:`🔒 Need Level ${nextEvo.level}`}</button></div>` : `<div class="evolution-info" style="background:#fef3c7"><h3>👑 Max Level</h3></div>`;
       
-      // SQUAD UI (NEW)
+      // 3. SQUAD UI
       const isInSquad = gameState.team ? gameState.team.includes(p.id) : false;
       const squadBtnColor = isInSquad ? 'red' : 'blue';
       const squadBtnText = isInSquad ? 'Remove from Squad' : 'Add to Squad';
+      
       const squadDisplay = `
         <div style="margin-top:10px; padding:10px; background:#edf2f7; border-radius:8px; font-size:14px;">
             <div style="display:flex; justify-content:space-between;">
@@ -1767,6 +1808,7 @@
             </div>
         </div>`;
 
+      // 4. MAIN DISPLAY
       c.innerHTML = `<div class="hub-grid"><div class="hub-left"><div class="pet-display"><div class="pet-visual">${v}</div><div class="pet-name">Lvl ${p.level} ${p.name} <span class="rarity-badge rarity-${p.rarity}">${p.rarity}</span></div><div style="font-size:12px;">XP: ${p.xp} / ${p.maxXp}</div><div class="xp-bar-container"><div class="xp-bar" style="width: ${(p.xp/p.maxXp)*100}%"></div></div><button class="action-btn red" style="margin-top:15px;" onclick="releasePet()">Release</button></div></div><div class="hub-right"><div class="inventory-section"><h3>Stats</h3><div class="pet-stats"><div class="stat-box"><div class="stat-label">HP</div><div class="stat-value">${p.hp}/${p.maxHP}</div></div><div class="stat-box"><div class="stat-label">Power</div><div class="stat-value">${p.powers.length}/4</div></div></div>${squadDisplay}</div>${ev}<div class="inventory-section"><h3>🎒 Inventory</h3>${renderInventory(false)}</div><div class="inventory-section"><h3>⚔️ Powers</h3>${renderPowersList(p)}</div></div></div><div class="pet-collection">${renderCollection()}</div>`;
     }
     
@@ -2449,13 +2491,13 @@
         gameState.inBattle = false; 
         document.getElementById('battle-ui').style.display = 'none'; 
         
-        // ===============================================
-        // 4. QUEST BATTLE RETURN LOGIC (The New Part)
+       // ===============================================
+        // 4. FIXED QUEST BATTLE RETURN LOGIC
         // ===============================================
         if (gameState.questBattleActive) {
-            gameState.questBattleActive = false; // Reset flag
+            gameState.questBattleActive = false; 
             
-            // A. Register Success Flag (Opens gates etc)
+            // A. Register Success Flag
             if (gameState.questSuccessKey) {
                 gameState.questProgress.flags.push(gameState.questSuccessKey);
             }
@@ -2464,29 +2506,28 @@
             if (gameState.pendingQuestRewardData) {
                 const r = gameState.pendingQuestRewardData;
                 
-                // Register Evolutions if present
-                if (r.evolutions && r.type) {
-                    EVOLUTION_CHAINS[r.type] = r.evolutions;
-                }
-
+                // --- CRITICAL FIX: Save Evolution Data Here ---
+                // This saves the evolution info directly onto the pet
                 const newPet = { 
                     ...r, 
                     id: 'quest_reward_' + Date.now(), 
-                    isHatched: false, // Reward is an Egg
+                    isHatched: false, 
                     hatchProgress: 0, 
                     powers: [], 
-                    level: 1, xp: 0, maxXp: 100 
+                    level: 1, 
+                    xp: 0, 
+                    maxXp: 100,
+                    savedEvolutions: r.evolutions || [] 
                 };
+                // ----------------------------------------------
                 
                 gameState.pets.push(newPet);
                 
-                // --- TRIGGER THE CEREMONY ---
-                // Show the adventure map background
+                // Reset View
                 document.getElementById('adventure-list-view').style.display = 'none';
                 document.getElementById('adventure-play-view').style.display = 'block';
                 drawAdventureMap();
 
-                // Determine Visual
                 const visual = r.image 
                     ? `<img src="${r.image}" style="width:150px; height:150px; object-fit:contain;">` 
                     : r.emoji;
@@ -2496,13 +2537,13 @@
                     `You found a ${r.name} Egg!`, 
                     visual, 
                     () => { 
-                        switchTab('adventure'); // Go back to map
+                        switchTab('adventure'); 
                     }
                 );
                 
-                gameState.pendingQuestRewardData = null; // Clear data
-                saveGame();
-                return; // Stop here, let the ceremony handle the rest
+                gameState.pendingQuestRewardData = null; 
+                saveGame(true); // Force Cloud Save
+                return; 
             } 
             else {
                 // No Reward, just a victory (like beating a guard)
@@ -2561,7 +2602,47 @@
     function updateStatsDisplay() { document.getElementById('bp-display').innerText = gameState.brainPoints; document.getElementById('stamina-display').innerText = gameState.stamina; }
     function createProjectile(v, s, e) { const p = document.createElement('div'); p.className = 'projectile'; if (v && v.startsWith('http')) p.innerHTML = `<img src="${v}">`; else p.innerText = v; const sr = s.getBoundingClientRect(); const er = e.getBoundingClientRect(); p.style.left = (sr.left + sr.width/2 - 75) + 'px'; p.style.top = (sr.top + sr.height/2 - 75) + 'px'; document.body.appendChild(p); const a = p.animate([ { transform: 'translate(0,0) scale(0.5)', opacity: 1 }, { transform: `translate(${er.left+er.width/2 - (sr.left+sr.width/2)}px, ${er.top+er.height/2 - (sr.top+sr.height/2)}px) scale(1.2)`, opacity: 0 } ], { duration: 600 }); a.onfinish = () => p.remove(); }
     function showToast(m, t) { const d = document.createElement('div'); d.className = 'toast ' + t; d.innerText = m; document.body.appendChild(d); setTimeout(()=>d.remove(), 3000); }
-    function saveGame() { if(gameState.playerName) { localStorage.setItem('math_rpg_' + gameState.playerName, JSON.stringify(gameState)); saveProgressToFirebase(); } }
+    // ==========================================
+// OPTIMIZATION #1: BATCH SAVING (Fixes Write Limit)
+// ==========================================
+
+let hasUnsavedChanges = false;
+let autoSaveInterval = null;
+
+function saveGame(forceFirebase = false) {
+    if (!gameState.playerName) return;
+
+    // 1. Always save to Local Browser Memory (Free & Instant)
+    localStorage.setItem('math_rpg_' + gameState.playerName, JSON.stringify(gameState));
+    
+    if (forceFirebase) {
+        // 2. Force Cloud Save (Use this for Shop, Evolution, Raid)
+        saveProgressToFirebase();
+        hasUnsavedChanges = false;
+        console.log("☁️ Forced Cloud Save");
+    } else {
+        // 3. Mark for later (Use this for Math Questions)
+        hasUnsavedChanges = true;
+    }
+}
+
+// Background Timer: Checks every 60 seconds
+if (autoSaveInterval) clearInterval(autoSaveInterval);
+autoSaveInterval = setInterval(() => {
+    if (hasUnsavedChanges) {
+        saveProgressToFirebase();
+        hasUnsavedChanges = false;
+        console.log("🕒 Auto-Saved to Cloud");
+        // Optional: showToast("Progress Saved", "info");
+    }
+}, 60000); // 60 seconds
+
+// Safety: Save if they close the tab
+window.addEventListener("beforeunload", () => {
+    if (hasUnsavedChanges) {
+        saveProgressToFirebase();
+    }
+});
     function logout() { location.reload(); }
     function releasePet() { if(gameState.pets.length<=1) return; window.petToRelease = gameState.pets.find(p => p.id === gameState.currentPetId); const m = document.getElementById('release-modal'); m.classList.add('active'); }
     document.getElementById('release-confirm').addEventListener('click', () => { 
@@ -3165,26 +3246,75 @@ function toggleTeacherLogin() {
     async function startPvPBattle() { await window.fbase.updateDoc(window.fbase.doc(window.db,"rooms",currentRoomId),{status:"battle",logs:window.fbase.arrayUnion("⚔️ BATTLE START!")}); }
     
     function renderPvPBattle(d) {
-        const myPet = isHost ? d.hostPet : d.guestPet; const oppPet = isHost ? d.guestPet : d.hostPet;
-        const myHP = isHost ? d.hostHP : d.guestHP; const oppHP = isHost ? d.guestHP : d.hostHP;
-        const myMax = isHost ? d.hostMaxHP : d.guestMaxHP; const oppMax = isHost ? d.guestMaxHP : d.hostMaxHP;
+        const myPet = isHost ? d.hostPet : d.guestPet; 
+        const oppPet = isHost ? d.guestPet : d.hostPet;
+        const myHP = isHost ? d.hostHP : d.guestHP; 
+        const oppHP = isHost ? d.guestHP : d.hostHP;
+        const myMax = isHost ? d.hostMaxHP : d.guestMaxHP; 
+        const oppMax = isHost ? d.guestMaxHP : d.hostMaxHP;
 
-        const pVis = document.getElementById('battle-player-visual'); const eVis = document.getElementById('battle-enemy-visual');
-        const mySize = getBattlerSize(myPet, false, false); const oppSize = getBattlerSize(oppPet, false, false);
+        const pVis = document.getElementById('battle-player-visual'); 
+        const eVis = document.getElementById('battle-enemy-visual');
+        const mySize = getBattlerSize(myPet, false, false); 
+        const oppSize = getBattlerSize(oppPet, false, false);
 
+        // Render Pet Visuals
         pVis.classList.remove('flipped-opponent');
-        if(myPet.image) pVis.innerHTML = `<img src="${myPet.image}" class="battler-image ${myPet.imageStyle}" style="width:${mySize}px; height:${mySize}px;">`; else pVis.innerHTML = `<div style="font-size:${mySize*0.7}px;">${myPet.emoji}</div>`;
-        eVis.classList.add('flipped-opponent');
-        if(oppPet.image) eVis.innerHTML = `<img src="${oppPet.image}" class="battler-image ${oppPet.imageStyle}" style="width:${oppSize}px; height:${oppSize}px;">`; else eVis.innerHTML = `<div class="emoji-wrapper" style="font-size:${oppSize*0.7}px;">${oppPet.emoji}</div>`;
-
-        if (localOpponentHP > oppHP) {
-            const dmg = localOpponentHP - oppHP; pVis.style.animation = "attackLunge 0.4s"; eVis.style.animation = "damageShake 0.4s"; createProjectile(myPet.image || "⚔️", pVis, eVis); showFloatingText(eVis.parentElement, `-${dmg}`, "crit"); soundManager.playSFX('hit'); setTimeout(() => { pVis.style.animation = ""; eVis.style.animation = ""; }, 500);
-        }
-        if (localPlayerHP > myHP) {
-            const dmg = localPlayerHP - myHP; eVis.style.animation = "attackLunge 0.4s"; pVis.style.animation = "damageShake 0.4s"; createProjectile(oppPet.image || "⚔️", eVis, pVis); showFloatingText(pVis.parentElement, `-${dmg}`, "crit"); soundManager.playSFX('hit'); setTimeout(() => { pVis.style.animation = ""; eVis.style.animation = ""; }, 500);
-        }
-        localOpponentHP = oppHP; localPlayerHP = myHP;
+        if(myPet.image) pVis.innerHTML = `<img src="${myPet.image}" class="battler-image ${myPet.imageStyle}" style="width:${mySize}px; height:${mySize}px;">`; 
+        else pVis.innerHTML = `<div style="font-size:${mySize*0.7}px;">${myPet.emoji}</div>`;
         
+        eVis.classList.add('flipped-opponent');
+        if(oppPet.image) eVis.innerHTML = `<img src="${oppPet.image}" class="battler-image ${oppPet.imageStyle}" style="width:${oppSize}px; height:${oppSize}px;">`; 
+        else eVis.innerHTML = `<div class="emoji-wrapper" style="font-size:${oppSize*0.7}px;">${oppPet.emoji}</div>`;
+
+        // --- HELPER: GET ATTACK IMAGE ---
+        // Pick a random move from the pet's equipped powers to show as the projectile
+        const getAttackImg = (pet) => {
+            if (pet.powers && pet.powers.length > 0) {
+                // Pick random equipped power
+                const pid = pet.powers[Math.floor(Math.random() * pet.powers.length)];
+                const item = findShopItem(pid);
+                if (item) {
+                    // Return the specific attack image (e.g. Fire Spell png)
+                    if (item.image) return item.image; 
+                    if (item.icon) return item.icon;
+                }
+            }
+            return "⚔️"; // Fallback if no powers equipped
+        };
+
+        // --- ATTACK ANIMATIONS ---
+        if (localOpponentHP > oppHP) {
+            const dmg = localOpponentHP - oppHP; 
+            pVis.style.animation = "attackLunge 0.4s"; 
+            eVis.style.animation = "damageShake 0.4s"; 
+            
+            // USE ATTACK IMAGE HERE
+            createProjectile(getAttackImg(myPet), pVis, eVis); 
+            
+            showFloatingText(eVis.parentElement, `-${dmg}`, "crit"); 
+            soundManager.playSFX('hit'); 
+            setTimeout(() => { pVis.style.animation = ""; eVis.style.animation = ""; }, 500);
+        }
+
+        if (localPlayerHP > myHP) {
+            const dmg = localPlayerHP - myHP; 
+            eVis.style.animation = "attackLunge 0.4s"; 
+            pVis.style.animation = "damageShake 0.4s"; 
+            
+            // USE OPPONENT'S ATTACK IMAGE HERE
+            createProjectile(getAttackImg(oppPet), eVis, pVis); 
+            
+            showFloatingText(pVis.parentElement, `-${dmg}`, "crit"); 
+            soundManager.playSFX('hit'); 
+            setTimeout(() => { pVis.style.animation = ""; eVis.style.animation = ""; }, 500);
+        }
+        // ---------------------------
+
+        localOpponentHP = oppHP; 
+        localPlayerHP = myHP;
+        
+        // Update HP Bars & Text
         document.getElementById('player-battle-name').innerHTML = `${isHost?d.hostName:d.guestName} <span class="element-icon">${getElIcon(myPet.element)}</span>`;
         document.getElementById('enemy-name').innerHTML = `${isHost?d.guestName:d.hostName} <span class="element-icon">${getElIcon(oppPet.element)}</span>`;
         document.getElementById('player-hp-bar').style.width = (myHP / myMax * 100) + "%";
@@ -3193,11 +3323,20 @@ function toggleTeacherLogin() {
         document.getElementById('enemy-hp-bar').style.width = (oppHP / oppMax * 100) + "%";
         document.getElementById('enemy-hp-trail').style.width = (oppHP / oppMax * 100) + "%";
 
-        const act = document.getElementById('battle-actions'); const turn = (d.turn === 'host' && isHost) || (d.turn === 'guest' && !isHost);
-        if (myHP <= 0 || oppHP <= 0) { act.innerHTML = "<h2>GAME OVER</h2>"; setTimeout(leavePvPRoom, 3000); return; }
+        const act = document.getElementById('battle-actions'); 
+        const turn = (d.turn === 'host' && isHost) || (d.turn === 'guest' && !isHost);
         
-        // PvP uses simpler buttons than the advanced AI battle
-        act.innerHTML = myPet.powers.map(pid => { const i = findShopItem(pid); return `<button class="action-btn green" onclick="usePvPAttack('${pid}')" ${!turn ? 'disabled style="opacity:0.5"' : ''}>${i.name}</button>`; }).join('');
+        if (myHP <= 0 || oppHP <= 0) { 
+            act.innerHTML = "<h2>GAME OVER</h2>"; 
+            setTimeout(leavePvPRoom, 3000); 
+            return; 
+        }
+        
+        // Render Buttons
+        act.innerHTML = myPet.powers.map(pid => { 
+            const i = findShopItem(pid); 
+            return `<button class="action-btn green" onclick="usePvPAttack('${pid}')" ${!turn ? 'disabled style="opacity:0.5"' : ''}>${i.name}</button>`; 
+        }).join('');
     }
 
     async function usePvPAttack(pid) { const item=findShopItem(pid); const r=window.fbase.doc(window.db,"rooms",currentRoomId); soundManager.playSFX('attack'); await window.fbase.runTransaction(window.db, async(t)=>{ const d=(await t.get(r)).data(); const turn=(d.turn==='host'&&isHost)||(d.turn==='guest'&&!isHost); if(!turn) return; const dmg=(item.damage||10); t.update(r,{hostHP:isHost?d.hostHP:Math.max(0,d.hostHP-dmg), guestHP:isHost?Math.max(0,d.guestHP-dmg):d.guestHP, turn:isHost?'guest':'host', logs:window.fbase.arrayUnion(`${isHost?d.hostName:d.guestName} used ${item.name}!`) }); }); }
@@ -3421,137 +3560,204 @@ function setupRaidData(data, docId) {
         setTimeout(() => { raidCooldown = false; btn.style.opacity = 1; }, 800);
     }
 
-    // 5. Victory & Rewards (Updated for Battle UI)
-    let hasClaimedRaidReward = false; // Prevents double claiming glitches
+ // ===============================================
+// SECURE VICTORY SYSTEM (Prevents Infinite Claiming)
+// ===============================================
+let hasClaimedRaidReward = false; 
 
-    async function handleRaidVictory() {
-        if (hasClaimedRaidReward) return; // Stop if already claimed
-        hasClaimedRaidReward = true; 
-
-        if (raidListenerUnsub) raidListenerUnsub(); // Stop listening
-        
-        soundManager.stopBGM();
-        soundManager.playSFX('victory');
-
-        // HIJACK THE BATTLE UI FOR VICTORY
+async function handleRaidVictory() {
+    // 1. Local Session Check (Stops double-clicks)
+    if (hasClaimedRaidReward) return; 
+    
+    // 2. Server Data Check (Stops page refreshes)
+    // We check if the student's name is already in the 'claimedBy' list from the database
+    if (localRaidData && localRaidData.claimedBy && localRaidData.claimedBy.includes(gameState.playerName)) {
+        // Show "Already Claimed" UI instead of giving loot
         const battlePanel = document.getElementById('battle-ui');
-        
-        // Create a Victory Overlay inside the battle screen
         battlePanel.innerHTML = `
             <div style="
                 position: absolute; top: 0; left: 0; width: 100%; height: 100%;
                 background: rgba(0,0,0,0.85); display: flex; flex-direction: column;
                 align-items: center; justify-content: center; z-index: 100; color: white;
-                animation: popIn 0.5s;
             ">
-                <h1 style="color:#48bb78; font-size:50px; text-shadow:0 0 20px #fff; margin-bottom: 10px;">VICTORY!</h1>
-                <p style="font-size: 20px; margin-bottom: 20px;">The Titan has fallen.</p>
-                
-                <div id="raid-reward-content" style="text-align:center; min-height: 150px;">
-                    <div class="egg-shaking" style="font-size:60px;">🎁</div>
-                    <p>Fetching Reward...</p>
+                <h1 style="color:#a0aec0; font-size:40px; margin-bottom: 10px;">Already Claimed</h1>
+                <p>You have already collected the reward for this boss.</p>
+                <div style="margin-top:20px;">
+                    <div style="font-size:50px;">✅</div>
                 </div>
-
                 <button class="action-btn red" style="width: 200px; margin-top: 20px;" onclick="location.reload()">Back to Hub</button>
             </div>
         `;
-
-        // Fetch Reward Data
-        if (currentRaidData && currentRaidData.rewardUrl) {
-            try {
-                let url = currentRaidData.rewardUrl;
-                if(!url.startsWith('http')) url = `https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/${url}`;
-                
-                const res = await fetch(url);
-                const petData = await res.json();
-                
-                // Register Evolutions if present
-                if (petData.evolutions && petData.type) {
-                    EVOLUTION_CHAINS[petData.type] = petData.evolutions;
-                }
-                
-                // Add to Inventory
-                const newPet = {
-                    id: 'raid_reward_' + Date.now(),
-                    ...petData, 
-                    level: 5, // Bonus level for Raid reward
-                    hp: petData.hp || 50,
-                    maxHP: petData.hp || 50,
-                    xp: 0, maxXp: 400,
-                    isHatched: true
-                };
-                
-                gameState.pets.push(newPet);
-                addBP(500); // BP Bonus
-                saveGame();
-
-                // Show the Pet
-                const rewardContainer = document.getElementById('raid-reward-content');
-                if(rewardContainer) {
-                    rewardContainer.innerHTML = `
-                        <h3 style="color:#f6e05e; font-size: 24px;">${newPet.name}</h3>
-                        ${newPet.image ? `<img src="${newPet.image}" style="width:150px; height:150px; object-fit:contain; filter:drop-shadow(0 0 10px white);">` : `<div style="font-size:80px">${newPet.emoji}</div>`}
-                        <div style="color:#48bb78; font-weight:bold; margin-top:10px;">+500 Brain Points</div>
-                    `;
-                }
-
-            } catch(e) {
-                console.error("Reward Error", e);
-                const rewardContainer = document.getElementById('raid-reward-content');
-                if(rewardContainer) rewardContainer.innerHTML = "<p>Reward Error (Check Network)</p><p>+500 BP added.</p>";
-                addBP(500);
-            }
-        } else {
-            // No specific pet reward, just BP
-            addBP(500);
-            const rewardContainer = document.getElementById('raid-reward-content');
-            if(rewardContainer) rewardContainer.innerHTML = "<h3 style='color:#f6e05e'>Reward: 500 BP</h3>";
-        }
+        return; // STOP HERE! Do not give loot.
     }
+
+    // --- If we pass the checks, give the reward ---
+    
+    hasClaimedRaidReward = true; 
+
+    if (typeof raidListenerUnsub !== 'undefined' && raidListenerUnsub) {
+        raidListenerUnsub();
+    }
+    
+    soundManager.stopBGM();
+    soundManager.playSFX('victory');
+
+    // 3. MARK AS CLAIMED ON SERVER
+    // We do this immediately so even if they refresh right now, they can't claim again.
+    try {
+        const bossRef = window.fbase.doc(window.db, "world_boss", window.currentRaidDocPath);
+        window.fbase.updateDoc(bossRef, {
+            claimedBy: window.fbase.arrayUnion(gameState.playerName)
+        });
+    } catch(e) {
+        console.error("Error marking claim:", e);
+    }
+
+    // 4. SETUP VICTORY SCREEN
+    const battlePanel = document.getElementById('battle-ui');
+    
+    battlePanel.innerHTML = `
+        <div style="
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); display: flex; flex-direction: column;
+            align-items: center; justify-content: center; z-index: 100; color: white;
+            animation: popIn 0.5s;
+        ">
+            <h1 style="color:#48bb78; font-size:50px; text-shadow:0 0 20px #fff; margin-bottom: 10px;">VICTORY!</h1>
+            <p style="font-size: 20px; margin-bottom: 20px;">The World Boss has been defeated!</p>
+            
+            <div id="raid-reward-content" style="text-align:center; min-height: 150px;">
+                <div class="egg-shaking" style="font-size:60px;">🎁</div>
+                <p>Retrieving Reward...</p>
+            </div>
+
+            <button class="action-btn red" style="width: 200px; margin-top: 20px;" onclick="location.reload()">Back to Hub</button>
+        </div>
+    `;
+
+    // 5. FETCH AND GIVE REWARD
+    if (localRaidData && localRaidData.rewardUrl) {
+        try {
+            let url = localRaidData.rewardUrl;
+            if (!url.startsWith('http')) {
+                if(url.startsWith('/')) url = url.substring(1);
+                url = `https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/${url}`;
+            }
+
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(`File not found: ${url}`);
+            
+            const petData = await res.json();
+            
+            const newPet = {
+                id: 'raid_reward_' + Date.now(),
+                name: petData.name || "Mystery Pet",
+                type: petData.type || "unknown",
+                rarity: petData.rarity || "epic",
+                element: petData.element || "normal",
+                image: petData.image || "",
+                imageStyle: petData.imageStyle || "",
+                emoji: petData.emoji || "🐾",
+                hp: petData.hp || 50,
+                maxHP: petData.hp || 50,
+                level: 5, 
+                xp: 0, 
+                maxXp: 400,
+                powers: [], 
+                isHatched: true,
+                hatchProgress: 100,
+                savedEvolutions: petData.evolutions || [] 
+            };
+            
+            gameState.pets.push(newPet);
+            addBP(1000); 
+            
+            saveGame(true); 
+
+            const rewardContainer = document.getElementById('raid-reward-content');
+            if(rewardContainer) {
+                rewardContainer.innerHTML = `
+                    <h3 style="color:#f6e05e; font-size: 24px; margin: 10px 0;">${newPet.name}</h3>
+                    ${newPet.image ? `<img src="${newPet.image}" style="width:180px; height:180px; object-fit:contain; filter:drop-shadow(0 0 10px white);">` : `<div style="font-size:80px">${newPet.emoji}</div>`}
+                    <div style="color:#48bb78; font-weight:bold; margin-top:10px;">+1000 Brain Points</div>
+                    <div style="color:#a0aec0; font-size:12px; margin-top:5px;">Check your Pet Hub!</div>
+                `;
+            }
+
+        } catch(e) {
+            console.error("Reward Error:", e);
+            const rewardContainer = document.getElementById('raid-reward-content');
+            if(rewardContainer) rewardContainer.innerHTML = `<p style="color:#fc8181">Error: ${e.message}</p><p>+1000 BP added.</p>`;
+            addBP(1000);
+            saveGame(true);
+        }
+    } else {
+        addBP(1000);
+        const rewardContainer = document.getElementById('raid-reward-content');
+        if(rewardContainer) rewardContainer.innerHTML = "<h3 style='color:#f6e05e'>Reward: 1000 BP</h3>";
+        saveGame(true);
+    }
+}
 // ===============================================
-// FIXED JOIN RAID (Checks Global vs Class)
-// ===============================================
-// ===============================================
-// FIXED JOIN RAID (Handles Multiple Boss Priority)
+// FIXED JOIN RAID (Allows Loot Claiming)
 // ===============================================
 async function joinRaid() {
-    // 1. Check Entry Fee
+    // 1. Check Requirements
+    // (We lower the requirement if claiming loot, but keeping it simple is fine)
     if (gameState.brainPoints < 1) return showToast("Need 1 BP to enter!", "error");
     
-    // 2. Check Pet Health
     const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
     if (!pet) return showToast("No pet selected!", "error");
-    if (pet.hp <= 0) return showToast("Your current pet is fainted!", "error");
+    // Allow fainted pets to enter if it's just to claim loot
+    // if (pet.hp <= 0) return showToast("Your current pet is fainted!", "error");
 
     showToast("Searching for Active Raid...", "info");
 
     let raidPath = null;
 
     try {
+        // --- HELPER: Logic to decide if we can enter ---
+        const canEnter = (doc) => {
+            if (!doc.exists()) return false;
+            const data = doc.data();
+            if (!data.active) return false; // If admin clicked "End Raid", it's gone forever.
+            
+            // 1. Boss is Alive? -> YES
+            if (data.hp > 0) return true;
+            
+            // 2. Boss is Dead BUT I fought? -> YES
+            if (data.damageDealers && data.damageDealers[gameState.playerName] > 0) {
+                console.log("💀 Boss is dead, but player contributed. Allowing entry for reward.");
+                return true;
+            }
+            
+            return false;
+        };
+
         // --- PRIORITY 1: GLOBAL BOSS (Admin) ---
         const globalRef = window.fbase.doc(window.db, "world_boss", "global");
         const globalSnap = await window.fbase.getDoc(globalRef);
 
-        if (globalSnap.exists() && globalSnap.data().active && globalSnap.data().hp > 0) {
+        if (canEnter(globalSnap)) {
             console.log("Found Global Boss");
             raidPath = "global";
         } 
         else {
             // --- PRIORITY 2: TEACHER BOSS ---
-            // Find Student's Teacher ID
             let tid = gameState.teacherId;
             if (!tid) {
                 const s = await window.fbase.getDoc(window.fbase.doc(window.db, "students", gameState.playerName));
                 if (s.exists()) {
                     tid = s.data().teacherId;
-                    gameState.teacherId = tid; // Cache it
+                    gameState.teacherId = tid; 
                 }
             }
 
             if (tid) {
                 const classRef = window.fbase.doc(window.db, "world_boss", `teacher_${tid}`);
                 const classSnap = await window.fbase.getDoc(classRef);
-                if (classSnap.exists() && classSnap.data().active && classSnap.data().hp > 0) {
+                
+                if (canEnter(classSnap)) {
                     console.log("Found Class Boss for teacher:", tid);
                     raidPath = `teacher_${tid}`;
                 }
@@ -3562,12 +3768,11 @@ async function joinRaid() {
         return showToast("Network Error checking raids.", "error");
     }
 
-    // If neither exists
     if (!raidPath) {
         return showToast("No Active Raid Found!", "error");
     }
 
-    // 3. Deduct BP and Start
+    // 3. Deduct BP and Start (Maybe free if claiming? For now, keep cost 1 BP)
     gameState.brainPoints -= 1;
     updateStatsDisplay();
     saveGame();
@@ -3586,7 +3791,7 @@ async function joinRaid() {
     // Default raid background
     ui.style.backgroundImage = `url('https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(3).png')`; 
 
-    // 5. CRITICAL: Start the engine with the SPECIFIC path found
+    // 5. Start Engine
     startRaidEngine(raidPath);
 }
 
@@ -3719,8 +3924,11 @@ window.resolveRaidMath = function(moveId, selected, correct) {
     // ===============================================
 // FIXED RAID ENGINE (Listens to Correct Path)
 // ===============================================
+// ===============================================
+// FIXED RAID ENGINE (Fixes Missing Reward Bug)
+// ===============================================
 function startRaidEngine(path) {
-    // Default to global if no path provided (fallback)
+    // Default to global if no path provided
     const docPath = path || "global";
     window.currentRaidDocPath = docPath; // Save for score submission
 
@@ -3728,23 +3936,20 @@ function startRaidEngine(path) {
     gameState.inBattle = true;
     document.getElementById('enemy-name').innerText = "Loading Titan...";
     
-    // Connect to Firestore Live Data using the CORRECT PATH
+    // Connect to Firestore
     const docRef = window.fbase.doc(window.db, "world_boss", docPath);
     
-    if (raidListenerUnsub) raidListenerUnsub(); // Clear old listeners
+    if (typeof raidListenerUnsub !== 'undefined' && raidListenerUnsub) {
+        raidListenerUnsub(); 
+    }
 
     raidListenerUnsub = window.fbase.onSnapshot(docRef, (doc) => {
-        // --- CRITICAL FIX: PREVENT INSTANT WIN ON 404 ---
+        // 1. Safety Check: If boss is deleted/inactive
         if (!doc.exists() || !doc.data().active) {
-            // Boss is gone or deleted.
-            // Only trigger victory if we were ALREADY fighting and now it's gone.
             if (currentRunDamage > 0) {
-                // We fought, so maybe we get a reward?
-                // Actually, simpler to just exit safely.
                 showToast("Raid ended.", "info");
-                submitRaidRun("Raid Ended"); // Submit whatever we did
+                submitRaidRun("Raid Ended"); 
             } else {
-                // We just got here and it's gone.
                 showToast("Raid is no longer active.", "error");
                 exitRaidBattle();
             }
@@ -3752,20 +3957,20 @@ function startRaidEngine(path) {
         }
 
         const data = doc.data();
-        
-        // Check if dead
+
+        // 2. CRITICAL FIX: CAPTURE DATA *BEFORE* CHECKING DEATH
+        // This ensures the Reward URL is saved before Victory runs
+        localRaidData = data; 
+        // -----------------------------------------------------
+
+        // 3. Check if dead
         if (data.hp <= 0) {
              handleRaidVictory();
              return;
         }
 
-        // --- CAPTURE BOSS DATA ---
-        localRaidData = data; 
-        // -------------------------
-
-        // Update Boss Visuals
+        // 4. Update Visuals
         const enemyVis = document.getElementById('battle-enemy-visual');
-        // Prevent flickering re-renders
         if (!enemyVis.innerHTML.includes(data.image) && data.image) {
             enemyVis.classList.add('flipped-opponent');
             enemyVis.innerHTML = `<img src="${data.image}" class="battler-image" style="width:300px; height:300px; filter:drop-shadow(0 0 15px red);">`;
@@ -3773,11 +3978,9 @@ function startRaidEngine(path) {
              enemyVis.innerHTML = '<div style="font-size:100px;">👹</div>';
         }
 
-        // Update Boss HP (Real-time)
         document.getElementById('enemy-name').innerHTML = `☠️ ${data.name}`;
         document.getElementById('enemy-hp-bar').style.width = (data.hp / data.maxHP * 100) + "%";
         
-        // Render Player Side
         renderRaidPlayerSide();
     });
 }
@@ -4883,6 +5086,102 @@ window.loginTeacher = async function() {
         alert("Login Error: " + err.message);
     }
 };
+// ===============================================
+// ADMIN PATCHER SYSTEM (Remote Database Fixes)
+// ===============================================
+
+async function executeAdminPatch() {
+    const code = document.getElementById('admin-patch-code').value;
+    const logBox = document.getElementById('patch-logs');
+    
+    if(!code) return alert("Enter code first!");
+    if(!confirm("⚠️ RUNNING DATABASE PATCH\n\nThis will modify student data permanently.\nAre you sure?")) return;
+
+    logBox.innerHTML = "⏳ Running script...";
+
+    try {
+        // We create a Function that has access to database tools
+        // This is safe because only YOU (Admin) can access this screen
+        const patchFunction = new Function('db', 'fbase', 'log', `
+            return (async () => {
+                ${code}
+            })();
+        `);
+
+        // Helper to log to screen
+        const customLog = (msg) => {
+            console.log(msg);
+            logBox.innerHTML += `<br>${msg}`;
+        };
+
+        await patchFunction(window.db, window.fbase, customLog);
+        logBox.innerHTML += "<br>✅ <strong style='color:#48bb78'>PATCH COMPLETE</strong>";
+
+    } catch (e) {
+        console.error(e);
+        logBox.innerHTML += `<br>❌ <strong style='color:#f56565'>ERROR: ${e.message}</strong>`;
+    }
+}
+
+// PRE-SET: Load the Rudolf Fix into the box
+function loadRudolfPatch() {
+    const script = `
+// 1. Get ALL Students
+log("Scanning database...");
+const q = await fbase.getDocs(fbase.collection(db, "students"));
+let count = 0;
+const batch = fbase.writeBatch(db);
+
+q.forEach(doc => {
+    const data = doc.data();
+    // Check if they have save data
+    if (!data.saveData || !data.saveData.pets) return;
+
+    let changed = false;
+    
+    // Loop through their pets
+    const updatedPets = data.saveData.pets.map(p => {
+        // IF it is Groochy AND missing evolution data
+        if ((p.name === "Groochy" || p.type === "tree_01") && !p.savedEvolutions) {
+            log("Fixing Groochy for: " + data.username);
+            
+            // INJECT THE DATA
+            p.savedEvolutions = [
+                {
+                  "name": "Rudolf Flyer", 
+                  "level": 10, "cost": 100, "baseHP": 100, "rarity": "epic",
+                  "element": ["grass", "ice"],
+                  "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/xmasreward/2.png",
+                  "imageStyle": "blend-multiply"
+                },
+                {
+                  "name": "Rudolf Legend",
+                  "level": 20, "cost": 200, "baseHP": 200, "rarity": "legendary",
+                  "element": ["grass", "ice"],
+                  "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/xmasreward/3.png",
+                  "imageStyle": "blend-multiply"
+                }
+            ];
+            changed = true;
+        }
+        return p;
+    });
+
+    if (changed) {
+        batch.update(doc.ref, { "saveData.pets": updatedPets });
+        count++;
+    }
+});
+
+if (count > 0) {
+    await batch.commit();
+    log("Successfully fixed " + count + " students!");
+} else {
+    log("No broken Rudolfs found.");
+}
+`;
+    document.getElementById('admin-patch-code').value = script;
+}
   </script>
 </body>
 </html>
