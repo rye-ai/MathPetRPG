@@ -1,1 +1,128 @@
-
+{
+  "meta": {
+    "title": "Base Ten Bootcamp",
+    "passThreshold": 0.7,
+    "rewards": {
+      "bp": 1000,
+      "items": [
+        {
+          "id": "xp_potion",
+          "qty": 1
+        }
+      ],
+      "pet": null
+    }
+  },
+  "questions": [
+    {
+      "q": "Look at the blocks below. What total number do they show?",
+      "qVisualHTML": "<svg width='200' height='100' viewBox='0 0 200 100'><rect x='10' y='10' width='60' height='60' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='80' y='10' width='60' height='60' fill='#4299e1' stroke='black' stroke-width='2'/><rect x='150' y='10' width='10' height='60' fill='#48bb78' stroke='black' stroke-width='2'/><rect x='165' y='10' width='10' height='60' fill='#48bb78' stroke='black' stroke-width='2'/><rect x='180' y='10' width='10' height='60' fill='#48bb78' stroke='black' stroke-width='2'/></svg>",
+      "a": "230",
+      "options": [
+        "203",
+        "23",
+        "230",
+        "320"
+      ]
+    },
+    {
+      "q": "The Merchant has 4 Crates (Hundreds) and 2 single Apples (Ones). He has ZERO bags (Tens). Which number is this?",
+      "qVisualHTML": "<div style='font-size:40px'>📦 📦 📦 📦 &nbsp; 🍎 🍎</div>",
+      "a": "402",
+      "options": [
+        "420",
+        "402",
+        "42",
+        "204"
+      ]
+    },
+    {
+      "q": "If 1 Book holds 100 stickers, how many stickers are in 6 Books?",
+      "qVisualHTML": "",
+      "a": "600",
+      "options": [
+        "60",
+        "600",
+        "106",
+        "610"
+      ]
+    },
+    {
+      "q": "Which choice shows the same number as the model below?",
+      "qVisualHTML": "<svg width='150' height='80' viewBox='0 0 150 80'><rect x='5' y='5' width='50' height='50' fill='#4299e1' stroke='black'/><rect x='60' y='5' width='10' height='50' fill='#48bb78' stroke='black'/><rect x='75' y='5' width='10' height='50' fill='#48bb78' stroke='black'/><rect x='90' y='5' width='10' height='50' fill='#48bb78' stroke='black'/><rect x='105' y='5' width='10' height='50' fill='#48bb78' stroke='black'/><circle cx='125' cy='30' r='5' fill='#ecc94b' stroke='black'/><circle cx='140' cy='30' r='5' fill='#ecc94b' stroke='black'/></svg>",
+      "a": "1 hundred + 4 tens + 2 ones",
+      "options": [
+        "1 hundred + 2 tens + 4 ones",
+        "1 hundred + 4 tens + 2 ones",
+        "4 hundreds + 1 ten + 2 ones",
+        "142 hundreds"
+      ]
+    },
+    {
+      "q": "Identify the number shown by the place value disks.",
+      "qVisualHTML": "<div style='display:flex; gap:10px; font-size:20px'><div style='background:#ddd; padding:10px; border-radius:50%'>100</div><div style='background:#ddd; padding:10px; border-radius:50%'>100</div><div style='background:#ddd; padding:10px; border-radius:50%'>100</div><div style='background:#eee; padding:10px; border-radius:50%'>10</div></div>",
+      "a": "310",
+      "options": [
+        "301",
+        "130",
+        "310",
+        "30010"
+      ]
+    },
+    {
+      "q": "The builder needs 100 bricks. He only has stacks of 10. How many stacks of 10 make 100?",
+      "qVisualHTML": "<svg width='200' height='50'><rect x='0' y='0' width='200' height='40' fill='none' stroke='black' stroke-dasharray='5,5'/><text x='10' y='25' font-family='Arial' font-size='14'>? Tens = 1 Hundred</text></svg>",
+      "a": "10 tens",
+      "options": [
+        "10 tens",
+        "100 tens",
+        "1 ten",
+        "5 tens"
+      ]
+    },
+    {
+      "q": "Which number matches the expanded form: 500 + 0 + 8?",
+      "qVisualHTML": "",
+      "a": "508",
+      "options": [
+        "580",
+        "5008",
+        "58",
+        "508"
+      ]
+    },
+    {
+      "q": "How many ones are in this single block?",
+      "qVisualHTML": "<svg width='60' height='60'><rect x='10' y='10' width='40' height='40' fill='#ed8936' stroke='black'/><text x='18' y='35' fill='white' font-family='sans-serif' font-weight='bold'>10</text></svg>",
+      "a": "10 ones",
+      "options": [
+        "1 one",
+        "10 ones",
+        "100 ones",
+        "0 ones"
+      ]
+    },
+    {
+      "q": "Look at the 12 ten rods below. What is another way to say '12 Tens'?",
+      "qVisualHTML": "<svg width='280' height='70' viewBox='0 0 280 70'><rect x='10' y='10' width='10' height='50' fill='#48bb78' stroke='black'/><rect x='25' y='10' width='10' height='50' fill='#48bb78' stroke='black'/><rect x='40' y='10' width='10' height='50' fill='#48bb78' stroke='black'/><rect x='55' y='10' width='10' height='50' fill='#48bb78' stroke='black'/><rect x='70' y='10' width='10' height='50' fill='#48bb78' stroke='black'/><rect x='85' y='10' width='10' height='50' fill='#48bb78' stroke='black'/><rect x='100' y='10' width='10' height='50' fill='#48bb78' stroke='black'/><rect x='115' y='10' width='10' height='50' fill='#48bb78' stroke='black'/><rect x='130' y='10' width='10' height='50' fill='#48bb78' stroke='black'/><rect x='145' y='10' width='10' height='50' fill='#48bb78' stroke='black'/><rect x='180' y='10' width='10' height='50' fill='#48bb78' stroke='black'/><rect x='195' y='10' width='10' height='50' fill='#48bb78' stroke='black'/></svg>",
+      "a": "1 hundred and 2 tens",
+      "options": [
+        "1 hundred and 2 tens",
+        "2 hundreds and 1 ten",
+        "12 hundreds",
+        "10 hundreds"
+      ]
+    },
+    {
+      "q": "Which of these is TRUE?",
+      "qVisualHTML": "",
+      "a": "10 tens = 1 hundred",
+      "options": [
+        "10 tens = 1 hundred",
+        "10 hundreds = 1 ten",
+        "100 tens = 1 ten",
+        "1 ten = 100 ones"
+      ]
+    }
+  ]
+}
