@@ -19,7 +19,6 @@
       appId: "1:590511399628:web:400e68086ccfaba2e65869"
     };
 
-
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     window.db = db;
@@ -411,7 +410,46 @@
 }
 
 @keyframes shineMove { 0% { transform: translateX(-100%) rotate(45deg); } 100% { transform: translateX(100%) rotate(45deg); } }
+ 
+ /* --- EXAM SYSTEM STYLES --- */
     
+    /* 1. Student Exam Card (In Study Tab) */
+    .exam-card {
+        background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+        border: 2px solid #e53e3e;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(229, 62, 62, 0.3);
+        animation: pulseRed 2s infinite;
+        display: none; /* Hidden by default */
+    }
+    @keyframes pulseRed { 0% { box-shadow: 0 0 0 0 rgba(229, 62, 62, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(229, 62, 62, 0); } 100% { box-shadow: 0 0 0 0 rgba(229, 62, 62, 0); } }
+
+    /* 2. Lockdown Interface */
+    .exam-lockdown {
+        display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: #f7fafc; z-index: 9000; flex-direction: column;
+    }
+    .exam-header { background: #2d3748; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
+    
+    /* 3. Navigator Grid (1, 2, 3...) */
+    .nav-grid { display: flex; gap: 8px; padding: 10px; overflow-x: auto; background: white; border-top: 1px solid #e2e8f0; justify-content: center; }
+    .nav-box {
+        width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;
+        border: 2px solid #cbd5e0; border-radius: 8px; font-weight: bold; cursor: pointer; color: #718096;
+    }
+    .nav-box.answered { background: #4299e1; color: white; border-color: #3182ce; }
+    .nav-box.current { border-color: #2b6cb0; transform: scale(1.1); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+
+    /* 4. Teacher Gradebook Table */
+    .gradebook-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    .gradebook-table th { background: #2d3748; color: white; padding: 10px; text-align: left; }
+    .gradebook-table td { padding: 10px; border-bottom: 1px solid #e2e8f0; color: #2d3748; }
+    .gradebook-table tr:nth-child(even) { background: #f7fafc; }
+    .score-pass { color: #38a169; font-weight: bold; }
+    .score-fail { color: #e53e3e; font-weight: bold; }  
   </style>
   </head>
  <body><!-- Login Screen -->
@@ -517,14 +555,22 @@
     </div>
 </div>
    
-   <!-- TEACHER DASHBOARD (Fixed & Reorganized) -->
-   <!-- TEACHER DASHBOARD (Clean & Verified) -->
+  <!-- TEACHER DASHBOARD (Clean & Verified) -->
    <div id="teacher-dashboard-screen" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:2100; padding:40px; overflow-y:auto;">
        <div style="max-width:1000px; margin:0 auto;">
-           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
-               <h1 style="font-size:32px; font-weight:bold; color:#5a67d8;">👩‍🏫 Teacher Dashboard</h1>
-               <button class="action-btn red" style="width:auto; padding:10px 20px;" onclick="location.reload()">Log Out</button>
+           
+           <!-- 1. HEADER ROW (Top) -->
+           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; border-bottom: 2px solid #edf2f7; padding-bottom: 20px;">
+               <h1 style="font-size:32px; font-weight:bold; color:#5a67d8; margin:0;">👩‍🏫 Teacher Dashboard</h1>
+               
+               <!-- Button Group (Right Side) -->
+               <div style="display:flex; align-items:center;">
+                   <button class="action-btn blue" style="width:auto; padding:10px 20px; margin:0 10px 0 0;" onclick="document.getElementById('gradebook-modal').style.display='flex'">📊 Gradebook</button>
+                   <button class="action-btn red" style="width:auto; padding:10px 20px; margin:0;" onclick="location.reload()">Log Out</button>
+               </div>
            </div>
+           
+           <!-- 2. MAIN CONTENT GRID (Bottom) -->
            
            <div style="display:grid; grid-template-columns: 1fr 1.5fr; gap:40px;">
                <!-- LEFT COLUMN: Controls -->
@@ -622,21 +668,6 @@
            </div>
        </div>
 
-       <div id="bulk-assign-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:2200;">
-           <div style="background:white; padding:30px; border-radius:15px; width:500px; max-width:90%;">
-               <h2 style="font-size:22px; font-weight:bold; color:#48bb78; margin-bottom:10px;">Bulk Assign</h2>
-               <p id="bulk-student-count-display" style="margin-bottom:15px;">...</p>
-               <select id="bulk-grade-select" style="width:100%; padding:8px; margin-bottom:10px;" onchange="refreshBulkTopicUI()">
-                   <option value="K">K</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option>
-               </select>
-               <div id="bulk-topic-list" style="max-height:300px; overflow-y:auto; border:1px solid #eee; padding:10px; margin-bottom:20px;">Loading...</div>
-               <div style="display:flex; gap:10px;">
-                   <button class="action-btn green" onclick="saveBulkStudentTopics()">Apply</button>
-                   <button class="action-btn red" onclick="document.getElementById('bulk-assign-modal').style.display='none'">Cancel</button>
-               </div>
-           </div>
-       </div>
-
        <div class="modal-overlay" id="teacher-delete-modal" style="z-index:2300;">
            <div class="confirm-modal delete-confirm-modal">
                <div style="font-size: 60px;">🗑️</div>
@@ -650,21 +681,60 @@
        </div>
    </div>
        <!-- Modals included inside dashboard -->
+       
+       <!-- 1. NEW GRADEBOOK MODAL -->
+       <div id="gradebook-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:2300;">
+           <div style="background:white; padding:30px; border-radius:15px; width:800px; max-width:95%; max-height:90vh; display:flex; flex-direction:column;">
+               <h2 style="color:#2b6cb0; margin-bottom:20px;">📊 Classroom Gradebook</h2>
+               
+               <div style="display:flex; gap:10px; margin-bottom:20px;">
+                   <select id="gb-grade-select" class="login-input" style="margin:0;" onchange="loadGradebookTests()">
+                       <option value="">1. Select Grade</option>
+                       <option value="K">K</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                   </select>
+                   <select id="gb-test-select" class="login-input" style="margin:0;" onchange="renderGradebook()">
+                       <option value="">2. Select Test</option>
+                   </select>
+               </div>
+
+               <div style="flex:1; overflow-y:auto; border:1px solid #e2e8f0; border-radius:10px;">
+                   <table class="gradebook-table">
+                       <thead><tr><th>Student</th><th>Score</th><th>Status</th><th>Date</th></tr></thead>
+                       <tbody id="gradebook-body"><tr><td colspan="4" style="text-align:center;">Select a Test to view scores.</td></tr></tbody>
+                   </table>
+               </div>
+
+               <button class="action-btn red" style="margin-top:20px;" onclick="document.getElementById('gradebook-modal').style.display='none'">Close</button>
+           </div>
+       </div>
+
+       <!-- 2. UPDATED TOPIC MANAGER (With Exam Dropdown) -->
        <div id="topic-manager-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:2200;">
            <div style="background:white; padding:30px; border-radius:15px; width:500px; max-width:90%;">
                <h2 style="font-size:22px; font-weight:bold; color:#5a67d8; margin-bottom:10px;">Manage Student</h2>
                <p id="tm-student-name" style="font-weight:bold; color:#2d3748; margin-bottom:10px;">Student: -</p>
-               <div style="margin-bottom:15px; background:#e0f2fe; padding:10px; border-radius:8px; border:1px solid #7dd3fc;">
-                   <label style="font-weight:bold; color:#0369a1; font-size:12px; display:block; margin-bottom:5px;">Currently Assigned Lessons:</label>
-                   <div id="tm-current-assignments" style="display:flex; flex-wrap:wrap; max-height:80px; overflow-y:auto;"><span style="color:#64748b; font-size:12px;">Loading...</span></div>
-               </div>
+               
+               <!-- Grade Selector -->
                <div style="margin-bottom:15px; background:#f7fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0;">
-                   <label style="font-weight:bold; color:#4a5568; font-size:14px;">Select Grade Source:</label>
+                   <label style="font-weight:bold; color:#4a5568; font-size:14px;">1. Grade Level:</label>
                    <select id="tm-grade-select" style="width:100%; padding:8px; margin-top:5px; border:1px solid #cbd5e0; border-radius:5px;" onchange="refreshTopicManagerUI()">
                        <option value="K">K</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option>
                    </select>
                </div>
-               <div id="tm-topic-list" style="max-height:200px; overflow-y:auto; border:1px solid #eee; padding:10px; border-radius:5px; margin-bottom:20px;">Loading...</div>
+
+               <!-- Exam Selector (NEW) -->
+               <div style="margin-bottom:15px; background:#fff5f5; padding:10px; border-radius:8px; border:1px solid #feb2b2;">
+                   <label style="font-weight:bold; color:#c53030; font-size:14px;">2. Assign Active Exam:</label>
+                   <select id="tm-exam-select" style="width:100%; padding:8px; margin-top:5px; border:1px solid #cbd5e0; border-radius:5px;" onchange="updateExamStatusDisplay()">
+                       <option value="">-- No Exam Assigned --</option>
+                   </select>
+                   <div id="tm-exam-status" style="margin-top:10px; font-weight:bold; font-size:14px; color:#718096;">Status: ...</div>
+               </div>
+
+               <!-- Topic List -->
+               <label style="font-weight:bold; color:#4a5568; font-size:14px;">3. Review Topics:</label>
+               <div id="tm-topic-list" style="max-height:150px; overflow-y:auto; border:1px solid #eee; padding:10px; border-radius:5px; margin-bottom:20px;">Loading...</div>
+               
                <div style="display:flex; gap:10px;">
                    <button class="action-btn blue" onclick="saveStudentTopics()">Save Changes</button>
                    <button class="action-btn red" onclick="document.getElementById('topic-manager-modal').style.display='none'">Cancel</button>
@@ -672,21 +742,41 @@
            </div>
        </div>
 
+       <!-- 3. UPDATED BULK ASSIGN (Now with Exams!) -->
        <div id="bulk-assign-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:2200;">
            <div style="background:white; padding:30px; border-radius:15px; width:500px; max-width:90%;">
                <h2 style="font-size:22px; font-weight:bold; color:#48bb78; margin-bottom:10px;">Bulk Assign</h2>
-               <p id="bulk-student-count-display" style="margin-bottom:15px;">...</p>
-               <select id="bulk-grade-select" style="width:100%; padding:8px; margin-bottom:10px;" onchange="refreshBulkTopicUI()">
-                   <option value="K">K</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option>
-               </select>
-               <div id="bulk-topic-list" style="max-height:300px; overflow-y:auto; border:1px solid #eee; padding:10px; margin-bottom:20px;">Loading...</div>
+               <p id="bulk-student-count-display" style="margin-bottom:15px; font-weight:bold; color:#2d3748;">...</p>
+               
+               <!-- 1. Grade Selector -->
+               <div style="margin-bottom:15px; background:#f7fafc; padding:10px; border-radius:8px;">
+                   <label style="font-weight:bold; color:#4a5568;">1. Target Grade Level:</label>
+                   <select id="bulk-grade-select" style="width:100%; padding:8px; margin-top:5px; border:1px solid #cbd5e0; border-radius:5px;" onchange="refreshBulkTopicUI()">
+                       <option value="K">K</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                   </select>
+               </div>
+
+               <!-- 2. Exam Selector (NEW) -->
+               <div style="margin-bottom:15px; background:#fff5f5; padding:10px; border-radius:8px; border:1px solid #feb2b2;">
+                   <label style="font-weight:bold; color:#c53030;">2. Assign Exam to All (Optional):</label>
+                   <select id="bulk-exam-select" style="width:100%; padding:8px; margin-top:5px; border:1px solid #cbd5e0; border-radius:5px;">
+                       <option value="">-- Keep Existing / No Change --</option>
+                       <!-- Options loaded via JS -->
+                   </select>
+               </div>
+
+               <!-- 3. Topic List -->
+               <label style="font-weight:bold; color:#4a5568;">3. Add Review Topics:</label>
+               <div id="bulk-topic-list" style="max-height:150px; overflow-y:auto; border:1px solid #eee; padding:10px; border-radius:5px; margin-bottom:20px;">Loading...</div>
+               
                <div style="display:flex; gap:10px;">
-                   <button class="action-btn green" onclick="saveBulkStudentTopics()">Apply</button>
+                   <button class="action-btn green" onclick="saveBulkStudentTopics()">Apply to Selected</button>
                    <button class="action-btn red" onclick="document.getElementById('bulk-assign-modal').style.display='none'">Cancel</button>
                </div>
            </div>
        </div>
 
+       <!-- 4. EXISTING DELETE MODAL (Unchanged) -->
        <div class="modal-overlay" id="teacher-delete-modal" style="z-index:2300;">
            <div class="confirm-modal delete-confirm-modal">
                <div style="font-size: 60px;">🗑️</div>
@@ -715,6 +805,81 @@
    </nav>
    <main class="content">
     <section id="screen-study" class="screen active">
+        <!-- PASTE INSIDE <section id="screen-study"> -->
+    <div id="active-exam-card" class="exam-card">
+         <h2 style="color: #c53030; font-size: 24px; font-weight: bold; margin-bottom: 5px;">⚠️ ACTIVE EXAM</h2>
+         <p id="exam-card-title" style="color: #742a2a; font-weight: bold; font-size: 18px; margin-bottom:10px;">Loading...</p>
+         <div id="exam-card-status" style="margin-bottom: 15px; font-size: 14px; color: #4a5568;"></div>
+         <button id="start-exam-btn" class="action-btn red" style="font-size: 20px; padding: 15px;" onclick="initExamMode()">📝 TAKE EXAM</button>
+    </div>
+
+    <!-- PASTE AT BOTTOM OF BODY (Modals area) -->
+    
+    <!-- 1. THE EXAM INTERFACE (Lockdown) -->
+    <div id="exam-interface" class="exam-lockdown">
+        <div class="exam-header">
+            <span>📝 EXAM MODE</span>
+            <span id="exam-progress-text">Q 1 / 10</span>
+        </div>
+        
+        <div style="flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; align-items:center;">
+            <div id="exam-visual" style="margin-bottom:20px; max-width:100%;"></div>
+            <!-- Question Text + Speaker Button -->
+          <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 30px;">
+              <div id="exam-q-text" style="font-size:24px; font-weight:bold; text-align:center; color:#2d3748; margin: 0;">...</div>
+              <button onclick="readExamQuestion()" class="bg-indigo-500 text-white p-2 rounded-full shadow-md hover:bg-indigo-600 transition duration-150" style="width: 40px; height: 40px; line-height: 1; border:none; cursor:pointer;">🔊</button>
+          </div>
+            <div id="exam-options" style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; width:100%; max-width:600px;"></div>
+        </div>
+
+        <div style="background:#f7fafc;">
+            <div id="exam-nav-container" class="nav-grid"></div>
+            <div style="padding:15px; display:flex; justify-content:space-between; max-width:800px; margin:0 auto;">
+                <button class="action-btn blue" style="width:120px;" onclick="prevExamQ()">⬅ Back</button>
+                <button id="exam-next-btn" class="action-btn blue" style="width:120px;" onclick="nextExamQ()">Next ➡</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. NEW RESULTS MODAL (Step-by-Step Review) -->
+    <div class="modal-overlay" id="exam-results-modal">
+        <div class="confirm-modal" style="max-width:700px; width:95%; height:90vh; display:flex; flex-direction:column; padding:0; overflow:hidden;">
+            
+            <!-- Header: Score & Reward -->
+            <div style="background:#2d3748; color:white; padding:15px; text-align:center;">
+                <h2 id="review-score-header" style="color:white; margin:0; font-size:20px;">Score: ...</h2>
+                <div id="review-reward-text" style="font-size:14px; color:#68d391; margin-top:5px;"></div>
+            </div>
+
+            <!-- Scrollable Question Area -->
+            <div style="flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; align-items:center;">
+                
+                <!-- Status Badge (Correct/Wrong) -->
+                <div id="review-status-badge" style="margin-bottom:15px; padding:5px 15px; border-radius:15px; font-weight:bold; text-transform:uppercase;">...</div>
+
+                <!-- Visual -->
+                <div id="review-visual" style="margin-bottom:20px; max-width:100%;"></div>
+                
+                <!-- Question Text -->
+                <div id="review-q-text" style="font-size:22px; font-weight:bold; text-align:center; margin-bottom:20px; color:#2d3748;">...</div>
+                
+                <!-- Options Grid (Disabled) -->
+                <div id="review-options" style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; width:100%; max-width:600px;"></div>
+            </div>
+
+            <!-- Footer: Navigation -->
+            <div style="background:#f7fafc; padding:15px; border-top:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
+                <button class="action-btn blue" style="width:100px;" onclick="changeReviewQ(-1)">⬅ Prev</button>
+                <div id="review-counter" style="font-weight:bold; color:#4a5568;">Q 1 / 10</div>
+                <button class="action-btn blue" style="width:100px;" onclick="changeReviewQ(1)">Next ➡</button>
+            </div>
+            
+            <!-- Close Button -->
+            <div style="padding:10px; background:white; border-top:1px solid #eee;">
+                <button class="confirm-btn yes" style="width:100%;" onclick="closeExamResults()">Finish Review</button>
+            </div>
+        </div>
+    </div>
      <div class="quiz-container">
       <div style="color: #718096; margin-bottom: 10px; font-size: 14px;">Solve to earn Brain Points!</div>
       <div id="question-visual-container" class="my-4 mx-auto" style="max-width: 90%; height: auto; display: flex; justify-content: center;"></div>
@@ -1538,7 +1703,11 @@
       gameState.playerName = n; loadExternalPets();
       const cloudLoaded = await loadProgressFromFirebase(n);
       if (!cloudLoaded || gameState.pets.length === 0) if (gameState.pets.length === 0) initializeGame();
-      if (auth.assignment?.grade) { gameState.grade = auth.assignment.grade; gameState.selectedTopics = auth.assignment.topics || []; }
+      if (auth.assignment) { 
+          gameState.grade = auth.assignment.grade; 
+          gameState.selectedTopics = auth.assignment.topics || []; 
+          gameState.assignedExam = auth.assignment.exam; // <--- NEW: Save to Game State
+      }
       await loadAssignmentAndQuestions(auth.assignment);
       checkDailyLogin();
       document.getElementById('display-name').innerText = gameState.playerName; 
@@ -1559,6 +1728,8 @@
       soundManager.playBGM('hub'); 
       generateNextQuestion(); 
       renderHub();
+      
+      checkActiveExam();
     });
 
     function loadExternalPets() {
@@ -3056,7 +3227,28 @@ function checkAdventureRandomEncounter(tileType) {
     // --- TEACHER LOGIC ---
     let currentStudentData = null; 
 
-    async function authenticateStudent(name, password) { try { const d = await window.fbase.getDoc(window.fbase.doc(window.db, "students", name)); if (d.exists() && (!d.data().password || d.data().password === password)) return { success: true, assignment: d.data().assignedGrade ? { grade: d.data().assignedGrade, topics: d.data().assignedTopics||[] } : null }; return { success: false, message: "Invalid Login" }; } catch (e) { return { success: false, message: "Error" }; } }
+    async function authenticateStudent(name, password) { 
+        try { 
+            const docRef = window.fbase.doc(window.db, "students", name);
+            const d = await window.fbase.getDoc(docRef); 
+            
+            if (d.exists() && (!d.data().password || d.data().password === password)) {
+                const data = d.data();
+                return { 
+                    success: true, 
+                    assignment: { 
+                        grade: data.assignedGrade, 
+                        topics: data.assignedTopics || [],
+                        exam: data.assignedExam || "" // <--- NEW: Grab the Exam Link!
+                    } 
+                }; 
+            } 
+            return { success: false, message: "Invalid Login" }; 
+        } catch (e) { 
+            console.error(e);
+            return { success: false, message: "Login Error" }; 
+        } 
+    }
     // Function to show/hide the teacher login box
 function toggleTeacherLogin() { 
     const panel = document.getElementById('teacher-login-panel');
@@ -3186,15 +3378,84 @@ function toggleTeacherLogin() {
     }
 
     function openBulkTopicManager() { const selected = document.querySelectorAll('.student-select-checkbox:checked'); if(selected.length === 0) return showToast("No students selected", "error"); document.getElementById('bulk-student-count-display').innerText = `Applying to ${selected.length} students.`; document.getElementById('bulk-assign-modal').style.display = 'flex'; refreshBulkTopicUI(); }
-    async function refreshBulkTopicUI() { const g = document.getElementById('bulk-grade-select').value; const d = document.getElementById('bulk-topic-list'); d.innerHTML='Loading...'; let files=[]; if(GITHUB_CONFIG.enabled) files=await fetchGithubFolder(`questions/grade_${g}`); d.innerHTML=''; if(files.length>0) files.filter(f=>f.name.endsWith('.json')).forEach(f=>d.innerHTML+=`<label class="topic-checkbox-label" style="display:block; margin:5px 0;"><input type="checkbox" value="${f.download_url}"> ${f.name}</label>`); else Object.keys(QUESTION_REPOSITORY[g]||{}).forEach(t=>d.innerHTML+=`<label class="topic-checkbox-label" style="display:block; margin:5px 0;"><input type="checkbox" value="INTERNAL:${t}"> ${t}</label>`); }
+    // ==========================================
+    // ==========================================
+    // 📦 BULK ASSIGN LOGIC (Now with Exams!)
+    // ==========================================
+
+    async function refreshBulkTopicUI() { 
+        const g = document.getElementById('bulk-grade-select').value; 
+        const d = document.getElementById('bulk-topic-list'); 
+        const examSel = document.getElementById('bulk-exam-select');
+
+        // 1. FETCH TOPICS (questions/grade_X)
+        d.innerHTML='<div style="color:gray;">Loading Topics...</div>'; 
+        let files=[]; 
+        if(GITHUB_CONFIG.enabled) files = await fetchGithubFolder(`questions/grade_${g}`); 
+        
+        d.innerHTML=''; 
+        if(files.length > 0) {
+            files.filter(f => f.name.endsWith('.json')).forEach(f => {
+                d.innerHTML += `<label style="display:block; margin:5px 0;"><input type="checkbox" value="${f.download_url}"> ${f.name}</label>`;
+            });
+        } else {
+            Object.keys(QUESTION_REPOSITORY[g]||{}).forEach(t => {
+                d.innerHTML += `<label style="display:block; margin:5px 0;"><input type="checkbox" value="INTERNAL:${t}"> ${t}</label>`;
+            });
+        }
+
+        // 2. FETCH EXAMS (tests/grade_X) - NEW!
+        if (examSel) {
+            examSel.innerHTML = '<option>Loading Exams...</option>';
+            examSel.disabled = true;
+            
+            let tests = await fetchGithubFolder(`tests/grade_${g}`);
+            
+            examSel.innerHTML = '<option value="">-- Keep Existing / No Change --</option>';
+            examSel.disabled = false;
+            
+            if (tests && tests.length > 0) {
+                tests.filter(f => f.name.endsWith('.json')).forEach(f => {
+                    examSel.innerHTML += `<option value="${f.download_url}">📝 ${f.name}</option>`;
+                });
+            } else {
+                examSel.innerHTML += `<option disabled value="">No exams found</option>`;
+            }
+        }
+    }
 
     async function saveBulkStudentTopics() {
-        const selectedStudents = Array.from(document.querySelectorAll('.student-select-checkbox:checked')).map(cb => cb.dataset.username); const topics = Array.from(document.querySelectorAll('#bulk-topic-list input:checked')).map(cb => cb.value); const grade = document.getElementById('bulk-grade-select').value;
+        const selectedStudents = Array.from(document.querySelectorAll('.student-select-checkbox:checked')).map(cb => cb.dataset.username); 
+        const topics = Array.from(document.querySelectorAll('#bulk-topic-list input:checked')).map(cb => cb.value); 
+        const grade = document.getElementById('bulk-grade-select').value;
+        const exam = document.getElementById('bulk-exam-select').value;
+
         if (selectedStudents.length === 0) return showToast("No students selected", "error");
+        
         const batch = window.fbase.writeBatch(window.db);
-        selectedStudents.forEach(user => { const ref = window.fbase.doc(window.db, "students", user); const updateData = { assignedGrade: grade }; if (topics.length > 0) { updateData.assignedTopics = window.fbase.arrayUnion(...topics); } batch.update(ref, updateData); });
-        await batch.commit(); showToast(`Added topics to ${selectedStudents.length} students!`, "success"); document.getElementById('bulk-assign-modal').style.display='none';
+        
+        selectedStudents.forEach(user => { 
+            const ref = window.fbase.doc(window.db, "students", user); 
+            const updateData = { assignedGrade: grade }; 
+            
+            // Merge topics (add new ones to existing list)
+            if (topics.length > 0) { 
+                updateData.assignedTopics = window.fbase.arrayUnion(...topics); 
+            }
+            
+            // Update Exam (Only if a specific one was picked)
+            if (exam && exam !== "") {
+                updateData.assignedExam = exam;
+            }
+            
+            batch.update(ref, updateData); 
+        });
+        
+        await batch.commit(); 
+        showToast(`Updated ${selectedStudents.length} students!`, "success"); 
+        document.getElementById('bulk-assign-modal').style.display='none';
     }
+
 
     let currentRoomId=null, pvpUnsubscribe=null, isHost=false, localOpponentHP=0, localPlayerHP=0;
     function showMultiplayerMenu() { document.getElementById('wilds-menu').style.display='none'; document.getElementById('multiplayer-menu').style.display='block'; }
@@ -3921,12 +4182,6 @@ window.resolveRaidMath = function(moveId, selected, correct) {
     let raidListenerUnsub = null;
     let localRaidData = { attack: 15 }; // <--- NEW: Defaults to 15
 
-    // ===============================================
-// FIXED RAID ENGINE (Listens to Correct Path)
-// ===============================================
-// ===============================================
-// FIXED RAID ENGINE (Fixes Missing Reward Bug)
-// ===============================================
 // ===============================================
 // STATIC RAID ENGINE (Maximum Read Optimization)
 // ===============================================
@@ -5183,6 +5438,466 @@ if (count > 0) {
 }
 `;
     document.getElementById('admin-patch-code').value = script;
+}
+// ==========================================
+// 🎓 STUDENT EXAM ENGINE
+// ==========================================
+let currentExamData = null;
+let userAnswers = {}; 
+let currentQIndex = 0;
+
+// 1. Check Login (Updated to Hide Completed Exams)
+function checkActiveExam() {
+    const assigned = gameState.assignedExam;
+    const card = document.getElementById('active-exam-card');
+    
+    // 1. If no exam assigned, hide card
+    if (!assigned || assigned === "") {
+        card.style.display = 'none';
+        return;
+    }
+
+    const history = gameState.examHistory || {};
+    
+    // 2. If exam is ALREADY COMPLETED, hide card
+    if (history[assigned]) {
+        card.style.display = 'none'; 
+        return;
+    }
+
+    // 3. If exam is PENDING, show the Red "Active" Card
+    card.style.display = 'block';
+    card.style.background = "#fff5f5";
+    card.style.borderColor = "#f56565";
+    document.getElementById('exam-card-title').innerText = "⚠️ Active Exam Assigned";
+    document.getElementById('start-exam-btn').style.display = 'block';
+    document.getElementById('exam-card-status').innerText = "Anti-Cheat Mode Enabled. Do not close browser.";
+}
+
+// 2. Start (Lockdown)
+async function initExamMode() {
+    if(!confirm("⚠️ START EXAM?\n\nYou cannot pause or exit.\nProgress saves automatically.\n\nClick OK to begin.")) return;
+
+    let url = gameState.assignedExam;
+    if (!url.startsWith('http')) url = `https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/${url}`;
+
+    try {
+        const res = await fetch(url);
+        if(!res.ok) throw new Error("Exam file missing.");
+        
+        currentExamData = await res.json();
+        
+        // Crash Recovery
+        const saved = localStorage.getItem('exam_' + gameState.playerName);
+        userAnswers = saved ? JSON.parse(saved) : {};
+
+        document.getElementById('exam-interface').style.display = 'flex';
+        currentQIndex = 0;
+        renderExamQuestion();
+        updateExamNav();
+
+    } catch(e) {
+        alert("Error: " + e.message);
+    }
+}
+
+// 3. Gameplay
+function renderExamQuestion() {
+    const q = currentExamData.questions[currentQIndex];
+    document.getElementById('exam-progress-text').innerText = `Q ${currentQIndex + 1} / ${currentExamData.questions.length}`;
+    document.getElementById('exam-q-text').innerHTML = q.q;
+    document.getElementById('exam-visual').innerHTML = q.qVisualHTML || "";
+    
+    const grid = document.getElementById('exam-options');
+    grid.innerHTML = "";
+    
+    q.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = "mcq-btn";
+        if (userAnswers[currentQIndex] === opt) {
+            btn.style.borderColor = "#4299e1";
+            btn.style.background = "#ebf8ff";
+        }
+        btn.innerText = opt;
+        btn.onclick = () => {
+            userAnswers[currentQIndex] = opt;
+            localStorage.setItem('exam_' + gameState.playerName, JSON.stringify(userAnswers));
+            renderExamQuestion();
+            updateExamNav();
+        };
+        grid.appendChild(btn);
+    });
+
+    const nextBtn = document.getElementById('exam-next-btn');
+    if (currentQIndex === currentExamData.questions.length - 1) {
+        nextBtn.innerText = "REVIEW 🏁";
+        nextBtn.className = "action-btn green";
+        nextBtn.onclick = showExamReview;
+    } else {
+        nextBtn.innerText = "Next ➡";
+        nextBtn.className = "action-btn blue";
+        nextBtn.onclick = nextExamQ;
+    }
+}
+
+function nextExamQ() { if(currentQIndex < currentExamData.questions.length-1) { currentQIndex++; renderExamQuestion(); } }
+function prevExamQ() { if(currentQIndex > 0) { currentQIndex--; renderExamQuestion(); } }
+
+function updateExamNav() {
+    const box = document.getElementById('exam-nav-container');
+    box.innerHTML = "";
+    currentExamData.questions.forEach((_, i) => {
+        const d = document.createElement('div');
+        d.className = `nav-box ${userAnswers[i] ? 'answered' : ''} ${i===currentQIndex ? 'current' : ''}`;
+        d.innerText = i + 1;
+        d.onclick = () => { currentQIndex = i; renderExamQuestion(); };
+        box.appendChild(d);
+    });
+}
+
+// ==========================================
+// 4. SUBMIT & STEP-BY-STEP REVIEW ENGINE
+// ==========================================
+
+let reviewIndex = 0; // Tracks which question they are reviewing
+
+function showExamReview() {
+    const answered = Object.keys(userAnswers).length;
+    const total = currentExamData.questions.length;
+    if(confirm(`You answered ${answered}/${total}.\n\nSubmit Exam? This is final.`)) finalizeExam();
+}
+
+async function finalizeExam() {
+    let score = 0;
+    const total = currentExamData.questions.length;
+
+    // 1. Calculate Score
+    currentExamData.questions.forEach((q, i) => {
+        if (userAnswers[i] == q.a) score++;
+    });
+
+    // 2. Handle Rewards
+    let rewardText = "Keep studying!";
+    const meta = currentExamData.meta || {};
+    const passThreshold = meta.passThreshold || 0.6;
+    const pct = score / total;
+    
+    if (pct >= passThreshold) {
+        rewardText = "🎉 REWARDS UNLOCKED!";
+        if(meta.rewards) {
+            // BP
+            if(meta.rewards.bp) addBP(meta.rewards.bp);
+            
+            // Items
+            if(meta.rewards.items) {
+                meta.rewards.items.forEach(item => {
+                    gameState.inventory[item.id] = (gameState.inventory[item.id] || 0) + item.qty;
+                });
+            }
+            
+            // Pets
+            if(meta.rewards.pet) {
+                const p = meta.rewards.pet;
+                p.id = 'exam_pet_' + Date.now();
+                // Ensure evolutions are saved to the pet specifically
+                if(p.evolutions) p.savedEvolutions = p.evolutions;
+                gameState.pets.push(p);
+                rewardText += " (New Pet!)";
+            }
+        }
+    }
+
+    // 3. Save to Firebase
+    if (!gameState.examHistory) gameState.examHistory = {};
+    gameState.examHistory[gameState.assignedExam] = {
+        score: score,
+        total: total,
+        timestamp: Date.now()
+    };
+    
+    saveGame(true); // Force Cloud Save
+
+    // 4. Cleanup Local Storage & UI
+    localStorage.removeItem('exam_' + gameState.playerName);
+    document.getElementById('exam-interface').style.display = 'none';
+    
+    // 5. Initialize Review Mode
+    document.getElementById('exam-results-modal').classList.add('active');
+    document.getElementById('review-score-header').innerText = `Final Score: ${score} / ${total} (${Math.round(pct*100)}%)`;
+    document.getElementById('review-reward-text').innerText = rewardText;
+    
+    reviewIndex = 0;
+    renderReviewQuestion();
+    checkActiveExam(); // Update the main menu card
+}
+
+function renderReviewQuestion() {
+    const q = currentExamData.questions[reviewIndex];
+    const userAns = userAnswers[reviewIndex];
+    const isCorrect = (userAns == q.a);
+
+    // 1. Update Text & Visuals
+    document.getElementById('review-counter').innerText = `Q ${reviewIndex + 1} / ${currentExamData.questions.length}`;
+    document.getElementById('review-q-text').innerHTML = q.q;
+    // THIS LINE SHOWS THE IMAGE:
+    document.getElementById('review-visual').innerHTML = q.qVisualHTML || "";
+
+    // 2. Status Badge
+    const badge = document.getElementById('review-status-badge');
+    if (isCorrect) {
+        badge.innerText = "✅ CORRECT";
+        badge.style.background = "#c6f6d5";
+        badge.style.color = "#22543d";
+    } else {
+        badge.innerText = "❌ INCORRECT";
+        badge.style.background = "#fed7d7";
+        badge.style.color = "#822727";
+    }
+
+    // 3. Render Options (Read-Only)
+    const grid = document.getElementById('review-options');
+    grid.innerHTML = "";
+    
+    q.options.forEach(opt => {
+        const div = document.createElement('div');
+        // Reuse MCQ styles but make it look static
+        div.className = "mcq-btn";
+        div.style.cursor = "default"; // Not clickable
+        div.style.fontSize = "16px";
+        div.style.minHeight = "50px";
+        div.innerText = opt;
+
+        // --- STYLING LOGIC ---
+        if (opt === userAns) {
+            // This is what the student picked
+            div.style.border = "4px solid";
+            if (isCorrect) {
+                div.style.borderColor = "#48bb78"; // Green Border
+                div.style.background = "#f0fff4";
+                div.innerHTML += " <b>(You)</b>";
+            } else {
+                div.style.borderColor = "#f56565"; // Red Border
+                div.style.background = "#fff5f5";
+                div.innerHTML += " <b>(You)</b>";
+            }
+        } else {
+            // Other options -> Fade them out slightly so the choice pops
+            div.style.opacity = "0.6";
+        }
+        
+        // NOTE: We do NOT highlight the correct answer if they got it wrong.
+        // This forces them to solve it on paper.
+
+        grid.appendChild(div);
+    });
+}
+
+function changeReviewQ(dir) {
+    const newIndex = reviewIndex + dir;
+    if (newIndex >= 0 && newIndex < currentExamData.questions.length) {
+        reviewIndex = newIndex;
+        renderReviewQuestion();
+    }
+}
+
+function closeExamResults() {
+    document.getElementById('exam-results-modal').classList.remove('active');
+}
+
+// ==========================================
+// 👨‍🏫 TEACHER DASHBOARD LOGIC (Updated)
+// ==========================================
+
+async function refreshTopicManagerUI() {
+    const g = document.getElementById('tm-grade-select').value;
+    const topicBox = document.getElementById('tm-topic-list');
+    const examSelect = document.getElementById('tm-exam-select');
+
+    // 1. Topics
+    topicBox.innerHTML = 'Loading...';
+    let files = [];
+    if(GITHUB_CONFIG.enabled) files = await fetchGithubFolder(`questions/grade_${g}`);
+    
+    topicBox.innerHTML = '';
+    const isChecked = (val) => (currentStudentData.assignedTopics || []).includes(val) ? 'checked' : '';
+    
+    if(files.length > 0) {
+        files.filter(f => f.name.endsWith('.json')).forEach(f => {
+            topicBox.innerHTML += `<label style="display:block; margin:5px 0;"><input type="checkbox" value="${f.download_url}" ${isChecked(f.download_url)}> ${f.name}</label>`;
+        });
+    } else {
+        Object.keys(QUESTION_REPOSITORY[g]||{}).forEach(t => {
+            const val = `INTERNAL:${t}`;
+            topicBox.innerHTML += `<label style="display:block; margin:5px 0;"><input type="checkbox" value="${val}" ${isChecked(val)}> ${t}</label>`;
+        });
+    }
+
+    // 2. Exams
+    examSelect.innerHTML = '<option>Loading...</option>';
+    let tests = await fetchGithubFolder(`tests/grade_${g}`);
+    examSelect.innerHTML = '<option value="">-- No Exam --</option>';
+    
+    if (tests && tests.length > 0) {
+        tests.filter(f => f.name.endsWith('.json')).forEach(f => {
+            const sel = (currentStudentData.assignedExam === f.download_url) ? 'selected' : '';
+            examSelect.innerHTML += `<option value="${f.download_url}" ${sel}>📝 ${f.name}</option>`;
+        });
+    }
+    updateExamStatusDisplay();
+}
+
+function updateExamStatusDisplay() {
+    const url = document.getElementById('tm-exam-select').value;
+    const disp = document.getElementById('tm-exam-status');
+    if (!url) { disp.innerText = "Status: None"; return; }
+    
+    const h = (currentStudentData.examHistory || {})[url];
+    if (h) {
+        const pct = Math.round((h.score/h.total)*100);
+        disp.innerHTML = `<span style="color:${pct>=70?'green':'red'}">✅ Completed: ${h.score}/${h.total} (${pct}%)</span>`;
+    } else {
+        disp.innerText = "Status: ⏳ Not Started";
+    }
+}
+
+async function saveStudentTopics() {
+    const checkboxes = document.querySelectorAll('#tm-topic-list input');
+    let topics = new Set(currentStudentData.assignedTopics || []);
+    checkboxes.forEach(cb => cb.checked ? topics.add(cb.value) : topics.delete(cb.value));
+    
+    await window.fbase.updateDoc(window.fbase.doc(window.db,"students",currentManagingStudent), {
+        assignedGrade: document.getElementById('tm-grade-select').value,
+        assignedExam: document.getElementById('tm-exam-select').value,
+        assignedTopics: Array.from(topics)
+    });
+    
+    showToast("Updated!", "success");
+    document.getElementById('topic-manager-modal').style.display='none';
+}
+
+// ==========================================
+// 📊 GRADEBOOK SYSTEM
+// ==========================================
+
+// ==========================================
+// 📊 GRADEBOOK SYSTEM (Fixed with Smart Match)
+// ==========================================
+
+async function loadGradebookTests() {
+    const g = document.getElementById('gb-grade-select').value;
+    const sel = document.getElementById('gb-test-select');
+    sel.innerHTML = '<option>Loading...</option>';
+    
+    const files = await fetchGithubFolder(`tests/grade_${g}`);
+    sel.innerHTML = '<option value="">2. Select Test</option>';
+    
+    if (files && files.length > 0) {
+        files.filter(f => f.name.endsWith('.json')).forEach(f => {
+            // We use the full URL as the value
+            sel.innerHTML += `<option value="${f.download_url}">${f.name}</option>`;
+        });
+    } else {
+        sel.innerHTML = '<option>No tests found</option>';
+    }
+}
+
+// ==========================================
+// 📊 GRADEBOOK (Fixed Data Path)
+// ==========================================
+async function renderGradebook() {
+    const g = document.getElementById('gb-grade-select').value;
+    const selectedUrl = document.getElementById('gb-test-select').value;
+    const tbody = document.getElementById('gradebook-body');
+    
+    if(!g || !selectedUrl) return;
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:gray;">Scanning scores...</td></tr>';
+
+    try {
+        const q = await window.fbase.getDocs(window.fbase.collection(window.db, "students"));
+        let html = "";
+        let count = 0;
+        
+        // Target Filename (e.g. "test_Place_Value.json")
+        const targetFile = selectedUrl.split('/').pop().trim();
+        
+        q.forEach(doc => {
+            const s = doc.data();
+            
+            // Filter by grade
+            // We use String() to ensure "2" matches 2
+            if (String(s.assignedGrade) !== String(g)) return; 
+            
+            count++;
+            
+            // --- CRITICAL FIX: LOOK INSIDE 'saveData' ---
+            const saveData = s.saveData || {};
+            const history = saveData.examHistory || {}; 
+            // --------------------------------------------
+
+            let h = null;
+
+            // Universal Search Loop
+            const foundKey = Object.keys(history).find(studentKey => {
+                const studentFile = studentKey.split('/').pop().trim();
+                return studentFile === targetFile;
+            });
+
+            if (foundKey) h = history[foundKey];
+
+            if (h) {
+                const pct = Math.round((h.score / h.total) * 100);
+                const color = pct >= 70 ? 'score-pass' : 'score-fail';
+                const dateStr = h.timestamp ? new Date(h.timestamp).toLocaleDateString() : "Unknown";
+                
+                html += `<tr>
+                    <td style="font-weight:bold;">${s.username}</td>
+                    <td class="${color}">${h.score}/${h.total} (${pct}%)</td>
+                    <td>✅ Done</td>
+                    <td style="font-size:12px; color:#718096;">${dateStr}</td>
+                </tr>`;
+            } else {
+                html += `<tr style="opacity:0.6;">
+                    <td>${s.username}</td>
+                    <td>-</td>
+                    <td style="color:#d69e2e;">⏳ Pending</td>
+                    <td>-</td>
+                </tr>`;
+            }
+        });
+        
+        if (count === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">No students found in Grade ${g}.</td></tr>`;
+        } else {
+            tbody.innerHTML = html || '<tr><td colspan="4" style="text-align:center;">Students found, but no matching scores yet.</td></tr>';
+        }
+        
+    } catch (e) {
+        console.error(e);
+        tbody.innerHTML = `<tr><td colspan="4" style="color:red; text-align:center;">Error: ${e.message}</td></tr>`;
+    }
+}
+// 🔊 READ ALOUD FOR EXAMS
+function readExamQuestion() {
+    // Safety checks
+    if (!currentExamData || !currentExamData.questions) return;
+    
+    // Get current question text
+    const q = currentExamData.questions[currentQIndex];
+    
+    // Create a temporary element to strip HTML (like <b> or <i>) so it reads cleanly
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = q.q;
+    const text = tempDiv.textContent || tempDiv.innerText || "";
+    
+    // Native Browser Text-to-Speech (Offline)
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel(); // Stop any previous talking
+        const u = new SpeechSynthesisUtterance(text);
+        u.rate = 0.9; // Slightly slower for better comprehension
+        window.speechSynthesis.speak(u);
+    } else {
+        alert("Text-to-Speech not supported on this browser.");
+    }
 }
   </script>
 </body>
