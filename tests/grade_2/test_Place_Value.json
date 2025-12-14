@@ -14,7 +14,7 @@
         "name": "Onesy",
         "type": "baseten_01",
         "rarity": "rare",
-        "element": "earth",
+        "element": "wind",
         "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/baseten/1.png",
         "imageStyle": "blend-multiply",
         "emoji": "🟦",
@@ -33,7 +33,7 @@
               "cost": 100,
               "baseHP": 100,
               "rarity": "epic",
-              "element": "earth",
+              "element": "wind",
               "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/baseten/2.png",
               "imageStyle": "blend-multiply"
             },
@@ -43,7 +43,7 @@
               "cost": 200,
               "baseHP": 200,
               "rarity": "legendary",
-              "element": "earth",
+              "element": "wind",
               "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/baseten/3.png",
               "imageStyle": "blend-multiply"
             }
