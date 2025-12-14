@@ -5591,6 +5591,18 @@ function showExamReview() {
     if(confirm(`You answered ${answered}/${total}.\n\nSubmit Exam? This is final.`)) finalizeExam();
 }
 
+// ==========================================
+// 4. SUBMIT, CEREMONY & REVIEW ENGINE
+// ==========================================
+
+let reviewIndex = 0; // Tracks which question they are reviewing
+
+function showExamReview() {
+    const answered = Object.keys(userAnswers).length;
+    const total = currentExamData.questions.length;
+    if(confirm(`You answered ${answered}/${total}.\n\nSubmit Exam? This is final.`)) finalizeExam();
+}
+
 async function finalizeExam() {
     let score = 0;
     const total = currentExamData.questions.length;
@@ -5600,35 +5612,52 @@ async function finalizeExam() {
         if (userAnswers[i] == q.a) score++;
     });
 
-    // 2. Handle Rewards
-    let rewardText = "Keep studying!";
+    // 2. Handle Rewards Logic
     const meta = currentExamData.meta || {};
-    const passThreshold = meta.passThreshold || 0.6;
+    const passThreshold = meta.passThreshold || 0.6; 
     const pct = score / total;
+    const passed = pct >= passThreshold;
     
-    if (pct >= passThreshold) {
-        rewardText = "🎉 REWARDS UNLOCKED!";
-        if(meta.rewards) {
-            // BP
-            if(meta.rewards.bp) addBP(meta.rewards.bp);
+    let rewardSummary = "";     
+    let ceremonyVisual = "📝"; 
+
+    if (passed && meta.rewards) {
+        let rewardsList = [];
+
+        // BP
+        if(meta.rewards.bp) {
+            addBP(meta.rewards.bp);
+            rewardsList.push(`${meta.rewards.bp} BP`);
+            ceremonyVisual = "💰"; 
+        }
+        
+        // Items
+        if(meta.rewards.items) {
+            meta.rewards.items.forEach(item => {
+                gameState.inventory[item.id] = (gameState.inventory[item.id] || 0) + item.qty;
+            });
+            rewardsList.push(`${meta.rewards.items.length} Items`);
+            ceremonyVisual = "🎁"; 
+        }
+        
+        // Pets
+        if(meta.rewards.pet) {
+            const p = meta.rewards.pet;
+            p.id = 'exam_pet_' + Date.now();
+            if(p.evolutions) p.savedEvolutions = p.evolutions;
+            gameState.pets.push(p);
             
-            // Items
-            if(meta.rewards.items) {
-                meta.rewards.items.forEach(item => {
-                    gameState.inventory[item.id] = (gameState.inventory[item.id] || 0) + item.qty;
-                });
-            }
+            rewardsList.push("New Pet!");
             
-            // Pets
-            if(meta.rewards.pet) {
-                const p = meta.rewards.pet;
-                p.id = 'exam_pet_' + Date.now();
-                // Ensure evolutions are saved to the pet specifically
-                if(p.evolutions) p.savedEvolutions = p.evolutions;
-                gameState.pets.push(p);
-                rewardText += " (New Pet!)";
+            // Show Pet Image in Ceremony
+            if (p.image) {
+                ceremonyVisual = `<img src="${p.image}" style="width:150px; height:150px; object-fit:contain; filter:drop-shadow(0 0 10px white);">`;
+            } else {
+                ceremonyVisual = `<div style="font-size:100px;">${p.emoji}</div>`;
             }
         }
+        
+        rewardSummary = rewardsList.join(" + ");
     }
 
     // 3. Save to Firebase
@@ -5639,20 +5668,37 @@ async function finalizeExam() {
         timestamp: Date.now()
     };
     
-    saveGame(true); // Force Cloud Save
+    saveGame(true); // Force Save
 
-    // 4. Cleanup Local Storage & UI
+    // 4. Cleanup Local Storage
     localStorage.removeItem('exam_' + gameState.playerName);
     document.getElementById('exam-interface').style.display = 'none';
     
-    // 5. Initialize Review Mode
-    document.getElementById('exam-results-modal').classList.add('active');
-    document.getElementById('review-score-header').innerText = `Final Score: ${score} / ${total} (${Math.round(pct*100)}%)`;
-    document.getElementById('review-reward-text').innerText = rewardText;
-    
-    reviewIndex = 0;
-    renderReviewQuestion();
-    checkActiveExam(); // Update the main menu card
+    // 5. Define "Show Report Card" Function
+    const showReportCard = () => {
+        document.getElementById('exam-score-header').innerText = `Final Score: ${score}/${total} (${Math.round(pct*100)}%)`;
+        document.getElementById('review-reward-text').innerText = passed ? "Rewards Claimed ✅" : "Keep Studying!";
+        
+        // Initialize Review Mode
+        document.getElementById('exam-results-modal').classList.add('active');
+        reviewIndex = 0;
+        renderReviewQuestion(); 
+        
+        checkActiveExam(); // Update main menu
+    };
+
+    // 6. TRIGGER CEREMONY OR SHOW REPORT
+    if (passed && meta.rewards) {
+        // Show Confetti First!
+        triggerRewardCeremony(
+            "EXAM PASSED!", 
+            `Score: ${Math.round(pct*100)}%<br><span style="color:#d69e2e">${rewardSummary}</span>`, 
+            ceremonyVisual, 
+            showReportCard // Opens report card after clicking claim
+        );
+    } else {
+        showReportCard();
+    }
 }
 
 function renderReviewQuestion() {
@@ -5663,7 +5709,6 @@ function renderReviewQuestion() {
     // 1. Update Text & Visuals
     document.getElementById('review-counter').innerText = `Q ${reviewIndex + 1} / ${currentExamData.questions.length}`;
     document.getElementById('review-q-text').innerHTML = q.q;
-    // THIS LINE SHOWS THE IMAGE:
     document.getElementById('review-visual').innerHTML = q.qVisualHTML || "";
 
     // 2. Status Badge
@@ -5684,34 +5729,27 @@ function renderReviewQuestion() {
     
     q.options.forEach(opt => {
         const div = document.createElement('div');
-        // Reuse MCQ styles but make it look static
         div.className = "mcq-btn";
-        div.style.cursor = "default"; // Not clickable
+        div.style.cursor = "default"; 
         div.style.fontSize = "16px";
         div.style.minHeight = "50px";
         div.innerText = opt;
 
-        // --- STYLING LOGIC ---
+        // Styling Logic
         if (opt === userAns) {
-            // This is what the student picked
             div.style.border = "4px solid";
             if (isCorrect) {
-                div.style.borderColor = "#48bb78"; // Green Border
+                div.style.borderColor = "#48bb78"; 
                 div.style.background = "#f0fff4";
                 div.innerHTML += " <b>(You)</b>";
             } else {
-                div.style.borderColor = "#f56565"; // Red Border
+                div.style.borderColor = "#f56565"; 
                 div.style.background = "#fff5f5";
                 div.innerHTML += " <b>(You)</b>";
             }
         } else {
-            // Other options -> Fade them out slightly so the choice pops
             div.style.opacity = "0.6";
         }
-        
-        // NOTE: We do NOT highlight the correct answer if they got it wrong.
-        // This forces them to solve it on paper.
-
         grid.appendChild(div);
     });
 }
