@@ -2869,6 +2869,13 @@ window.addEventListener("beforeunload", () => {
     document.getElementById('release-modal').classList.remove('active'); 
 });
 
+// ---------------------------------------------------------
+    // 2. THE FIX: The "NO" Button (PASTE THIS RIGHT HERE!)
+    // ---------------------------------------------------------
+    document.getElementById('release-cancel').addEventListener('click', () => {
+        document.getElementById('release-modal').classList.remove('active');
+    });
+
     // --- ADVENTURE MODE SYSTEM (RESTORATION) ---
     // ... (Your adventure functions remain here, skipping duplicate copy for brevity, they are assumed present as per instruction "Do not delete existing features") ... 
     // Re-adding adventure logic to ensure full functionality:
@@ -5988,4 +5995,4 @@ function readExamQuestion() {
     }
   </script>
 </body>
-</html>
+ </html>
