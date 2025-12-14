@@ -10,7 +10,45 @@
           "qty": 1
         }
       ],
-      "pet": null
+      "pet": {
+        "name": "Onesy",
+        "type": "baseten_01",
+        "rarity": "rare",
+        "element": "earth",
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/baseten/1.png",
+        "imageStyle": "blend-multiply",
+        "emoji": "🟦",
+        "hp": 60,
+        "maxHP": 60,
+        "level": 5,
+        "xp": 0,
+        "maxXp": 300,
+        "powers": [],
+        "isHatched": true,
+        "hatchProgress": 100,
+        "savedEvolutions": [
+            {
+              "name": "Onesy", 
+              "level": 10,
+              "cost": 100,
+              "baseHP": 100,
+              "rarity": "epic",
+              "element": "earth",
+              "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/baseten/2.png",
+              "imageStyle": "blend-multiply"
+            },
+            {
+              "name": "Onesy",
+              "level": 20,
+              "cost": 200,
+              "baseHP": 200,
+              "rarity": "legendary",
+              "element": "earth",
+              "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/baseten/3.png",
+              "imageStyle": "blend-multiply"
+            }
+        ]
+      }
     }
   },
   "questions": [
