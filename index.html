@@ -450,6 +450,32 @@
     .gradebook-table tr:nth-child(even) { background: #f7fafc; }
     .score-pass { color: #38a169; font-weight: bold; }
     .score-fail { color: #e53e3e; font-weight: bold; }  
+    
+    /* EQUIPMENT SLOTS */
+    .equipment-grid {
+        display: flex; gap: 10px; justify-content: center; margin: 15px 0;
+    }
+    .equip-slot {
+        width: 50px; height: 50px; 
+        background: #edf2f7; border: 2px dashed #cbd5e0; border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 24px; cursor: pointer; position: relative;
+        transition: all 0.2s;
+    }
+    .equip-slot:hover { border-color: #5a67d8; background: white; }
+    .equip-slot.filled { border: 2px solid #5a67d8; background: #ebf8ff; }
+    .equip-badge {
+        position: absolute; bottom: -20px; font-size: 10px; font-weight: bold;
+        color: #718096; width: 100%; text-align: center;
+    }
+    .equip-img { width: 35px; height: 35px; object-fit: contain; }
+    /* FUSION SYSTEM */
+    .star-display { color: #ecc94b; font-size: 18px; text-shadow: 1px 1px 0 #975a16; margin-top: -5px; margin-bottom: 5px; }
+    .fuse-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; max-height: 300px; overflow-y: auto; padding: 10px; }
+    .fuse-card { background: white; border: 2px solid #e2e8f0; border-radius: 10px; padding: 10px; text-align: center; cursor: pointer; position: relative; }
+    .fuse-card:hover { border-color: #5a67d8; background: #ebf8ff; }
+    .fuse-card.high-level { border-color: #fc8181; background: #fff5f5; }
+    .fuse-card.high-level::after { content: "⚠️"; position: absolute; top: 5px; right: 5px; font-size: 12px; }
   </style>
   </head>
  <body><!-- Login Screen -->
@@ -1047,11 +1073,50 @@
   <div class="modal-overlay" id="release-modal"><div class="confirm-modal"><h2>⚠️ Release Pet?</h2><div class="pet-preview" id="release-pet-preview">🐱</div><p id="release-pet-text" style="font-weight: bold; font-size: 18px;">Are you sure you want to release <strong>Cat</strong>?</p><p style="color: #6b7280; font-size: 14px;">This pet will leave your collection forever and return to the wild.</p><div class="confirm-reward">✅ You will receive +10 Brain Points</div><div class="confirm-warning">🚨 WARNING: This action cannot be undone!</div><div class="confirm-buttons"><button class="confirm-btn no" id="release-cancel">No, Keep</button> <button class="confirm-btn yes" id="release-confirm">Yes, Release</button></div></div></div>
   <div class="modal-overlay" id="gacha-reveal-modal"><div class="confirm-modal" style="max-width: 800px;"><h2 id="reveal-title">🌟 Legendary Summon Results! 🌟</h2><p id="reveal-message">You summoned 3 powerful companions!</p><div id="gacha-reveal-container" class="gacha-results"></div><div style="margin-top: 30px;"><button class="confirm-btn yes" onclick="closeGacha()">Awesome!</button></div></div></div>
   <div id="gacha-cinematic-modal"><div class="flash-overlay" id="gacha-flash-overlay"></div><div id="gacha-message" class="evo-message" style="margin-bottom: 50px; font-size: 28px; transition: opacity 1s;">Summoning Legendary Power...</div><div class="summoning-circle" id="summoning-circle"><div class="summoning-core" id="summoning-core"></div></div><div id="pet-reveal-container" style="position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; pointer-events: none;"></div><div id="gacha-cinematic-controls" style="position: absolute; bottom: 10%; opacity: 0; transition: opacity 0.5s;"></div></div>
+  <!-- EQUIPMENT SELECTION MODAL -->
+  <div class="modal-overlay" id="equip-modal">
+      <div class="confirm-modal">
+          <h2 style="color: #5a67d8;">🎒 Equip Item</h2>
+          <p id="equip-slot-title">Select a Weapon:</p>
+          
+          <!-- List of items you own for this slot -->
+          <div id="equip-list" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; max-height: 300px; overflow-y: auto;">
+              <!-- Items injected here by JS -->
+          </div>
+
+          <div class="confirm-buttons">
+              <button class="confirm-btn no" onclick="document.getElementById('equip-modal').classList.remove('active')">Cancel</button>
+              <button id="unequip-btn" class="confirm-btn yes" style="background: #e53e3e; display: none;">Unequip Current</button>
+          </div>
+      </div>
+  </div>
   <div class="modal-overlay" id="arena-modal"><div class="confirm-modal"><div style="font-size: 60px; margin-bottom: 10px;">🏟️</div><h2 style="color: #d69e2e;">Championship Arena</h2><p style="font-weight: bold; font-size: 18px;">Challenge a Powerful Champion?</p><div style="background: #fffbeb; padding: 15px; border-radius: 10px; border: 2px solid #fbd38d; margin: 15px 0; text-align: left;"><div>🎟️ <strong>Ticket Cost:</strong> 1</div><div id="arena-ticket-display" style="color: #744210; font-size: 14px; margin-bottom: 10px;">(You have: 0)</div><hr style="border-color: #fbd38d; margin: 10px 0;"><div style="font-size: 14px;"><div>🏆 <strong>Win:</strong> Rare, Epic, or Legendary Egg</div><div style="color: #e53e3e;">💀 <strong>Lose:</strong> -20 Stamina</div></div></div><div class="confirm-buttons"><button class="confirm-btn no" onclick="closeArenaModal()">Leave</button> <button class="confirm-btn yes" id="enter-arena-btn" style="background: #d69e2e;">Fight! ⚔️</button></div></div></div>
   <div class="modal-overlay" id="replace-move-modal"><div class="confirm-modal"><h2 style="color: #4299e1;">🧠 Move Relearner</h2><p>Your pet already knows 4 moves!</p><p style="font-size: 14px; color: #718096;">Select a move to <strong>forget</strong> to learn <strong id="new-move-name" style="color: #48bb78;">New Move</strong>:</p><div id="replace-move-list" class="move-replace-list"></div><div class="confirm-buttons"><button class="confirm-btn no" onclick="closeReplaceModal()">Cancel</button></div></div></div>
   <div class="modal-overlay" id="teacher-delete-modal"><div class="confirm-modal delete-confirm-modal"><div style="font-size: 60px; margin-bottom: 10px;">🗑️</div><h2 style="color: #e53e3e;">Delete Student Account?</h2><p style="font-weight: bold; font-size: 18px;">Are you sure you want to delete account: <strong id="delete-student-name-display">STUDENT_NAME</strong>?</p><div class="confirm-warning">🚨 WARNING: All associated data will be permanently lost! This cannot be undone.</div><div class="confirm-buttons"><button class="confirm-btn no" onclick="document.getElementById('teacher-delete-modal').classList.remove('active');">Cancel</button> <button class="confirm-btn yes" id="delete-student-confirm-btn" onclick="confirmDeleteStudent()">Yes, Delete Permanently</button></div></div></div>
   <div id="evolution-modal"><div id="evo-message-1" class="evo-message" style="transition: opacity 1s;">...The aura is changing...</div><div id="evo-pet-container" class="evo-pet-visual"></div><div id="evo-message-2" class="evo-message" style="transition: opacity 1s; margin-top: 40px;"></div><button id="evo-continue-btn" class="action-btn green" style="width:200px; padding:12px; margin-top: 40px; display:none;">Continue</button></div>
   <div class="modal-overlay" id="quantity-modal"><div class="confirm-modal"><h2 id="qty-item-name" style="color: #48bb78;">Buy Item</h2><div id="qty-item-visual" class="pet-preview" style="font-size: 50px;">🛒</div><p id="qty-cost-display" style="font-weight: bold; font-size: 16px; color:#92400e; margin-bottom: 20px;">Cost: 0 BP</p><label for="quantity-slider" id="quantity-label" style="display:block; font-weight:bold; margin-bottom:10px;">Quantity: 1</label><input type="range" id="quantity-slider" min="1" max="1" value="1" style="width: 100%; height: 25px; cursor: pointer;"><div style="display:flex; justify-content:space-between; font-size:12px; color:#718096; margin-bottom:20px;"><span>1</span><span id="max-affordable-qty">Max: 1</span></div><div class="confirm-buttons"><button class="confirm-btn no" onclick="document.getElementById('quantity-modal').classList.remove('active');">Cancel</button> <button class="confirm-btn green" id="qty-buy-confirm-btn" style="background: #48bb78;">Buy 1 (0 BP)</button></div></div></div>
+  
+  <!-- 🧬 EVOLUTION MATH CHALLENGE MODAL -->
+  <div class="modal-overlay" id="evo-challenge-modal" style="z-index: 9500;">
+      <div class="confirm-modal" style="max-width: 500px; width: 90%; height: auto; padding: 0; overflow: hidden; display:flex; flex-direction:column;">
+          
+          <!-- Header -->
+          <div style="background: #5a67d8; color: white; padding: 15px; font-weight: bold; font-size: 18px; display:flex; justify-content:space-between;">
+              <span>🧬 Evolution Trial</span>
+              <span id="evo-chal-score">0 / 3</span>
+          </div>
+
+          <!-- Question Area -->
+          <div id="evo-chal-content" style="padding: 30px 20px; text-align: center; flex: 1;">
+              <!-- Question goes here -->
+          </div>
+
+          <!-- Footer (Cancel) -->
+          <div style="background: #f7fafc; padding: 10px; border-top: 1px solid #e2e8f0; text-align: center;">
+              <button class="confirm-btn no" style="font-size: 12px; padding: 8px 15px;" onclick="closeEvoChallenge()">Give Up</button>
+          </div>
+      </div>
+  </div>
 
   <div id="hatch-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:6000; flex-direction:column; align-items:center; justify-content:center;">
       <div id="hatch-light" class="hatch-light"></div>
@@ -1316,24 +1381,54 @@
        { emoji: '🦕', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/enemy/6.png', imageStyle: 'blend-multiply', name: 'Draire', hp: 140, damage: 15, xp: 80, element: 'fire' }
     ];
 
-    let SHOP_ITEMS = { 
+   let SHOP_ITEMS = { 
         egg_items: [ 
             { id: 'premium_food', name: 'Premium Food', icon: '🥩', price: 50, desc: 'Adds 20% to hatch progress', effect: 20 }, 
             { id: 'warmer', name: 'Warmer', icon: '🔥', price: 30, desc: 'Adds 10% to hatch progress', effect: 10 }, 
             { id: 'hatching_machine', name: 'Hatching Machine', icon: '⚙️', price: 100, desc: 'Adds 50% to hatch progress', effect: 50 } 
         ], 
         power_items: [ 
+            // BASIC ATTACKS
             { id: 'claw_attack', name: 'Claw Attack', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/power/2.png', icon: '🦅', price: 80, desc: 'Normal damage', damage: 10, element: 'normal' }, 
-            { id: 'fire_spell', name: 'Fire Spell', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/power/1.png', icon: '🔥', price: 120, desc: 'Burn the target', damage: 15, element: 'fire' }, 
+            
+            // ELEMENTAL STATUS ATTACKS
+            { 
+                id: 'fire_spell', name: 'Fire Spell', 
+                image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/power/1.png', icon: '🔥', 
+                price: 120, desc: 'Burn the target', damage: 15, element: 'fire',
+                effect: { type: "burn", value: 5, duration: 3, chance: 0.5 } // <--- NEW!
+            }, 
+            { 
+                id: 'ice_blast', name: 'Ice Blast', 
+                image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/power/4.png', icon: '❄️', 
+                price: 110, desc: 'Freezing cold', damage: 12, element: 'ice',
+                effect: { type: "freeze", duration: 1, chance: 0.3 } // <--- NEW!
+            }, 
+            { 
+                id: 'thunder_strike', name: 'Thunder Strike', 
+                image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/power/5.png', icon: '⚡', 
+                price: 150, desc: 'Shocking hit', damage: 18, element: 'electric',
+                effect: { type: "stun", duration: 1, chance: 0.25 } // <--- NEW!
+            }, 
+            { 
+                id: 'poison_fang', name: 'Poison Fang', 
+                image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/power/10.png', icon: '🐍', 
+                price: 105, desc: 'Toxic bite', damage: 14, element: 'grass',
+                effect: { type: "poison", value: 5, duration: 5, chance: 0.8 } // <--- NEW!
+            },
+            { 
+                id: 'shadow_strike', name: 'Shadow Strike', 
+                image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/power/8.png', icon: '🌑', 
+                price: 130, desc: 'Lifesteal Attack', damage: 16, element: 'shadow',
+                effect: { type: "drain", value: 0.5, chance: 1.0 } // <--- NEW! (Heals 50% of damage)
+            },
+
+            // STANDARD ATTACKS (No effects, just damage)
             { id: 'quick_dodge', name: 'Cloud Strike', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/power/3.png', icon: '💨', price: 100, desc: 'Normal damage', damage: 15, element: 'normal' }, 
-            { id: 'ice_blast', name: 'Ice Blast', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/power/4.png', icon: '❄️', price: 110, desc: 'Freezing cold', damage: 12, element: 'ice' }, 
-            { id: 'thunder_strike', name: 'Thunder Strike', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/power/5.png', icon: '⚡', price: 150, desc: 'Shocking hit', damage: 18, element: 'electric' }, 
             { id: 'water_wave', name: 'Water Wave', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/power/6.png', icon: '🌊', price: 90, desc: 'Soaking wet', damage: 11, element: 'water' }, 
             { id: 'earth_slam', name: 'Earth Slam', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/power/7.png', icon: '🪨', price: 100, desc: 'Rock solid', damage: 13, element: 'earth' }, 
             { id: 'wind_slash', name: 'Wind Slash', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/power/12.png', icon: '🌪️', price: 95, desc: 'Fast cut', damage: 10, element: 'wind' }, 
-            { id: 'shadow_strike', name: 'Shadow Strike', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/power/8.png', icon: '🌑', price: 130, desc: 'Dark energy', damage: 16, element: 'shadow' }, 
             { id: 'light_beam', name: 'Light Beam', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/power/9.png', icon: '✨', price: 140, desc: 'Holy light', damage: 17, element: 'light' }, 
-            { id: 'poison_fang', name: 'Poison Fang', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/power/10.png', icon: '🐍', price: 105, desc: 'Toxic bite', damage: 14, element: 'grass' }, 
             { id: 'mega_punch', name: 'Mega Punch', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/power/11.png', icon: '👊', price: 115, desc: 'Heavy hit', damage: 15, element: 'normal' } 
         ],
         consumable_items: [ 
@@ -1471,6 +1566,35 @@
                 } 
             } 
         } catch(e) { console.error("Error loading evolutions:", e); }
+        
+        // 4. Dynamic Equipment (NEW!)
+        try {
+            // Initialize array if missing
+            if (!SHOP_ITEMS.equipment) SHOP_ITEMS.equipment = [];
+            
+            const files = await fetchGithubFolder('items');
+            if (files && files.length > 0) {
+                for (const file of files) {
+                    if (file.name.endsWith('.json')) {
+                        try {
+                            const res = await fetch(file.download_url);
+                            if (res.ok) {
+                                const newItems = await res.json();
+                                if (Array.isArray(newItems)) {
+                                    newItems.forEach(item => {
+                                        // Prevent duplicates based on ID
+                                        if (!SHOP_ITEMS.equipment.find(i => i.id === item.id)) {
+                                            SHOP_ITEMS.equipment.push(item);
+                                        }
+                                    });
+                                }
+                            }
+                        } catch (err) { console.error("Item load error:", err); }
+                    }
+                }
+                console.log("🎒 Loaded Equipment:", SHOP_ITEMS.equipment.length);
+            }
+        } catch(e) { console.log("No items folder found."); }
 
         // 3. Dynamic Powers
         try {
@@ -1926,10 +2050,11 @@
       
       if (!p) { c.innerHTML = "<div class='no-pet-message'>No pet selected.</div>"; return; }
       
-      // Safety check for Squad
+      // Safety Checks
       if (!gameState.team) gameState.team = [p.id]; 
-
-      // Safety checks for Stats
+      if (!p.equipment) p.equipment = {}; 
+      if (!p.stars) p.stars = 0; // Initialize Stars
+      
       if(!p.level) p.level = 1; 
       if(!p.xp) p.xp = 0; 
       if(!p.maxXp) p.maxXp = 100; 
@@ -1942,63 +2067,83 @@
           c.innerHTML = `<div style="text-align:center; padding:20px;"><h2>🥚 Incubator</h2><div class="pet-visual" style="font-size:100px;">🥚</div><h3>${p.isHatched ? p.name : "Mystery Egg"}</h3><div style="margin:20px 0;">${p.hatchProgress}% <div class="hatch-bar-container"><div class="hatch-bar" style="width: ${p.hatchProgress}%;"></div></div></div>${p.hatchProgress >= 100 ? `<button class="action-btn green" onclick="hatchPet()">✨ HATCH NOW! ✨</button>` : `<p style="color:#718096">Use Items in Shop to speed up!</p>`}<div style="margin-top:20px;">${renderInventory(true)}</div></div><div class="pet-collection">${renderCollection()}</div>`; return; 
       }
       
-      // 2. EVOLUTION CHECK (Includes Rudolf Fix)
+      // --- STAR DISPLAY ---
+      let starHTML = "";
+      for(let i=0; i<5; i++) {
+          starHTML += (i < p.stars) ? "★" : "☆";
+      }
+      // --------------------
+
+      // --- BUTTON LOGIC ---
+      let actionButton = "";
+      if (p.stars < 5) {
+          actionButton = `<button class="action-btn blue" style="margin-top:5px;" onclick="openFuseMenu()">⚗️ Fuse (+Star)</button>`;
+      } else {
+          // 5 Stars Reached! Check Level.
+          if (p.level >= 25) {
+              actionButton = `<button class="gacha-btn" style="margin-top:5px; font-size:16px;" onclick="startUltraEvolve()">🧬 ULTRA EVOLVE</button>`;
+          } else {
+              actionButton = `<button class="action-btn" disabled style="background:#cbd5e0; margin-top:5px;">🔒 Ultra (Need Lvl 25)</button>`;
+          }
+      }
+      // --------------------
+
+      // Evolution Check
       let ch = EVOLUTION_CHAINS[p.type]; 
       if (!ch && p.savedEvolutions) {
           ch = p.savedEvolutions;
           EVOLUTION_CHAINS[p.type] = p.savedEvolutions;
       }
-
       const nextEvo = (ch && ch[currentStage]) ? ch[currentStage] : null;
       const can = nextEvo && p.level >= nextEvo.level;
-
       let ev = nextEvo ? `<div class="evolution-info"><h3>🧬 Evolution</h3><p>Next: <strong>${nextEvo.name || ('Teen ' + p.name)}</strong></p><button class="evolution-btn" ${can?'':'disabled'} onclick="evolvePet()">${can?`✨ Evolve (Lvl ${nextEvo.level})`:`🔒 Need Level ${nextEvo.level}`}</button></div>` : `<div class="evolution-info" style="background:#fef3c7"><h3>👑 Max Level</h3></div>`;
       
-      // 3. SQUAD UI
+      // Squad Logic
       const isInSquad = gameState.team ? gameState.team.includes(p.id) : false;
       const squadBtnColor = isInSquad ? 'red' : 'blue';
       const squadBtnText = isInSquad ? 'Remove from Squad' : 'Add to Squad';
-      
-      const squadDisplay = `
-        <div style="margin-top:10px; padding:10px; background:#edf2f7; border-radius:8px; font-size:14px;">
-            <div style="display:flex; justify-content:space-between;">
-                <strong>🛡️ Squad (${(gameState.team||[]).length}/6)</strong>
-                <button class="action-btn ${squadBtnColor}" style="width:auto; padding:5px 10px; font-size:11px; margin:0;" onclick="toggleSquadMember('${p.id}')">${squadBtnText}</button>
-            </div>
-            <div style="display:flex; gap:5px; margin-top:5px; overflow-x:auto;">
-                ${(gameState.team||[]).map(tid => {
-                    const mp = gameState.pets.find(x => x.id === tid);
-                    return `<div style="width:20px; height:20px; background:white; border-radius:50%; border:1px solid #ccc; display:flex; align-items:center; justify-content:center; font-size:12px;">${mp ? (mp.emoji || '🐾') : '?'}</div>`
-                }).join('')}
-            </div>
-        </div>`;
+      const squadDisplay = `<div style="margin-top:10px; padding:10px; background:#edf2f7; border-radius:8px; font-size:14px;"><div style="display:flex; justify-content:space-between;"><strong>🛡️ Squad (${(gameState.team||[]).length}/6)</strong><button class="action-btn ${squadBtnColor}" style="width:auto; padding:5px 10px; font-size:11px; margin:0;" onclick="toggleSquadMember('${p.id}')">${squadBtnText}</button></div><div style="display:flex; gap:5px; margin-top:5px; overflow-x:auto;">${(gameState.team||[]).map(tid => { const mp = gameState.pets.find(x => x.id === tid); return `<div style="width:20px; height:20px; background:white; border-radius:50%; border:1px solid #ccc; display:flex; align-items:center; justify-content:center; font-size:12px;">${mp ? (mp.emoji || '🐾') : '?'}</div>`}).join('')}</div></div>`;
 
-      // 4. MAIN DISPLAY (Updated with Rename Button)
+      // Helper: Render Slot
+      const renderSlot = (type, icon) => {
+          const itemId = p.equipment[type];
+          const item = itemId ? findShopItem(itemId) : null;
+          let content = icon;
+          let css = "equip-slot";
+          if (item) {
+              css += " filled";
+              if(item.image && item.image.startsWith('http')) { content = `<img src="${item.image}" class="equip-img">`; } else { content = item.icon || '📦'; }
+          }
+          return `<div class="${css}" onclick="openEquipMenu('${type}')">${content}<div class="equip-badge">${type}</div></div>`;
+      };
+
+      // 4. MAIN DISPLAY
       c.innerHTML = `
       <div class="hub-grid">
         <div class="hub-left">
             <div class="pet-display">
                 <div class="pet-visual">${v}</div>
                 <div class="pet-name">
-                    Lvl ${p.level} ${p.name} 
-                    <!-- RENAME BUTTON -->
-                    <button onclick="renamePet()" style="background:none; border:none; cursor:pointer; font-size:16px;" title="Rename (100 BP)">✏️</button>
-                    <span class="rarity-badge rarity-${p.rarity}">${p.rarity}</span>
+                    Lvl ${p.level} ${p.name} <button onclick="renamePet()" style="background:none; border:none; cursor:pointer; font-size:16px;" title="Rename (100 BP)">✏️</button> <span class="rarity-badge rarity-${p.rarity}">${p.rarity}</span>
                 </div>
+                <!-- STARS -->
+                <div class="star-display">${starHTML}</div>
+                <!-- STATS -->
                 <div style="font-size:12px;">XP: ${p.xp} / ${p.maxXp}</div>
                 <div class="xp-bar-container"><div class="xp-bar" style="width: ${(p.xp/p.maxXp)*100}%"></div></div>
-                <button class="action-btn red" style="margin-top:15px;" onclick="releasePet()">Release</button>
+                
+                <!-- EQUIPMENT GRID -->
+                <div class="equipment-grid">
+                    ${renderSlot('weapon', '🗡️')} ${renderSlot('armor', '🛡️')} ${renderSlot('accessory', '💍')} ${renderSlot('charm', '🧿')}
+                </div>
+                
+                <!-- ACTION BUTTONS -->
+                ${actionButton}
+                <button class="action-btn red" style="margin-top:10px;" onclick="releasePet()">Release</button>
             </div>
         </div>
         <div class="hub-right">
-            <div class="inventory-section">
-                <h3>Stats</h3>
-                <div class="pet-stats">
-                    <div class="stat-box"><div class="stat-label">HP</div><div class="stat-value">${p.hp}/${p.maxHP}</div></div>
-                    <div class="stat-box"><div class="stat-label">Power</div><div class="stat-value">${p.powers.length}/4</div></div>
-                </div>
-                ${squadDisplay}
-            </div>
+            <div class="inventory-section"><h3>Stats</h3><div class="pet-stats"><div class="stat-box"><div class="stat-label">HP</div><div class="stat-value">${p.hp}/${p.maxHP}</div></div><div class="stat-box"><div class="stat-label">Power</div><div class="stat-value">${p.powers.length}/4</div></div></div>${squadDisplay}</div>
             ${ev}
             <div class="inventory-section"><h3>🎒 Inventory</h3>${renderInventory(false)}</div>
             <div class="inventory-section"><h3>⚔️ Powers</h3>${renderPowersList(p)}</div>
@@ -2102,36 +2247,231 @@
         }
     }
     
+    // ==========================================
+    // 🧬 STANDARD EVOLUTION (With Dedicated Modal)
+    // ==========================================
+
+    let pendingEvoData = null; 
+    let stdEvoCount = 0; 
+    let stdEvoScore = 0; 
+
     async function evolvePet() {
         const p = gameState.pets.find(pet => pet.id === gameState.currentPetId); 
+        
+        // 1. Get Evolution Data
         let ch = EVOLUTION_CHAINS[p.type]; 
+        if (!ch && p.savedEvolutions) {
+             ch = p.savedEvolutions;
+             EVOLUTION_CHAINS[p.type] = p.savedEvolutions;
+        }
+
         if (!ch) return showToast(`Error: Evolution data missing`, "error");
+        
         const currentStage = typeof p.evolutionStage === 'number' ? p.evolutionStage : 0;
         if (!ch[currentStage]) return showToast("Max Evolution!", "info");
+        
         const next = ch[currentStage];
+        
+        // 2. Check Requirements
         if (p.level < next.level) { showToast(`Need Lvl ${next.level} to evolve!`, "error"); return; }
         if (gameState.brainPoints < next.cost) { showToast(`Need ${next.cost} BP to evolve!`, "error"); return; }
+        
+        // 3. Confirm & Start
+        pendingEvoData = next; 
+        if(confirm(`🧬 EVOLUTION READY!\n\nTo evolve into ${next.name || "Next Form"}, you must pass a quick test.\n\nAnswer 3 Questions correctly.\n\nCost: ${next.cost} BP (Paid on success).`)) {
+            startStandardEvoQuiz();
+        }
+    }
+
+    function startStandardEvoQuiz() {
+        stdEvoCount = 0;
+        stdEvoScore = 0;
+        
+        // OPEN NEW MODAL
+        document.getElementById('evo-challenge-modal').classList.add('active');
+        document.getElementById('evo-chal-score').innerText = "0 / 3";
+        
+        renderStandardEvoQuestion();
+    }
+
+    function renderStandardEvoQuestion() {
+        if (stdEvoCount >= 3) {
+            finishStandardEvoQuiz();
+            return;
+        }
+
+        let q;
+        
+        // 1. TRY TO USE ASSIGNED TOPICS FIRST
+        if (gameState.activeQuestionPool && gameState.activeQuestionPool.length > 0) {
+            const randomIndex = Math.floor(Math.random() * gameState.activeQuestionPool.length);
+            q = gameState.activeQuestionPool[randomIndex];
+        } 
+        // 2. FALLBACK TO GENERIC MATH (If no topics assigned)
+        else {
+            q = MathEngine.generate(gameState.grade || "1");
+        }
+
+        const container = document.getElementById('evo-chal-content');
+        
+        // Render
+        container.innerHTML = `
+            <div style="font-size:14px; color:#718096; margin-bottom:10px; font-weight:bold;">QUESTION ${stdEvoCount+1}</div>
+            
+            <div style="font-size:32px; margin-bottom:15px;">${q.qVisualHTML || ""}</div>
+            
+            <!-- Question Text -->
+            <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:20px;">
+                <div style="font-size:24px; font-weight:bold; color:#2d3748;">${q.text || q.q}</div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; width:100%;">
+                ${q.options.map(opt => `<button class="mcq-btn" style="min-height:50px; font-size:18px;" onclick="handleEvoAnswer('${opt}', '${q.a}')">${opt}</button>`).join('')}
+            </div>
+        `;
+    }
+
+    window.handleEvoAnswer = (ans, correct) => {
+        if (ans == correct) {
+            stdEvoScore++;
+            soundManager.playSFX('correct');
+        } else {
+            soundManager.playSFX('wrong');
+        }
+        
+        stdEvoCount++;
+        document.getElementById('evo-chal-score').innerText = `${stdEvoScore} / 3`;
+        
+        // Short delay to feel like a game
+        setTimeout(renderStandardEvoQuestion, 300);
+    }
+
+    function finishStandardEvoQuiz() {
+        document.getElementById('evo-challenge-modal').classList.remove('active');
+
+        // PASS CONDITION: 2 out of 3
+        if (stdEvoScore >= 2) {
+            performEvolutionAnimation();
+        } else {
+            alert(`Trial Failed (${stdEvoScore}/3). \n\nThe evolution energy fades... \nStudy and try again!`);
+        }
+    }
+
+    function closeEvoChallenge() {
+        if(confirm("Quit the evolution trial?")) {
+            document.getElementById('evo-challenge-modal').classList.remove('active');
+        }
+    }
+
+    function performEvolutionAnimation() {
+        const p = gameState.pets.find(pet => pet.id === gameState.currentPetId);
+        const next = pendingEvoData;
         let newName = next.name || ("Teen " + p.name);
 
-        const m = document.getElementById('evolution-modal'); const c = document.getElementById('evo-pet-container'); m.style.display = 'flex'; 
-        document.getElementById('evo-message-1').innerText = ""; document.getElementById('evo-message-2').innerText = "";
-        document.getElementById('evo-continue-btn').style.display='none';
-        c.innerHTML = p.image ? `<img src="${p.image}" class="evo-pet-image ${p.imageStyle}">` : p.emoji; c.classList.remove('flash-and-scale');
+        // Deduct Cost
+        gameState.brainPoints -= next.cost;
+        updateStatsDisplay();
+
+        // Setup Animation Modal
+        const m = document.getElementById('evolution-modal'); 
+        const c = document.getElementById('evo-pet-container'); 
+        m.style.display = 'flex'; 
         
-        setTimeout(() => { document.getElementById('evo-message-1').innerText = "The aura is changing..."; document.getElementById('evo-message-1').style.opacity = 1; }, 500);
+        document.getElementById('evo-message-1').innerText = ""; 
+        document.getElementById('evo-message-2').innerText = "";
+        document.getElementById('evo-continue-btn').style.display='none';
+        
+        c.innerHTML = p.image ? `<img src="${p.image}" class="evo-pet-image ${p.imageStyle}">` : p.emoji; 
+        c.classList.remove('flash-and-scale');
+        
         setTimeout(() => { 
-            gameState.brainPoints -= next.cost; updateStatsDisplay();
-            p.name = newName; p.image = next.image; p.imageStyle = next.imageStyle; p.rarity = next.rarity; p.maxHP = next.baseHP; p.hp = p.maxHP; p.evolutionStage = currentStage + 1;
+            document.getElementById('evo-message-1').innerText = "The aura is changing..."; 
+            document.getElementById('evo-message-1').style.opacity = 1; 
+        }, 500);
+        
+        setTimeout(() => { 
+            p.name = newName; 
+            p.image = next.image; 
+            p.imageStyle = next.imageStyle; 
+            p.rarity = next.rarity; 
+            p.maxHP = next.baseHP; 
+            p.hp = p.maxHP; 
+            p.evolutionStage = (p.evolutionStage || 0) + 1;
             if (next.element) p.element = next.element;
-            c.innerHTML = next.image ? `<img src="${next.image}" class="evo-pet-image ${next.imageStyle}">` : next.emoji; c.classList.add('flash-and-scale'); soundManager.playSFX('levelUp'); 
+
+            c.innerHTML = next.image ? `<img src="${next.image}" class="evo-pet-image ${next.imageStyle}">` : next.emoji; 
+            c.classList.add('flash-and-scale'); 
+            soundManager.playSFX('levelUp'); 
         }, 3000);
-        setTimeout(() => { document.getElementById('evo-message-2').innerText = `Evolved into ${newName}!`; document.getElementById('evo-message-2').style.opacity = 1; document.getElementById('evo-continue-btn').style.display = 'block'; }, 5000);
-        document.getElementById('evo-continue-btn').onclick = () => { m.style.display = 'none'; saveGame(); renderHub(); };
+
+        setTimeout(() => { 
+            document.getElementById('evo-message-2').innerText = `Evolved into ${newName}!`; 
+            document.getElementById('evo-message-2').style.opacity = 1; 
+            document.getElementById('evo-continue-btn').style.display = 'block'; 
+            pendingEvoData = null;
+        }, 5000);
+
+        document.getElementById('evo-continue-btn').onclick = () => { 
+            m.style.display = 'none'; 
+            saveGame(true); 
+            renderHub(); 
+        };
     }
     
     function renderShop() {
-        const c = document.getElementById('shop-content'); let h = `<div class="shop-section" style="text-align:center; background:#f3e8ff; padding:15px; border-radius:15px; border:2px solid #a855f7; margin-bottom:30px;"><h2 style="color:#6b21a8; border-bottom:none;">🔮 Legendary Summon</h2><button class="gacha-btn" onclick="buyGacha()">SUMMON (5000 BP)</button></div>`;
-        [{t:'🥚 Egg Care',i:SHOP_ITEMS.egg_items,k:'egg'},{t:'⚔️ Powers',i:SHOP_ITEMS.power_items,k:'power'},{t:'🧪 Consumables',i:SHOP_ITEMS.consumable_items,k:'consumable'}].forEach(cat=>{ h+=`<div class="shop-section"><h2>${cat.t}</h2><div class="shop-items">${cat.i.map(item=>`<div class="shop-item"><div style="height:50px;display:flex;align-items:center;justify-content:center;">${item.image?`<img src="${item.image}" style="width:40px;">`:item.icon}</div><div style="font-weight:bold;">${item.name}</div><div class="shop-item-price">🧠 ${item.price}</div><button class="buy-btn" onclick="${cat.k==='power'?`buyItem('${item.id}','power')`:`openQuantityModal('${item.id}')`}">Buy</button></div>`).join('')}</div></div>`; }); c.innerHTML = h;
+        const c = document.getElementById('shop-content'); 
+        
+        let h = `<div class="shop-section" style="text-align:center; background:#f3e8ff; padding:15px; border-radius:15px; border:2px solid #a855f7; margin-bottom:30px;">
+            <h2 style="color:#6b21a8; border-bottom:none;">🔮 Legendary Summon</h2>
+            <button class="gacha-btn" onclick="buyGacha()">SUMMON (5000 BP)</button>
+        </div>`;
+
+        // Define Categories
+        const categories = [
+            { t: '🥚 Egg Care', i: SHOP_ITEMS.egg_items, k: 'egg' },
+            { t: '⚔️ Powers', i: SHOP_ITEMS.power_items, k: 'power' },
+            { t: '🧪 Consumables', i: SHOP_ITEMS.consumable_items, k: 'consumable' },
+            { t: '🎒 Equipment', i: SHOP_ITEMS.equipment || [], k: 'equipment' } // New Category
+        ];
+
+        categories.forEach(cat => { 
+            if (cat.i.length === 0) return; // Don't show empty categories
+            
+            h += `<div class="shop-section"><h2>${cat.t}</h2><div class="shop-items">`;
+            
+            cat.i.map(item => {
+                // VISUAL LOGIC: Check for Image URL first, else Emoji
+                let visual = item.icon || '📦';
+                if (item.image && item.image.startsWith('http')) {
+                    visual = `<img src="${item.image}" style="width:50px; height:50px; object-fit:contain; filter:drop-shadow(0 2px 5px rgba(0,0,0,0.2));">`;
+                } else {
+                    visual = `<div style="font-size:30px;">${visual}</div>`;
+                }
+
+                // BUY BUTTON LOGIC
+                // Powers use buyItem(id, 'power'). 
+                // Equipment uses buyItem(id, 'equipment').
+                // Consumables use openQuantityModal.
+                let action = `openQuantityModal('${item.id}')`;
+                if (cat.k === 'power') action = `buyItem('${item.id}','power')`;
+                if (cat.k === 'equipment') action = `buyItem('${item.id}','equipment')`;
+
+                h += `
+                <div class="shop-item">
+                    <div style="height:60px; display:flex; align-items:center; justify-content:center; margin-bottom:5px;">
+                        ${visual}
+                    </div>
+                    <div style="font-weight:bold; font-size:14px; margin-bottom:5px;">${item.name}</div>
+                    <div style="font-size:11px; color:#718096; margin-bottom:8px; height:30px; overflow:hidden;">${item.desc || item.description || ''}</div>
+                    <div class="shop-item-price">🧠 ${item.price}</div>
+                    <button class="buy-btn" onclick="${action}">Buy</button>
+                </div>`;
+            }).join('');
+            
+            h += `</div></div>`;
+        }); 
+        
+        c.innerHTML = h;
     }
     function buyGacha() {
         if(gameState.brainPoints<5000) { showToast("Need 5000 BP!", "error"); return; }
@@ -2144,7 +2484,34 @@
     function closeGachaCinematic(pulls) { document.getElementById('gacha-cinematic-modal').style.display='none'; const c=document.getElementById('gacha-reveal-container'); c.innerHTML=pulls.map(p=>`<div class="gacha-card"><div>${p.image?`<img src="${p.image}" class="${p.imageStyle}" style="width:60px;">`:p.emoji}</div><div>${p.name}</div><div class="rarity-badge rarity-${p.rarity}">${p.rarity}</div></div>`).join(''); document.getElementById('gacha-reveal-modal').classList.add('active'); }
     function closeGacha() { document.getElementById('gacha-reveal-modal').classList.remove('active'); switchTab('hub'); }
     function findShopItem(id) { for(const k in SHOP_ITEMS) { const f=SHOP_ITEMS[k].find(i=>i.id===id); if(f) return f; } return null; }
-    function buyItem(id, type) { const item=findShopItem(id); if(gameState.brainPoints<item.price) return showToast("Not enough BP", "error"); const p=gameState.pets.find(pet=>pet.id===gameState.currentPetId); if(type==='power') { if(p.powers.includes(id)) return; if(p.powers.length>=4) { openReplaceModal(item); return; } p.powers.push(id); } else { gameState.inventory[id]=(gameState.inventory[id]||0)+1; } gameState.brainPoints-=item.price; saveGame(); updateStatsDisplay(); renderShop(); showToast("Bought!", "success"); }
+    function buyItem(id, type) { 
+        const item = findShopItem(id); 
+        if(gameState.brainPoints < item.price) return showToast("Not enough BP", "error"); 
+        
+        const p = gameState.pets.find(pet => pet.id === gameState.currentPetId); 
+        
+        // 1. POWERS (Limit 4)
+        if(type === 'power') { 
+            if(p.powers.includes(id)) return showToast("You already know this!", "info"); 
+            if(p.powers.length >= 4) { openReplaceModal(item); return; } 
+            p.powers.push(id); 
+        } 
+        // 2. EQUIPMENT (Inventory)
+        else if (type === 'equipment') {
+            // Equipment just goes to inventory stack, like potions
+            gameState.inventory[id] = (gameState.inventory[id] || 0) + 1;
+        }
+        // 3. CONSUMABLES
+        else { 
+            gameState.inventory[id] = (gameState.inventory[id] || 0) + 1; 
+        } 
+        
+        gameState.brainPoints -= item.price; 
+        saveGame(); 
+        updateStatsDisplay(); 
+        renderShop(); 
+        showToast(`Bought ${item.name}!`, "success"); 
+    }
     function openQuantityModal(id) { currentBuyingItem=findShopItem(id); const max=Math.floor(gameState.brainPoints/currentBuyingItem.price); if(max===0) return showToast("Too expensive!", "error"); document.getElementById('quantity-modal').classList.add('active'); const sl=document.getElementById('quantity-slider'); sl.max=max; sl.value=1; document.getElementById('qty-item-name').innerText=`Buy ${currentBuyingItem.name}`; document.getElementById('qty-buy-confirm-btn').onclick=()=>confirmBulkBuy(currentBuyingItem.price); updateQuantityModalDisplay(1,currentBuyingItem.price); sl.oninput=(e)=>updateQuantityModalDisplay(e.target.value,currentBuyingItem.price); }
     function updateQuantityModalDisplay(q,p) { document.getElementById('quantity-label').innerText=`Qty: ${q}`; document.getElementById('qty-cost-display').innerText=`Total: ${q*p} BP`; document.getElementById('qty-buy-confirm-btn').innerText=`Buy ${q}`; }
     function confirmBulkBuy(p) { const q=parseInt(document.getElementById('quantity-slider').value); if(gameState.brainPoints<q*p) return; gameState.brainPoints-=q*p; gameState.inventory[currentBuyingItem.id]=(gameState.inventory[currentBuyingItem.id]||0)+q; saveGame(); updateStatsDisplay(); renderShop(); document.getElementById('quantity-modal').classList.remove('active'); showToast(`Bought ${q}!`, "success"); }
@@ -2321,12 +2688,19 @@
         const hpGrowth = (playerLevel - 1) * 5; 
         const dmgGrowth = Math.floor((playerLevel - 1) * 0.4);
         const xpGrowth = (playerLevel - 1) * 15; 
+        
         enemy.hp = (enemy.hp || 30) + hpGrowth;
         enemy.damage = (enemy.damage || 5) + dmgGrowth;
         enemy.xp = (enemy.xp || 10) + xpGrowth;
+        
+        // Randomize HP slightly
         enemy.hp = Math.floor(enemy.hp * (0.9 + (Math.random() * 0.2)));
         enemy.hp = Math.max(10, enemy.hp);
+        
+        // --- NEW: Save Level for Anti-Cheat checks ---
+        enemy.level = playerLevel; 
         enemy.name = `Lvl ${playerLevel} ${enemy.name}`;
+        
         return enemy;
     }
     
@@ -2355,54 +2729,67 @@
             if (!pet.element) pet.element = 'normal'; 
         }
         
-        let enemy;
-        
-        // 1. SPECIFIC ENEMY (From Quest JSON)
-        if (specificEnemy) {
-            enemy = getScaledEnemy(specificEnemy, pet.level);
-        }
-        // 2. Arena Logic
-        else if (isArena) { 
-            const baseArena = getArenaEnemy(); 
-            enemy = getScaledEnemy(baseArena, pet.level + 2); 
-        } 
-        // 3. Boss Logic
-        else if (isBoss) { 
-            enemy = getScaledEnemy(BOSS_TYPES[0], pet.level + 5); 
-        } 
-        // 4. Random Wild Logic
-        else { 
-            const randomBase = MONSTER_TYPES[Math.floor(Math.random() * MONSTER_TYPES.length)]; 
-            enemy = getScaledEnemy(randomBase, pet.level); 
+        // 1. DETERMINE SCALING LEVEL
+        // Wilds: Active Pet (Casual)
+        // Boss/Arena: Strongest Pet in Squad (Hardcore)
+        let scalingLevel = pet.level;
+
+        if (isBoss || isArena) {
+            const teamIds = gameState.team || [gameState.currentPetId];
+            teamIds.forEach(id => {
+                const member = gameState.pets.find(p => p.id === id);
+                if (member && member.level > scalingLevel) {
+                    scalingLevel = member.level;
+                }
+            });
         }
 
+        // 2. GENERATE ENEMY
+        let enemy;
+        if (specificEnemy) {
+            enemy = getScaledEnemy(specificEnemy, scalingLevel);
+        } else if (isArena) { 
+            const baseArena = getArenaEnemy(); 
+            enemy = getScaledEnemy(baseArena, scalingLevel + 2); 
+        } else if (isBoss) { 
+            enemy = getScaledEnemy(BOSS_TYPES[0], scalingLevel + 5); 
+        } else { 
+            const randomBase = MONSTER_TYPES[Math.floor(Math.random() * MONSTER_TYPES.length)]; 
+            enemy = getScaledEnemy(randomBase, scalingLevel); 
+        }
+
+        // 3. EQUIPMENT ARMOR LOGIC
+        const gear = getPetEquipmentStats(pet);
+        const battleMaxHP = pet.maxHP + gear.hp;
+        const currentBattleHP = Math.min(battleMaxHP, pet.hp + gear.hp); 
+
+        // 4. SETUP BATTLE STATE
         gameState.inBattle = true;
         gameState.battleState = { 
             enemy: enemy, 
-            playerHP: pet.hp, 
+            playerHP: currentBattleHP,
+            playerMaxHP: battleMaxHP,
             enemyHP: enemy.hp, 
             isBoss: isBoss, 
             isArena: isArena, 
             turnInProgress: false, 
             log: [`A wild ${enemy.name} appeared!`], 
-            showBag: false 
+            showBag: false,
+            playerStatus: [],
+            enemyStatus: []
         };
         
         soundManager.playBGM(isBoss || isArena ? 'boss' : 'battle');
         const bg = isArena ? ARENA_IMGS[0] : (BATTLE_BACKGROUNDS[tileType] || BATTLE_BACKGROUNDS[1]);
         
-        // --- UI SWITCHING FIX (The part you asked about) ---
-        // 1. Force the Wilds Screen to be active (where Battle UI lives)
+        // UI Switching
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById('screen-wilds').classList.add('active');
-        
-        // 2. Hide other Wilds components so only Battle is visible
         document.getElementById('wilds-menu').style.display = 'none'; 
         document.getElementById('rpg-wrapper').style.display = 'none'; 
         document.getElementById('multiplayer-menu').style.display = 'none';
-        document.getElementById('raid-arena').style.display = 'none'; // Also hide raid if active
+        document.getElementById('raid-arena').style.display = 'none';
 
-        // 3. Show Battle UI
         document.getElementById('battle-ui').style.backgroundImage = `url('${bg}')`;
         document.getElementById('battle-ui').style.display = 'flex'; 
         
@@ -2511,11 +2898,17 @@
             ? `<img src="${bs.enemy.image}" class="battler-image ${bs.enemy.imageStyle}" style="width:${eSize}px; height:${eSize}px;">` 
             : `<div class="emoji-wrapper" style="font-size:${eSize * 0.7}px;">${bs.enemy.emoji}</div>`;
       
-        document.getElementById('player-battle-name').innerHTML = `${pet.name} ${gameState.burstMode ? "🔥" : ""} <span class="element-icon">${getElIcon(pet.element)}</span>`;
-        document.getElementById('enemy-name').innerHTML = `${bs.enemy.name} <span class="element-icon">${getElIcon(bs.enemy.element)}</span>`;
+        // --- SHOW STATUS ICONS ---
+        const pIcons = bs.playerStatus ? bs.playerStatus.map(s => s.icon).join(' ') : '';
+        const eIcons = bs.enemyStatus ? bs.enemyStatus.map(s => s.icon).join(' ') : '';
+      
+        document.getElementById('player-battle-name').innerHTML = `${pet.name} ${pIcons} <span class="element-icon">${getElIcon(pet.element)}</span>`;
+        document.getElementById('enemy-name').innerHTML = `${bs.enemy.name} ${eIcons} <span class="element-icon">${getElIcon(bs.enemy.element)}</span>`;
         document.getElementById('enemy-hp-bar').style.width = (bs.enemyHP / bs.enemy.hp * 100) + "%";
-        document.getElementById('player-hp-bar').style.width = (bs.playerHP / pet.maxHP * 100) + "%";
-        document.getElementById('player-hp-text').innerText = `${Math.ceil(bs.playerHP)}/${pet.maxHP}`;
+        // Use the Battle State Max (which includes Armor)
+const pMax = bs.playerMaxHP || pet.maxHP; 
+document.getElementById('player-hp-bar').style.width = (bs.playerHP / pMax * 100) + "%";
+document.getElementById('player-hp-text').innerText = `${Math.ceil(bs.playerHP)}/${pMax}`;
 
         const act = document.getElementById('battle-actions');
         
@@ -2552,50 +2945,107 @@
         if (gameState.battleState.playerHP <= 0) return showToast("Your pet has fainted!", "error");
 
         gameState.battleState.turnInProgress = true;
+        
+        const playerStunned = resolveStatusTurn('player');
         renderBattle(); 
+        
+        if (gameState.battleState.playerHP <= 0) { await wait(1000); handlePlayerFaint(); return; }
 
-        const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
-        const enemy = gameState.battleState.enemy;
-        const move = findShopItem(pid);
-        
-        const pVis = document.getElementById('battle-player-visual');
-        const eVis = document.getElementById('battle-enemy-visual');
-        
-        soundManager.playSFX('attack');
-        pVis.style.animation = "attackLunge 0.3s";
-        createProjectile(move.image || move.icon, pVis, eVis);
-        await wait(500); 
-        pVis.style.animation = "";
+        if (playerStunned) {
+            await wait(1000); 
+        } 
+        else {
+            const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+            const enemy = gameState.battleState.enemy;
+            const move = findShopItem(pid);
+            
+            // --- EQUIPMENT STATS ---
+            const gear = getPetEquipmentStats(pet);
+            // -----------------------
+            
+            const pVis = document.getElementById('battle-player-visual');
+            const eVis = document.getElementById('battle-enemy-visual');
+            
+            soundManager.playSFX('attack');
+            pVis.style.animation = "attackLunge 0.3s";
+            createProjectile(move.image || move.icon, pVis, eVis);
+            await wait(500); 
+            pVis.style.animation = "";
 
-        let mult = getTypeMult(move.element, enemy.element);
-        let isCrit = false;
-        let critMult = 1.0;
-        
-        if (gameState.burstMode) {
-            critMult = 2.0; isCrit = true; gameState.burstMode = false; showToast("🔥 BRAIN BURST HIT! 🔥", "success");
-        } else if (Math.random() < 0.1) {
-            critMult = 1.5; isCrit = true;
+            // Calculate Damage
+            let mult = getTypeMult(move.element, enemy.element);
+            
+            // --- CRIT LOGIC (Accessory Bonus) ---
+            let isCrit = false;
+            let critMult = 1.0;
+            // Base chance 10% + Gear Chance (e.g. 5%)
+            let critChance = 0.10 + (gear.crit / 100); 
+            
+            if (gameState.burstMode) { 
+                critMult = 2.0; isCrit = true; gameState.burstMode = false; showToast("🔥 BURST HIT!", "success"); 
+            } else if (Math.random() < critChance) { 
+                critMult = 1.5; isCrit = true; 
+            }
+
+            // --- DAMAGE LOGIC (Weapon Bonus) ---
+            // Base Damage + Level Bonus + Weapon Bonus
+            let rawDmg = (move.damage + (pet.level * 1.5) + gear.dmg);
+            let dmg = Math.floor((rawDmg * mult * critMult) * (Math.random() * 0.2 + 0.9));
+            
+            gameState.battleState.enemyHP = Math.max(0, gameState.battleState.enemyHP - dmg);
+            soundManager.playSFX('hit');
+            eVis.style.animation = "damageShake 0.5s";
+            
+            let color = isCrit ? "crit" : (mult > 1 ? "super" : (mult < 1 ? "weak" : ""));
+            showFloatingText(eVis.parentElement, `-${dmg}`, color);
+            addBattleLog(`${pet.name} used ${move.name} for ${dmg}!`, isCrit ? 'crit' : 'player');
+
+            if (move.effect && move.effect.type === 'drain') {
+                if (Math.random() <= (move.effect.chance || 1.0)) {
+                    let healAmount = Math.ceil(dmg * move.effect.value);
+                    const pMax = gameState.battleState.playerMaxHP || pet.maxHP;
+                    gameState.battleState.playerHP = Math.min(pMax, gameState.battleState.playerHP + healAmount);
+                    
+                    showFloatingText(pVis.parentElement, `+${healAmount}`, "heal");
+                    addBattleLog(`Drained ${healAmount} HP!`, "heal");
+                }
+            }
+            else if (move.effect) {
+                applyStatusEffect(move.effect, 'player', 'enemy');
+            }
+
+            document.getElementById('enemy-hp-bar').style.width = (gameState.battleState.enemyHP / enemy.hp * 100) + "%";
         }
 
-        let rawDmg = (move.damage + (pet.level * 1.5));
-        let dmg = Math.floor((rawDmg * mult * critMult) * (Math.random() * 0.2 + 0.9));
-        
-        gameState.battleState.enemyHP = Math.max(0, gameState.battleState.enemyHP - dmg);
-        soundManager.playSFX('hit');
-        eVis.style.animation = "damageShake 0.5s";
-        
-        let color = isCrit ? "crit" : (mult > 1 ? "super" : (mult < 1 ? "weak" : ""));
-        showFloatingText(eVis.parentElement, `-${dmg}`, color);
-        addBattleLog(`${pet.name} used ${move.name} for ${dmg} DMG!`, isCrit ? 'crit' : 'player');
-        document.getElementById('enemy-hp-bar').style.width = (gameState.battleState.enemyHP / enemy.hp * 100) + "%";
-
         if (gameState.battleState.enemyHP <= 0) { await wait(1000); winBattle(); return; }
-        await wait(800); await processEnemyTurnAsync();
+        
+        await wait(800); 
+        await processEnemyTurnAsync();
+        
         if (gameState.inBattle) { gameState.battleState.turnInProgress = false; renderBattle(); }
     }
 
     async function processEnemyTurnAsync() {
         if (!gameState.inBattle) return;
+        
+        // 1. RESOLVE ENEMY STATUS
+        const enemyStunned = resolveStatusTurn('enemy');
+        renderBattle(); 
+        
+        // Check if enemy died from burn/poison
+        if (gameState.battleState.enemyHP <= 0) { 
+            await wait(1000); 
+            winBattle(); 
+            return; 
+        }
+
+        // 2. IF FROZEN, SKIP ATTACK
+        if (enemyStunned) {
+            await wait(1000);
+            return;
+        }
+
+        // 3. NORMAL ATTACK
         const eVis = document.getElementById('battle-enemy-visual');
         const pVis = document.getElementById('battle-player-visual');
         const enemy = gameState.battleState.enemy;
@@ -2644,27 +3094,63 @@
         soundManager.stopBGM(); 
         soundManager.playSFX('victory'); 
         
-        const p = gameState.pets.find(pet => pet.id === gameState.currentPetId); 
+        const activePet = gameState.pets.find(pet => pet.id === gameState.currentPetId); 
         const bs = gameState.battleState; 
         
-        // 1. Update Stats (Health, BP, XP)
-        p.hp = bs.playerHP; 
-        const bp = bs.isBoss ? 100 : (bs.isArena ? 50 : 20); 
-        addBP(bp); 
-        p.xp += (bs.enemy.xp || 15); 
+        // 1. Update Active Pet HP
+        activePet.hp = bs.playerHP; 
         
-        // 2. Level Up Logic
-        if(p.xp >= p.maxXp) { 
-            p.level++; 
-            p.xp = 0; 
-            p.maxXp = p.level * 300 + 200; 
-            p.maxHP = 50 + (p.level * 10); // Standard HP Formula
-            p.hp = p.maxHP; 
-            soundManager.playSFX('levelUp'); 
-            showToast(`Level Up! ${p.name} is now Lvl ${p.level}`, "success");
-        } 
+        // 2. Calculate Base Rewards
+        let baseXP = bs.enemy.xp || 15;
+        let bpGained = bs.isBoss ? 100 : (bs.isArena ? 50 : 20); 
         
-        // 3. Random Egg Drop (Only in Wilds, NOT Quests/Arena)
+        // --- ANTI-CHEAT: OVERLEVELED PENALTY ---
+        // If pet is > 5 levels higher than enemy (Wilds only), reduce rewards
+        if (!bs.isBoss && !bs.isArena && activePet.level > (bs.enemy.level || 1) + 5) {
+            baseXP = 1; 
+            bpGained = 1; 
+            showToast("Enemy too weak! Reduced Rewards.", "info");
+        } else {
+            showToast(`Victory! +${bpGained} BP`, "success"); 
+        }
+        // ---------------------------------------
+
+        addBP(bpGained); 
+
+        // 3. SQUAD XP SHARE LOOP
+        const squadIds = gameState.team || [gameState.currentPetId];
+        let leveledUpNames = [];
+
+        squadIds.forEach(id => {
+            const member = gameState.pets.find(p => p.id === id);
+            if (!member) return;
+
+            // Active gets 100%, Bench gets 50%
+            const shareMult = (id === gameState.currentPetId) ? 1.0 : 0.5;
+            const xpToAdd = Math.floor(baseXP * shareMult);
+
+            if (xpToAdd > 0) {
+                member.xp += xpToAdd;
+
+                // Level Up Logic
+                const maxLvl = LEVEL_CAPS[member.rarity] || 100;
+                if (member.xp >= member.maxXp && member.level < maxLvl) { 
+                    member.level++; 
+                    member.xp = 0; 
+                    member.maxXp = member.level * 300 + 200; 
+                    member.maxHP = 50 + (member.level * 10); 
+                    member.hp = member.maxHP; // Full heal on level up
+                    leveledUpNames.push(member.name);
+                } 
+            }
+        });
+
+        if (leveledUpNames.length > 0) {
+            soundManager.playSFX('levelUp');
+            showToast(`Level Up: ${leveledUpNames.join(", ")}!`, "success");
+        }
+        
+        // 4. Random Egg Drop (Wilds Only)
         if (!bs.isBoss && !bs.isArena && !gameState.questBattleActive && Math.random() < 0.1) {
             const eggPool = [...PET_TYPES.common, ...PET_TYPES.uncommon]; 
             const basePet = eggPool[Math.floor(Math.random() * eggPool.length)];
@@ -2673,9 +3159,7 @@
             newEgg.id = 'egg_' + Date.now(); 
             newEgg.isHatched = false; 
             newEgg.hatchProgress = 0; 
-            newEgg.level = 1; 
-            newEgg.xp = 0; 
-            newEgg.maxXp = 100; 
+            newEgg.level = 1; xp:0; maxXp:100;
             newEgg.powers = []; 
             newEgg.maxHP = basePet.baseHP; 
             newEgg.hp = basePet.baseHP;
@@ -2686,39 +3170,29 @@
         gameState.inBattle = false; 
         document.getElementById('battle-ui').style.display = 'none'; 
         
-       // ===============================================
-        // 4. FIXED QUEST BATTLE RETURN LOGIC
-        // ===============================================
+        // 5. QUEST BATTLE RETURN LOGIC
         if (gameState.questBattleActive) {
             gameState.questBattleActive = false; 
             
-            // A. Register Success Flag
             if (gameState.questSuccessKey) {
                 gameState.questProgress.flags.push(gameState.questSuccessKey);
             }
 
-            // B. Handle Special Quest Reward
             if (gameState.pendingQuestRewardData) {
                 const r = gameState.pendingQuestRewardData;
                 
-                // --- CRITICAL FIX: Save Evolution Data Here ---
-                // This saves the evolution info directly onto the pet
                 const newPet = { 
                     ...r, 
                     id: 'quest_reward_' + Date.now(), 
                     isHatched: false, 
                     hatchProgress: 0, 
                     powers: [], 
-                    level: 1, 
-                    xp: 0, 
-                    maxXp: 100,
+                    level: 1, xp: 0, maxXp: 100,
                     savedEvolutions: r.evolutions || [] 
                 };
-                // ----------------------------------------------
                 
                 gameState.pets.push(newPet);
                 
-                // Reset View
                 document.getElementById('adventure-list-view').style.display = 'none';
                 document.getElementById('adventure-play-view').style.display = 'block';
                 drawAdventureMap();
@@ -2731,19 +3205,15 @@
                     "QUEST COMPLETE!", 
                     `You found a ${r.name} Egg!`, 
                     visual, 
-                    () => { 
-                        switchTab('adventure'); 
-                    }
+                    () => { switchTab('adventure'); }
                 );
                 
                 gameState.pendingQuestRewardData = null; 
-                saveGame(true); // Force Cloud Save
+                saveGame(true); 
                 return; 
             } 
             else {
-                // No Reward, just a victory (like beating a guard)
                 alert("⚔️ Enemy Defeated! The path is open!");
-                
                 switchTab('adventure'); 
                 document.getElementById('adventure-list-view').style.display = 'none';
                 document.getElementById('adventure-play-view').style.display = 'block';
@@ -2751,10 +3221,7 @@
             }
         } 
         else {
-            // ===============================================
-            // 5. STANDARD WILD BATTLE RETURN
-            // ===============================================
-            showToast(`Victory! +${bp} BP`, "success"); 
+            // Standard Return
             document.getElementById('rpg-wrapper').style.display = 'block'; 
             initRPG(); 
             soundManager.playBGM('wilds');
@@ -5993,6 +6460,445 @@ function readExamQuestion() {
             showToast(`Renamed to ${newName}! (-100 BP)`, "success");
         }
     }
+    // ==========================================
+// 🧪 STATUS EFFECT ENGINE (Expert)
+// ==========================================
+
+// 1. Apply Status (With Charm Immunity Check)
+function applyStatusEffect(effectData, userSide, targetSide) {
+    if (Math.random() > effectData.chance) return;
+
+    // --- CHARM CHECK ---
+    if (targetSide === 'player') {
+        const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+        const gear = getPetEquipmentStats(pet);
+        
+        // If gear has immunity to this specific type (e.g. "poison")
+        if (gear.immune.includes(effectData.type)) {
+            const visual = document.getElementById('battle-player-visual');
+            showFloatingText(visual.parentElement, "RESISTED!", "heal");
+            addBattleLog(`Charm blocked ${effectData.type}!`, "heal");
+            return; // Stop the effect!
+        }
+    }
+    // -------------------
+
+    const statusList = (targetSide === 'player') 
+        ? gameState.battleState.playerStatus 
+        : gameState.battleState.enemyStatus;
+
+    const existing = statusList.find(e => e.type === effectData.type);
+    
+    if (existing) {
+        existing.turns = effectData.duration;
+        addBattleLog(`${targetSide} ${effectData.type} extended!`, "info");
+    } else {
+        statusList.push({
+            type: effectData.type,
+            turns: effectData.duration,
+            val: effectData.value || 0,
+            icon: getStatusIcon(effectData.type)
+        });
+        
+        const visual = (targetSide === 'player') ? document.getElementById('battle-player-visual') : document.getElementById('battle-enemy-visual');
+        showFloatingText(visual.parentElement, effectData.type.toUpperCase() + "!", "crit");
+    }
+}
+
+// 2. Process Turn (Take Damage or Skip Turn)
+function resolveStatusTurn(targetSide) {
+    const bs = gameState.battleState;
+    const list = (targetSide === 'player') ? bs.playerStatus : bs.enemyStatus;
+    let isStunned = false;
+    let dotDamage = 0;
+
+    // Loop backwards to remove expired items safely
+    for (let i = list.length - 1; i >= 0; i--) {
+        const s = list[i];
+        
+        // Damage over Time
+        if (s.type === 'burn' || s.type === 'poison') {
+            dotDamage += s.val;
+        } 
+        // Crowd Control
+        else if (s.type === 'freeze' || s.type === 'stun') {
+            isStunned = true;
+            addBattleLog(`${targetSide} is frozen/stunned!`, "weak");
+        }
+
+        // Tick down timer
+        s.turns--;
+        if (s.turns <= 0) list.splice(i, 1);
+    }
+
+    // Apply accumulated damage
+    if (dotDamage > 0) {
+        if (targetSide === 'player') bs.playerHP -= dotDamage;
+        else bs.enemyHP -= dotDamage;
+        
+        const visual = (targetSide === 'player') ? document.getElementById('battle-player-visual') : document.getElementById('battle-enemy-visual');
+        showFloatingText(visual.parentElement, `-${dotDamage}`, "weak");
+        addBattleLog(`${targetSide} took ${dotDamage} dmg`, "enemy");
+    }
+
+    return isStunned; // Returns true if they can't move
+}
+
+// 3. Icon Helper
+function getStatusIcon(type) {
+    const map = { 'burn':'🔥', 'poison':'🤢', 'freeze':'❄️', 'stun':'💫' };
+    return map[type] || '✨';
+}
+// ==========================================
+    // 🎒 EQUIPMENT LOGIC
+    // ==========================================
+    
+    let currentEquipSlot = null; // Tracks which slot we are clicking
+
+    function openEquipMenu(slotType) {
+        currentEquipSlot = slotType;
+        const p = gameState.pets.find(pet => pet.id === gameState.currentPetId);
+        
+        // 1. Setup Modal
+        document.getElementById('equip-slot-title').innerText = `Select ${slotType.toUpperCase()} for ${p.name}:`;
+        const list = document.getElementById('equip-list');
+        list.innerHTML = "";
+        
+        // 2. Filter Inventory for this slot type
+        // We look through all keys in inventory, find the Item Data, and check if type matches
+        let found = false;
+        
+        // We need to check all shop items to find matches
+        const allItems = [
+            ...(SHOP_ITEMS.equipment || [])
+        ];
+
+        Object.keys(gameState.inventory).forEach(itemId => {
+            const count = gameState.inventory[itemId];
+            if (count > 0) {
+                const itemData = allItems.find(i => i.id === itemId);
+                
+                // If it's a valid item AND matches the slot (weapon/armor/etc)
+                if (itemData && itemData.type === slotType) {
+                    found = true;
+                    
+                    // Visual
+                    let visual = itemData.icon || '📦';
+                    if (itemData.image && itemData.image.startsWith('http')) {
+                        visual = `<img src="${itemData.image}" style="width:30px;">`;
+                    }
+                    
+                    const div = document.createElement('div');
+                    div.style.background = "#f7fafc";
+                    div.style.border = "1px solid #cbd5e0";
+                    div.style.padding = "10px";
+                    div.style.borderRadius = "8px";
+                    div.style.cursor = "pointer";
+                    div.style.textAlign = "left";
+                    
+                    div.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-weight:bold;">${visual} ${itemData.name}</span>
+                            <span style="font-size:12px; background:#edf2f7; padding:2px 6px; border-radius:10px;">x${count}</span>
+                        </div>
+                        <div style="font-size:10px; color:#718096; margin-top:5px;">${itemData.description || itemData.desc || 'No desc'}</div>
+                    `;
+                    
+                    div.onclick = () => confirmEquip(itemId);
+                    list.appendChild(div);
+                }
+            }
+        });
+        
+        if (!found) {
+            list.innerHTML = `<div style="grid-column:span 2; text-align:center; color:gray;">You have no ${slotType}s in your bag.<br>Go to the Shop!</div>`;
+        }
+        
+        // 3. Handle Unequip Button
+        const unequipBtn = document.getElementById('unequip-btn');
+        if (p.equipment && p.equipment[slotType]) {
+            unequipBtn.style.display = 'block';
+            unequipBtn.onclick = () => unequipCurrent(slotType);
+        } else {
+            unequipBtn.style.display = 'none';
+        }
+
+        document.getElementById('equip-modal').classList.add('active');
+    }
+
+    function confirmEquip(newItemId) {
+        const p = gameState.pets.find(pet => pet.id === gameState.currentPetId);
+        const slot = currentEquipSlot;
+        
+        // 1. If something is already equipped, put it back in bag
+        if (p.equipment[slot]) {
+            const oldItem = p.equipment[slot];
+            gameState.inventory[oldItem] = (gameState.inventory[oldItem] || 0) + 1;
+        }
+        
+        // 2. Equip new item (remove from bag)
+        p.equipment[slot] = newItemId;
+        gameState.inventory[newItemId]--;
+        if (gameState.inventory[newItemId] <= 0) delete gameState.inventory[newItemId];
+        
+        // 3. Save & Close
+        saveGame(true);
+        renderHub();
+        document.getElementById('equip-modal').classList.remove('active');
+        showToast("Equipped!", "success");
+    }
+
+    function unequipCurrent(slot) {
+        const p = gameState.pets.find(pet => pet.id === gameState.currentPetId);
+        const oldItem = p.equipment[slot];
+        
+        if (oldItem) {
+            gameState.inventory[oldItem] = (gameState.inventory[oldItem] || 0) + 1;
+            delete p.equipment[slot];
+            
+            saveGame(true);
+            renderHub();
+            document.getElementById('equip-modal').classList.remove('active');
+            showToast("Unequipped.", "info");
+        }
+    }
+    // ==========================================
+// 🧮 EQUIPMENT STATS CALCULATOR
+// ==========================================
+function getPetEquipmentStats(pet) {
+    let bonuses = { 
+        dmg: 0,   // Weapon
+        hp: 0,    // Armor
+        crit: 0,  // Accessory (% chance, e.g. 5)
+        immune: [] // Charm (List of strings like 'poison')
+    };
+
+    if (!pet.equipment) return bonuses;
+
+    // Check all 4 slots
+    ['weapon', 'armor', 'accessory', 'charm'].forEach(slot => {
+        const itemId = pet.equipment[slot];
+        if (itemId) {
+            const item = findShopItem(itemId);
+            if (item) {
+                // Add Stats based on type
+                if (item.type === 'weapon') bonuses.dmg += (item.stat || 0);
+                if (item.type === 'armor') bonuses.hp += (item.stat || 0);
+                if (item.type === 'accessory') bonuses.crit += (item.stat || 0);
+                if (item.type === 'charm' && item.immunity) {
+                    bonuses.immune.push(item.immunity);
+                }
+            }
+        }
+    });
+    
+    return bonuses;
+}
+// ==========================================
+    // ⚗️ FUSION & ULTRA EVOLUTION ENGINE
+    // ==========================================
+    
+    // --- PART 1: FUSION (Adding Stars) ---
+    function openFuseMenu() {
+        const p = gameState.pets.find(pet => pet.id === gameState.currentPetId);
+        
+        // Find Duplicates
+        const duplicates = gameState.pets.filter(d => 
+            d.type === p.type && d.id !== p.id && d.isHatched // Must be same type, hatched, not self
+        );
+        
+        // Find Mimic Slimes
+        const mimics = gameState.inventory['mimic_slime'] || 0;
+        
+        let html = `<h2 style="color:#5a67d8">⚗️ Fusion Chamber</h2><p>Select a duplicate to fuse into <strong>${p.name}</strong>.</p><p style="font-size:12px; color:#e53e3e;">⚠️ The duplicate will be destroyed!</p><div class="fuse-grid">`;
+        
+        if (duplicates.length === 0 && mimics === 0) {
+            html += `<p style="grid-column:span 3; color:gray;">No duplicates found.</p>`;
+        }
+        
+        // Render Duplicates
+        duplicates.forEach(d => {
+            const isHighLvl = d.level > 1;
+            html += `
+            <div class="fuse-card ${isHighLvl?'high-level':''}" onclick="confirmFuse('${d.id}', false)">
+                <div style="font-size:30px;">${d.image ? `<img src="${d.image}" style="width:40px;">` : d.emoji}</div>
+                <div style="font-weight:bold; font-size:12px;">Lvl ${d.level}</div>
+                <div style="font-size:10px;">${d.name}</div>
+            </div>`;
+        });
+        
+        // Render Mimic Slimes
+        if (mimics > 0) {
+            html += `
+            <div class="fuse-card" onclick="confirmFuse('mimic', true)" style="border-color:#ecc94b; background:#fffff0;">
+                <div style="font-size:30px;">🧪</div>
+                <div style="font-weight:bold; font-size:12px;">x${mimics}</div>
+                <div style="font-size:10px;">Mimic Slime</div>
+            </div>`;
+        }
+        
+        html += `</div><button class="confirm-btn no" style="margin-top:10px; width:100%;" onclick="closeArenaModal()">Cancel</button>`;
+        
+        // Re-use Arena Modal for UI (Hack to save space)
+        const modal = document.querySelector('#arena-modal .confirm-modal');
+        const overlay = document.getElementById('arena-modal');
+        const originalContent = modal.innerHTML; // Save original arena content
+        
+        modal.innerHTML = html;
+        overlay.classList.add('active');
+        
+        // Restore Arena Modal when closed (Quick fix)
+        window.restoreArena = () => { modal.innerHTML = originalContent; overlay.classList.remove('active'); };
+        modal.querySelector('.no').onclick = window.restoreArena;
+    }
+
+    function confirmFuse(targetId, isMimic) {
+        const p = gameState.pets.find(pet => pet.id === gameState.currentPetId);
+        
+        if (!isMimic) {
+            const sacrifice = gameState.pets.find(d => d.id === targetId);
+            // SAFETY LOCK
+            if (sacrifice.level > 1) {
+                if(!confirm(`⚠️ WARNING ⚠️\n\nThis pet is LEVEL ${sacrifice.level}!\nIt will be DELETED forever.\n\nAre you sure?`)) return;
+            }
+            // Remove Pet
+            gameState.pets = gameState.pets.filter(d => d.id !== targetId);
+            // Remove from squad if there
+            if (gameState.team) gameState.team = gameState.team.filter(id => id !== targetId);
+        } else {
+            // Remove Item
+            gameState.inventory['mimic_slime']--;
+        }
+        
+        // Add Star
+        p.stars = (p.stars || 0) + 1;
+        
+        soundManager.playSFX('levelUp');
+        saveGame(true);
+        window.restoreArena(); // Close modal
+        renderHub();
+        showToast(`Success! ${p.name} gained a Star! ⭐`, "success");
+    }
+
+    // --- PART 2: ULTRA EVOLUTION (The Trial) ---
+    
+    let ultraTargetPet = null;
+    let ultraTargetData = null;
+    let evoQuizScore = 0;
+    
+    async function startUltraEvolve() {
+        const p = gameState.pets.find(pet => pet.id === gameState.currentPetId);
+        
+        // 1. Fetch Data
+        try {
+            const files = await fetchGithubFolder('pets');
+            const file = files.find(f => f.name === 'ultra_evolutions.json');
+            if(!file) throw new Error("Evolution file not found");
+            
+            const res = await fetch(file.download_url);
+            const data = await res.json();
+            
+            const ultraData = data.find(u => u.base_id === p.type);
+            
+            if (!ultraData) {
+                alert("This pet does not have an Ultra Form discovered yet!");
+                return;
+            }
+            
+            ultraTargetPet = p;
+            ultraTargetData = ultraData.ultra_form;
+            
+            // 2. Start The Trial
+            if(confirm(`🧬 ULTRA EVOLUTION DETECTED!\n\nTo evolve into ${ultraData.ultra_form.name}, you must pass the Trial of Knowledge.\n\nAnswer 5 Questions. Pass 4 to Evolve.\n\nReady?`)) {
+                startEvoQuiz();
+            }
+
+        } catch(e) {
+            console.error(e);
+            showToast("Error connecting to Evolution Server", "error");
+        }
+    }
+
+    function startEvoQuiz() {
+        evoQuizScore = 0;
+        let qCount = 0;
+        
+        // We reuse the Exam Modal for the Quiz
+        const modal = document.getElementById('exam-interface');
+        const header = document.querySelector('.exam-header');
+        const container = document.querySelector('#exam-interface > div:nth-child(2)');
+        
+        modal.style.display = 'flex';
+        header.innerHTML = `<span>🧬 EVOLUTION TRIAL</span><span id="evo-score">0 / 5</span>`;
+        
+        const nextQ = () => {
+            if (qCount >= 5) {
+                finishEvoQuiz();
+                return;
+            }
+            
+            // Generate Question
+            const q = MathEngine.generate(gameState.grade || "1");
+            
+            container.innerHTML = `
+                <div style="font-size:24px; font-weight:bold; margin-bottom:20px;">Question ${qCount+1}</div>
+                <div style="font-size:30px; margin-bottom:30px;">${q.text || q.q}</div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; width:100%; max-width:500px;">
+                    ${q.options.map(opt => `<button class="mcq-btn" onclick="checkEvoAnswer('${opt}', '${q.a}')">${opt}</button>`).join('')}
+                </div>
+            `;
+            qCount++;
+        };
+        
+        window.checkEvoAnswer = (ans, correct) => {
+            if (ans == correct) {
+                evoQuizScore++;
+                soundManager.playSFX('correct');
+            } else {
+                soundManager.playSFX('wrong');
+            }
+            document.getElementById('evo-score').innerText = `${evoQuizScore} / 5`;
+            nextQ(); // Auto next
+        };
+        
+        nextQ(); // Start first question
+    }
+
+    function finishEvoQuiz() {
+        document.getElementById('exam-interface').style.display = 'none';
+        
+        if (evoQuizScore >= 4) {
+            // SUCCESS
+            const p = ultraTargetPet;
+            const newData = ultraTargetData;
+            
+            p.name = newData.name;
+            p.type = newData.type;
+            p.image = newData.image;
+            p.imageStyle = newData.imageStyle;
+            p.rarity = newData.rarity;
+            p.element = newData.element;
+            p.maxHP = newData.maxHP; // Boost Base HP
+            p.hp = p.maxHP;
+            p.stars = 0; // RESET STARS (Balance)
+            
+            // Trigger Animation
+            triggerRewardCeremony(
+                "🧬 EVOLUTION COMPLETE!",
+                `${p.name} has awakened!`,
+                `<img src="${p.image}" style="width:200px; height:200px; object-fit:contain;">`,
+                null
+            );
+            
+            saveGame(true);
+            renderHub();
+            
+        } else {
+            // FAIL
+            alert(`Trial Failed (${evoQuizScore}/5). Study more and try again!`);
+        }
+    }
   </script>
 </body>
  </html>
+
