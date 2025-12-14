@@ -1,0 +1,11 @@
+[
+  {
+    "id": "mimic_slime",
+    "name": "Mimic Slime",
+    "type": "consumable",
+    "price": 5000,
+    "description": "A mysterious goo that can mimic any pet. Used for Fusing.",
+    "icon": "🧪",
+    "image": ""
+  }
+]
