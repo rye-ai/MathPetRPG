@@ -5580,22 +5580,11 @@ function updateExamNav() {
 }
 
 // ==========================================
-// 4. SUBMIT & STEP-BY-STEP REVIEW ENGINE
+// 4. SUBMIT, REVIEW, THEN REWARD
 // ==========================================
 
-let reviewIndex = 0; // Tracks which question they are reviewing
-
-function showExamReview() {
-    const answered = Object.keys(userAnswers).length;
-    const total = currentExamData.questions.length;
-    if(confirm(`You answered ${answered}/${total}.\n\nSubmit Exam? This is final.`)) finalizeExam();
-}
-
-// ==========================================
-// 4. SUBMIT, CEREMONY & REVIEW ENGINE
-// ==========================================
-
-let reviewIndex = 0; // Tracks which question they are reviewing
+let reviewIndex = 0; 
+let pendingExamRewards = null; // Stores the prize until they finish reviewing
 
 function showExamReview() {
     const answered = Object.keys(userAnswers).length;
@@ -5612,23 +5601,28 @@ async function finalizeExam() {
         if (userAnswers[i] == q.a) score++;
     });
 
-    // 2. Handle Rewards Logic
+    // 2. Handle Rewards & Visuals (BUT DON'T SHOW YET)
     const meta = currentExamData.meta || {};
-    const passThreshold = meta.passThreshold || 0.6; 
+    const passThreshold = meta.passThreshold || 0.6;
     const pct = score / total;
     const passed = pct >= passThreshold;
     
-    let rewardSummary = "";     
-    let ceremonyVisual = "📝"; 
+    let rewardText = "Keep studying!";
+    let ceremonyVisual = "📝";
+    let rewardSummary = "";
+    
+    // Reset pending rewards
+    pendingExamRewards = null;
 
     if (passed && meta.rewards) {
+        rewardText = "🎉 PASSED! (Finish Review to Claim)";
         let rewardsList = [];
 
         // BP
         if(meta.rewards.bp) {
             addBP(meta.rewards.bp);
             rewardsList.push(`${meta.rewards.bp} BP`);
-            ceremonyVisual = "💰"; 
+            ceremonyVisual = "💰";
         }
         
         // Items
@@ -5637,7 +5631,7 @@ async function finalizeExam() {
                 gameState.inventory[item.id] = (gameState.inventory[item.id] || 0) + item.qty;
             });
             rewardsList.push(`${meta.rewards.items.length} Items`);
-            ceremonyVisual = "🎁"; 
+            ceremonyVisual = "🎁";
         }
         
         // Pets
@@ -5646,10 +5640,8 @@ async function finalizeExam() {
             p.id = 'exam_pet_' + Date.now();
             if(p.evolutions) p.savedEvolutions = p.evolutions;
             gameState.pets.push(p);
-            
             rewardsList.push("New Pet!");
             
-            // Show Pet Image in Ceremony
             if (p.image) {
                 ceremonyVisual = `<img src="${p.image}" style="width:150px; height:150px; object-fit:contain; filter:drop-shadow(0 0 10px white);">`;
             } else {
@@ -5657,7 +5649,13 @@ async function finalizeExam() {
             }
         }
         
+        // STORE THE REWARD FOR LATER
         rewardSummary = rewardsList.join(" + ");
+        pendingExamRewards = {
+            title: "EXAM PASSED!",
+            message: `Score: ${Math.round(pct*100)}%<br><span style="color:#d69e2e">${rewardSummary}</span>`,
+            visual: ceremonyVisual
+        };
     }
 
     // 3. Save to Firebase
@@ -5668,37 +5666,20 @@ async function finalizeExam() {
         timestamp: Date.now()
     };
     
-    saveGame(true); // Force Save
+    saveGame(true); 
 
-    // 4. Cleanup Local Storage
+    // 4. Cleanup UI
     localStorage.removeItem('exam_' + gameState.playerName);
     document.getElementById('exam-interface').style.display = 'none';
     
-    // 5. Define "Show Report Card" Function
-    const showReportCard = () => {
-        document.getElementById('exam-score-header').innerText = `Final Score: ${score}/${total} (${Math.round(pct*100)}%)`;
-        document.getElementById('review-reward-text').innerText = passed ? "Rewards Claimed ✅" : "Keep Studying!";
-        
-        // Initialize Review Mode
-        document.getElementById('exam-results-modal').classList.add('active');
-        reviewIndex = 0;
-        renderReviewQuestion(); 
-        
-        checkActiveExam(); // Update main menu
-    };
-
-    // 6. TRIGGER CEREMONY OR SHOW REPORT
-    if (passed && meta.rewards) {
-        // Show Confetti First!
-        triggerRewardCeremony(
-            "EXAM PASSED!", 
-            `Score: ${Math.round(pct*100)}%<br><span style="color:#d69e2e">${rewardSummary}</span>`, 
-            ceremonyVisual, 
-            showReportCard // Opens report card after clicking claim
-        );
-    } else {
-        showReportCard();
-    }
+    // 5. OPEN REVIEW SCREEN IMMEDIATELY
+    document.getElementById('exam-results-modal').classList.add('active');
+    document.getElementById('review-score-header').innerText = `Final Score: ${score} / ${total} (${Math.round(pct*100)}%)`;
+    document.getElementById('review-reward-text').innerText = rewardText;
+    
+    reviewIndex = 0;
+    renderReviewQuestion();
+    checkActiveExam(); 
 }
 
 function renderReviewQuestion() {
@@ -5706,12 +5687,12 @@ function renderReviewQuestion() {
     const userAns = userAnswers[reviewIndex];
     const isCorrect = (userAns == q.a);
 
-    // 1. Update Text & Visuals
+    // Update Text & Visuals
     document.getElementById('review-counter').innerText = `Q ${reviewIndex + 1} / ${currentExamData.questions.length}`;
     document.getElementById('review-q-text').innerHTML = q.q;
     document.getElementById('review-visual').innerHTML = q.qVisualHTML || "";
 
-    // 2. Status Badge
+    // Status Badge
     const badge = document.getElementById('review-status-badge');
     if (isCorrect) {
         badge.innerText = "✅ CORRECT";
@@ -5723,7 +5704,7 @@ function renderReviewQuestion() {
         badge.style.color = "#822727";
     }
 
-    // 3. Render Options (Read-Only)
+    // Render Options
     const grid = document.getElementById('review-options');
     grid.innerHTML = "";
     
@@ -5735,7 +5716,6 @@ function renderReviewQuestion() {
         div.style.minHeight = "50px";
         div.innerText = opt;
 
-        // Styling Logic
         if (opt === userAns) {
             div.style.border = "4px solid";
             if (isCorrect) {
@@ -5762,8 +5742,20 @@ function changeReviewQ(dir) {
     }
 }
 
+// 6. TRIGGER REWARD ON CLOSE
 function closeExamResults() {
     document.getElementById('exam-results-modal').classList.remove('active');
+
+    // If there is a pending reward, show it NOW
+    if (pendingExamRewards) {
+        triggerRewardCeremony(
+            pendingExamRewards.title,
+            pendingExamRewards.message,
+            pendingExamRewards.visual,
+            null
+        );
+        pendingExamRewards = null; // Clear it so it doesn't show again
+    }
 }
 
 // ==========================================
