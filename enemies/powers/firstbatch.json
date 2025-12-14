@@ -1,0 +1,136 @@
+[
+  {
+    "id": "venomous_net",
+    "name": "Venomous Net",
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/powerbatch1/1.png",
+    "damage": 15,
+    "element": "grass",
+    "price": 350,
+    "description": "A thorny trap. 60% chance to Poison the enemy.",
+    "effect": {
+      "type": "poison",
+      "value": 8,
+      "duration": 4,
+      "chance": 0.6
+    }
+  },
+  {
+    "id": "crystal_mirror",
+    "name": "Crystal Mirror",
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/powerbatch1/2.png",
+    "damage": 25,
+    "element": "ice",
+    "price": 450,
+    "description": "Reflective ice shard. High chance to Stun (Reflect) the enemy.",
+    "effect": {
+      "type": "freeze",
+      "duration": 1,
+      "chance": 0.5
+    }
+  },
+  {
+    "id": "magnet_bomb",
+    "name": "Magnet Bomb",
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/powerbatch1/3.png",
+    "damage": 30,
+    "element": "electric",
+    "price": 400,
+    "description": "Attracts debris to disrupt the enemy strategy.",
+    "effect": {
+      "type": "stun",
+      "duration": 1,
+      "chance": 0.3
+    }
+  },
+  {
+    "id": "eclipse_sphere",
+    "name": "Eclipse Sphere",
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/powerbatch1/4.png",
+    "damage": 20,
+    "element": "shadow",
+    "price": 380,
+    "description": "Blocks out light. Blinds (Stuns) the enemy.",
+    "effect": {
+      "type": "stun",
+      "duration": 1,
+      "chance": 0.4
+    }
+  },
+  {
+    "id": "wind_barrage",
+    "name": "Wind Barrage",
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/powerbatch1/5.png",
+    "damage": 45,
+    "element": "wind",
+    "price": 500,
+    "description": "A rapid series of sharp blades. High raw damage.",
+    "effect": null
+  },
+  {
+    "id": "molten_core",
+    "name": "Molten Core",
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/powerbatch1/6.png",
+    "damage": 35,
+    "element": "fire",
+    "price": 600,
+    "description": "Heavy lava sphere. Guaranteed to Burn the ground.",
+    "effect": {
+      "type": "burn",
+      "value": 10,
+      "duration": 3,
+      "chance": 1.0
+    }
+  },
+  {
+    "id": "shatter_wave",
+    "name": "Shatter Wave",
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/powerbatch1/7.png",
+    "damage": 40,
+    "element": "normal",
+    "price": 350,
+    "description": "Distorted sound waves that break defenses.",
+    "effect": null
+  },
+  {
+    "id": "lifedrain_leech",
+    "name": "Life-Drain Leech",
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/powerbatch1/8.png",
+    "damage": 20,
+    "element": "shadow",
+    "price": 550,
+    "description": "Siphons health from the enemy upon impact.",
+    "effect": {
+      "type": "drain",
+      "value": 0.5,
+      "chance": 1.0
+    }
+  },
+  {
+    "id": "static_cling",
+    "name": "Static Cling",
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/powerbatch1/9.png",
+    "damage": 15,
+    "element": "electric",
+    "price": 300,
+    "description": "Sticky electric orb. 40% chance to Paralyze.",
+    "effect": {
+      "type": "stun",
+      "duration": 1,
+      "chance": 0.4
+    }
+  },
+  {
+    "id": "dust_devil",
+    "name": "Dust Devil",
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/powerbatch1/10.png",
+    "damage": 18,
+    "element": "earth",
+    "price": 320,
+    "description": "A tornado of rocks that blinds (Stuns) the enemy.",
+    "effect": {
+      "type": "stun",
+      "duration": 1,
+      "chance": 0.35
+    }
+  }
+]
