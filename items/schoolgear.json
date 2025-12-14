@@ -1,0 +1,132 @@
+[
+  {
+    "id": "pencil_spear",
+    "name": "Sharpened Pencil",
+    "type": "weapon",
+    "stat": 3,
+    "price": 200,
+    "description": "+3 Damage. The pointiest object in class.",
+    "icon": "✏️",
+    "image": ""
+  },
+  {
+    "id": "paper_hat",
+    "name": "Paper Hat",
+    "type": "armor",
+    "stat": 15,
+    "price": 200,
+    "description": "+15 HP. Offers minimal protection against rain.",
+    "icon": "📄",
+    "image": ""
+  },
+  {
+    "id": "sticky_note",
+    "name": "Sticky Note",
+    "type": "accessory",
+    "stat": 2,
+    "price": 150,
+    "description": "+2% Crit. Reminds you to hit the weak spot.",
+    "icon": "📝",
+    "image": ""
+  },
+  {
+    "id": "hand_sanitizer",
+    "name": "Hand Sanitizer",
+    "type": "charm",
+    "immunity": "poison",
+    "price": 300,
+    "description": "Immune to Poison. Kills 99.9% of germs.",
+    "icon": "🧴",
+    "image": ""
+  },
+  {
+    "id": "hot_cocoa",
+    "name": "Hot Cocoa",
+    "type": "charm",
+    "immunity": "freeze",
+    "price": 300,
+    "description": "Immune to Freeze. Keeps you warm in math class.",
+    "icon": "☕",
+    "image": ""
+  },
+  {
+    "id": "metal_ruler",
+    "name": "Metal Ruler",
+    "type": "weapon",
+    "stat": 8,
+    "price": 600,
+    "description": "+8 Damage. Gives a sharp slap.",
+    "icon": "📏",
+    "image": ""
+  },
+  {
+    "id": "hardcover_book",
+    "name": "Hardcover Textbook",
+    "type": "armor",
+    "stat": 40,
+    "price": 600,
+    "description": "+40 HP. Thick enough to stop a fireball.",
+    "icon": "📕",
+    "image": ""
+  },
+  {
+    "id": "pink_eraser",
+    "name": "Pink Eraser",
+    "type": "accessory",
+    "stat": 5,
+    "price": 500,
+    "description": "+5% Crit. Erases your mistakes.",
+    "icon": "🧼",
+    "image": ""
+  },
+  {
+    "id": "fire_alarm",
+    "name": "Fire Alarm",
+    "type": "charm",
+    "immunity": "burn",
+    "price": 400,
+    "description": "Immune to Burn. Loud noise warning!",
+    "icon": "🚨",
+    "image": ""
+  },
+  {
+    "id": "headphones",
+    "name": "Noise-Canceling Headphones",
+    "type": "charm",
+    "immunity": "stun",
+    "price": 400,
+    "description": "Immune to Stun. Blocks out the thunder.",
+    "icon": "🎧",
+    "image": ""
+  },
+  {
+    "id": "golden_calculator",
+    "name": "Golden Calculator",
+    "type": "weapon",
+    "stat": 15,
+    "price": 2000,
+    "description": "+15 Damage. Calculates pain with 100% accuracy.",
+    "icon": "🧮",
+    "image": ""
+  },
+  {
+    "id": "heavy_backpack",
+    "name": "Heavy Backpack",
+    "type": "armor",
+    "stat": 100,
+    "price": 2000,
+    "description": "+100 HP. Carries the weight of your success.",
+    "icon": "🎒",
+    "image": ""
+  },
+  {
+    "id": "nerd_glasses",
+    "name": "Smart Glasses",
+    "type": "accessory",
+    "stat": 10,
+    "price": 1500,
+    "description": "+10% Crit. You see the matrix.",
+    "icon": "👓",
+    "image": ""
+  }
+]
