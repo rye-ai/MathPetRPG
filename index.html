@@ -1942,18 +1942,12 @@
           c.innerHTML = `<div style="text-align:center; padding:20px;"><h2>🥚 Incubator</h2><div class="pet-visual" style="font-size:100px;">🥚</div><h3>${p.isHatched ? p.name : "Mystery Egg"}</h3><div style="margin:20px 0;">${p.hatchProgress}% <div class="hatch-bar-container"><div class="hatch-bar" style="width: ${p.hatchProgress}%;"></div></div></div>${p.hatchProgress >= 100 ? `<button class="action-btn green" onclick="hatchPet()">✨ HATCH NOW! ✨</button>` : `<p style="color:#718096">Use Items in Shop to speed up!</p>`}<div style="margin-top:20px;">${renderInventory(true)}</div></div><div class="pet-collection">${renderCollection()}</div>`; return; 
       }
       
-      // =======================================================
-      // 2. EVOLUTION FIX (Check Local & Global)
-      // =======================================================
+      // 2. EVOLUTION CHECK (Includes Rudolf Fix)
       let ch = EVOLUTION_CHAINS[p.type]; 
-      
-      // If not in main file, check the pet's backpack for instructions
       if (!ch && p.savedEvolutions) {
           ch = p.savedEvolutions;
-          // Temporarily register it globally so the evolve function knows what to do
           EVOLUTION_CHAINS[p.type] = p.savedEvolutions;
       }
-      // =======================================================
 
       const nextEvo = (ch && ch[currentStage]) ? ch[currentStage] : null;
       const can = nextEvo && p.level >= nextEvo.level;
@@ -1979,8 +1973,38 @@
             </div>
         </div>`;
 
-      // 4. MAIN DISPLAY
-      c.innerHTML = `<div class="hub-grid"><div class="hub-left"><div class="pet-display"><div class="pet-visual">${v}</div><div class="pet-name">Lvl ${p.level} ${p.name} <span class="rarity-badge rarity-${p.rarity}">${p.rarity}</span></div><div style="font-size:12px;">XP: ${p.xp} / ${p.maxXp}</div><div class="xp-bar-container"><div class="xp-bar" style="width: ${(p.xp/p.maxXp)*100}%"></div></div><button class="action-btn red" style="margin-top:15px;" onclick="releasePet()">Release</button></div></div><div class="hub-right"><div class="inventory-section"><h3>Stats</h3><div class="pet-stats"><div class="stat-box"><div class="stat-label">HP</div><div class="stat-value">${p.hp}/${p.maxHP}</div></div><div class="stat-box"><div class="stat-label">Power</div><div class="stat-value">${p.powers.length}/4</div></div></div>${squadDisplay}</div>${ev}<div class="inventory-section"><h3>🎒 Inventory</h3>${renderInventory(false)}</div><div class="inventory-section"><h3>⚔️ Powers</h3>${renderPowersList(p)}</div></div></div><div class="pet-collection">${renderCollection()}</div>`;
+      // 4. MAIN DISPLAY (Updated with Rename Button)
+      c.innerHTML = `
+      <div class="hub-grid">
+        <div class="hub-left">
+            <div class="pet-display">
+                <div class="pet-visual">${v}</div>
+                <div class="pet-name">
+                    Lvl ${p.level} ${p.name} 
+                    <!-- RENAME BUTTON -->
+                    <button onclick="renamePet()" style="background:none; border:none; cursor:pointer; font-size:16px;" title="Rename (100 BP)">✏️</button>
+                    <span class="rarity-badge rarity-${p.rarity}">${p.rarity}</span>
+                </div>
+                <div style="font-size:12px;">XP: ${p.xp} / ${p.maxXp}</div>
+                <div class="xp-bar-container"><div class="xp-bar" style="width: ${(p.xp/p.maxXp)*100}%"></div></div>
+                <button class="action-btn red" style="margin-top:15px;" onclick="releasePet()">Release</button>
+            </div>
+        </div>
+        <div class="hub-right">
+            <div class="inventory-section">
+                <h3>Stats</h3>
+                <div class="pet-stats">
+                    <div class="stat-box"><div class="stat-label">HP</div><div class="stat-value">${p.hp}/${p.maxHP}</div></div>
+                    <div class="stat-box"><div class="stat-label">Power</div><div class="stat-value">${p.powers.length}/4</div></div>
+                </div>
+                ${squadDisplay}
+            </div>
+            ${ev}
+            <div class="inventory-section"><h3>🎒 Inventory</h3>${renderInventory(false)}</div>
+            <div class="inventory-section"><h3>⚔️ Powers</h3>${renderPowersList(p)}</div>
+        </div>
+      </div>
+      <div class="pet-collection">${renderCollection()}</div>`;
     }
     
     function renderCollection() { return gameState.pets.map(p => `<div class="pet-card ${p.id===gameState.currentPetId?'active':''}" onclick="switchPet('${p.id}')"><div class="pet-card-visual">${!p.isHatched?'🥚':(p.image?`<img src="${p.image}" class="${p.imageStyle}" style="width:40px;height:40px;">`:p.emoji)}</div><div style="font-size:12px;">${p.isHatched ? p.name : "Mystery Egg"}</div></div>`).join(''); }
@@ -5899,6 +5923,39 @@ function readExamQuestion() {
         alert("Text-to-Speech not supported on this browser.");
     }
 }
+   // ==========================================
+    // ✏️ RENAME PET FUNCTION (100 BP Cost)
+    // ==========================================
+    function renamePet() {
+        const p = gameState.pets.find(pet => pet.id === gameState.currentPetId);
+        if(!p) return;
+
+        // 1. Check Cost
+        if (gameState.brainPoints < 100) {
+            showToast("Need 100 BP to rename!", "error");
+            return;
+        }
+
+        // 2. Ask user
+        let newName = prompt(`Rename ${p.name}? (Cost: 100 BP)\n\nEnter new name:`, p.name);
+
+        // 3. Validate and Deduct
+        if (newName && newName.trim() !== "" && newName !== p.name) {
+            // Deduct BP
+            gameState.brainPoints -= 100;
+            
+            // Update Name
+            newName = newName.trim().substring(0, 15); // Limit length to 15 chars
+            p.name = newName;
+            
+            // Save & Refresh
+            updateStatsDisplay(); // Update the BP counter
+            saveGame(true); // Force Save immediately
+            renderHub(); // Refresh the Hub UI
+            
+            showToast(`Renamed to ${newName}! (-100 BP)`, "success");
+        }
+    }
   </script>
 </body>
 </html>
