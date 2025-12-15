@@ -19,6 +19,7 @@
       appId: "1:590511399628:web:400e68086ccfaba2e65869"
     };
 
+
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     window.db = db;
@@ -410,6 +411,94 @@
 }
 
 @keyframes shineMove { 0% { transform: translateX(-100%) rotate(45deg); } 100% { transform: translateX(100%) rotate(45deg); } }
+
+/* =========================================
+       🏰 VOXEL BUILDER ENGINE (CSS)
+       ========================================= */
+    
+    .builder-container {
+        width: 100%; height: 100%;
+        position: relative;
+        background: linear-gradient(to bottom, #87CEEB 0%, #E0F7FA 100%); /* Sky */
+        overflow: hidden;
+        border-radius: 15px;
+        touch-action: none; /* Prevents scrolling while rotating */
+    }
+
+    .perspective-container {
+        perspective: 1200px;
+        width: 100%; height: 100%;
+        position: absolute;
+        display: flex; align-items: center; justify-content: center;
+    }
+
+    .scene-3d {
+        position: relative;
+        width: 400px; height: 400px;
+        transform-style: preserve-3d;
+        transition: transform 0.1s ease-out;
+    }
+
+    /* The Floor Grid */
+    .grid-base {
+        position: absolute;
+        display: grid;
+        background-color: rgba(255, 255, 255, 0.4);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+        border: 4px solid rgba(255,255,255,0.8);
+        transform-origin: center;
+        /* Width/Grid Template set via JS */
+    }
+
+    .grid-cell {
+        border: 0.5px solid rgba(0,0,0,0.1);
+        transition: background 0.1s;
+    }
+    .grid-cell:hover { background-color: rgba(66, 153, 225, 0.5); cursor: pointer; }
+
+    /* The Block (Cube) */
+    .voxel-cube {
+        position: absolute; width: 40px; height: 40px;
+        transform-style: preserve-3d;
+        pointer-events: none; /* Let clicks pass through container */
+    }
+
+    .face {
+        position: absolute; width: 40px; height: 40px;
+        backface-visibility: hidden;
+        pointer-events: auto; /* Re-enable clicks on faces */
+        cursor: pointer;
+        border: 1px solid rgba(0,0,0,0.1);
+    }
+    .face:hover { filter: brightness(1.2); }
+
+    /* Cube Faces Math */
+    .face-top   { transform: rotateX(0deg) translateZ(20px); }
+    .face-front { transform: rotateX(-90deg) translateZ(20px); filter: brightness(0.9); }
+    .face-back  { transform: rotateX(90deg) translateZ(20px); filter: brightness(0.9); }
+    .face-right { transform: rotateY(90deg) translateZ(20px); filter: brightness(0.7); }
+    .face-left  { transform: rotateY(-90deg) translateZ(20px); filter: brightness(0.7); }
+
+    /* Builder UI Overlay */
+    .build-ui {
+        position: absolute; bottom: 0; left: 0; width: 100%;
+        background: rgba(255,255,255,0.9);
+        padding: 10px; border-top: 2px solid #cbd5e0;
+        display: flex; flex-direction: column; gap: 10px;
+        z-index: 100;
+    }
+    .palette-scroll {
+        display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px;
+    }
+    .block-btn {
+        min-width: 60px; height: 60px;
+        border: 2px solid #e2e8f0; border-radius: 10px;
+        background: white; cursor: pointer;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        font-size: 20px; position: relative;
+    }
+    .block-btn.active { border-color: #5a67d8; background: #ebf8ff; transform: translateY(-3px); }
+    .block-qty { font-size: 10px; font-weight: bold; color: #5a67d8; }
  
  /* --- EXAM SYSTEM STYLES --- */
     
@@ -476,6 +565,15 @@
     .fuse-card:hover { border-color: #5a67d8; background: #ebf8ff; }
     .fuse-card.high-level { border-color: #fc8181; background: #fff5f5; }
     .fuse-card.high-level::after { content: "⚠️"; position: absolute; top: 5px; right: 5px; font-size: 12px; }
+    /* Add to your CSS */
+.grid-base {
+    /* ensure pointer events work for placing the first block */
+    pointer-events: auto; 
+    z-index: 1; /* Below the blocks */
+}
+.voxel-cube {
+    z-index: 10; /* Above the grid */
+}
   </style>
   </head>
  <body><!-- Login Screen -->
@@ -828,6 +926,7 @@
        <button class="tab" data-tab="shop" onclick="switchTab('shop')">🛒 Shop</button> 
        <button class="tab" data-tab="wilds" onclick="switchTab('wilds')">🌲 Wilds</button>
        <button class="tab adventure-tab" data-tab="adventure" onclick="switchTab('adventure')">🌟 Adventure</button>
+       <button class="tab" data-tab="build" onclick="switchTab('build')">🏰 Build</button>
    </nav>
    <main class="content">
     <section id="screen-study" class="screen active">
@@ -839,8 +938,6 @@
          <button id="start-exam-btn" class="action-btn red" style="font-size: 20px; padding: 15px;" onclick="initExamMode()">📝 TAKE EXAM</button>
     </div>
 
-    <!-- PASTE AT BOTTOM OF BODY (Modals area) -->
-    
     <!-- 1. THE EXAM INTERFACE (Lockdown) -->
     <div id="exam-interface" class="exam-lockdown">
         <div class="exam-header">
@@ -914,6 +1011,44 @@
       <div id="mcq-mode-container" class="mcq-options" style="display:none"></div>
       <div id="feedback" class="feedback"></div>
      </div>
+    </section>
+    <section id="screen-build" class="screen" style="padding: 0; height: 100%;">
+        <div class="builder-container" id="builder-container">
+            
+            <!-- 3D Scene -->
+            <div class="perspective-container">
+                <div id="world" class="scene-3d">
+                    <!-- Blocks injected here by JS -->
+                </div>
+            </div>
+
+            <!-- Hint Overlay -->
+            <div style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.5); color: white; padding: 5px 10px; border-radius: 15px; font-size: 12px; pointer-events: none;">
+                🖱️ Drag to Rotate • Click to Build
+            </div>
+
+            <!-- UI Controls -->
+            <div class="build-ui">
+                <!-- Top Row: Tools -->
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <button class="action-btn red" style="width:auto; padding: 5px 10px; font-size: 12px;" onclick="resetBuilderView()">Reset View</button>
+                    <div style="font-weight:bold; font-size:14px; color:#2d3748;">
+                        Land: <span id="land-size-display">6x6</span>
+                    </div>
+                    <button class="action-btn blue" style="width:auto; padding: 5px 10px; font-size: 12px;" onclick="expandLand()">Expand (500 BP)</button>
+                </div>
+
+                <!-- Bottom Row: Block Palette -->
+                <div class="palette-scroll" id="block-palette">
+                    <!-- Javascript will fill this -->
+                    <div class="block-btn active">
+                        <div>🧱</div>
+                        <div class="block-qty">x99</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </section>
     <section id="screen-hub" class="screen"><div id="hub-content"></div></section>
     <section id="screen-shop" class="screen"><div id="shop-content"></div></section>
@@ -1174,6 +1309,7 @@
         </div>
     </div>
   </div>
+  
 
   <script>
     // --- GLOBAL GAME STATE DEFINITION ---
@@ -1644,32 +1780,14 @@
     function repairSaveData() {
         let fixed = false;
         
-        // 1. Init missing systems
+        // 1. Fix Combo & Streak
         if(gameState.combo === undefined) { gameState.combo = 0; fixed=true; }
         if(gameState.dailyStreak === undefined) { gameState.dailyStreak = 0; fixed=true; }
-        if(!gameState.questProgress) { gameState.questProgress = { active: false, flags: [] }; fixed=true; }
+        
+        // 2. Fix Squad
         if(!gameState.team) { gameState.team = [gameState.currentPetId]; fixed=true; }
 
-        // --- 2. FIX SQUAD GHOSTS (The Fix for You) ---
-        // Filter the team to ONLY keep pets that actually exist in your inventory
-        const initialTeamSize = gameState.team.length;
-        gameState.team = gameState.team.filter(teamId => 
-            gameState.pets.some(p => p.id === teamId)
-        );
-        
-        if (gameState.team.length !== initialTeamSize) {
-            console.log("👻 Removed Ghost Pets from Squad");
-            fixed = true;
-        }
-        
-        // If squad ended up empty, add current pet
-        if (gameState.team.length === 0 && gameState.pets.length > 0) {
-            gameState.team.push(gameState.pets[0].id);
-            fixed = true;
-        }
-        // ---------------------------------------------
-
-        // 3. Fix Pet Data
+        // 3. Fix Pet Data (Powers & HP)
         gameState.pets.forEach(p => {
             if (!p.powers || !Array.isArray(p.powers)) { p.powers = []; fixed = true; }
             
@@ -1679,7 +1797,23 @@
                 fixed = true;
             }
         });
+
+        // 4. --- NEW: GIVE LAND TO OLD PLAYERS ---
+        if (!gameState.builder) {
+            console.log("🏗️ Migrating save: Adding Builder Data...");
+            gameState.builder = {
+                landSize: 6,         // Start with 6x6
+                voxels: {},          // Empty plot
+                inventory: { 
+                    'grass': 10,     // Starter blocks
+                    'wood': 5 
+                } 
+            };
+            fixed = true;
+        }
+        // ----------------------------------------
         
+        // 5. Save Once if needed
         if (fixed) saveGame();
     }
     
@@ -1895,8 +2029,16 @@
         gameState.currentPetId = starterId; 
         gameState.brainPoints = 100; 
         gameState.stamina = 100; 
-        gameState.inventory['arena_ticket'] = 1; 
+        gameState.inventory['arena_ticket'] = 1;
+        
+        // --- NEW: BUILDER DATA ---
+        gameState.builder = {
+            landSize: 6, // 6x6 Grid
+            voxels: {},  // Saved blocks
+            inventory: { 'grass': 10, 'wood': 5 } // Starter blocks
+        };
     }
+    
     
     // --- DAILY LOGIN LOGIC ---
     function checkDailyLogin() {
@@ -3256,11 +3398,35 @@ document.getElementById('player-hp-text').innerText = `${Math.ceil(bs.playerHP)}
     }
 }
     function switchTab(t) { 
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.querySelectorAll('.tab').forEach(b => b.classList.remove('active')); document.querySelector(`.tab[data-tab="${t}"]`).classList.add('active'); document.getElementById('screen-' + t).classList.add('active'); 
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
+        document.querySelectorAll('.tab').forEach(b => b.classList.remove('active')); 
+        document.querySelector(`.tab[data-tab="${t}"]`).classList.add('active'); 
+        document.getElementById('screen-' + t).classList.add('active'); 
+        
         if(t==='wilds') soundManager.playBGM('wilds'); else soundManager.playBGM('hub'); 
-        if (t === 'hub') renderHub(); if (t === 'shop') renderShop(); 
-        if (t !== 'wilds') { document.getElementById('rpg-wrapper').style.display = 'none'; document.getElementById('battle-ui').style.display = 'none'; document.getElementById('wilds-menu').style.display = 'block'; } 
+        if (t === 'hub') renderHub(); 
+        if (t === 'shop') renderShop(); 
+        
+        // --- NEW: INIT BUILDER ---
+        // --- NEW: INIT BUILDER & PETS ---
+    if (t === 'build') {
+        initBuilder();
+        // Check if function exists to prevent errors during loading
+        if (typeof initBuilderPets === 'function') initBuilderPets(); 
+    } else {
+        // STOP PETS (Save CPU/Battery when not building)
+        if (typeof builderPetInterval !== 'undefined' && builderPetInterval) {
+            clearInterval(builderPetInterval);
+        }
     }
+    // -------------------------
+
+    if (t !== 'wilds') { 
+        document.getElementById('rpg-wrapper').style.display = 'none'; 
+        document.getElementById('battle-ui').style.display = 'none'; 
+        document.getElementById('wilds-menu').style.display = 'block'; 
+    } 
+}
     function updateStatsDisplay() { document.getElementById('bp-display').innerText = gameState.brainPoints; document.getElementById('stamina-display').innerText = gameState.stamina; }
     function createProjectile(v, s, e) { const p = document.createElement('div'); p.className = 'projectile'; if (v && v.startsWith('http')) p.innerHTML = `<img src="${v}">`; else p.innerText = v; const sr = s.getBoundingClientRect(); const er = e.getBoundingClientRect(); p.style.left = (sr.left + sr.width/2 - 75) + 'px'; p.style.top = (sr.top + sr.height/2 - 75) + 'px'; document.body.appendChild(p); const a = p.animate([ { transform: 'translate(0,0) scale(0.5)', opacity: 1 }, { transform: `translate(${er.left+er.width/2 - (sr.left+sr.width/2)}px, ${er.top+er.height/2 - (sr.top+sr.height/2)}px) scale(1.2)`, opacity: 0 } ], { duration: 600 }); a.onfinish = () => p.remove(); }
     function showToast(m, t) { const d = document.createElement('div'); d.className = 'toast ' + t; d.innerText = m; document.body.appendChild(d); setTimeout(()=>d.remove(), 3000); }
@@ -6898,6 +7064,394 @@ function getPetEquipmentStats(pet) {
             alert(`Trial Failed (${evoQuizScore}/5). Study more and try again!`);
         }
     }
+    // ==========================================
+    // 🏰 VOXEL BUILDER ENGINE
+    // ==========================================
+
+    const BUILDER_BLOCKS = [
+        { id: 'grass', icon: '🟩', name: 'Grass', color: '#4ade80', side: '#22c55e', top: '#86efac', cost: 10 },
+        { id: 'dirt', icon: '🟫', name: 'Dirt', color: '#a16207', side: '#713f12', top: '#ca8a04', cost: 10 },
+        { id: 'stone', icon: '⬜', name: 'Stone', color: '#94a3b8', side: '#64748b', top: '#cbd5e1', cost: 20 },
+        { id: 'wood', icon: '🪵', name: 'Wood', color: '#d97706', side: '#b45309', top: '#fbbf24', cost: 50 },
+        { id: 'brick', icon: '🧱', name: 'Brick', color: '#ef4444', side: '#b91c1c', top: '#f87171', cost: 100 },
+        { id: 'glass', icon: '🧊', name: 'Glass', color: 'rgba(56,189,248,0.4)', side: 'rgba(2,132,199,0.4)', top: 'rgba(125,211,252,0.4)', cost: 200 },
+        { id: 'gold', icon: '👑', name: 'Gold', color: '#eab308', side: '#a16207', top: '#facc15', cost: 1000 }
+    ];
+
+    let buildState = {
+        viewRot: { x: 60, z: 45 },
+        selectedTool: 'grass', // Block ID or 'eraser'
+        isDragging: false,
+        startX: 0, startY: 0
+    };
+
+    function initBuilder() {
+        // Ensure data exists (migration for old saves)
+        if (!gameState.builder) {
+            gameState.builder = { landSize: 6, voxels: {}, inventory: { 'grass': 10 } };
+        }
+        
+        renderBuilderScene();
+        renderPalette();
+        setupBuilderControls();
+    }
+
+    function renderBuilderScene() {
+        const world = document.getElementById('world');
+        const LAND_SCALE = 40; // Pixel size of one block
+        const size = gameState.builder.landSize * LAND_SCALE;
+        
+        // Center the world based on the container size (400x400) defined in CSS
+        const CONTAINER_SIZE = 400;
+        const centerOffset = CONTAINER_SIZE / 2;
+        
+        // Apply camera rotation
+        world.style.transform = `rotateX(${buildState.viewRot.x}deg) rotateZ(${buildState.viewRot.z}deg) translateZ(-50px)`;
+        
+        let html = '';
+
+        // 1. Draw Grid Base (The Floor)
+        // We use translate3d to ensure GPU acceleration
+        html += `<div class="grid-base" style="
+            width:${size}px; height:${size}px; 
+            grid-template-columns:repeat(${gameState.builder.landSize}, 1fr); 
+            left:50%; top:50%; 
+            transform:translate3d(-50%, -50%, 0px);">`;
+            
+        for(let y=0; y<gameState.builder.landSize; y++) {
+            for(let x=0; x<gameState.builder.landSize; x++) {
+                html += `<div class="grid-cell" onclick="placeBlock(${x},${y},0)"></div>`;
+            }
+        }
+        html += `</div>`;
+
+        // 2. Draw Voxels (The Blocks)
+        for(const [key, data] of Object.entries(gameState.builder.voxels)) {
+            const [x, y, z] = key.split(',').map(Number);
+            const b = BUILDER_BLOCKS.find(bl => bl.id === data.id);
+            
+            if(b) {
+                // Calculate position: 
+                // 1. Start at 0
+                // 2. Add block position (x * 40)
+                // 3. Subtract half map size to center it (-size/2)
+                // 4. Add container center offset (+200)
+                const ox = (x * LAND_SCALE) - (size / 2) + centerOffset;
+                const oy = (y * LAND_SCALE) - (size / 2) + centerOffset;
+                // Lift z by half block height (20px) so it sits ON the grid, not inside it
+                const oz = (z * LAND_SCALE) + (LAND_SCALE / 2); 
+                
+                html += `
+                <div class="voxel-cube" style="transform: translate3d(${ox}px, ${oy}px, ${oz}px)">
+                    <div class="face face-top" style="background-color:${b.top}" onclick="clickVoxel(${x},${y},${z}, 'top', event)"></div>
+                    <div class="face face-front" style="background-color:${b.side}" onclick="clickVoxel(${x},${y},${z}, 'front', event)"></div>
+                    <div class="face face-back" style="background-color:${b.side}" onclick="clickVoxel(${x},${y},${z}, 'back', event)"></div>
+                    <div class="face face-right" style="background-color:${b.color}" onclick="clickVoxel(${x},${y},${z}, 'right', event)"></div>
+                    <div class="face face-left" style="background-color:${b.color}" onclick="clickVoxel(${x},${y},${z}, 'left', event)"></div>
+                </div>`;
+            }
+        }
+        
+        // --- NEW: RENDER PETS (3D THICKNESS VERSION) ---
+        if (builderPets && builderPets.length > 0) {
+            builderPets.forEach(pet => {
+                const ox = (pet.x * 40) - (size / 2) + centerOffset;
+                const oy = (pet.y * 40) - (size / 2) + centerOffset;
+                
+                // Lift +20px so feet are on the floor
+                const oz = (pet.z * 40) + 20; 
+
+                // Define the Image/Emoji once
+                const content = pet.image 
+                    ? `<img src="${pet.image}" style="width:30px; height:30px; object-fit:contain;">`
+                    : `<div style="font-size:24px;">${pet.emoji}</div>`;
+
+                html += `
+                <div class="voxel-pet" style="
+                    position: absolute;
+                    width: 40px; height: 40px;
+                    transform-style: preserve-3d;
+                    transform: translate3d(${ox}px, ${oy}px, ${oz}px) rotateX(-90deg);
+                    pointer-events: none; 
+                    transition: transform 0.5s linear;
+                ">
+                    <!-- Layer 1: Front Face (Bright) -->
+                    <div style="position:absolute; width:100%; height:100%; display:flex; justify-content:center; align-items:center; transform: translateZ(2px);">
+                        ${content}
+                    </div>
+
+                    <!-- Layer 2: Middle Filler (Slightly Darker) -->
+                    <div style="position:absolute; width:100%; height:100%; display:flex; justify-content:center; align-items:center; transform: translateZ(0px); filter: brightness(0.8);">
+                        ${content}
+                    </div>
+
+                    <!-- Layer 3: Back Face (Dark Shadow) -->
+                    <div style="position:absolute; width:100%; height:100%; display:flex; justify-content:center; align-items:center; transform: translateZ(-2px); filter: brightness(0.5);">
+                        ${content}
+                    </div>
+                </div>`;
+            });
+        }
+        // ------------------------
+        // ------------------------
+        world.innerHTML = html;
+        document.getElementById('land-size-display').innerText = `${gameState.builder.landSize}x${gameState.builder.landSize}`;
+    }
+
+    function renderPalette() {
+        const p = document.getElementById('block-palette');
+        let html = `
+        <div class="block-btn ${buildState.selectedTool==='eraser'?'active':''}" onclick="selectTool('eraser')">
+            <div>🧼</div><div class="block-qty">DEL</div>
+        </div>`;
+        
+        BUILDER_BLOCKS.forEach(b => {
+            const qty = gameState.builder.inventory[b.id] || 0;
+            const active = buildState.selectedTool === b.id ? 'active' : '';
+            // Dim if 0 qty
+            const style = qty === 0 ? 'opacity:0.5; filter:grayscale(1);' : '';
+            
+            // Add click to select OR buy if 0
+            const action = qty > 0 ? `selectTool('${b.id}')` : `buyBlock('${b.id}')`;
+            const label = qty > 0 ? `x${qty}` : `${b.cost}BP`;
+            
+            html += `
+            <div class="block-btn ${active}" style="${style}" onclick="${action}">
+                <div>${b.icon}</div><div class="block-qty">${label}</div>
+            </div>`;
+        });
+        p.innerHTML = html;
+    }
+
+    // --- ACTIONS ---
+
+    function selectTool(id) {
+        buildState.selectedTool = id;
+        renderPalette();
+    }
+
+    function buyBlock(id) {
+        const b = BUILDER_BLOCKS.find(x => x.id === id);
+        if (gameState.brainPoints >= b.cost) {
+            gameState.brainPoints -= b.cost;
+            gameState.builder.inventory[id] = (gameState.builder.inventory[id] || 0) + 5; // Buy 5 at a time? Or 1? Let's do 1 for now to be safe, or 5 for value.
+            // Let's do: Cost is per block.
+            // Actually, let's make it "Buy 5 for Cost" to make it feel generous.
+            gameState.builder.inventory[id] = (gameState.builder.inventory[id] || 0) + 4; // Add 4 more (total +5 logic above) -> wait, logic fix:
+            // Fix: Just add 5.
+            // gameState.builder.inventory[id] += 4; 
+            
+            updateStatsDisplay();
+            saveGame();
+            renderPalette();
+            showToast(`Bought 5 ${b.name}!`, "success");
+        } else {
+            showToast("Not enough BP!", "error");
+        }
+    }
+
+    function expandLand() {
+    // 1. Calculate Cost based on current size
+    // Size 6 -> 500 BP
+    // Size 8 -> 1000 BP
+    // Size 10 -> 1500 BP, etc.
+    const baseCost = 500;
+    const multiplier = (gameState.builder.landSize - 4) / 2; 
+    const currentCost = baseCost * multiplier;
+
+    // 2. Set Max Limit to 20 (Safe for performance)
+    if(gameState.builder.landSize >= 20) return showToast("Maximum Land Size Reached!", "info");
+    
+    if(gameState.brainPoints >= currentCost) {
+        if(confirm(`Expand Land to ${gameState.builder.landSize+2}x${gameState.builder.landSize+2} for ${currentCost} BP?`)) {
+            gameState.brainPoints -= currentCost;
+            gameState.builder.landSize += 2;
+            
+            updateStatsDisplay();
+            saveGame();
+            initBuilder(); // Re-center everything
+            showToast("Land Expanded!", "success");
+        }
+    } else {
+        showToast(`Need ${currentCost} BP to expand!`, "error");
+    }
+}
+
+    function placeBlock(x, y, z) {
+        if(buildState.isDragging) return;
+        if(buildState.selectedTool === 'eraser') return;
+
+        const key = `${x},${y},${z}`;
+        if(gameState.builder.voxels[key]) return; // Occupied
+
+        const qty = gameState.builder.inventory[buildState.selectedTool] || 0;
+        if(qty > 0) {
+            gameState.builder.voxels[key] = { id: buildState.selectedTool };
+            gameState.builder.inventory[buildState.selectedTool]--;
+            saveGame();
+            renderBuilderScene();
+            renderPalette();
+        } else {
+            showToast("Out of blocks!", "error");
+        }
+    }
+
+    function clickVoxel(x, y, z, face, e) {
+        e.stopPropagation(); // Don't click grid behind it
+        if(buildState.isDragging) return;
+
+        const currentKey = `${x},${y},${z}`;
+
+        if(buildState.selectedTool === 'eraser') {
+            // Refund block (optional? Let's keep it simple: Yes refund)
+            const id = gameState.builder.voxels[currentKey].id;
+            gameState.builder.inventory[id] = (gameState.builder.inventory[id] || 0) + 1;
+            
+            delete gameState.builder.voxels[currentKey];
+            saveGame();
+            renderBuilderScene();
+            renderPalette();
+        } else {
+            // Build on neighbor face
+            let nx = x, ny = y, nz = z;
+            if(face === 'top') nz++;
+            if(face === 'bottom') nz--; // Not clickable really
+            if(face === 'front') ny++;
+            if(face === 'back') ny--;
+            if(face === 'right') nx++;
+            if(face === 'left') nx--;
+
+            // Check Bounds
+            if(nx < 0 || nx >= gameState.builder.landSize || ny < 0 || ny >= gameState.builder.landSize || nz < 0 || nz > 10) return;
+
+            placeBlock(nx, ny, nz);
+        }
+    }
+
+    // --- CONTROLS ---
+    function setupBuilderControls() {
+        const c = document.getElementById('builder-container');
+        if(c.dataset.listening) return; // Prevent double listeners
+        c.dataset.listening = "true";
+
+        c.addEventListener('mousedown', e => {
+            buildState.isDragging = false;
+            buildState.startX = e.clientX;
+            buildState.startY = e.clientY;
+        });
+
+        c.addEventListener('mousemove', e => {
+            if(e.buttons === 1) { // Left click hold
+                const dx = e.clientX - buildState.startX;
+                const dy = e.clientY - buildState.startY;
+                if(Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+                    buildState.isDragging = true;
+                    buildState.viewRot.z -= dx * 0.5;
+                    buildState.viewRot.x = Math.max(10, Math.min(85, buildState.viewRot.x - dy * 0.5));
+                    buildState.startX = e.clientX;
+                    buildState.startY = e.clientY;
+                    
+                    // Update transform directly for smooth 60fps
+                    document.getElementById('world').style.transform = `rotateX(${buildState.viewRot.x}deg) rotateZ(${buildState.viewRot.z}deg) translateZ(-50px)`;
+                }
+            }
+        });
+    }
+
+    function resetBuilderView() {
+        buildState.viewRot = { x: 60, z: 45 };
+        renderBuilderScene();
+    }
+    // --- 🏰 PET BUILDER INTEGRATION ---
+
+let builderPetInterval = null;
+let builderPets = []; // Local state for builder pets
+
+function initBuilderPets() {
+    // 1. Clear old intervals to prevent speed-ups
+    if (builderPetInterval) clearInterval(builderPetInterval);
+    
+    // 2. Get the squad
+    const squadIds = gameState.team || [gameState.currentPetId];
+    builderPets = [];
+
+    // 3. Spawn them at safe locations
+    squadIds.forEach(id => {
+        const petData = gameState.pets.find(p => p.id === id);
+        if (petData) {
+            // Find a random spot within current land size
+            let safeX = Math.floor(Math.random() * gameState.builder.landSize);
+            let safeY = Math.floor(Math.random() * gameState.builder.landSize);
+            let safeZ = getHighestZ(safeX, safeY) + 1; // Stand ON TOP of the block
+
+            builderPets.push({
+                id: id,
+                image: petData.image,
+                emoji: petData.emoji,
+                x: safeX, 
+                y: safeY, 
+                z: safeZ,
+                // Add a little randomness so they don't all move at exact same millisecond
+                nextMoveTime: Date.now() + (Math.random() * 3000)
+            });
+        }
+    });
+
+    // 4. Start the AI Loop
+    builderPetInterval = setInterval(updateBuilderPets, 500); // Check every half second
+}
+
+function getHighestZ(x, y) {
+    // Helper to find the ground height at specific X,Y
+    let maxZ = -1; // -1 means ground level (z=0) is available
+    for (const key in gameState.builder.voxels) {
+        const [vx, vy, vz] = key.split(',').map(Number);
+        if (vx === x && vy === y) {
+            if (vz > maxZ) maxZ = vz;
+        }
+    }
+    return maxZ;
+}
+
+function updateBuilderPets() {
+    const now = Date.now();
+    let moved = false;
+
+    builderPets.forEach(pet => {
+        if (now > pet.nextMoveTime) {
+            // TIME TO MOVE!
+            // 1. Pick random direction (Up, Down, Left, Right)
+            const dirs = [{dx:0, dy:1}, {dx:0, dy:-1}, {dx:1, dy:0}, {dx:-1, dy:0}];
+            const move = dirs[Math.floor(Math.random() * dirs.length)];
+            
+            const targetX = pet.x + move.dx;
+            const targetY = pet.y + move.dy;
+
+            // 2. Check Boundaries
+            if (targetX >= 0 && targetX < gameState.builder.landSize && 
+                targetY >= 0 && targetY < gameState.builder.landSize) {
+                
+                // 3. Check Physics
+                // We want to walk ON blocks, not inside them.
+                const groundHeight = getHighestZ(targetX, targetY);
+                const targetZ = groundHeight + 1;
+
+                // "Gravity Check": Max jump height = 1 block up/down
+                if (Math.abs(targetZ - pet.z) <= 1) {
+                    pet.x = targetX;
+                    pet.y = targetY;
+                    pet.z = targetZ;
+                    moved = true;
+                }
+            }
+
+            // Reset Timer (2 to 5 seconds wait)
+            pet.nextMoveTime = now + 2000 + (Math.random() * 3000);
+        }
+    });
+
+    if (moved) renderBuilderScene(); // Redraw if anyone moved
+}
   </script>
 </body>
  </html>
