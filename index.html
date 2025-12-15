@@ -7226,26 +7226,40 @@ function getPetEquipmentStats(pet) {
 
     function renderPalette() {
         const p = document.getElementById('block-palette');
+        
+        // Eraser Tool
         let html = `
         <div class="block-btn ${buildState.selectedTool==='eraser'?'active':''}" onclick="selectTool('eraser')">
-            <div>🧼</div><div class="block-qty">DEL</div>
+            <div style="font-size:24px;">🧼</div><div class="block-qty">DEL</div>
         </div>`;
         
         BUILDER_BLOCKS.forEach(b => {
             const qty = gameState.builder.inventory[b.id] || 0;
             const active = buildState.selectedTool === b.id ? 'active' : '';
-            // Dim if 0 qty
-            const style = qty === 0 ? 'opacity:0.5; filter:grayscale(1);' : '';
+            const style = qty === 0 ? 'opacity:0.6; filter:grayscale(1);' : '';
             
-            // Add click to select OR buy if 0
             const action = qty > 0 ? `selectTool('${b.id}')` : `buyBlock('${b.id}')`;
             const label = qty > 0 ? `x${qty}` : `${b.cost}BP`;
             
+            // --- 🌟 THE FIX IS HERE 🌟 ---
+            let iconDisplay;
+            
+            if (b.icon && b.icon.startsWith('http')) {
+                // If it is a LINK, render an IMAGE tag
+                iconDisplay = `<img src="${b.icon}" style="width:30px; height:30px; object-fit:contain; pointer-events:none;">`;
+            } else {
+                // If it is NOT a link (like an Emoji), render TEXT
+                iconDisplay = `<div style="font-size:24px;">${b.icon || '📦'}</div>`;
+            }
+            // -----------------------------
+
             html += `
             <div class="block-btn ${active}" style="${style}" onclick="${action}">
-                <div>${b.icon}</div><div class="block-qty">${label}</div>
+                ${iconDisplay}
+                <div class="block-qty">${label}</div>
             </div>`;
         });
+        
         p.innerHTML = html;
     }
 
