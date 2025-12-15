@@ -1,0 +1,102 @@
+[
+  {
+    "id": "grass2",
+    "name": "real grass",
+    "icon": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/1.png",
+    "cost": 500,
+    "desc": "Handle with care!",
+    "top": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/1.png",
+    "side": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/1.png",
+    "color": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/1.png"
+  },
+  {
+    "id": "ocean",
+    "name": "ocean",
+    "icon": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/2.png",
+    "cost": 100,
+    "desc": "What is inside?",
+    "top": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/2.png",
+    "side": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/2.png",
+    "color": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/2.png"
+  },
+  {
+    "id": "lava",
+    "name": "lava",
+    "icon": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/3.png",
+    "cost": 50,
+    "desc": "A bright solid color.",
+    "top": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/3.png",
+    "side": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/3.png",
+    "color": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/3.png"
+  },
+  {
+    "id": "bush",
+    "name": "bush",
+    "icon": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/4.png",
+    "cost": 50,
+    "desc": "A bright solid color.",
+    "top": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/4.png",
+    "side": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/4.png",
+    "color": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/4.png"
+  },
+  {
+    "id": "boulder",
+    "name": "boulder",
+    "icon": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/5.png",
+    "cost": 50,
+    "desc": "A bright solid color.",
+    "top": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/5.png",
+    "side": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/5.png",
+    "color": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/5.png"
+  },
+  {
+    "id": "diamond",
+    "name": "Diamond",
+    "icon": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/6.png",
+    "cost": 50,
+    "desc": "A bright solid color.",
+    "top": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/6.png",
+    "side": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/6.png",
+    "color": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/6.png"
+  },
+  {
+    "id": "wood",
+    "name": "wood",
+    "icon": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/7.png",
+    "cost": 50,
+    "desc": "A bright solid color.",
+    "top": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/7.png",
+    "side": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/7.png",
+    "color": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/7.png"
+  },
+  {
+    "id": "ice",
+    "name": "ice",
+    "icon": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/8.png",
+    "cost": 50,
+    "desc": "A bright solid color.",
+    "top": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/8.png",
+    "side": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/8.png",
+    "color": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/8.png"
+  },
+  {
+    "id": "light",
+    "name": "light",
+    "icon": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/9.png",
+    "cost": 50,
+    "desc": "A bright solid color.",
+    "top": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/9.png",
+    "side": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/9.png",
+    "color": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/9.png"
+  },
+  {
+    "id": "sand",
+    "name": "sand",
+    "icon": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/10.png",
+    "cost": 50,
+    "desc": "A bright solid color.",
+    "top": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/10.png",
+    "side": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/10.png",
+    "color": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/tiles/10.png"
+  }
+]
