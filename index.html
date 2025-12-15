@@ -1731,6 +1731,43 @@
                 console.log("🎒 Loaded Equipment:", SHOP_ITEMS.equipment.length);
             }
         } catch(e) { console.log("No items folder found."); }
+        
+        // 5. DYNAMIC BLOCKS LOADER (Textures & Colors)
+        try {
+            console.log("🧱 Scanning 'blocks' folder...");
+            const blockFiles = await fetchGithubFolder('blocks');
+            
+            if (blockFiles && Array.isArray(blockFiles)) {
+                for (const file of blockFiles) {
+                    if (file.name.endsWith('.json')) {
+                        try {
+                            const res = await fetch(file.download_url);
+                            if (res.ok) {
+                                const newBlocks = await res.json();
+                                if (Array.isArray(newBlocks)) {
+                                    newBlocks.forEach(block => {
+                                        // Prevent duplicates
+                                        const exists = BUILDER_BLOCKS.find(b => b.id === block.id);
+                                        if (!exists) {
+                                            // Fallback: If JSON is missing specific sides, use 'top' for all
+                                            if (!block.side) block.side = block.top;
+                                            if (!block.color) block.color = block.side;
+                                            
+                                            BUILDER_BLOCKS.push(block);
+                                        }
+                                    });
+                                    console.log(`--> Loaded ${newBlocks.length} blocks from ${file.name}`);
+                                }
+                            }
+                        } catch (err) { 
+                            console.warn("Skipped invalid block file:", file.name); 
+                        }
+                    }
+                }
+            }
+        } catch (e) { 
+            console.log("No external blocks folder found (Optional)."); 
+        }
 
         // 3. Dynamic Powers
         try {
@@ -7101,7 +7138,7 @@ function getPetEquipmentStats(pet) {
         const LAND_SCALE = 40; // Pixel size of one block
         const size = gameState.builder.landSize * LAND_SCALE;
         
-        // Center the world based on the container size (400x400) defined in CSS
+        // Center the world based on the container size (400x400)
         const CONTAINER_SIZE = 400;
         const centerOffset = CONTAINER_SIZE / 2;
         
@@ -7111,7 +7148,6 @@ function getPetEquipmentStats(pet) {
         let html = '';
 
         // 1. Draw Grid Base (The Floor)
-        // We use translate3d to ensure GPU acceleration
         html += `<div class="grid-base" style="
             width:${size}px; height:${size}px; 
             grid-template-columns:repeat(${gameState.builder.landSize}, 1fr); 
@@ -7125,43 +7161,42 @@ function getPetEquipmentStats(pet) {
         }
         html += `</div>`;
 
-        // 2. Draw Voxels (The Blocks)
+        // 2. Draw Voxels (Now supports Images AND Colors)
         for(const [key, data] of Object.entries(gameState.builder.voxels)) {
             const [x, y, z] = key.split(',').map(Number);
             const b = BUILDER_BLOCKS.find(bl => bl.id === data.id);
             
             if(b) {
-                // Calculate position: 
-                // 1. Start at 0
-                // 2. Add block position (x * 40)
-                // 3. Subtract half map size to center it (-size/2)
-                // 4. Add container center offset (+200)
                 const ox = (x * LAND_SCALE) - (size / 2) + centerOffset;
                 const oy = (y * LAND_SCALE) - (size / 2) + centerOffset;
-                // Lift z by half block height (20px) so it sits ON the grid, not inside it
-                const oz = (z * LAND_SCALE) + (LAND_SCALE / 2); 
+                // Lift z by half block height + correction
+                const oz = (z * LAND_SCALE) + 20; 
                 
+                // --- 🌟 NEW: HYBRID TEXTURE LOGIC ---
+                // If it starts with http, wrap in url(''). If not, assume it's a Hex Color.
+                const getStyle = (val) => val && val.toString().startsWith('http') ? `url('${val}')` : val;
+                
+                // If it is an image, force it to cover the face
+                const bgProps = (val) => val && val.toString().startsWith('http') ? 'background-size: cover; background-repeat: no-repeat;' : '';
+
                 html += `
                 <div class="voxel-cube" style="transform: translate3d(${ox}px, ${oy}px, ${oz}px)">
-                    <div class="face face-top" style="background-color:${b.top}" onclick="clickVoxel(${x},${y},${z}, 'top', event)"></div>
-                    <div class="face face-front" style="background-color:${b.side}" onclick="clickVoxel(${x},${y},${z}, 'front', event)"></div>
-                    <div class="face face-back" style="background-color:${b.side}" onclick="clickVoxel(${x},${y},${z}, 'back', event)"></div>
-                    <div class="face face-right" style="background-color:${b.color}" onclick="clickVoxel(${x},${y},${z}, 'right', event)"></div>
-                    <div class="face face-left" style="background-color:${b.color}" onclick="clickVoxel(${x},${y},${z}, 'left', event)"></div>
+                    <div class="face face-top"   style="background:${getStyle(b.top)}; ${bgProps(b.top)}" onclick="clickVoxel(${x},${y},${z}, 'top', event)"></div>
+                    <div class="face face-front" style="background:${getStyle(b.side)}; ${bgProps(b.side)}" onclick="clickVoxel(${x},${y},${z}, 'front', event)"></div>
+                    <div class="face face-back"  style="background:${getStyle(b.side)}; ${bgProps(b.side)}" onclick="clickVoxel(${x},${y},${z}, 'back', event)"></div>
+                    <div class="face face-right" style="background:${getStyle(b.color)}; ${bgProps(b.color)}" onclick="clickVoxel(${x},${y},${z}, 'right', event)"></div>
+                    <div class="face face-left"  style="background:${getStyle(b.color)}; ${bgProps(b.color)}" onclick="clickVoxel(${x},${y},${z}, 'left', event)"></div>
                 </div>`;
             }
         }
-        
-        // --- NEW: RENDER PETS (3D THICKNESS VERSION) ---
-        if (builderPets && builderPets.length > 0) {
+
+        // --- 3. RENDER PETS (3D THICKNESS VERSION) ---
+        if (typeof builderPets !== 'undefined' && builderPets.length > 0) {
             builderPets.forEach(pet => {
                 const ox = (pet.x * 40) - (size / 2) + centerOffset;
                 const oy = (pet.y * 40) - (size / 2) + centerOffset;
-                
-                // Lift +20px so feet are on the floor
                 const oz = (pet.z * 40) + 20; 
 
-                // Define the Image/Emoji once
                 const content = pet.image 
                     ? `<img src="${pet.image}" style="width:30px; height:30px; object-fit:contain;">`
                     : `<div style="font-size:24px;">${pet.emoji}</div>`;
@@ -7175,25 +7210,16 @@ function getPetEquipmentStats(pet) {
                     pointer-events: none; 
                     transition: transform 0.5s linear;
                 ">
-                    <!-- Layer 1: Front Face (Bright) -->
-                    <div style="position:absolute; width:100%; height:100%; display:flex; justify-content:center; align-items:center; transform: translateZ(2px);">
-                        ${content}
-                    </div>
-
-                    <!-- Layer 2: Middle Filler (Slightly Darker) -->
-                    <div style="position:absolute; width:100%; height:100%; display:flex; justify-content:center; align-items:center; transform: translateZ(0px); filter: brightness(0.8);">
-                        ${content}
-                    </div>
-
-                    <!-- Layer 3: Back Face (Dark Shadow) -->
-                    <div style="position:absolute; width:100%; height:100%; display:flex; justify-content:center; align-items:center; transform: translateZ(-2px); filter: brightness(0.5);">
-                        ${content}
-                    </div>
+                    <!-- Layer 1 -->
+                    <div style="position:absolute; width:100%; height:100%; display:flex; justify-content:center; align-items:center; transform: translateZ(2px);">${content}</div>
+                    <!-- Layer 2 -->
+                    <div style="position:absolute; width:100%; height:100%; display:flex; justify-content:center; align-items:center; transform: translateZ(0px); filter: brightness(0.8);">${content}</div>
+                    <!-- Layer 3 -->
+                    <div style="position:absolute; width:100%; height:100%; display:flex; justify-content:center; align-items:center; transform: translateZ(-2px); filter: brightness(0.5);">${content}</div>
                 </div>`;
             });
         }
-        // ------------------------
-        // ------------------------
+
         world.innerHTML = html;
         document.getElementById('land-size-display').innerText = `${gameState.builder.landSize}x${gameState.builder.landSize}`;
     }
@@ -7454,5 +7480,5 @@ function updateBuilderPets() {
 }
   </script>
 </body>
- </html>
+          </html>
 
