@@ -1,0 +1,32 @@
+{
+  "name": "Raygon",
+  "type": "ray",
+  "rarity": "Legendary",
+  "element": ["light", "wind"],
+  "hp": 70,
+  "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/raygon/1.png",
+  "imageStyle": "blend-multiply",
+  "emoji": "🐺",
+  "evolutions": [
+    {
+      "name": "Groochy", 
+      "level": 10,
+      "cost": 100,
+      "baseHP": 100,
+      "rarity": "Legendary",
+      "element": ["light", "wind"],
+      "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/raygon/2.png",
+      "imageStyle": "blend-multiply"
+    },
+    {
+      "name": "Groochy",
+      "level": 20,
+      "cost": 200,
+      "baseHP": 200,
+      "rarity": "legendary",
+      "element": ["light", "wind"],
+      "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/raygon/3.png",
+      "imageStyle": "blend-multiply"
+    }
+  ]
+}
