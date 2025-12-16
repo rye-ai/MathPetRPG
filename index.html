@@ -19,7 +19,6 @@
       appId: "1:590511399628:web:400e68086ccfaba2e65869"
     };
 
-
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     window.db = db;
@@ -7261,6 +7260,7 @@ function getPetEquipmentStats(pet) {
         
         p.innerHTML = html;
     }
+    
 
     // --- ACTIONS ---
 
@@ -7317,19 +7317,32 @@ function getPetEquipmentStats(pet) {
 }
 
     function placeBlock(x, y, z) {
+        // Prevent placement if dragging or erasing
         if(buildState.isDragging) return;
         if(buildState.selectedTool === 'eraser') return;
 
         const key = `${x},${y},${z}`;
-        if(gameState.builder.voxels[key]) return; // Occupied
+        if(gameState.builder.voxels[key]) return; // Spot occupied
 
         const qty = gameState.builder.inventory[buildState.selectedTool] || 0;
+        
         if(qty > 0) {
+            // 1. Place the block
             gameState.builder.voxels[key] = { id: buildState.selectedTool };
             gameState.builder.inventory[buildState.selectedTool]--;
+            
+            // 2. Save & Render
             saveGame();
             renderBuilderScene();
             renderPalette();
+
+            // --- 🚧 NEW: TRIGGER QUIZ EVERY 5 BLOCKS ---
+            blocksPlacedSession++;
+            if (blocksPlacedSession % 5 === 0) {
+                setTimeout(triggerBuildQuiz, 300); // Small delay so they see the block appear first
+            }
+            // -------------------------------------------
+
         } else {
             showToast("Out of blocks!", "error");
         }
@@ -7491,7 +7504,81 @@ function updateBuilderPets() {
 
     if (moved) renderBuilderScene(); // Redraw if anyone moved
 }
+// --- 🚧 CONSTRUCTION QUIZ ENGINE ---
+
+let blocksPlacedSession = 0; // Counts blocks placed in this session
+
+function triggerBuildQuiz() {
+    // 1. Get Question from Assigned Pool (or fallback to Grade math)
+    let q;
+    if (gameState.activeQuestionPool && gameState.activeQuestionPool.length > 0) {
+        // Pick random question from assigned topics
+        q = gameState.activeQuestionPool[Math.floor(Math.random() * gameState.activeQuestionPool.length)];
+    } else {
+        // Fallback generator
+        q = MathEngine.generate(gameState.grade || "1");
+    }
+
+    // 2. Setup UI
+    const modal = document.getElementById('build-quiz-modal');
+    const qText = document.getElementById('build-quiz-question');
+    const qGrid = document.getElementById('build-quiz-options');
+    
+    // Handle text vs object format
+    qText.innerHTML = q.qVisualHTML || q.q || q.text;
+    qGrid.innerHTML = '';
+
+    // 3. Generate Options
+    const options = q.options || MathEngine.generateDistractors(parseFloat(q.a));
+    
+    options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'mcq-btn';
+        btn.style.fontSize = '20px';
+        btn.style.padding = '15px';
+        btn.innerText = opt;
+        
+        btn.onclick = () => {
+            if (opt == q.a) {
+                // CORRECT
+                soundManager.playSFX('correct');
+                addBP(5); // Small reward
+                showToast("✅ Inspection Passed! (+5 BP)", "success");
+                modal.classList.remove('active');
+            } else {
+                // WRONG - Just a warning, let them continue (keeps flow)
+                soundManager.playSFX('wrong');
+                showToast("❌ Wrong! Be careful next time.", "error");
+                modal.classList.remove('active');
+            }
+        };
+        qGrid.appendChild(btn);
+    });
+
+    // 4. Show Modal
+    modal.classList.add('active');
+}
   </script>
+  <!-- 🚧 CONSTRUCTION QUIZ MODAL -->
+<div class="modal-overlay" id="build-quiz-modal" style="z-index: 9999;">
+    <div class="confirm-modal" style="border: 4px solid #f6ad55; background: #fffaf0;">
+        <div style="font-size: 50px; margin-bottom: 10px;">🚧</div>
+        <h2 style="color: #d97706; font-weight: 900; text-transform: uppercase;">Safety Inspection!</h2>
+        <p style="color: #744210; margin-bottom: 20px; font-size: 14px;">
+            Answer this to continue building! (+5 BP)
+        </p>
+        
+        <!-- Question Display -->
+        <div id="build-quiz-question" style="font-size: 24px; font-weight: bold; color: #2d3748; margin-bottom: 20px;">
+            Loading...
+        </div>
+        
+        <!-- Options -->
+        <div id="build-quiz-options" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <!-- Buttons go here -->
+        </div>
+    </div>
+</div>
 </body>
           </html>
 
