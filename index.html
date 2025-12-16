@@ -468,16 +468,15 @@
         backface-visibility: hidden;
         pointer-events: auto; /* Re-enable clicks on faces */
         cursor: pointer;
-        border: 1px solid rgba(0,0,0,0.1);
     }
     .face:hover { filter: brightness(1.2); }
 
-    /* Cube Faces Math */
-    .face-top   { transform: rotateX(0deg) translateZ(20px); }
-    .face-front { transform: rotateX(-90deg) translateZ(20px); filter: brightness(0.9); }
-    .face-back  { transform: rotateX(90deg) translateZ(20px); filter: brightness(0.9); }
-    .face-right { transform: rotateY(90deg) translateZ(20px); filter: brightness(0.7); }
-    .face-left  { transform: rotateY(-90deg) translateZ(20px); filter: brightness(0.7); }
+    /* Cube Faces Math - Overlap Fix */
+    .face-top   { transform: rotateX(0deg) translateZ(20px) scale(1.01); }
+    .face-front { transform: rotateX(-90deg) translateZ(20px) scale(1.01); filter: brightness(0.9); }
+    .face-back  { transform: rotateX(90deg) translateZ(20px) scale(1.01); filter: brightness(0.9); }
+    .face-right { transform: rotateY(90deg) translateZ(20px) scale(1.01); filter: brightness(0.7); }
+    .face-left  { transform: rotateY(-90deg) translateZ(20px) scale(1.01); filter: brightness(0.7); }
 
     /* Builder UI Overlay */
     .build-ui {
