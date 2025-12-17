@@ -3028,18 +3028,57 @@
     }
 
     async function confirmBattleSwap(newPetId) {
+        // 1. Close Modal
         document.getElementById('swap-pet-modal').classList.remove('active');
+        
+        // 2. Update State
         gameState.currentPetId = newPetId;
         const newPet = gameState.pets.find(p => p.id === newPetId);
-        if (gameState.inBattle) gameState.battleState.playerHP = newPet.hp;
+        
+        // 3. Update HP tracking
+        if (gameState.inBattle) {
+            // If in a Raid, use the pet's real HP. 
+            // If in normal battle, use battleState HP (which might need resetting if switching in fresh)
+            if (window.currentRaidDocPath) {
+                 // Raid Logic: No separate battleState HP, uses pet.hp directly
+            } else {
+                 // Normal Battle Logic: Update battleState to match the new pet
+                 gameState.battleState.playerHP = newPet.hp;
+                 gameState.battleState.playerMaxHP = newPet.maxHP;
+            }
+        }
+        
         showToast(`Go ${newPet.name}!`, "info");
-        renderBattle();
-        if (!isForcedSwap && gameState.inBattle) {
+
+        // --- 🛡️ FIX: INSTANT VISUAL RESET ---
+        // Immediately remove "Faint" effects (Gray/Transparent)
+        const pVis = document.getElementById('battle-player-visual');
+        if (pVis) {
+            pVis.style.filter = "none";
+            pVis.style.opacity = "1";
+            pVis.style.transform = "scale(1)";
+        }
+
+        // --- 🛡️ FIX: RENDER THE CORRECT SCREEN ---
+        if (window.currentRaidDocPath) {
+            // We are in a Raid -> Use Raid Renderer
+            renderRaidPlayerSide(); 
+        } else {
+            // We are in Wilds/Arena -> Use Standard Renderer
+            renderBattle(); 
+        }
+
+        // 4. Handle Turn Penalty (Only for Wilds/Arena, NOT Raids)
+        if (!isForcedSwap && gameState.inBattle && !window.currentRaidDocPath) {
             showToast("Swapping took your turn!", "warning");
             await wait(1000); 
             await processEnemyTurnAsync();
         } 
-        if (gameState.inBattle) { gameState.battleState.turnInProgress = false; renderBattle(); }
+        
+        if (gameState.inBattle && !window.currentRaidDocPath) { 
+            gameState.battleState.turnInProgress = false; 
+            renderBattle(); 
+        }
     }
 
     // 1. Battle Logger Helper
@@ -4881,66 +4920,83 @@ window.resolveRaidMath = function(moveId, selected, correct) {
     let raidListenerUnsub = null;
     let localRaidData = { attack: 15 }; // <--- NEW: Defaults to 15
 
-// ===============================================
-// STATIC RAID ENGINE (Maximum Read Optimization)
-// ===============================================
+// --- 🛡️ ROBUST RAID ENGINE (Fixed for Battle UI) ---
+
+
 async function startRaidEngine(path) {
-    // Default to global if no path provided
     const docPath = path || "global";
     window.currentRaidDocPath = docPath; 
 
+    // Reset local damage
     currentRunDamage = 0; 
-    gameState.inBattle = true;
-    document.getElementById('enemy-name').innerText = "Loading Titan...";
     
-    // 1. GET DOC ONCE (Saves Data!)
+    // 1. GET DOC ONCE
     const docRef = window.fbase.doc(window.db, "world_boss", docPath);
     const docSnap = await window.fbase.getDoc(docRef);
 
-    // 2. Safety Check
+    // 2. CHECK IF ACTIVE
     if (!docSnap.exists() || !docSnap.data().active) {
-        if (currentRunDamage > 0) {
-            submitRaidRun("Raid Ended");
-        } else {
-            showToast("Raid is no longer active.", "error");
-            exitRaidBattle();
-        }
+        showToast("Raid is no longer active.", "error");
+        exitRaidBattle();
         return;
     }
 
     const data = docSnap.data();
 
-    // 3. CAPTURE DATA
-    localRaidData = data; 
+    // --- SANITIZE DATA (Prevents NaN/Zero Glitch) ---
+    if (!data.maxHP || isNaN(data.maxHP) || data.maxHP === 0) {
+        data.maxHP = (data.hp > 0) ? data.hp : 50000; 
+    }
+    data.hp = parseInt(data.hp) || 0;
+    // ------------------------------------------------
 
-    // 4. Check if dead
+    // 3. DEAD CHECK
     if (data.hp <= 0) {
          handleRaidVictory();
          return;
     }
 
-    // 5. Update Boss Visuals
+    // 4. SETUP BATTLE STATE
+    localRaidData = data; 
+    gameState.inBattle = true;
+
+    // 5. UPDATE VISUALS (Standard Battle UI)
     const enemyVis = document.getElementById('battle-enemy-visual');
-    if (!enemyVis.innerHTML.includes(data.image) && data.image) {
-        enemyVis.classList.add('flipped-opponent');
-        enemyVis.innerHTML = `<img src="${data.image}" class="battler-image" style="width:300px; height:300px; filter:drop-shadow(0 0 15px red);">`;
-    } else if (!data.image && enemyVis.innerText !== '👹') {
-         enemyVis.innerHTML = '<div style="font-size:100px;">👹</div>';
+    enemyVis.className = "battler-visual flipped-opponent"; // Ensure class is reset
+    
+    if (data.image) {
+        enemyVis.innerHTML = `<img src="${data.image}" class="battler-image" style="width:250px; height:250px; filter:drop-shadow(0 0 15px red);">`;
+    } else {
+        enemyVis.innerHTML = '<div style="font-size:100px;">👹</div>';
     }
 
-    // 6. Set Initial HP Display
-    document.getElementById('enemy-name').innerHTML = `☠️ ${data.name}`;
-    document.getElementById('raid-boss-hp-text').innerText = `${Math.ceil(data.hp)} / ${data.maxHP}`;
-    document.getElementById('raid-boss-bar').style.width = (data.hp / data.maxHP * 100) + "%";
+    // --- 6. UPDATE HP BAR & TEXT (THE FIX) ---
     
+    // Calculate Percentage
+    const hpPercent = Math.max(0, Math.min(100, (data.hp / data.maxHP * 100)));
+    
+    // A. Update the Green Bar (In Battle UI)
+    const battleBar = document.getElementById('enemy-hp-bar');
+    if (battleBar) battleBar.style.width = hpPercent + "%";
+
+    // B. Inject Numbers into Name Plate (Since Battle UI has no separate text box)
+    const namePlate = document.getElementById('enemy-name');
+    if (namePlate) {
+        namePlate.innerHTML = `
+            <div style="color:#e53e3e; font-size:16px;">☠️ ${data.name}</div>
+            <div style="font-size:12px; color:white; font-weight:bold;">${Math.ceil(data.hp)} / ${data.maxHP}</div>
+        `;
+    }
+    // ------------------------------------------
+    
+    // 7. Setup Player Side
     renderRaidPlayerSide();
-    
-    console.log("⚔️ Raid Started in Static Mode");
+    console.log("⚔️ Raid Started. HP:", data.hp);
 }
     function renderRaidPlayerSide() {
     const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
     
-    // 1. Render Visuals
+    // 1. Render Visuals (Player Sprite & HP)
     const pVis = document.getElementById('battle-player-visual');
     pVis.classList.remove('flipped-opponent');
     pVis.innerHTML = pet.image 
@@ -4951,25 +5007,53 @@ async function startRaidEngine(path) {
     document.getElementById('player-hp-bar').style.width = (pet.hp / pet.maxHP * 100) + "%";
     document.getElementById('player-hp-text').innerText = `${Math.ceil(pet.hp)}/${pet.maxHP}`;
 
-    // 2. Render Buttons (Using FORCE logic)
-    const btnGrid = document.getElementById('battle-actions');
+    // 2. Prepare the Status Message (The Text above buttons)
+    let statusMsg = "";
     
-    let buttons = pet.powers.map(pid => {
+    if (raidBuffCharges > 0) {
+        // Gold Message
+        statusMsg = `<div style="width:100%; text-align:center; color:#f6e05e; font-weight:bold; font-size:12px; margin-bottom:5px; text-shadow:0 1px 3px black; animation: pulseGold 1s infinite;">
+            ⚡ CHARGED UP: ${raidBuffCharges} Attacks Left! ⚡
+        </div>`;
+    } else if (raidMovesCounter >= 3) {
+        // Red Warning
+        statusMsg = `<div style="width:100%; text-align:center; color:#fc8181; font-weight:bold; font-size:12px; margin-bottom:5px; text-shadow:0 1px 3px black;">
+            ⚠️ NEXT ATTACK: Math Challenge!
+        </div>`;
+    }
+
+    // 3. Prepare Buttons
+    let btnStyle = "border:2px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.3);";
+    let buffText = "";
+
+    if (raidBuffCharges > 0) {
+        btnStyle = "border:2px solid #f6e05e; background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); box-shadow: 0 0 15px #f6e05e; transform: scale(1.05); font-weight:bold;";
+        buffText = " (2x)";
+    } else if (raidMovesCounter >= 3) {
+        btnStyle = "border:2px solid #fc8181; animation: pulseGold 1s infinite;";
+        buffText = " (❓)";
+    }
+
+    let buttonsHtml = pet.powers.map(pid => {
         const move = findShopItem(pid);
-        // We use window.FORCE_RAID_ATTACK to bypass any scope issues
-        return `<button class="action-btn green" style="border:2px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.3);" onclick="window.FORCE_RAID_ATTACK('${pid}')">${move.name}</button>`;
+        return `<button class="action-btn green" style="${btnStyle}" onclick="window.FORCE_RAID_ATTACK('${pid}')">${move.name}${buffText}</button>`;
     }).join('');
     
-    buttons += `<button class="action-btn blue" onclick="openSwapMenu()">🔄 Squad</button>`;
-    buttons += `<button class="action-btn red" onclick="exitRaidBattle()">🏃 Escape</button>`;
-    
-    if(document.getElementById('action-buttons-grid')) {
-        document.getElementById('action-buttons-grid').innerHTML = buttons;
-    } else {
-        btnGrid.innerHTML = `<div id="action-buttons-grid" class="battle-actions">${buttons}</div>`;
+    buttonsHtml += `<button class="action-btn blue" onclick="openSwapMenu()">🔄 Squad</button>`;
+    buttonsHtml += `<button class="action-btn red" onclick="exitRaidBattle()">🏃 Escape</button>`;
+
+    // 4. FINAL RENDER (Overwrite the panel completely to prevent stacking)
+    // We target the .battle-ui-panel class to ensure we control the whole bottom area
+    const panel = document.querySelector('.battle-ui-panel');
+    if (panel) {
+        panel.innerHTML = `
+            ${statusMsg}
+            <div id="action-buttons-grid" class="battle-actions">
+                ${buttonsHtml}
+            </div>
+        `;
     }
 }
-
     // --- The Connector (Animation + Database Transaction) ---
     // ===============================================
 // RAID BATTLE ENGINE (40% Boss Attack Chance)
@@ -5412,172 +5496,120 @@ window.openRaidMathPopup = function(moveId) {
     });
 };
 
-// ===============================================
-// FORCE RAID POPUP (WITH BP REWARDS + 1s DELAY)
-// ===============================================
+// --- ⚔️ RAID BATTLE STATE (3-Turn Mechanic) ---
+let raidMovesCounter = 0; // Counts up to 3 to trigger quiz
+let raidBuffCharges = 0;  // Counts down from 3 (Super Damage turns)
 
+// 1. THE MAIN TRIGGER (Decides: Attack or Quiz?)
 window.FORCE_RAID_ATTACK = function(moveId) {
-    console.log("🚀 Force Attack Clicked:", moveId);
+    console.log("🚀 Raid Button Clicked:", moveId);
 
-    // 1. DATA EXTRACTION
-    let mainContent = "Solve:"; 
-    let extraVisual = "";       
-    let qAnswer = null;
-    let qOptions = [];
+    // Prevent double clicking while animation plays
+    if (typeof isRaidTurnProcessing !== 'undefined' && isRaidTurnProcessing) return;
 
+    // CHECK CONDITION: Is it time for a quiz? (Every 3rd attack)
+    if (raidMovesCounter >= 3) {
+        // TRIGGER QUIZ
+        launchRaidQuiz(moveId);
+    } else {
+        // STANDARD ATTACK
+        executeRaidMove(moveId);
+    }
+};
+
+// 2. ATTACK HELPER (Handles Damage & Counters)
+function executeRaidMove(moveId) {
+    let damageMult = 1.0;
+
+    // Apply Buff if active
+    if (raidBuffCharges > 0) {
+        damageMult = 2.0; // DOUBLE DAMAGE!
+        raidBuffCharges--;
+        showToast(`⚡ Super Charge! (${raidBuffCharges} left)`, "success");
+    }
+
+    // Perform the actual attack (Visuals + Database)
+    useRaidMove(moveId, damageMult, 1.0);
+    
+    // Increment Counter (progress toward next quiz)
+    raidMovesCounter++;
+    
+    // Refresh UI (To update button glows/text)
+    if (typeof renderRaidPlayerSide === 'function') renderRaidPlayerSide();
+}
+
+// 3. NEW QUIZ LAUNCHER (Sets the Buffs)
+function launchRaidQuiz(moveId) {
+    // A. Get Question Data
+    let qData = null;
     try {
-        if (typeof gameState !== 'undefined' && gameState.activeQuestionPool && gameState.activeQuestionPool.length > 0) {
+        if (gameState.activeQuestionPool && gameState.activeQuestionPool.length > 0) {
             const randIndex = Math.floor(Math.random() * gameState.activeQuestionPool.length);
             const sourceQ = gameState.activeQuestionPool[randIndex];
-            
-            if (sourceQ && typeof sourceQ === 'object') {
-                if (sourceQ.q) mainContent = sourceQ.q;
-                else if (sourceQ.text) mainContent = sourceQ.text;
-
-                if (sourceQ.qVisualHTML) extraVisual = sourceQ.qVisualHTML;
-
-                qAnswer = sourceQ.a;
-                qOptions = sourceQ.options;
-            }
+            qData = { text: sourceQ.qVisualHTML || sourceQ.q || "Solve:", a: sourceQ.a, options: sourceQ.options };
         }
-    } catch(e) { console.error("Topic Error:", e); }
+    } catch(e) {}
 
-    // Fallback
-    if (!qAnswer) {
-        const g = (typeof gameState !== 'undefined' && gameState.grade) ? gameState.grade : '1';
-        const fallback = MathEngine.generate(g);
-        mainContent = fallback.q;
-        extraVisual = fallback.qVisualHTML || "";
-        qAnswer = fallback.a;
-        qOptions = fallback.options;
-    }
+    // Fallback if no question found
+    if (!qData) qData = MathEngine.generate(gameState.grade || '1');
 
-    // 2. CREATE OVERLAY
-    const existing = document.getElementById('force-raid-overlay');
-    if (existing) existing.remove();
-
+    // B. Build Overlay
     const overlay = document.createElement('div');
-    overlay.id = 'force-raid-overlay';
-    overlay.style.cssText = `
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.95); z-index: 10000;
-        display: flex; flex-direction: column; align-items: center; justify-content: center;
-        backdrop-filter: blur(5px); animation: popIn 0.2s; padding: 15px;
-    `;
-
-    // 3. RENDER CONTENT
+    overlay.id = "raid-math-overlay";
+    overlay.style.cssText = `position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; animation:popIn 0.2s; padding:20px;`;
+    
     overlay.innerHTML = `
-        <div id="raid-question-container" style="width: 100%; max-width: 600px; display:flex; flex-direction:column; align-items:center;">
-            <div style="font-size: 20px; color: #f6e05e; font-weight:bold; margin-bottom: 15px; text-shadow: 0 0 10px red;">
-                ⚡ DOUBLE DAMAGE CHANCE ⚡
-            </div>
-            
-            <div style="
-                background: white; color: #2d3748; border-radius: 20px; padding: 25px; 
-                width: 100%; margin-bottom: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-                display: flex; flex-direction: column; align-items: center; text-align: center;
-            ">
-                <div style="margin-bottom: 15px; width: 100%;">
-                    ${extraVisual}
-                </div>
-                <div style="font-size: 32px; font-weight: bold; line-height: 1.3;">
-                    ${mainContent}
-                </div>
-            </div>
-
-            <div id="force-math-options" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%;"></div>
-            
-            <button onclick="document.getElementById('force-raid-overlay').remove()" 
-                style="margin-top:25px; padding:10px 30px; background:#e53e3e; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">
-                Cancel
-            </button>
+        <div style="font-size: 24px; color: #f6e05e; font-weight:bold; margin-bottom: 10px; text-shadow:0 0 10px red; text-align:center;">
+            ⚡ CHARGE YOUR WEAPON! ⚡
         </div>
+        <div style="background:white; color:#2d3748; border-radius:15px; padding:20px; width:100%; max-width:500px; margin-bottom:20px; text-align:center; font-size:28px; font-weight:bold;">
+            ${qData.text}
+        </div>
+        <div id="raid-quiz-opts" style="display:grid; grid-template-columns:1fr 1fr; gap:15px; width:100%; max-width:500px;"></div>
     `;
-
     document.body.appendChild(overlay);
 
-    // 4. GENERATE OPTIONS
-    const optsContainer = document.getElementById('force-math-options');
-    let finalOptions = [];
-
-    if (qOptions && Array.isArray(qOptions) && qOptions.length > 0) {
-        finalOptions = [...qOptions];
-    } else {
-        let optionsSet = new Set([qAnswer]);
-        const numericAns = parseFloat(qAnswer);
-        if (!isNaN(numericAns)) {
-            while(optionsSet.size < 4) {
-                let offset = Math.floor(Math.random() * 10) - 5;
-                if(offset !== 0) optionsSet.add(numericAns + offset);
-            }
-        } else {
-            optionsSet.add("Yes"); optionsSet.add("No");
-        }
-        finalOptions = Array.from(optionsSet);
-    }
-
-    finalOptions.sort(() => Math.random() - 0.5).forEach(opt => {
+    // C. Generate Options
+    const optsContainer = document.getElementById('raid-quiz-opts');
+    const answer = qData.a;
+    let options = qData.options || MathEngine.generateDistractors(parseFloat(answer));
+    
+    options.sort(() => Math.random() - 0.5).forEach(opt => {
         const btn = document.createElement('button');
         btn.className = "mcq-btn";
-        btn.style.cssText = "font-size: 24px; min-height: 80px; width: 100%; cursor: pointer; border-radius: 15px; border: 4px solid #cbd5e0; background: white; color: #2d3748; box-shadow: 0 5px 0 #a0aec0;";
-        btn.innerHTML = opt; 
+        btn.style.cssText = "font-size:20px; padding:15px; border-radius:10px;";
+        btn.innerHTML = opt;
         
-        // --- CLICK HANDLER WITH BP REWARD ---
-        btn.onclick = function() { 
-            const isCorrect = (opt == qAnswer);
+        btn.onclick = () => {
+            document.getElementById('raid-math-overlay').remove();
             
-            // 1. BP LOGIC
-            let bpMsg = "";
-            if (isCorrect) {
-                addBP(10); // Native function to add BP
-                bpMsg = "+10 Brain Points!";
+            if (opt == answer) {
+                // ✅ CORRECT: Activate Buff Mode
+                soundManager.playSFX('correct');
+                addBP(10); // Reward BP
+                showFloatingText(document.body, "POWER UP! (3 Turns)", "crit");
+                
+                raidMovesCounter = 0; // Reset quiz counter
+                raidBuffCharges = 3;  // GRANT 3 BUFFS
+                
+                // Execute the triggering attack immediately with the NEW buff
+                executeRaidMove(moveId);
+                
             } else {
-                // Safe Deduction (Native logic)
-                const deduction = Math.min(gameState.brainPoints, 5);
-                gameState.brainPoints -= deduction;
-                updateStatsDisplay();
-                saveGame();
-                bpMsg = `-${deduction} Brain Points`;
+                // ❌ WRONG: Reset counters, normal damage
+                soundManager.playSFX('wrong');
+                showFloatingText(document.body, "Failed... No Buff", "weak");
+                
+                raidMovesCounter = 0; // Reset quiz counter
+                raidBuffCharges = 0;  // No buff
+                
+                // Execute weak/normal attack
+                executeRaidMove(moveId);
             }
-
-            // 2. PLAY SOUND
-            soundManager.playSFX(isCorrect ? 'correct' : 'wrong');
-
-            // 3. SHOW FEEDBACK
-            const container = document.getElementById('raid-question-container');
-            if(container) {
-                container.innerHTML = `
-                    <div style="animation: popIn 0.3s; text-align:center;">
-                        <div style="font-size: 80px; margin-bottom: 10px;">
-                            ${isCorrect ? '✅' : '❌'}
-                        </div>
-                        <h1 style="color: ${isCorrect ? '#48bb78' : '#f56565'}; font-size: 40px; font-weight:bold; text-shadow: 0 2px 5px black; margin:0;">
-                            ${isCorrect ? 'CORRECT!' : 'INCORRECT!'}
-                        </h1>
-                        <p style="color: white; font-size: 20px; font-weight:bold; margin-top: 5px;">
-                            ${isCorrect ? 'DOUBLE DAMAGE ACTIVATED!' : 'Damage Reduced...'}
-                        </p>
-                        <!-- BP MESSAGE -->
-                        <p style="color: ${isCorrect ? '#f6e05e' : '#fc8181'}; font-size: 18px; font-weight:bold; margin-top: 5px;">
-                            ${bpMsg}
-                        </p>
-                    </div>
-                `;
-            }
-
-            // 4. WAIT 1 SECOND THEN ATTACK
-            setTimeout(() => {
-                document.getElementById('force-raid-overlay').remove();
-                if (isCorrect) {
-                    useRaidMove(moveId, 2.0, 1.0); 
-                } else {
-                    useRaidMove(moveId, 0.5, 2.0);
-                }
-            }, 1000); 
         };
         optsContainer.appendChild(btn);
     });
-};
+}
 
 // ===============================================
 // BULK ITEM USAGE SYSTEM (XP ONLY)
@@ -7509,13 +7541,11 @@ function updateBuilderPets() {
 let blocksPlacedSession = 0; // Counts blocks placed in this session
 
 function triggerBuildQuiz() {
-    // 1. Get Question from Assigned Pool (or fallback to Grade math)
+    // 1. Get Question (Topic-based or Fallback)
     let q;
     if (gameState.activeQuestionPool && gameState.activeQuestionPool.length > 0) {
-        // Pick random question from assigned topics
         q = gameState.activeQuestionPool[Math.floor(Math.random() * gameState.activeQuestionPool.length)];
     } else {
-        // Fallback generator
         q = MathEngine.generate(gameState.grade || "1");
     }
 
@@ -7524,7 +7554,7 @@ function triggerBuildQuiz() {
     const qText = document.getElementById('build-quiz-question');
     const qGrid = document.getElementById('build-quiz-options');
     
-    // Handle text vs object format
+    // Ensure we handle text properly
     qText.innerHTML = q.qVisualHTML || q.q || q.text;
     qGrid.innerHTML = '';
 
@@ -7540,22 +7570,42 @@ function triggerBuildQuiz() {
         
         btn.onclick = () => {
             if (opt == q.a) {
-                // CORRECT
+                // --- ✅ CORRECT ANSWER ---
                 soundManager.playSFX('correct');
-                addBP(5); // Small reward
-                showToast("✅ Inspection Passed! (+5 BP)", "success");
+                addBP(10); // Reward increased to 10
+                
+                showToast("✅ Inspection Passed! (+10 BP)", "success");
+                
+                // UNLOCK: Close the modal so they can build again
                 modal.classList.remove('active');
             } else {
-                // WRONG - Just a warning, let them continue (keeps flow)
+                // --- ❌ WRONG ANSWER ---
                 soundManager.playSFX('wrong');
-                showToast("❌ Wrong! Be careful next time.", "error");
-                modal.classList.remove('active');
+                
+                // 1. Deduct BP
+                const loss = Math.min(gameState.brainPoints, 5); // Prevent negative BP
+                gameState.brainPoints -= loss;
+                updateStatsDisplay();
+                saveGame(); // Save the penalty immediately
+                
+                showToast(`❌ Incorrect! -${loss} BP. Try again!`, "error");
+                
+                // 2. VISUAL LOCK: Gray out THIS wrong button
+                btn.disabled = true;
+                btn.style.background = "#fed7d7"; // Red tint
+                btn.style.borderColor = "#fc8181";
+                btn.style.opacity = "0.5";
+                btn.style.cursor = "not-allowed";
+                
+                // 3. IMPORTANT: DO NOT CLOSE MODAL
+                // We do NOT run modal.classList.remove('active');
+                // The student is trapped until they pick the right one.
             }
         };
         qGrid.appendChild(btn);
     });
 
-    // 4. Show Modal
+    // 4. Lock the Screen
     modal.classList.add('active');
 }
   </script>
