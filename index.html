@@ -640,10 +640,11 @@ body {
     /* ENEMY: Top-Right of the Top Zone */
     #enemy-container {
         bottom: auto !important;
-        top: 15% !important; /* High up in the distance */
+        top: 15% !important;
         right: 5% !important;
-        width: 35% !important; 
-        transform: scale(0.9);
+        /* Reduce width for normal mobs. Bosses have their own size logic in JS */
+        width: 25% !important; 
+        transform: scale(1.0); /* Remove scaling, let the width handle it */
         z-index: 10; 
     }
     
@@ -3207,11 +3208,11 @@ body {
         container.prepend(entry);
     }
 
-    // 2. Refined Render Logic
-    function renderBattle() {
+   function renderBattle() {
         const pet = gameState.pets.find(p => p.id === gameState.currentPetId); 
         const bs = gameState.battleState;
         
+        // 1. SETUP VISUALS (Top Screen)
         const pSize = getBattlerSize(pet, false, false);
         const eSize = getBattlerSize(bs.enemy, bs.isBoss, bs.isArena);
         
@@ -3230,71 +3231,90 @@ body {
             ? `<img src="${bs.enemy.image}" class="battler-image ${bs.enemy.imageStyle}" style="width:${eSize}px; height:${eSize}px;">` 
             : `<div class="emoji-wrapper" style="font-size:${eSize * 0.7}px;">${bs.enemy.emoji}</div>`;
       
-        // --- SHOW STATUS ICONS ---
+        // Status Icons
         const pIcons = bs.playerStatus ? bs.playerStatus.map(s => s.icon).join(' ') : '';
         const eIcons = bs.enemyStatus ? bs.enemyStatus.map(s => s.icon).join(' ') : '';
       
+        // Update Names & Bars
         document.getElementById('player-battle-name').innerHTML = `${pet.name} ${pIcons} <span class="element-icon">${getElIcon(pet.element)}</span>`;
         document.getElementById('enemy-name').innerHTML = `${bs.enemy.name} ${eIcons} <span class="element-icon">${getElIcon(bs.enemy.element)}</span>`;
-        document.getElementById('enemy-hp-bar').style.width = (bs.enemyHP / bs.enemy.hp * 100) + "%";
-        // Use the Battle State Max (which includes Armor)
-const pMax = bs.playerMaxHP || pet.maxHP; 
-document.getElementById('player-hp-bar').style.width = (bs.playerHP / pMax * 100) + "%";
-document.getElementById('player-hp-text').innerText = `${Math.ceil(bs.playerHP)}/${pMax}`;
-
-        const act = document.getElementById('battle-actions');
         
-        if (!document.getElementById('battle-log-feed')) {
-            const logHTML = `<div class="battle-log-container" id="battle-log-feed" style="display:none !important;"></div><div id="action-buttons-grid" class="battle-actions"></div>`;
-            act.parentElement.innerHTML = logHTML;
-            return renderBattle(); 
-        }
+        document.getElementById('enemy-hp-bar').style.width = (bs.enemyHP / bs.enemy.hp * 100) + "%";
+        
+        const pMax = bs.playerMaxHP || pet.maxHP; 
+        document.getElementById('player-hp-bar').style.width = (bs.playerHP / pMax * 100) + "%";
+        document.getElementById('player-hp-text').innerText = `${Math.ceil(bs.playerHP)}/${pMax}`;
 
-        const btnGrid = document.getElementById('action-buttons-grid');
-
+        // 2. SETUP CONTROLS (Bottom Screen)
+        // We use the same Panel Logic as Gameboy Mode to keep it consistent
+        const panel = document.querySelector('.battle-ui-panel');
+        
         if(bs.turnInProgress) {
-            btnGrid.innerHTML = `<div style="color:white; font-weight:bold; width:100%; text-align:center; padding:10px;">Thinking...</div>`;
+            panel.innerHTML = `<div style="width:100%; text-align:center; font-weight:bold; color:#718096; padding:20px;">Thinking...</div>`;
             return;
         }
 
+        // Generate Standard Buttons (Calling usePowerAsync)
         let buttons = pet.powers.map(pid => {
             const move = findShopItem(pid);
             const mult = getTypeMult(move.element, bs.enemy.element);
+            
+            // Visual Indicators for Weak/Strong
             let indicator = "";
-            if (mult >= 2.0) indicator = `<span class="type-indicator eff-up">⬆</span>`;
-            if (mult <= 0.5) indicator = `<span class="type-indicator eff-down">⬇</span>`;
-            const burstClass = gameState.burstMode ? 'burst-ready' : '';
-            const burstText = gameState.burstMode ? ' (CRIT)' : '';
-            return `<button class="action-btn green ${burstClass}" style="display:flex; justify-content:space-between;" onclick="usePowerAsync('${pid}')"><span>${move.name}${burstText}</span> ${indicator}</button>`;
+            if (mult >= 2.0) indicator = "⬆";
+            if (mult <= 0.5) indicator = "⬇";
+            
+            // Burst Mode Glow
+            const burstStyle = gameState.burstMode ? 'box-shadow: 0 0 10px #f6e05e; border: 2px solid #ecc94b;' : '';
+
+            return `<button class="action-btn green" style="${burstStyle}" onclick="usePowerAsync('${pid}')">
+                <span>${move.name} ${indicator}</span>
+            </button>`;
         }).join('');
 
-        buttons += `<button class="action-btn blue" onclick="openSwapMenu()">🔄 Squad</button><button class="action-btn red" onclick="flee()">🏃 Run</button>`;
-        btnGrid.innerHTML = buttons;
+        buttons += `<button class="action-btn blue" onclick="openSwapMenu()">🔄 Squad</button>`;
+        buttons += `<button class="action-btn red" onclick="flee()">🏃 Run</button>`;
+
+        // Render to Panel
+        panel.innerHTML = `
+            <div id="battle-log-feed" class="battle-log-container" style="display:flex !important; margin-bottom:10px;">
+                ${gameState.battleState.log ? gameState.battleState.log.map(l => `<div class="log-entry">${l}</div>`).join('') : ''}
+            </div>
+            <div id="action-buttons-grid" class="battle-actions">
+                ${buttons}
+            </div>
+        `;
     }
 
+   // --- 🌲 STANDARD BATTLE ENGINE (Fixed Damage Update) ---
+
     async function usePowerAsync(pid) {
+        // 1. Safety Checks
         if (gameState.battleState.turnInProgress) return;
         if (gameState.battleState.playerHP <= 0) return showToast("Your pet has fainted!", "error");
 
         gameState.battleState.turnInProgress = true;
         
+        // 2. Resolve Status Effects
         const playerStunned = resolveStatusTurn('player');
-        renderBattle(); 
+        // Update UI immediately for status damage
+        updateStandardBattleUI(); 
         
-        if (gameState.battleState.playerHP <= 0) { await wait(1000); handlePlayerFaint(); return; }
+        if (gameState.battleState.playerHP <= 0) { 
+            await wait(1000); handlePlayerFaint(); return; 
+        }
 
         if (playerStunned) {
             await wait(1000); 
         } 
         else {
+            // 3. PERFORM ATTACK
             const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
             const enemy = gameState.battleState.enemy;
             const move = findShopItem(pid);
-            
-            // --- EQUIPMENT STATS ---
-            const gear = getPetEquipmentStats(pet);
-            // -----------------------
-            
+            const gear = getPetEquipmentStats(pet); 
+
+            // A. Animation
             const pVis = document.getElementById('battle-player-visual');
             const eVis = document.getElementById('battle-enemy-visual');
             
@@ -3304,13 +3324,10 @@ document.getElementById('player-hp-text').innerText = `${Math.ceil(bs.playerHP)}
             await wait(500); 
             pVis.style.animation = "";
 
-            // Calculate Damage
+            // B. Damage Calculation
             let mult = getTypeMult(move.element, enemy.element);
-            
-            // --- CRIT LOGIC (Accessory Bonus) ---
             let isCrit = false;
             let critMult = 1.0;
-            // Base chance 10% + Gear Chance (e.g. 5%)
             let critChance = 0.10 + (gear.crit / 100); 
             
             if (gameState.burstMode) { 
@@ -3319,42 +3336,70 @@ document.getElementById('player-hp-text').innerText = `${Math.ceil(bs.playerHP)}
                 critMult = 1.5; isCrit = true; 
             }
 
-            // --- DAMAGE LOGIC (Weapon Bonus) ---
-            // Base Damage + Level Bonus + Weapon Bonus
             let rawDmg = (move.damage + (pet.level * 1.5) + gear.dmg);
             let dmg = Math.floor((rawDmg * mult * critMult) * (Math.random() * 0.2 + 0.9));
             
             gameState.battleState.enemyHP = Math.max(0, gameState.battleState.enemyHP - dmg);
+            
+            // --- 🚨 IMMEDIATE UI UPDATE (THE FIX) ---
+            updateStandardBattleUI(); 
+            // ----------------------------------------
+
             soundManager.playSFX('hit');
             eVis.style.animation = "damageShake 0.5s";
             
             let color = isCrit ? "crit" : (mult > 1 ? "super" : (mult < 1 ? "weak" : ""));
             showFloatingText(eVis.parentElement, `-${dmg}`, color);
-            addBattleLog(`${pet.name} used ${move.name} for ${dmg}!`, isCrit ? 'crit' : 'player');
+            addBattleLog(`${pet.name} used ${move.name}!`, isCrit ? 'crit' : 'player');
+            
+            if(typeof vibratePhone === 'function') vibratePhone(50);
 
+            // Effects
             if (move.effect && move.effect.type === 'drain') {
                 if (Math.random() <= (move.effect.chance || 1.0)) {
                     let healAmount = Math.ceil(dmg * move.effect.value);
                     const pMax = gameState.battleState.playerMaxHP || pet.maxHP;
                     gameState.battleState.playerHP = Math.min(pMax, gameState.battleState.playerHP + healAmount);
-                    
                     showFloatingText(pVis.parentElement, `+${healAmount}`, "heal");
-                    addBattleLog(`Drained ${healAmount} HP!`, "heal");
+                    updateStandardBattleUI(); // Update UI for heal
                 }
-            }
-            else if (move.effect) {
+            } else if (move.effect) {
                 applyStatusEffect(move.effect, 'player', 'enemy');
             }
-
-            document.getElementById('enemy-hp-bar').style.width = (gameState.battleState.enemyHP / enemy.hp * 100) + "%";
         }
 
-        if (gameState.battleState.enemyHP <= 0) { await wait(1000); winBattle(); return; }
+        // 4. Check Victory
+        if (gameState.battleState.enemyHP <= 0) { 
+            await wait(1000); winBattle(); return; 
+        }
         
+        // 5. Enemy Turn
         await wait(800); 
         await processEnemyTurnAsync();
         
-        if (gameState.inBattle) { gameState.battleState.turnInProgress = false; renderBattle(); }
+        // 6. Reset Turn
+        if (gameState.inBattle) { 
+            gameState.battleState.turnInProgress = false; 
+            renderBattle(); 
+        }
+    }
+
+    // Helper to update bars without re-rendering buttons
+    function updateStandardBattleUI() {
+        const bs = gameState.battleState;
+        const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+        
+        // Update Enemy Bar
+        const eBar = document.getElementById('enemy-hp-bar');
+        if(eBar) eBar.style.width = (bs.enemyHP / bs.enemy.hp * 100) + "%";
+        
+        // Update Player Bar
+        const pMax = bs.playerMaxHP || pet.maxHP; 
+        const pBar = document.getElementById('player-hp-bar');
+        const pText = document.getElementById('player-hp-text');
+        
+        if(pBar) pBar.style.width = (bs.playerHP / pMax * 100) + "%";
+        if(pText) pText.innerText = `${Math.ceil(bs.playerHP)}/${pMax}`;
     }
 
     async function processEnemyTurnAsync() {
@@ -7798,4 +7843,3 @@ function triggerBuildQuiz() {
 </div>
 </body>
           </html>
-
