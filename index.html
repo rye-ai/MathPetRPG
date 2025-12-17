@@ -572,6 +572,72 @@
 .voxel-cube {
     z-index: 10; /* Above the grid */
 }
+/* =========================================
+   📱 MOBILE & APP EXPERIENCE PATCH
+   ========================================= */
+
+/* 1. NOTCH PROTECTION (iPhone Safe Areas) */
+body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    padding-bottom: env(safe-area-inset-bottom);
+}
+.header {
+    padding-top: max(10px, env(safe-area-inset-top)); /* Avoid camera notch */
+}
+
+/* 2. MOBILE RESPONSIVENESS */
+@media (max-width: 768px) {
+    
+    /* Global Adjustments */
+    .game-container { padding: 0; height: 100vh; max-width: 100%; }
+    .tabs { padding: 5px; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .tab { font-size: 14px; padding: 10px; flex-shrink: 0; }
+    
+    /* BUILDER: Fix aspect ratio for portrait */
+    .builder-container { height: 60vh; margin-bottom: 0; border-radius: 0; }
+    .build-ui { padding-bottom: 30px; } /* Lift up for thumb reach */
+
+    /* BATTLE: THE DIAGONAL CINEMA LAYOUT 🎬 */
+    .battle-screen {
+        background-position: center bottom !important; /* Anchor floor to bottom */
+        background-size: cover; 
+    }
+
+    /* Player: Big, Bottom-Left, "Close to Camera" */
+    #player-container {
+        bottom: 22% !important; /* Move up to clear UI */
+        left: -10% !important;  /* Slight overhang looks dynamic */
+        width: 60% !important;  /* Make them look BIG */
+        z-index: 20;            /* In front of enemy */
+        transform: scale(1.1);
+    }
+    
+    /* Enemy: Small, Top-Right, "Far Away" */
+    #enemy-container {
+        bottom: auto !important;
+        top: 15% !important;
+        right: 5% !important;
+        width: 40% !important;  /* Distance effect */
+        z-index: 10;            /* Behind player */
+        filter: brightness(0.9); /* Atmospheric depth */
+    }
+
+    /* BATTLE UI: Thumb Friendly */
+    .battle-ui-panel {
+        padding-bottom: 20px; /* Lift for iPhone Home Bar */
+    }
+    .battle-actions {
+        display: grid; 
+        grid-template-columns: 1fr 1fr; /* 2x2 Grid is easier to tap than a long row */
+        gap: 8px;
+    }
+    .battle-actions .action-btn {
+        min-height: 55px; /* Fat Finger Friendly */
+        font-size: 15px;
+        margin: 0;
+    }
+}
   </style>
   </head>
  <body><!-- Login Screen -->
@@ -916,7 +982,9 @@
 <div class="game-container" id="main-game-ui" style="display: none;">
    <header class="header">
     <div class="player-info"><span style="font-size: 24px; margin-right: 5px;">👤</span><div><div style="font-weight: bold; font-size: 16px;" id="display-name">Player</div><div style="font-size: 12px; color: #718096;" id="display-grade">Grade: -</div></div><button class="logout-btn" onclick="logout()">Logout</button></div>
-    <div class="stats-container"><button id="mute-btn" onclick="toggleAudio()" style="background:none; border:none; font-size:24px; cursor:pointer;" title="Mute/Unmute">🔊</button><div class="stamina-display">⚡ <span id="stamina-display">100</span>/100</div><div class="currency-display">🧠 <span id="bp-display">0</span> BP</div></div>
+    <div class="stats-container"><button id="mute-btn" onclick="toggleAudio()" style="background:none; border:none; font-size:24px; cursor:pointer;" title="Mute/Unmute">🔊</button>
+    <button onclick="toggleFullscreen()" style="background:none; border:none; font-size:24px; cursor:pointer; margin-right:10px;" title="Fullscreen">⛶</button>
+    <div class="stamina-display">⚡ <span id="stamina-display">100</span>/100</div><div class="currency-display">🧠 <span id="bp-display">0</span> BP</div></div>
    </header>
    <nav class="tabs">
        <button class="tab active" data-tab="study" onclick="switchTab('study')">📚 Study</button> 
@@ -4564,93 +4632,81 @@ function setupRaidData(data, docId) {
 // ===============================================
 let hasClaimedRaidReward = false; 
 
+// --- 🛡️ CHEAT-PROOF VICTORY SYSTEM (Server-Side Check) ---
+
 async function handleRaidVictory() {
-    // 1. Local Session Check (Stops double-clicks)
-    if (hasClaimedRaidReward) return; 
-    
-    // 2. Server Data Check (Stops page refreshes)
-    // We check if the student's name is already in the 'claimedBy' list from the database
-    if (localRaidData && localRaidData.claimedBy && localRaidData.claimedBy.includes(gameState.playerName)) {
-        // Show "Already Claimed" UI instead of giving loot
-        const battlePanel = document.getElementById('battle-ui');
-        battlePanel.innerHTML = `
-            <div style="
-                position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-                background: rgba(0,0,0,0.85); display: flex; flex-direction: column;
-                align-items: center; justify-content: center; z-index: 100; color: white;
-            ">
-                <h1 style="color:#a0aec0; font-size:40px; margin-bottom: 10px;">Already Claimed</h1>
-                <p>You have already collected the reward for this boss.</p>
-                <div style="margin-top:20px;">
-                    <div style="font-size:50px;">✅</div>
-                </div>
-                <button class="action-btn red" style="width: 200px; margin-top: 20px;" onclick="location.reload()">Back to Hub</button>
-            </div>
-        `;
-        return; // STOP HERE! Do not give loot.
-    }
+    console.log("🏆 Processing Victory...");
 
-    // --- If we pass the checks, give the reward ---
-    
-    hasClaimedRaidReward = true; 
+    // 1. Identify the Boss Document
+    const path = window.currentRaidDocPath || "global";
+    const ref = window.fbase.doc(window.db, "world_boss", path);
 
-    if (typeof raidListenerUnsub !== 'undefined' && raidListenerUnsub) {
-        raidListenerUnsub();
-    }
-    
-    soundManager.stopBGM();
-    soundManager.playSFX('victory');
-
-    // 3. MARK AS CLAIMED ON SERVER
-    // We do this immediately so even if they refresh right now, they can't claim again.
+    // ---------------------------------------------------------
+    // 🛑 STEP 1: FORCE SERVER CHECK
+    // We ignore local memory and ask the database directly:
+    // "Has this student looted this boss?"
+    // ---------------------------------------------------------
+    let serverData;
     try {
-        const bossRef = window.fbase.doc(window.db, "world_boss", window.currentRaidDocPath);
-        window.fbase.updateDoc(bossRef, {
+        const snap = await window.fbase.getDoc(ref);
+        if (snap.exists()) {
+            serverData = snap.data();
+        } else {
+            return showToast("Error: Boss data not found.", "error");
+        }
+    } catch (e) {
+        console.error(e);
+        return showToast("Network error checking claim status.", "error");
+    }
+
+    // 🛑 STEP 2: THE RECEIPT CHECK
+    // If their name is ALREADY in the database list, stop everything.
+    if (serverData.claimedBy && serverData.claimedBy.includes(gameState.playerName)) {
+        console.log("🚫 Loot already claimed. Stopping.");
+        renderAlreadyClaimedScreen();
+        return; // <--- STOP HERE. Do not give loot.
+    }
+
+    // ---------------------------------------------------------
+    // ✅ STEP 3: SIGN THE RECEIPT (Before Giving Loot)
+    // We write their name now. If this fails, the code stops.
+    // ---------------------------------------------------------
+    try {
+        await window.fbase.updateDoc(ref, {
             claimedBy: window.fbase.arrayUnion(gameState.playerName)
         });
-    } catch(e) {
-        console.error("Error marking claim:", e);
+    } catch (e) {
+        console.error("Error signing receipt:", e);
+        return; // Stop if database write fails (prevents exploits)
     }
 
-    // 4. SETUP VICTORY SCREEN
-    const battlePanel = document.getElementById('battle-ui');
+    // ---------------------------------------------------------
+    // 🎁 STEP 4: GIVE REWARDS (Safe Zone)
+    // ---------------------------------------------------------
+    soundManager.stopBGM();
+    soundManager.playSFX('victory');
     
-    battlePanel.innerHTML = `
-        <div style="
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); display: flex; flex-direction: column;
-            align-items: center; justify-content: center; z-index: 100; color: white;
-            animation: popIn 0.5s;
-        ">
-            <h1 style="color:#48bb78; font-size:50px; text-shadow:0 0 20px #fff; margin-bottom: 10px;">VICTORY!</h1>
-            <p style="font-size: 20px; margin-bottom: 20px;">The World Boss has been defeated!</p>
-            
-            <div id="raid-reward-content" style="text-align:center; min-height: 150px;">
-                <div class="egg-shaking" style="font-size:60px;">🎁</div>
-                <p>Retrieving Reward...</p>
-            </div>
+    // A. BP Reward (1000 BP)
+    addBP(1000);
 
-            <button class="action-btn red" style="width: 200px; margin-top: 20px;" onclick="location.reload()">Back to Hub</button>
-        </div>
-    `;
+    // B. Pet Reward Logic
+    let rewardVisual = "";
+    let rewardMsg = "+1000 Brain Points";
 
-    // 5. FETCH AND GIVE REWARD
-    if (localRaidData && localRaidData.rewardUrl) {
+    if (serverData.rewardUrl) {
         try {
-            let url = localRaidData.rewardUrl;
+            let url = serverData.rewardUrl;
             if (!url.startsWith('http')) {
                 if(url.startsWith('/')) url = url.substring(1);
                 url = `https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/${url}`;
             }
-
+            
             const res = await fetch(url);
-            if (!res.ok) throw new Error(`File not found: ${url}`);
-            
             const petData = await res.json();
-            
+
             const newPet = {
                 id: 'raid_reward_' + Date.now(),
-                name: petData.name || "Mystery Pet",
+                name: petData.name || "Boss Pet",
                 type: petData.type || "unknown",
                 rarity: petData.rarity || "epic",
                 element: petData.element || "normal",
@@ -4659,43 +4715,57 @@ async function handleRaidVictory() {
                 emoji: petData.emoji || "🐾",
                 hp: petData.hp || 50,
                 maxHP: petData.hp || 50,
-                level: 5, 
-                xp: 0, 
-                maxXp: 400,
-                powers: [], 
-                isHatched: true,
-                hatchProgress: 100,
-                savedEvolutions: petData.evolutions || [] 
+                level: 5, xp: 0, maxXp: 400,
+                powers: [], isHatched: true, hatchProgress: 100,
+                savedEvolutions: petData.evolutions || []
             };
-            
-            gameState.pets.push(newPet);
-            addBP(1000); 
-            
-            saveGame(true); 
 
-            const rewardContainer = document.getElementById('raid-reward-content');
-            if(rewardContainer) {
-                rewardContainer.innerHTML = `
-                    <h3 style="color:#f6e05e; font-size: 24px; margin: 10px 0;">${newPet.name}</h3>
-                    ${newPet.image ? `<img src="${newPet.image}" style="width:180px; height:180px; object-fit:contain; filter:drop-shadow(0 0 10px white);">` : `<div style="font-size:80px">${newPet.emoji}</div>`}
-                    <div style="color:#48bb78; font-weight:bold; margin-top:10px;">+1000 Brain Points</div>
-                    <div style="color:#a0aec0; font-size:12px; margin-top:5px;">Check your Pet Hub!</div>
-                `;
+            gameState.pets.push(newPet);
+            rewardMsg += ` & ${newPet.name}!`;
+            
+            if (newPet.image) {
+                rewardVisual = `<img src="${newPet.image}" style="width:180px; height:180px; object-fit:contain; filter:drop-shadow(0 0 20px gold);">`;
+            } else {
+                rewardVisual = `<div style="font-size:80px">${newPet.emoji}</div>`;
             }
 
-        } catch(e) {
-            console.error("Reward Error:", e);
-            const rewardContainer = document.getElementById('raid-reward-content');
-            if(rewardContainer) rewardContainer.innerHTML = `<p style="color:#fc8181">Error: ${e.message}</p><p>+1000 BP added.</p>`;
-            addBP(1000);
-            saveGame(true);
+        } catch (err) {
+            console.error("Pet Load Error:", err);
+            rewardVisual = `<div style="font-size:80px">💰</div>`;
         }
     } else {
-        addBP(1000);
-        const rewardContainer = document.getElementById('raid-reward-content');
-        if(rewardContainer) rewardContainer.innerHTML = "<h3 style='color:#f6e05e'>Reward: 1000 BP</h3>";
-        saveGame(true);
+        rewardVisual = `<div style="font-size:80px">💰</div>`;
     }
+
+    // Save Player Data
+    saveGame(true);
+
+    // Show Victory UI
+    const battlePanel = document.getElementById('battle-ui');
+    battlePanel.innerHTML = `
+        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; color: white; animation: popIn 0.5s;">
+            <h1 style="color:#48bb78; font-size:40px; text-shadow:0 0 20px #fff; margin-bottom: 10px;">VICTORY!</h1>
+            <div style="margin:20px; animation: subtleFloat 2s infinite;">${rewardVisual}</div>
+            <div style="font-size: 20px; color:#f6e05e; font-weight:bold;">${rewardMsg}</div>
+            <div style="color:#a0aec0; font-size:12px; margin-top:5px;">Reward Claimed Successfully</div>
+            <button class="action-btn red" style="width: 200px; margin-top: 30px;" onclick="finalizeExit()">Return to Camp</button>
+        </div>
+    `;
+    
+    startConfetti();
+}
+
+// Helper: The "Stop, You Thief!" Screen
+function renderAlreadyClaimedScreen() {
+    const battlePanel = document.getElementById('battle-ui');
+    battlePanel.innerHTML = `
+        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; color: white;">
+            <div style="font-size: 60px; margin-bottom: 10px;">✅</div>
+            <h1 style="color:#cbd5e0; font-size:32px; font-weight:bold;">Reward Collected</h1>
+            <p style="color:#a0aec0; margin-top:10px;">You have already claimed the loot for this boss.</p>
+            <button class="action-btn red" style="width: 200px; margin-top: 30px;" onclick="finalizeExit()">Back to Hub</button>
+        </div>
+    `;
 }
 // ===============================================
 // FIXED JOIN RAID (Allows Loot Claiming)
@@ -7412,12 +7482,14 @@ function getPetEquipmentStats(pet) {
         }
     }
 
-    // --- CONTROLS ---
+    // --- 📱 MOBILE & DESKTOP CONTROLS ---
+
     function setupBuilderControls() {
         const c = document.getElementById('builder-container');
         if(c.dataset.listening) return; // Prevent double listeners
         c.dataset.listening = "true";
 
+        // --- MOUSE (Desktop) ---
         c.addEventListener('mousedown', e => {
             buildState.isDragging = false;
             buildState.startX = e.clientX;
@@ -7425,26 +7497,73 @@ function getPetEquipmentStats(pet) {
         });
 
         c.addEventListener('mousemove', e => {
-            if(e.buttons === 1) { // Left click hold
-                const dx = e.clientX - buildState.startX;
-                const dy = e.clientY - buildState.startY;
-                if(Math.abs(dx) > 5 || Math.abs(dy) > 5) {
-                    buildState.isDragging = true;
-                    buildState.viewRot.z -= dx * 0.5;
-                    buildState.viewRot.x = Math.max(10, Math.min(85, buildState.viewRot.x - dy * 0.5));
-                    buildState.startX = e.clientX;
-                    buildState.startY = e.clientY;
-                    
-                    // Update transform directly for smooth 60fps
-                    document.getElementById('world').style.transform = `rotateX(${buildState.viewRot.x}deg) rotateZ(${buildState.viewRot.z}deg) translateZ(-50px)`;
-                }
-            }
+            if(e.buttons === 1) handleInputMove(e.clientX, e.clientY);
         });
+
+        // --- TOUCH (Mobile) ---
+        // This makes the builder rotate with fingers instead of scrolling the page
+        c.addEventListener('touchstart', e => {
+            // Check if touching the scene or container
+            if(e.target === c || e.target.classList.contains('scene-3d')) {
+                e.preventDefault(); 
+            }
+            buildState.isDragging = false;
+            buildState.startX = e.touches[0].clientX;
+            buildState.startY = e.touches[0].clientY;
+        }, { passive: false });
+
+        c.addEventListener('touchmove', e => {
+            if(e.target === c || e.target.classList.contains('scene-3d')) {
+                e.preventDefault();
+            }
+            handleInputMove(e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: false });
     }
 
+    // Unified Logic (Works for Mouse & Touch)
+    function handleInputMove(currentX, currentY) {
+        const dx = currentX - buildState.startX;
+        const dy = currentY - buildState.startY;
+        
+        // Threshold to prevent accidental clicks registering as drags
+        if(Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+            buildState.isDragging = true;
+            buildState.viewRot.z -= dx * 0.5;
+            // Limit vertical rotation so they can't flip the world upside down
+            buildState.viewRot.x = Math.max(10, Math.min(85, buildState.viewRot.x - dy * 0.5));
+            
+            buildState.startX = currentX;
+            buildState.startY = currentY;
+            
+            // Render Rotation immediately
+            const world = document.getElementById('world');
+            if(world) {
+                world.style.transform = `rotateX(${buildState.viewRot.x}deg) rotateZ(${buildState.viewRot.z}deg) translateZ(-50px)`;
+            }
+        }
+    }
+
+    // Resets camera angle
     function resetBuilderView() {
         buildState.viewRot = { x: 60, z: 45 };
         renderBuilderScene();
+    }
+
+    // --- 📳 MOBILE UTILS ---
+
+    function vibratePhone(ms) {
+        // Only works on Android/Mobile devices that support it
+        if (navigator && navigator.vibrate) {
+            try { navigator.vibrate(ms); } catch(e){}
+        }
+    }
+
+    function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(e => console.log(e));
+        } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+        }
     }
     // --- 🏰 PET BUILDER INTEGRATION ---
 
@@ -7631,4 +7750,3 @@ function triggerBuildQuiz() {
 </div>
 </body>
           </html>
-
