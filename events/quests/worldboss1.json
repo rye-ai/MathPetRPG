@@ -9,7 +9,7 @@
   "emoji": "🐺",
   "evolutions": [
     {
-      "name": "Groochy", 
+      "name": "Raygon", 
       "level": 10,
       "cost": 100,
       "baseHP": 100,
@@ -19,7 +19,7 @@
       "imageStyle": "blend-multiply"
     },
     {
-      "name": "Groochy",
+      "name": "Raygon",
       "level": 20,
       "cost": 200,
       "baseHP": 200,
