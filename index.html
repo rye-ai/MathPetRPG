@@ -585,57 +585,105 @@ body {
 .header {
     padding-top: max(10px, env(safe-area-inset-top)); /* Avoid camera notch */
 }
+/* =========================================
+   📱 MOBILE "GAMEBOY" SPLIT-SCREEN PATCH
+   ========================================= */
 
-/* 2. MOBILE RESPONSIVENESS */
 @media (max-width: 768px) {
     
-    /* Global Adjustments */
-    .game-container { padding: 0; height: 100vh; max-width: 100%; }
-    .tabs { padding: 5px; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-    .tab { font-size: 14px; padding: 10px; flex-shrink: 0; }
+    /* 1. GLOBAL FIXES */
+    .game-container { padding: 0; height: 100vh; max-width: 100%; overflow: hidden; }
     
-    /* BUILDER: Fix aspect ratio for portrait */
-    .builder-container { height: 60vh; margin-bottom: 0; border-radius: 0; }
-    .build-ui { padding-bottom: 30px; } /* Lift up for thumb reach */
+    /* 2. BUILDER: Square Window in Middle */
+    .builder-container { 
+        height: 50vh; /* Don't fill screen, make it a window */
+        width: 100%;
+        margin-top: 10%; 
+        /* CRITICAL: This fixes the "Rotation not pushing" issue */
+        touch-action: none; 
+    }
+    .build-ui { padding-bottom: 40px; }
 
-    /* BATTLE: THE DIAGONAL CINEMA LAYOUT 🎬 */
+    /* 3. BATTLE SCREEN: The "Split" Container */
     .battle-screen {
-        background-position: center bottom !important; /* Anchor floor to bottom */
-        background-size: cover; 
+        display: flex !important;
+        flex-direction: column;
+        height: 100vh !important;
+        width: 100vw !important;
+        background-color: #2d3748; 
     }
 
-    /* Player: Big, Bottom-Left, "Close to Camera" */
-    #player-container {
-        bottom: 22% !important; /* Move up to clear UI */
-        left: -10% !important;  /* Slight overhang looks dynamic */
-        width: 60% !important;  /* Make them look BIG */
-        z-index: 20;            /* In front of enemy */
-        transform: scale(1.1);
+    /* 4. ZONE A: THE STAGE (Top 60%) - "The TV Screen" */
+    .battle-arena {
+        position: relative;
+        flex: 6; /* Takes up 60% of vertical space */
+        width: 100%;
+        overflow: hidden;
+        z-index: 10;
+        /* Force background image to anchor to the floor of this zone */
+        background-position: center bottom !important; 
+        background-size: cover !important;
     }
+
+    /* 5. PET POSITIONING (Diagonal Cinema Depth) */
     
-    /* Enemy: Small, Top-Right, "Far Away" */
+    /* PLAYER: Bottom-Left of the Top Zone */
+    #player-container {
+        bottom: 0 !important; /* Sit exactly on the "floor" */
+        left: -5% !important; 
+        width: 55% !important; /* Make big */
+        transform: scale(1.2); 
+        transform-origin: bottom center;
+        z-index: 20; 
+    }
+
+    /* ENEMY: Top-Right of the Top Zone */
     #enemy-container {
         bottom: auto !important;
-        top: 15% !important;
+        top: 15% !important; /* High up in the distance */
         right: 5% !important;
-        width: 40% !important;  /* Distance effect */
-        z-index: 10;            /* Behind player */
-        filter: brightness(0.9); /* Atmospheric depth */
+        width: 35% !important; 
+        transform: scale(0.9);
+        z-index: 10; 
+    }
+    
+    /* Make text readable on mobile */
+    .battle-name-plate {
+        font-size: 11px; 
+        text-shadow: 0 0 4px #000;
+        background: rgba(0,0,0,0.5);
+        padding: 4px 8px;
+        border-radius: 4px;
     }
 
-    /* BATTLE UI: Thumb Friendly */
+    /* 6. ZONE B: THE COMMAND DECK (Bottom 40%) - "The Controller" */
     .battle-ui-panel {
-        padding-bottom: 20px; /* Lift for iPhone Home Bar */
+        position: relative !important;
+        flex: 4; /* Takes up 40% of vertical space */
+        width: 100%;
+        background: #f7fafc !important; /* Solid Panel Color */
+        border-top: 4px solid #cbd5e0;
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center; /* Center buttons vertically */
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.2);
+        z-index: 30;
     }
+
+    /* Big, Tappable Buttons Grid */
     .battle-actions {
-        display: grid; 
-        grid-template-columns: 1fr 1fr; /* 2x2 Grid is easier to tap than a long row */
-        gap: 8px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        width: 100%;
     }
     .battle-actions .action-btn {
-        min-height: 55px; /* Fat Finger Friendly */
-        font-size: 15px;
+        min-height: 60px; /* Thumb size */
+        font-size: 16px;
+        border-radius: 12px;
         margin: 0;
+        box-shadow: 0 4px 0 rgba(0,0,0,0.1);
     }
 }
   </style>
@@ -7750,3 +7798,4 @@ function triggerBuildQuiz() {
 </div>
 </body>
           </html>
+
