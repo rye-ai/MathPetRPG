@@ -3212,11 +3212,14 @@ body {
         const pet = gameState.pets.find(p => p.id === gameState.currentPetId); 
         const bs = gameState.battleState;
         
-        // 1. SETUP VISUALS (Top Screen)
+        // --- 1. SETUP VISUALS (Top Screen) ---
+        // (Visual logic remains the same)
         const pSize = getBattlerSize(pet, false, false);
         const eSize = getBattlerSize(bs.enemy, bs.isBoss, bs.isArena);
         
         const pVis = document.getElementById('battle-player-visual');
+        const eVis = document.getElementById('battle-enemy-visual');
+        
         pVis.style.filter = "none";    
         pVis.style.opacity = "1";      
         pVis.style.transform = "none"; 
@@ -3225,7 +3228,6 @@ body {
             ? `<img src="${pet.image}" class="battler-image ${pet.imageStyle}" style="width:${pSize}px; height:${pSize}px;">` 
             : `<div style="font-size:${pSize * 0.7}px;">${pet.emoji}</div>`;
       
-        const eVis = document.getElementById('battle-enemy-visual'); 
         eVis.classList.add('flipped-opponent');
         eVis.innerHTML = bs.enemy.image 
             ? `<img src="${bs.enemy.image}" class="battler-image ${bs.enemy.imageStyle}" style="width:${eSize}px; height:${eSize}px;">` 
@@ -3235,18 +3237,24 @@ body {
         const pIcons = bs.playerStatus ? bs.playerStatus.map(s => s.icon).join(' ') : '';
         const eIcons = bs.enemyStatus ? bs.enemyStatus.map(s => s.icon).join(' ') : '';
       
-        // Update Names & Bars
         document.getElementById('player-battle-name').innerHTML = `${pet.name} ${pIcons} <span class="element-icon">${getElIcon(pet.element)}</span>`;
         document.getElementById('enemy-name').innerHTML = `${bs.enemy.name} ${eIcons} <span class="element-icon">${getElIcon(bs.enemy.element)}</span>`;
         
+        // --- SIZE FIX: Toggle Boss Mode ---
+        const eContainer = document.getElementById('enemy-container');
+        if (bs.isBoss || bs.isArena) {
+            eContainer.classList.add('boss-mode'); 
+        } else {
+            eContainer.classList.remove('boss-mode'); 
+        }
+
+        // Update Bars
         document.getElementById('enemy-hp-bar').style.width = (bs.enemyHP / bs.enemy.hp * 100) + "%";
-        
         const pMax = bs.playerMaxHP || pet.maxHP; 
         document.getElementById('player-hp-bar').style.width = (bs.playerHP / pMax * 100) + "%";
         document.getElementById('player-hp-text').innerText = `${Math.ceil(bs.playerHP)}/${pMax}`;
 
-        // 2. SETUP CONTROLS (Bottom Screen)
-        // We use the same Panel Logic as Gameboy Mode to keep it consistent
+        // --- 2. SETUP CONTROLS (Bottom Screen) ---
         const panel = document.querySelector('.battle-ui-panel');
         
         if(bs.turnInProgress) {
@@ -3254,17 +3262,14 @@ body {
             return;
         }
 
-        // Generate Standard Buttons (Calling usePowerAsync)
         let buttons = pet.powers.map(pid => {
             const move = findShopItem(pid);
             const mult = getTypeMult(move.element, bs.enemy.element);
             
-            // Visual Indicators for Weak/Strong
             let indicator = "";
             if (mult >= 2.0) indicator = "⬆";
             if (mult <= 0.5) indicator = "⬇";
             
-            // Burst Mode Glow
             const burstStyle = gameState.burstMode ? 'box-shadow: 0 0 10px #f6e05e; border: 2px solid #ecc94b;' : '';
 
             return `<button class="action-btn green" style="${burstStyle}" onclick="usePowerAsync('${pid}')">
@@ -3275,11 +3280,8 @@ body {
         buttons += `<button class="action-btn blue" onclick="openSwapMenu()">🔄 Squad</button>`;
         buttons += `<button class="action-btn red" onclick="flee()">🏃 Run</button>`;
 
-        // Render to Panel
+        // ✅ CLEANER UI: No Log Container
         panel.innerHTML = `
-            <div id="battle-log-feed" class="battle-log-container" style="display:flex !important; margin-bottom:10px;">
-                ${gameState.battleState.log ? gameState.battleState.log.map(l => `<div class="log-entry">${l}</div>`).join('') : ''}
-            </div>
             <div id="action-buttons-grid" class="battle-actions">
                 ${buttons}
             </div>
@@ -4403,104 +4405,146 @@ function toggleTeacherLogin() {
             } 
         }); 
     }
-    async function startPvPBattle() { await window.fbase.updateDoc(window.fbase.doc(window.db,"rooms",currentRoomId),{status:"battle",logs:window.fbase.arrayUnion("⚔️ BATTLE START!")}); }
+// --- ⚔️ FULL PVP SUITE (Mobile/Split-Screen Ready) ---
+
+// 1. START BATTLE (Host Only)
+async function startPvPBattle() { 
+    await window.fbase.updateDoc(window.fbase.doc(window.db,"rooms",currentRoomId), {
+        status: "battle",
+        logs: window.fbase.arrayUnion("⚔️ BATTLE START!")
+    }); 
+}
+
+// 2. RENDER BATTLE SCENE (The Big Fix)
+// --- ⚔️ PVP RENDERER (Clean Version - No Logs) ---
+function renderPvPBattle(d) {
+    // 1. Determine Identity
+    const amIHost = isHost; 
+    const myData = amIHost ? { name: d.hostName, pet: d.hostPet, hp: d.hostHP, max: d.hostMaxHP } 
+                           : { name: d.guestName, pet: d.guestPet, hp: d.guestHP, max: d.guestMaxHP };
+    const oppData = amIHost ? { name: d.guestName, pet: d.guestPet, hp: d.guestHP, max: d.guestMaxHP } 
+                            : { name: d.hostName, pet: d.hostPet, hp: d.hostHP, max: d.hostMaxHP };
+
+    // 2. Visuals
+    const pVis = document.getElementById('battle-player-visual');
+    const eVis = document.getElementById('battle-enemy-visual');
+
+    pVis.classList.remove('flipped-opponent');
+    pVis.innerHTML = myData.pet.image 
+        ? `<img src="${myData.pet.image}" class="battler-image ${myData.pet.imageStyle}" style="width:200px; height:200px;">` 
+        : `<div style="font-size:100px;">${myData.pet.emoji}</div>`;
+
+    eVis.classList.add('flipped-opponent');
+    eVis.innerHTML = oppData.pet.image 
+        ? `<img src="${oppData.pet.image}" class="battler-image ${oppData.pet.imageStyle}" style="width:200px; height:200px;">` 
+        : `<div class="emoji-wrapper" style="font-size:100px;">${oppData.pet.emoji || '👤'}</div>`;
+
+    // 3. Bars
+    document.getElementById('player-battle-name').innerHTML = `${myData.name}`;
+    document.getElementById('enemy-name').innerHTML = `${oppData.name || "Waiting..."}`;
+
+    document.getElementById('player-hp-bar').style.width = Math.max(0, (myData.hp / myData.max) * 100) + "%";
+    document.getElementById('player-hp-text').innerText = `${Math.ceil(myData.hp)}/${myData.max}`;
+    document.getElementById('enemy-hp-bar').style.width = Math.max(0, (oppData.hp / oppData.max) * 100) + "%";
+
+    // 4. Force Mobile Size
+    const eContainer = document.getElementById('enemy-container');
+    if (eContainer) eContainer.classList.add('boss-mode');
+
+    // 5. Controls
+    const panel = document.querySelector('.battle-ui-panel');
+    const isMyTurn = (d.turn === 'host' && amIHost) || (d.turn === 'guest' && !amIHost);
     
-    function renderPvPBattle(d) {
-        const myPet = isHost ? d.hostPet : d.guestPet; 
-        const oppPet = isHost ? d.guestPet : d.hostPet;
-        const myHP = isHost ? d.hostHP : d.guestHP; 
-        const oppHP = isHost ? d.guestHP : d.hostHP;
-        const myMax = isHost ? d.hostMaxHP : d.guestMaxHP; 
-        const oppMax = isHost ? d.guestMaxHP : d.hostMaxHP;
+    // Status Indicator (Important for PVP timing)
+    const turnStatus = isMyTurn ? 
+        `<div style="color:#48bb78; font-weight:bold; animation: pulseGold 1s infinite; text-align:center; margin-bottom:10px;">⚡ YOUR TURN!</div>` : 
+        `<div style="color:#a0aec0; text-align:center; margin-bottom:10px;">⏳ Waiting for opponent...</div>`;
 
-        const pVis = document.getElementById('battle-player-visual'); 
-        const eVis = document.getElementById('battle-enemy-visual');
-        const mySize = getBattlerSize(myPet, false, false); 
-        const oppSize = getBattlerSize(oppPet, false, false);
+    let buttons = myData.pet.powers.map(pid => {
+        const move = findShopItem(pid);
+        const style = isMyTurn ? "" : "opacity: 0.5; cursor: not-allowed; background: #cbd5e0; box-shadow: none;";
+        const action = isMyTurn ? `usePvPAttack('${pid}')` : "";
+        return `<button class="action-btn green" style="${style}" onclick="${action}">${move.name}</button>`;
+    }).join('');
+    
+    buttons += `<button class="action-btn red" onclick="leavePvPRoom()">🏳️ Surrender</button>`;
 
-        // Render Pet Visuals
-        pVis.classList.remove('flipped-opponent');
-        if(myPet.image) pVis.innerHTML = `<img src="${myPet.image}" class="battler-image ${myPet.imageStyle}" style="width:${mySize}px; height:${mySize}px;">`; 
-        else pVis.innerHTML = `<div style="font-size:${mySize*0.7}px;">${myPet.emoji}</div>`;
-        
-        eVis.classList.add('flipped-opponent');
-        if(oppPet.image) eVis.innerHTML = `<img src="${oppPet.image}" class="battler-image ${oppPet.imageStyle}" style="width:${oppSize}px; height:${oppSize}px;">`; 
-        else eVis.innerHTML = `<div class="emoji-wrapper" style="font-size:${oppSize*0.7}px;">${oppPet.emoji}</div>`;
-
-        // --- HELPER: GET ATTACK IMAGE ---
-        // Pick a random move from the pet's equipped powers to show as the projectile
-        const getAttackImg = (pet) => {
-            if (pet.powers && pet.powers.length > 0) {
-                // Pick random equipped power
-                const pid = pet.powers[Math.floor(Math.random() * pet.powers.length)];
-                const item = findShopItem(pid);
-                if (item) {
-                    // Return the specific attack image (e.g. Fire Spell png)
-                    if (item.image) return item.image; 
-                    if (item.icon) return item.icon;
-                }
-            }
-            return "⚔️"; // Fallback if no powers equipped
-        };
-
-        // --- ATTACK ANIMATIONS ---
-        if (localOpponentHP > oppHP) {
-            const dmg = localOpponentHP - oppHP; 
-            pVis.style.animation = "attackLunge 0.4s"; 
-            eVis.style.animation = "damageShake 0.4s"; 
-            
-            // USE ATTACK IMAGE HERE
-            createProjectile(getAttackImg(myPet), pVis, eVis); 
-            
-            showFloatingText(eVis.parentElement, `-${dmg}`, "crit"); 
-            soundManager.playSFX('hit'); 
-            setTimeout(() => { pVis.style.animation = ""; eVis.style.animation = ""; }, 500);
-        }
-
-        if (localPlayerHP > myHP) {
-            const dmg = localPlayerHP - myHP; 
-            eVis.style.animation = "attackLunge 0.4s"; 
-            pVis.style.animation = "damageShake 0.4s"; 
-            
-            // USE OPPONENT'S ATTACK IMAGE HERE
-            createProjectile(getAttackImg(oppPet), eVis, pVis); 
-            
-            showFloatingText(pVis.parentElement, `-${dmg}`, "crit"); 
-            soundManager.playSFX('hit'); 
-            setTimeout(() => { pVis.style.animation = ""; eVis.style.animation = ""; }, 500);
-        }
-        // ---------------------------
-
-        localOpponentHP = oppHP; 
-        localPlayerHP = myHP;
-        
-        // Update HP Bars & Text
-        document.getElementById('player-battle-name').innerHTML = `${isHost?d.hostName:d.guestName} <span class="element-icon">${getElIcon(myPet.element)}</span>`;
-        document.getElementById('enemy-name').innerHTML = `${isHost?d.guestName:d.hostName} <span class="element-icon">${getElIcon(oppPet.element)}</span>`;
-        document.getElementById('player-hp-bar').style.width = (myHP / myMax * 100) + "%";
-        document.getElementById('player-hp-trail').style.width = (myHP / myMax * 100) + "%";
-        document.getElementById('player-hp-text').innerText = `${myHP}/${myMax}`;
-        document.getElementById('enemy-hp-bar').style.width = (oppHP / oppMax * 100) + "%";
-        document.getElementById('enemy-hp-trail').style.width = (oppHP / oppMax * 100) + "%";
-
-        const act = document.getElementById('battle-actions'); 
-        const turn = (d.turn === 'host' && isHost) || (d.turn === 'guest' && !isHost);
-        
-        if (myHP <= 0 || oppHP <= 0) { 
-            act.innerHTML = "<h2>GAME OVER</h2>"; 
-            setTimeout(leavePvPRoom, 3000); 
-            return; 
-        }
-        
-        // Render Buttons
-        act.innerHTML = myPet.powers.map(pid => { 
-            const i = findShopItem(pid); 
-            return `<button class="action-btn green" onclick="usePvPAttack('${pid}')" ${!turn ? 'disabled style="opacity:0.5"' : ''}>${i.name}</button>`; 
-        }).join('');
+    // ✅ CLEAN UI: No Logs, just Status + Buttons
+    if (panel) {
+        panel.innerHTML = `
+            ${turnStatus}
+            <div id="action-buttons-grid" class="battle-actions">${buttons}</div>
+        `;
     }
 
-    async function usePvPAttack(pid) { const item=findShopItem(pid); const r=window.fbase.doc(window.db,"rooms",currentRoomId); soundManager.playSFX('attack'); await window.fbase.runTransaction(window.db, async(t)=>{ const d=(await t.get(r)).data(); const turn=(d.turn==='host'&&isHost)||(d.turn==='guest'&&!isHost); if(!turn) return; const dmg=(item.damage||10); t.update(r,{hostHP:isHost?d.hostHP:Math.max(0,d.hostHP-dmg), guestHP:isHost?Math.max(0,d.guestHP-dmg):d.guestHP, turn:isHost?'guest':'host', logs:window.fbase.arrayUnion(`${isHost?d.hostName:d.guestName} used ${item.name}!`) }); }); }
-    function leavePvPRoom() { if(pvpUnsubscribe) pvpUnsubscribe(); currentRoomId=null; document.getElementById('pvp-lobby-screen').style.display='none'; document.getElementById('battle-ui').style.display='none'; document.getElementById('wilds-menu').style.display='block'; soundManager.playBGM('wilds'); }
+    // 6. End Game
+    if (myData.hp <= 0) { alert("❌ You Lost!"); leavePvPRoom(); }
+    else if (oppData.hp <= 0 && oppData.name) { alert("🏆 You Won!"); leavePvPRoom(); }
+}
+
+// 3. ATTACK ACTION (Animated)
+async function usePvPAttack(pid) {
+    const item = findShopItem(pid);
+    const r = window.fbase.doc(window.db, "rooms", currentRoomId);
+    
+    // Animation
+    const pVis = document.getElementById('battle-player-visual');
+    const eVis = document.getElementById('battle-enemy-visual');
+    
+    soundManager.playSFX('attack');
+    pVis.style.animation = "attackLunge 0.3s";
+    createProjectile(item.image || item.icon, pVis, eVis);
+    
+    setTimeout(() => {
+        pVis.style.animation = "";
+        eVis.style.animation = "damageShake 0.5s"; 
+        soundManager.playSFX('hit');
+        if(typeof vibratePhone === 'function') vibratePhone(50);
+    }, 400);
+
+    // Database Update
+    try {
+        await window.fbase.runTransaction(window.db, async(t) => {
+            const doc = await t.get(r);
+            if (!doc.exists()) throw "Room closed";
+            const d = doc.data();
+            
+            // Turn Check
+            if (!((d.turn === 'host' && isHost) || (d.turn === 'guest' && !isHost))) return; 
+
+            const dmg = (item.damage || 10) + Math.floor(Math.random() * 5);
+            let updates = {};
+            
+            if (isHost) {
+                updates.guestHP = Math.max(0, d.guestHP - dmg);
+                updates.turn = 'guest';
+                updates.logs = window.fbase.arrayUnion(`Host: ${item.name} (-${dmg})`);
+            } else {
+                updates.hostHP = Math.max(0, d.hostHP - dmg);
+                updates.turn = 'host';
+                updates.logs = window.fbase.arrayUnion(`Guest: ${item.name} (-${dmg})`);
+            }
+            t.update(r, updates);
+        });
+    } catch (e) { console.error(e); }
+}
+
+// 4. LEAVE ROOM (Cleanup)
+function leavePvPRoom() { 
+    if(pvpUnsubscribe) pvpUnsubscribe(); 
+    currentRoomId=null; 
+    
+    // Reset UI
+    document.getElementById('pvp-lobby-screen').style.display='none'; 
+    document.getElementById('battle-ui').style.display='none'; 
+    document.getElementById('wilds-menu').style.display='block'; 
+    
+    // Remove Boss Mode Size
+    const eContainer = document.getElementById('enemy-container');
+    if (eContainer) eContainer.classList.remove('boss-mode');
+
+    soundManager.playBGM('wilds'); 
+}
     
     function readQuestionAloud() { if (gameState.currentQuestion) { const d=document.createElement('div'); d.innerHTML=gameState.currentQuestion.q; const t=d.textContent||d.innerText||""; if ('speechSynthesis' in window) { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.rate = 0.9; window.speechSynthesis.speak(u); } } }
     
@@ -7842,4 +7886,4 @@ function triggerBuildQuiz() {
     </div>
 </div>
 </body>
-          </html>
+ </html>
