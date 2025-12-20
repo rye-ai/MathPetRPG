@@ -5,13 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Math Pet Adventure RPG (Pro Edition)</title>
   
-  <!-- 1. LOAD FIREBASE LIBRARIES -->
+  <!-- 1. LOAD FIREBASE LIBRARIES (DUAL CORE) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, addDoc, getDocs, runTransaction, arrayUnion, deleteDoc, writeBatch, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAw7gJ8lN5BNE2a74jdAoSu9vrpAsBgcpc",
+    // 1. MAIN GAME DB (Pet Adventure) - Saves Student Data
+    const gameConfig = {
+     apiKey: "AIzaSyAw7gJ8lN5BNE2a74jdAoSu9vrpAsBgcpc",
       authDomain: "petadventure-b73c8.firebaseapp.com",
       projectId: "petadventure-b73c8",
       storageBucket: "petadventure-b73c8.firebase.storage.app",
@@ -19,11 +20,29 @@
       appId: "1:590511399628:web:400e68086ccfaba2e65869"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    // 2. TOOLS DB (Visualization Practice) - Stores Tool HTML Code
+    const toolsConfig = {
+        apiKey: "AIzaSyCYVPsTnfNnyYfmgyKqeTtIAg5qf-ganS4",
+        authDomain: "visualizationpractice.firebaseapp.com",
+        projectId: "visualizationpractice",
+        storageBucket: "visualizationpractice.firebasestorage.app",
+        messagingSenderId: "814840211812",
+        appId: "1:814840211812:web:01543de18dc9cb3ce23271"
+    };
+
+    // Initialize Both Apps
+    const app = initializeApp(gameConfig);
+    const toolsApp = initializeApp(toolsConfig, "toolsApp"); 
+
+    const db = getFirestore(app);         // Main DB
+    const toolsDb = getFirestore(toolsApp); // Content DB
+
+    // Expose to window for the game logic
     window.db = db;
+    window.toolsDb = toolsDb; 
     window.fbase = { doc, getDoc, setDoc, updateDoc, onSnapshot, collection, addDoc, getDocs, runTransaction, arrayUnion, deleteDoc, writeBatch, increment };
-    console.log("🔥 Firebase Initialized");
+    
+    console.log("🔥 Dual-Core Firebase Initialized");
   </script>
 
   <!-- Load Tailwind -->
@@ -411,6 +430,79 @@
 
 @keyframes shineMove { 0% { transform: translateX(-100%) rotate(45deg); } 100% { transform: translateX(100%) rotate(45deg); } }
 
+/* --- UPDATED TOOL FOCUS MODE STYLES --- */
+#tool-player-view {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: #1a202c;
+    z-index: 9999;
+    display: none;
+    flex-direction: column;
+}
+
+.focus-header {
+    background: rgba(0,0,0,0.9);
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 3px solid #5a67d8;
+    height: 100px; /* Slightly taller to accommodate the pet */
+}
+
+/* The cheering pet is now part of the header flex */
+.cheer-zone {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    pointer-events: none;
+    z-index: 10001;
+}
+
+.cheer-pet-img {
+    width: 150px; /* Increased size from 120px */
+    height: 150px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 15px rgba(255,255,255,0.6));
+    animation: bounce 2s infinite ease-in-out;
+    margin-top: 40px; /* Overhangs slightly out of the header */
+}
+
+.speech-bubble {
+    background: white;
+    border: 3px solid #5a67d8;
+    border-radius: 15px;
+    padding: 10px 15px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #2d3748;
+    position: relative;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    max-width: 180px;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+
+/* Updated speech bubble arrow to point right toward the pet */
+.speech-bubble::after {
+    content: '';
+    position: absolute;
+    right: -12px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-left: 12px solid #5a67d8;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+
 /* =========================================
        🏰 VOXEL BUILDER ENGINE (CSS)
        ========================================= */
@@ -789,6 +881,34 @@ body {
                 <div id="patch-logs" style="margin-top:10px; color:#a0aec0; font-size:12px; font-family:monospace;">Waiting...</div>
             </div>
             </div>
+            <!-- COLUMN 4: TOOL CREATOR -->
+            <div style="background:rgba(0,0,0,0.3); padding:20px; border-radius:15px; border:1px solid #ecc94b; margin-top:20px; grid-column: span 2;">
+                <h2 style="color:#ecc94b; border-bottom:1px solid #718096; padding-bottom:10px; margin-bottom:15px;">
+                    🛠️ TOOL FACTORY (Math Tools)
+                </h2>
+                
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+                    <input type="text" id="admin-tool-title" class="login-input" placeholder="Tool Title" style="background:#1a202c; color:white;">
+                    <input type="text" id="admin-tool-topic" class="login-input" placeholder="Topic (e.g. Geometry)" style="background:#1a202c; color:white;">
+                    
+                    <select id="admin-tool-grade" class="login-input" style="background:#1a202c; color:white;">
+                        <option value="All">All Grades</option>
+                        <option value="K">Kindergarten</option>
+                        <option value="1">Grade 1</option>
+                        <option value="2">Grade 2</option>
+                        <option value="3">Grade 3</option>
+                        <option value="4">Grade 4</option>
+                        <option value="5">Grade 5</option>
+                        <option value="6">Grade 6</option>
+                    </select>
+                </div>
+
+                <textarea id="admin-tool-html" 
+                    style="width:100%; height:150px; background:#1a202c; color:#68d391; font-family:monospace; padding:10px; border:1px solid #4a5568; border-radius:5px;" 
+                    placeholder="Paste HTML Code here..."></textarea>
+                
+                <button class="action-btn green" style="margin-top:10px;" onclick="adminPublishTool()">🚀 PUBLISH TO CLOUD</button>
+            </div>
     </div>
 </div>
    
@@ -1042,6 +1162,7 @@ body {
        <button class="tab" data-tab="wilds" onclick="switchTab('wilds')">🌲 Wilds</button>
        <button class="tab adventure-tab" data-tab="adventure" onclick="switchTab('adventure')">🌟 Adventure</button>
        <button class="tab" data-tab="build" onclick="switchTab('build')">🏰 Build</button>
+       <button class="tab" data-tab="tools" onclick="switchTab('tools')">🛠️ Tools</button>
    </nav>
    <main class="content">
     <section id="screen-study" class="screen active">
@@ -1164,6 +1285,62 @@ body {
             </div>
 
         </div>
+    </section>
+    <section id="screen-tools" class="screen">
+    <!-- 1. LIBRARY VIEW -->
+    <div id="tools-library-view">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; background: #fffbeb; padding: 15px; border-radius: 15px; border: 2px solid #f6ad55;">
+            <div>
+                <h2 style="color: #d97706; font-size: 24px; margin:0; font-weight: 900;">🧮 Math Lab</h2>
+                <p style="font-size: 12px; color: #b45309; margin:0;">Complete activities to master skills!</p>
+            </div>
+            
+            <!-- Enhanced Grade Filter -->
+            <div style="text-align: right;">
+                <label style="display:block; font-size: 10px; font-weight: bold; color: #d97706; text-transform: uppercase;">Change Grade:</label>
+                <select id="tools-grade-filter" class="login-input" style="width:160px; margin:0; padding:8px; border: 2px solid #f6ad55; cursor:pointer; background: white;" onchange="renderToolsTab()">
+                    <option value="All">Show All Grades</option>
+                    <option value="K">Kindergarten</option>
+                    <option value="1">Grade 1</option>
+                    <option value="2">Grade 2</option>
+                    <option value="3">Grade 3</option>
+                    <option value="4">Grade 4</option>
+                    <option value="5">Grade 5</option>
+                    <option value="6">Grade 6</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="tools-grid" class="adventure-grid">
+            <!-- Content injected by JS -->
+        </div>
+    </div>
+
+<div id="tool-player-view">
+    <div class="focus-header">
+        <!-- Left Side: Title and Score -->
+        <div style="display:flex; align-items:center; gap:15px;">
+            <span id="active-tool-title" style="color:white; font-weight:bold; font-size:18px;">Tool Name</span>
+            <div style="background:#2d3748; padding:8px 20px; border-radius:20px; border:2px solid #48bb78; box-shadow: 0 0 10px rgba(72, 187, 120, 0.3);">
+                <span style="color:#a0aec0; font-size:12px; font-weight: bold;">SMART SCORE:</span>
+                <span id="focus-score-display" style="color:#48bb78; font-size: 24px; font-weight:bold; font-family:monospace;">0</span>
+            </div>
+        </div>
+
+        <!-- Middle/Right: The Cheering Pet (Now integrated) -->
+        <div class="cheer-zone">
+            <div id="pet-speech" class="speech-bubble">Amazing work!</div>
+            <div id="cheer-pet-visual"></div>
+        </div>
+
+        <!-- Right Side: Exit -->
+        <button class="action-btn red" style="width:auto; padding:8px 20px; margin:0;" onclick="exitTool()">💾 SAVE & EXIT</button>
+    </div>
+
+    <div style="flex:1; background:white; position:relative;">
+        <iframe id="tool-frame" style="width:100%; height:100%; border:none;" sandbox="allow-scripts allow-modals allow-same-origin allow-popups"></iframe>
+    </div>
+</div>
     </section>
     <section id="screen-hub" class="screen"><div id="hub-content"></div></section>
     <section id="screen-shop" class="screen"><div id="shop-content"></div></section>
@@ -1429,7 +1606,7 @@ body {
   <script>
     // --- GLOBAL GAME STATE DEFINITION ---
     let gameState = { 
-        playerName: "Student", grade: null, selectedTopics: [], activeQuestionPool: [], currentQuestion: null, brainPoints: 0, 
+        playerName: "Student", grade: null, selectedTopics: [],toolHistory: {}, activeQuestionPool: [], currentQuestion: null, brainPoints: 0, 
         pets: [], currentPetId: null, inventory: {}, inBattle: false, battleState: null, mapX: 2, mapY: 2, stamina: 100, maxStamina: 100, tempMoveToLearn: null,
         combo: 0, burstMode: false, dailyStreak: 0, lastLoginDate: null, questProgress: { active: false, flags: [] },
         questBattleActive: false, questSuccessKey: null, pendingQuestRewardData: null,
@@ -1916,59 +2093,121 @@ body {
     }
     loadGitHubData();
 
-    async function loadProgressFromFirebase(username) {
-        try { const docSnap = await window.fbase.getDoc(window.fbase.doc(window.db, "students", username)); if (docSnap.exists() && docSnap.data().saveData) { gameState = { ...gameState, ...docSnap.data().saveData }; repairSaveData(); return true; } } catch (e) { console.error("Cloud Load Error:", e); } return false;
-    }
+    // ==========================================
+// 🧠 CORE ENGINE: LOAD, SAVE, & REPAIR
+// ==========================================
 
-    async function saveProgressToFirebase() {
-        if (!gameState.playerName) return;
-        let cleanState = JSON.parse(JSON.stringify(gameState));
-        delete cleanState.activeQuestionPool; 
-        delete cleanState.battleState;
-        delete cleanState.currentQuestion;
-        try { await window.fbase.setDoc(window.fbase.doc(window.db, "students", gameState.playerName), { saveData: cleanState, lastSaved: new Date() }, { merge: true }); } catch (e) { console.error("Cloud Save Error:", e); }
-    }
-
-    function repairSaveData() {
-        let fixed = false;
+async function loadProgressFromFirebase(username) {
+    try { 
+        const docSnap = await window.fbase.getDoc(window.fbase.doc(window.db, "students", username)); 
         
-        // 1. Fix Combo & Streak
-        if(gameState.combo === undefined) { gameState.combo = 0; fixed=true; }
-        if(gameState.dailyStreak === undefined) { gameState.dailyStreak = 0; fixed=true; }
-        
-        // 2. Fix Squad
-        if(!gameState.team) { gameState.team = [gameState.currentPetId]; fixed=true; }
+        if (docSnap.exists() && docSnap.data().saveData) { 
+            const cloudData = docSnap.data().saveData;
 
-        // 3. Fix Pet Data (Powers & HP)
-        gameState.pets.forEach(p => {
-            if (!p.powers || !Array.isArray(p.powers)) { p.powers = []; fixed = true; }
+            // 1. MERGE: Pull everything from the cloud into our game
+            // We do this carefully to ensure we don't lose the playerName
+            gameState = { ...gameState, ...cloudData }; 
             
-            if (isNaN(p.hp) || isNaN(p.maxHP) || !p.maxHP) {
-                p.maxHP = 50 + ((p.level||1) * 10);
+            // 2. SAFETY CHECK: If the cloud was missing these folders, create them now
+            if (!gameState.toolHistory) gameState.toolHistory = {};
+            if (!gameState.inventory) gameState.inventory = {};
+            if (!gameState.pets) gameState.pets = [];
+            
+            console.log("📥 Cloud Data Loaded. Tool History:", gameState.toolHistory);
+
+            // 3. REPAIR: Initialize any missing logic (like new pets or block inventory)
+            repairSaveData(); 
+            
+            // 4. REFRESH UI: Make sure the labels at the top show the correct info
+            updateStatsDisplay(); 
+            
+            return true; 
+        } 
+    } catch (e) { 
+        console.error("❌ Cloud Load Error:", e); 
+    } 
+    return false;
+}
+
+async function saveProgressToFirebase() {
+    if (!gameState.playerName) return false;
+    
+    // Create a clean copy for the database (remove temporary pools)
+    let cleanState = JSON.parse(JSON.stringify(gameState));
+    delete cleanState.activeQuestionPool; 
+    delete cleanState.battleState;
+    delete cleanState.currentQuestion;
+
+    try {
+        const docRef = window.fbase.doc(window.db, "students", gameState.playerName);
+        await window.fbase.setDoc(docRef, { 
+            saveData: cleanState, 
+            lastSaved: new Date().toISOString() 
+        }, { merge: true });
+        console.log("☁️ Firebase Sync Successful");
+        return true;
+    } catch (e) { 
+        console.error("❌ Firebase Sync Failed:", e); 
+        return false;
+    }
+}
+
+async function saveGame(forceFirebase = false) {
+    if (!gameState.playerName) return false;
+
+    // 1. Instant Local Save (Device Memory)
+    localStorage.setItem('math_rpg_' + gameState.playerName, JSON.stringify(gameState));
+    
+    // 2. Optional Cloud Save (Firebase)
+    if (forceFirebase) {
+        console.log("📡 Pushing to Cloud...");
+        return await saveProgressToFirebase();
+    }
+    return true;
+}
+
+function repairSaveData() {
+    let fixed = false;
+    
+    // 1. Fix basic stats
+    if (gameState.combo === undefined) { gameState.combo = 0; fixed = true; }
+    if (gameState.dailyStreak === undefined) { gameState.dailyStreak = 0; fixed = true; }
+    if (!gameState.team || gameState.team.length === 0) { 
+        gameState.team = [gameState.currentPetId]; 
+        fixed = true; 
+    }
+
+    // 2. CRITICAL: Initialize toolHistory folder if it doesn't exist
+    if (!gameState.toolHistory) { 
+        console.log("🛠️ Initializing Tool History Folder...");
+        gameState.toolHistory = {}; 
+        fixed = true; 
+    }
+
+    // 3. Fix Pet Data (HP/Powers)
+    if (gameState.pets) {
+        gameState.pets.forEach(p => {
+            if (!p.powers) { p.powers = []; fixed = true; }
+            if (isNaN(p.hp) || !p.maxHP) {
+                p.maxHP = 50 + ((p.level || 1) * 10);
                 p.hp = p.maxHP; 
                 fixed = true;
             }
         });
-
-        // 4. --- NEW: GIVE LAND TO OLD PLAYERS ---
-        if (!gameState.builder) {
-            console.log("🏗️ Migrating save: Adding Builder Data...");
-            gameState.builder = {
-                landSize: 6,         // Start with 6x6
-                voxels: {},          // Empty plot
-                inventory: { 
-                    'grass': 10,     // Starter blocks
-                    'wood': 5 
-                } 
-            };
-            fixed = true;
-        }
-        // ----------------------------------------
-        
-        // 5. Save Once if needed
-        if (fixed) saveGame();
     }
-    
+
+    // 4. Fix Builder Data for old accounts
+    if (!gameState.builder) {
+        gameState.builder = { landSize: 6, voxels: {}, inventory: { 'grass': 10, 'wood': 5 } };
+        fixed = true;
+    }
+
+    // 5. If we fixed anything, sync it to the Cloud immediately
+    if (fixed) {
+        console.log("🛠️ Data Repaired & Initialized Successfully");
+        saveGame(true);
+    }
+}
     // RPG Variables
     const TILE_SIZE = 40; 
     let canvas, ctx, playerImage = new Image(), arenaIcon = new Image(); const HUMAN_SPRITE_URL = "https://i.imgur.com/J6eL2tY.png"; arenaIcon.src = 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/Copy%20of%20Zyfire%20(1).png';
@@ -2022,7 +2261,8 @@ body {
       ctx.font = "bold 14px Arial"; ctx.fillStyle = "rgba(0,0,0,0.5)"; ctx.fillRect(5, 5, 120, 25); ctx.fillStyle = "white"; ctx.fillText(currentMapName || "Wilds", 10, 22);
     }
 
-    function handleKeyDown(e) { 
+    function handleKeyDown(e) {
+        if (activeToolId !== null) return;
         if(gameState.inBattle) return; 
         
         // Prevent scrolling with arrows
@@ -2190,6 +2430,246 @@ body {
             inventory: { 'grass': 10, 'wood': 5 } // Starter blocks
         };
     }
+    
+// ==========================================
+// 🛠️ PRO TOOLS ENGINE: LOCKDOWN & CHEER
+// ==========================================
+
+let activeToolId = null;
+let lastKnownScore = 0;
+
+// 1. RENDER TOOLS GRID (Shows Badges)
+// 1. RENDER TOOLS GRID (Updated with Debugging & Fresh State Logic)
+async function renderToolsTab() {
+    const grid = document.getElementById('tools-grid');
+    const filter = document.getElementById('tools-grade-filter').value;
+    grid.innerHTML = '<div style="color:gray; text-align:center; width:100%;">Syncing with Math Lab...</div>';
+
+    try {
+        const q = window.fbase.collection(window.toolsDb, "games");
+        const snap = await window.fbase.getDocs(q);
+        grid.innerHTML = "";
+        
+        // --- FRESH DATA CHECK ---
+        // Ensure we are pulling FRESH data from the global gameState
+        const history = gameState.toolHistory || {}; 
+        console.log("📊 Badge System checking History:", history);
+
+        snap.forEach(doc => {
+            const t = doc.data();
+            const matchesGrade = (filter === "All") || (t.grade === filter);
+            const isTool = (t.subject === 'math' || t.subject === 'tools');
+
+            if (matchesGrade && isTool) {
+                // MATCHING TOOL ID TO HISTORY
+                const record = history[doc.id] || { score: 0, claimed: false };
+                
+                let badge = "";
+                let style = "border: 2px solid #ed8936;"; // Default Orange
+
+                // Logic for Mastered (100% or Claimed)
+                if (record.claimed === true || record.score >= 100) {
+                    badge = `<span style="background:#48bb78; color:white; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:bold;">✅ MASTERED</span>`;
+                    style = "border: 3px solid #48bb78; background:#f0fff4;"; // Green Card
+                } 
+                // Logic for Progressing (Resume)
+                else if (record.score > 0) {
+                    badge = `<span style="background:#ecc94b; color:white; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:bold;">RESUME: ${record.score}%</span>`;
+                    style = "border: 3px solid #ecc94b; background:#fffbeb;"; // Yellow Card
+                }
+
+                grid.innerHTML += `
+                <div class="adventure-card" style="${style}" onclick="launchTool('${doc.id}')">
+                    <div class="adventure-header" style="background:linear-gradient(135deg, #d97706, #b45309)">
+                        <span>🛠️ ${t.title}</span>
+                    </div>
+                    <div class="adventure-body">
+                        <p class="adventure-desc">${t.topic || "Math Lab Activity"}</p>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
+                            ${badge} 
+                            <span style="font-size:10px; color:#718096;">Gr ${t.grade || "All"}</span>
+                        </div>
+                    </div>
+                </div>`;
+            }
+        });
+
+    } catch (e) { 
+        console.error("❌ renderToolsTab Error:", e);
+        grid.innerHTML = "Connection Error."; 
+    }
+}
+
+// 2. LAUNCH FOCUS MODE (Lockdown)
+async function launchTool(docId) {
+    try {
+        const docSnap = await window.fbase.getDoc(window.fbase.doc(window.toolsDb, "games", docId));
+        if (!docSnap.exists()) return showToast("Tool not found", "error");
+
+        const data = docSnap.data();
+        activeToolId = docId;
+
+        // 1. Get saved progress
+        if (!gameState.toolHistory) gameState.toolHistory = {};
+        const record = gameState.toolHistory[docId] || { score: 0, claimed: false };
+        
+        let startScore = record.claimed ? 0 : (record.score || 0);
+        lastKnownScore = startScore;
+
+        // 2. Open the Window
+        document.getElementById('tool-player-view').style.display = 'flex';
+        document.getElementById('active-tool-title').innerText = data.title + (record.claimed ? " (Review Mode)" : "");
+        document.getElementById('focus-score-display').innerText = startScore;
+        
+        // 3. Set up the Cheering Pet
+        const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+        const cheerVis = document.getElementById('cheer-pet-visual');
+        cheerVis.innerHTML = pet.image 
+            ? `<img src="${pet.image}" class="cheer-pet-img ${pet.imageStyle}">` 
+            : `<div style="font-size:80px;">${pet.emoji}</div>`;
+        
+        updatePetSpeech(`Time for some math, ${gameState.playerName}!`);
+
+        // --- 🛠️ THE AUTOMATIC BRIDGE ---
+        const frame = document.getElementById('tool-frame');
+        const bridgeScript = `
+            <script>
+                // A. Variables for the Tool to find
+                window.INITIAL_SCORE = ${startScore};
+                window.smartScore = ${startScore};
+
+                // B. Function to talk to RPG
+                function submitScore(s) { 
+                    window.parent.postMessage({ type: 'TOOL_SCORE', score: s }, '*'); 
+                }
+
+                // C. AUTO-RESUME: This forces the tool to use the score even if it doesn't have initGame()
+                window.addEventListener('load', () => {
+                    // Try to inject into the tool's 'currentScore' variable if it exists
+                    if (typeof currentScore !== 'undefined') {
+                        currentScore = window.INITIAL_SCORE;
+                        if (typeof updateScoreDisplay === 'function') updateScoreDisplay();
+                    }
+                    // Try to trigger a 'reset' or 'init' if they exist
+                    if (typeof initGame === 'function') initGame();
+                });
+            <\/script>
+        `;
+        
+        frame.srcdoc = bridgeScript + data.htmlCode;
+        soundManager.stopBGM();
+
+    } catch (e) { console.error(e); }
+}
+
+window.addEventListener('message', (e) => {
+    if (!e.data || e.data.type !== 'TOOL_SCORE' || !activeToolId) return;
+
+    const newScore = parseInt(e.data.score) || 0;
+    document.getElementById('focus-score-display').innerText = newScore;
+    
+    // Ensure the tool history folder exists
+    if (!gameState.toolHistory) gameState.toolHistory = {};
+
+    // Get the current record or create a fresh one
+    let record = gameState.toolHistory[activeToolId] || { score: 0, claimed: false };
+
+    // Update Pet Speech on progress
+    if (newScore > lastKnownScore) {
+        const cheers = ["Great job!", "Keep going!", "You're a genius!", "Brain power increasing!"];
+        updatePetSpeech(cheers[Math.floor(Math.random() * cheers.length)]);
+    }
+    lastKnownScore = newScore;
+
+    // --- SECURE SAVE LOGIC ---
+    if (!record.claimed) {
+        // Update the numbers
+        record.score = newScore;
+        
+        // RE-ATTACH TO GLOBAL STATE (This is the important part!)
+        gameState.toolHistory[activeToolId] = record;
+        
+        if (newScore >= 100) {
+            record.claimed = true;
+            record.score = 100;
+            addBP(500);
+            updatePetSpeech("🎉 MASTERY! YOU DID IT! 🎉");
+            soundManager.playSFX('levelUp');
+            saveGame(true); // Sync to Cloud for the win
+            triggerRewardCeremony("TOOL MASTERED!", "Perfect Score! +500 BP", "🛠️", null);
+        } else {
+            saveGame(false); // Background local save
+        }
+    }
+});
+
+async function exitTool() {
+    if (!activeToolId) return;
+
+    const exitBtn = document.querySelector('#tool-player-view .action-btn.red');
+    const originalText = exitBtn ? exitBtn.innerText : "EXIT";
+
+    try {
+        if (exitBtn) {
+            exitBtn.innerText = "⌛ SAVING...";
+            exitBtn.disabled = true;
+        }
+
+        console.log("📡 Final Save before closing...");
+        // This ensures we wait for Firebase before hiding the screen
+        await saveGame(true); 
+
+    } catch (e) {
+        console.error("Exit Save Error:", e);
+    } finally {
+        activeToolId = null;
+        const frame = document.getElementById('tool-frame');
+        if (frame) frame.srcdoc = ""; 
+        
+        document.getElementById('tool-player-view').style.display = 'none';
+        
+        if (exitBtn) {
+            exitBtn.innerText = originalText;
+            exitBtn.disabled = false;
+        }
+
+        soundManager.playBGM('hub');
+        renderToolsTab(); 
+        showToast("Progress Saved to Cloud", "success");
+    }
+}
+
+function updatePetSpeech(text) {
+    const bubble = document.getElementById('pet-speech');
+    if(!bubble) return;
+    bubble.innerText = text;
+    bubble.style.opacity = 1;
+    setTimeout(() => { if(bubble) bubble.style.opacity = 0; }, 4000);
+}
+
+// 5. ADMIN: PUBLISH TOOL (Kept for Headmaster Dashboard)
+async function adminPublishTool() {
+    const title = document.getElementById('admin-tool-title').value;
+    const topic = document.getElementById('admin-tool-topic').value;
+    const grade = document.getElementById('admin-tool-grade').value;
+    const html = document.getElementById('admin-tool-html').value;
+
+    if(!title || !html) return alert("Missing Title or Code!");
+
+    try {
+        await window.fbase.addDoc(window.fbase.collection(window.toolsDb, "games"), {
+            title: title,
+            topic: topic,
+            grade: grade,
+            htmlCode: html,
+            subject: "tools",
+            createdAt: new Date().toISOString()
+        });
+        alert("✅ Tool Published Successfully!");
+    } catch(e) {
+        alert("Error publishing: " + e.message);
+    }
+}
     
     
     // --- DAILY LOGIN LOGIC ---
@@ -3635,28 +4115,37 @@ body {
     }
 }
     function switchTab(t) { 
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
-        document.querySelectorAll('.tab').forEach(b => b.classList.remove('active')); 
-        document.querySelector(`.tab[data-tab="${t}"]`).classList.add('active'); 
-        document.getElementById('screen-' + t).classList.add('active'); 
-        
-        if(t==='wilds') soundManager.playBGM('wilds'); else soundManager.playBGM('hub'); 
-        if (t === 'hub') renderHub(); 
-        if (t === 'shop') renderShop(); 
-        
-        // --- NEW: INIT BUILDER ---
-        // --- NEW: INIT BUILDER & PETS ---
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active')); 
+    
+    const activeTabBtn = document.querySelector(`.tab[data-tab="${t}"]`);
+    if(activeTabBtn) activeTabBtn.classList.add('active'); 
+    
+    const targetScreen = document.getElementById('screen-' + t);
+    if(targetScreen) targetScreen.classList.add('active'); 
+    
+    if(t === 'wilds') soundManager.playBGM('wilds'); else soundManager.playBGM('hub'); 
+    if (t === 'hub') renderHub(); 
+    if (t === 'shop') renderShop();
+    
+    // --- SMART TOOLS INITIALIZATION ---
+    if (t === 'tools') {
+        const filterDropdown = document.getElementById('tools-grade-filter');
+        // If this is the first time opening, set it to the student's grade
+        if (filterDropdown && gameState.grade) {
+            filterDropdown.value = gameState.grade; 
+        }
+        renderToolsTab();
+    }
+    
     if (t === 'build') {
         initBuilder();
-        // Check if function exists to prevent errors during loading
         if (typeof initBuilderPets === 'function') initBuilderPets(); 
     } else {
-        // STOP PETS (Save CPU/Battery when not building)
         if (typeof builderPetInterval !== 'undefined' && builderPetInterval) {
             clearInterval(builderPetInterval);
         }
     }
-    // -------------------------
 
     if (t !== 'wilds') { 
         document.getElementById('rpg-wrapper').style.display = 'none'; 
@@ -3674,22 +4163,6 @@ body {
 let hasUnsavedChanges = false;
 let autoSaveInterval = null;
 
-function saveGame(forceFirebase = false) {
-    if (!gameState.playerName) return;
-
-    // 1. Always save to Local Browser Memory (Free & Instant)
-    localStorage.setItem('math_rpg_' + gameState.playerName, JSON.stringify(gameState));
-    
-    if (forceFirebase) {
-        // 2. Force Cloud Save (Use this for Shop, Evolution, Raid)
-        saveProgressToFirebase();
-        hasUnsavedChanges = false;
-        console.log("☁️ Forced Cloud Save");
-    } else {
-        // 3. Mark for later (Use this for Math Questions)
-        hasUnsavedChanges = true;
-    }
-}
 
 // Background Timer: Checks every 60 seconds
 if (autoSaveInterval) clearInterval(autoSaveInterval);
@@ -4030,7 +4503,8 @@ function checkAdventureRandomEncounter(tileType) {
 
     // --- Helpers ---
     function interactNPC(npc) { 
-        const dBox = document.getElementById('quest-dialog'); 
+        const dBox = document.ge
+tElementById('quest-dialog'); 
         document.getElementById('quest-npc-name').innerText = npc.name; 
         document.getElementById('quest-text').innerText = npc.dialogue[0]; 
         dBox.style.display = 'block'; 
@@ -7864,6 +8338,13 @@ function triggerBuildQuiz() {
     // 4. Lock the Screen
     modal.classList.add('active');
 }
+// Background safety save every 60 seconds
+setInterval(() => {
+    if (gameState.playerName && activeToolId) {
+        console.log("🕒 Background sync...");
+        saveGame(true); 
+    }
+}, 60000);
   </script>
   <!-- 🚧 CONSTRUCTION QUIZ MODAL -->
 <div class="modal-overlay" id="build-quiz-modal" style="z-index: 9999;">
