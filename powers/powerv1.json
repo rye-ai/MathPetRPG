@@ -101,8 +101,8 @@
     "description": "Siphons health from the enemy upon impact.",
     "effect": {
       "type": "drain",
-      "value": 0.2,
-      "chance": 1.0
+      "value": 0.05,
+      "chance": 0.70
     }
   },
   {
