@@ -8,7 +8,7 @@
   <!-- 1. LOAD FIREBASE LIBRARIES (DUAL CORE) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, addDoc, getDocs, runTransaction, arrayUnion, deleteDoc, writeBatch, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, addDoc, getDocs, runTransaction, arrayUnion, deleteDoc, writeBatch, increment, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     // 1. MAIN GAME DB (Pet Adventure) - Saves Student Data
     const gameConfig = {
@@ -19,6 +19,8 @@
       messagingSenderId: "590511399628",
       appId: "1:590511399628:web:400e68086ccfaba2e65869"
     };
+
+
 
     // 2. TOOLS DB (Visualization Practice) - Stores Tool HTML Code
     const toolsConfig = {
@@ -40,8 +42,7 @@
     // Expose to window for the game logic
     window.db = db;
     window.toolsDb = toolsDb; 
-    window.fbase = { doc, getDoc, setDoc, updateDoc, onSnapshot, collection, addDoc, getDocs, runTransaction, arrayUnion, deleteDoc, writeBatch, increment };
-    
+    window.fbase = { doc, getDoc, setDoc, updateDoc, onSnapshot, collection, addDoc, getDocs, runTransaction, arrayUnion, deleteDoc, writeBatch, increment, query, where };
     console.log("🔥 Dual-Core Firebase Initialized");
   </script>
 
@@ -52,6 +53,16 @@
   
   <!-- Custom Game Styles -->
   <style>
+  .tower-math-overlay {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8);
+    display: none; /* JS will change this to 'flex' */
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(5px);
+}
     :root {
         --bg-login: url('https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/Untitled%20design.png'); 
         --bg-game:  url('https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/Untitled%20design%20(1).png'); 
@@ -779,6 +790,250 @@ body {
         box-shadow: 0 4px 0 rgba(0,0,0,0.1);
     }
 }
+
+/* --- PRO UI: HUD & JOURNAL STYLES --- */
+.adventure-hud {
+    position: absolute; bottom: 85px; left: 15px; 
+    z-index: 1500; pointer-events: none;
+    display: none; flex-direction: column; gap: 10px;
+}
+.hud-pill {
+    background: rgba(0,0,0,0.7); backdrop-filter: blur(5px);
+    border-radius: 20px; padding: 5px 12px;
+    border: 1px solid rgba(255,255,255,0.2);
+    color: white; font-size: 12px; display: flex; align-items: center; gap: 8px;
+}
+.journal-btn {
+    position: absolute; top: 70px; right: 15px;
+    z-index: 1500; width: 50px; height: 50px;
+    background: #f6ad55; border-radius: 50%;
+    display: none; align-items: center; justify-content: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; border: 3px solid white;
+}
+.journal-panel {
+    position: fixed; top: 0; right: -300px; width: 280px; height: 100vh;
+    background: white; z-index: 2000; transition: right 0.3s ease-out;
+    box-shadow: -5px 0 20px rgba(0,0,0,0.2); padding: 20px;
+}
+.journal-panel.open { right: 0; }
+.mission-card {
+    background: #f7fafc; border-left: 4px solid #5a67d8;
+    padding: 10px; margin-bottom: 10px; border-radius: 4px;
+}
+.mission-done { color: #a0aec0; text-decoration: line-through; }
+
+/* --- PRO LOOT: RARITY VISUALS --- */
+.item-slot {
+    position: relative;
+    transition: all 0.2s;
+}
+.rarity-basic { border: 2px solid #cbd5e0 !important; }
+.rarity-rare { 
+    border: 2px solid #4299e1 !important; 
+    box-shadow: 0 0 10px rgba(66, 153, 225, 0.5);
+    background: linear-gradient(135deg, #fff 0%, #ebf8ff 100%) !important;
+}
+.rarity-legendary { 
+    border: 3px solid #d69e2e !important; 
+    box-shadow: 0 0 15px #f6e05e;
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%) !important;
+    animation: lootGlow 2s infinite alternate;
+}
+@keyframes lootGlow {
+    from { box-shadow: 0 0 5px #f6e05e; }
+    to { box-shadow: 0 0 20px #f6ad55; }
+}
+/* --- PRO LOOT: REVEAL ANIMATIONS --- */
+.reveal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.9); z-index: 9999;
+    display: none; align-items: center; justify-content: center;
+    backdrop-filter: blur(10px);
+}
+.reveal-card {
+    background: white; border-radius: 25px; padding: 40px;
+    text-align: center; max-width: 400px; width: 90%;
+    transform: scale(0); animation: lootPop 0.5s cubic-bezier(0.17, 0.89, 0.32, 1.28) forwards;
+    position: relative; overflow: hidden;
+}
+@keyframes lootPop {
+    to { transform: scale(1); }
+}
+.reveal-shine {
+    position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 60%);
+    animation: rotateShine 4s linear infinite;
+    pointer-events: none;
+}
+@keyframes rotateShine {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+.reveal-image {
+    width: 150px; height: 150px; object-fit: contain;
+    filter: drop-shadow(0 0 15px rgba(0,0,0,0.2));
+    margin-bottom: 20px; position: relative; z-index: 2;
+}
+/* --- PRO RAID: PHASE VISUALS --- */
+.enrage-filter { filter: sepia(100%) saturate(300%) hue-rotate(-50deg) drop-shadow(0 0 20px red) !important; }
+.frenzy-overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85); z-index: 500;
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    color: white; text-align: center; padding: 20px;
+}
+.frenzy-timer { font-size: 48px; font-weight: 900; color: #f56565; animation: pulse 1s infinite; }
+.shield-bar-bg { width: 80%; height: 15px; background: #2d3748; border-radius: 10px; margin: 15px 0; border: 2px solid white; overflow: hidden; }
+.shield-bar-fill { height: 100%; background: #4299e1; transition: width 0.3s; box-shadow: 0 0 10px #4299e1; }
+/* Recommendation 3: Screen Shake & Frenzy Juice */
+.shake-ui { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+@keyframes shake {
+  10%, 90% { transform: translate3d(-2px, 0, 0); }
+  20%, 80% { transform: translate3d(4px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-8px, 0, 0); }
+  40%, 60% { transform: translate3d(8px, 0, 0); }
+}
+.frenzy-bg-active { animation: frenzyPulse 1.5s infinite; }
+@keyframes frenzyPulse {
+    0% { background-color: rgba(255, 0, 0, 0.1); }
+    50% { background-color: rgba(255, 0, 0, 0.4); }
+    100% { background-color: rgba(255, 0, 0, 0.1); }
+}
+/* =========================================
+   🗼 INFINITY TOWER: MASTER PRO STYLES
+   ========================================= */
+
+/* 1. LOBBY & SQUAD MANAGEMENT */
+.tower-lobby-card {
+    background: rgba(255,255,255,0.05);
+    border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 15px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+.weather-tag {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    margin-top: 5px;
+}
+.tower-btn-group {
+    display: flex; gap: 10px;
+    justify-content: center; margin-top: 10px;
+}
+.tower-modal {
+    position: fixed; top: 10%; left: 5%; width: 90%; height: 80%;
+    background: white; border: 4px solid #5a67d8; border-radius: 20px;
+    z-index: 5000; padding: 20px; display: none; flex-direction: column;
+    color: #2d3748;
+}
+
+/* 2. THE BATTLE STAGE (The "Hero Wars" Formation) */
+.tower-stage {
+    position: relative;
+    /* This forces the stage to stay the same SHAPE as your background image */
+    aspect-ratio: 16 / 9; 
+    width: 100%;
+    margin: 0 auto;
+    
+    background-image: url('https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/123.png');
+    /* '100% 100%' ensures the image stretches to fit our invisible 16:9 box exactly */
+    background-size: 100% 100%; 
+    background-position: center;
+    background-repeat: no-repeat;
+    overflow: hidden;
+}
+.hero-slot {
+    position: absolute;
+    /* ADJUST THIS NUMBER to match the size of the stone in your art */
+    width: 16%; 
+    height: auto; /* Give it enough height to show the pet and the HP number */
+    
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    transition: all 0.4s ease-out;
+}
+
+/* Row Layering: Makes the front row pets look like they are in front of the back row */
+.row-top { z-index: 100; }
+.row-bottom { z-index: 200; }
+
+.hero-img-unit {
+    width: 100%; /* The pet will now fill exactly the 14% width you set above */
+    height: auto;
+    object-fit: contain;
+}
+
+/* 3. DASHBOARD & COMMAND BAR (The Bottom Menu) */
+#tower-command-bar {
+    position: absolute;
+    bottom: 0; left: 0; width: 100%;
+    height: 130px;
+    background: rgba(26, 32, 44, 0.98);
+    border-top: 4px solid #5a67d8;
+    display: none; /* Shown via JS only when it is the student's turn */
+    padding: 15px;
+    z-index: 1000;
+    flex-direction: column;
+    justify-content: center;
+}
+.tower-action-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    width: 100%;
+}
+
+/* 4. TURN INDICATORS & EFFECTS */
+/* Glow for the pet currently attacking */
+.tower-active-glow {
+    filter: drop-shadow(0 0 15px #5a67d8) brightness(1.2) !important;
+    transform: scale(1.1) translateY(-10px);
+}
+/* Glow if the student got the Math Focus correct */
+.burst-glow-pet {
+    filter: drop-shadow(0 0 20px #f6e05e) brightness(1.3) !important;
+}
+/* Gray out pets that have already used their turn */
+.pet-acted { 
+    filter: grayscale(1) opacity(0.5) !important; 
+}
+
+/* 5. UI OVERLAYS & TEXT */
+.tower-command-box {
+    background: white; padding: 20px; 
+    border-radius: 15px; border: 4px solid #5a67d8;
+}
+.hero-hp-number {
+    font-size: 13px; font-weight: 900;
+    color: #48bb78; text-shadow: 2px 2px 0px #000;
+    z-index: 10; margin-bottom: -5px;
+}
+.enemy-hp-number { color: #f56565; }
+
+/* Cinematic Intro Banner */
+#tower-floor-banner {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.9); color: #f6e05e;
+    padding: 20px 60px; font-size: 32px; font-weight: 900;
+    border-radius: 50px; border: 3px solid #f6e05e;
+    z-index: 2000; opacity: 0; pointer-events: none;
+    transition: all 0.5s;
+}
+.banner-show { opacity: 1 !important; transform: translate(-50%, -50%) scale(1.2) !important; }
+
+/* 6. LOOT MODAL */
+.loot-modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.9); z-index: 10000;
+    display: none; align-items: center; justify-content: center;
+    flex-direction: column; color: white; text-align: center;
+}
   </style>
   </head>
  <body><!-- Login Screen -->
@@ -934,6 +1189,30 @@ body {
                <div>
                    <!-- 1. Create Student -->
                    <div style="background:#f7fafc; padding:25px; border-radius:15px; border:2px solid #e2e8f0; margin-bottom: 20px;">
+                       <!-- Recommendation: Quest Master Control Panel -->
+<div style="background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding:20px; border-radius:15px; margin-bottom: 20px; color: white; box-shadow: 0 4px 15px rgba(118, 75, 162, 0.4);">
+    <h2 style="font-size:20px; font-weight:bold; margin-bottom:15px; display:flex; align-items:center; gap:10px;">🛡️ Quest Master Controls</h2>
+    
+    <!-- Endurance Mode Toggle -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; background:rgba(255,255,255,0.1); padding:10px; border-radius:10px;">
+        <div>
+            <div style="font-weight:bold;">Endurance Mode</div>
+            <div style="font-size:11px; opacity:0.8;">Double all enemy HP (Great for fast classes!)</div>
+        </div>
+        <input type="checkbox" id="qm-endurance-toggle" style="width:25px; height:25px; cursor:pointer;">
+    </div>
+
+    <!-- Reward Multiplier Slider -->
+    <div style="background:rgba(255,255,255,0.1); padding:10px; border-radius:10px; margin-bottom:15px;">
+        <div style="display:flex; justify-content:space-between; font-weight:bold; margin-bottom:5px;">
+            <span>XP/BP Multiplier</span>
+            <span id="qm-mult-display" style="background:#f6ad55; padding:2px 8px; border-radius:5px;">1.0x</span>
+        </div>
+        <input type="range" id="qm-reward-slider" min="1" max="3" step="0.5" value="1" style="width:100%; cursor:pointer;" oninput="document.getElementById('qm-mult-display').innerText = this.value + 'x'">
+    </div>
+
+    <button class="action-btn green" style="margin:0; border:2px solid white;" onclick="saveQuestMasterSettings()">Apply Settings to Class</button>
+</div>
                        <h2 style="font-size:20px; font-weight:bold; margin-bottom:15px;">Create Student Account</h2>
                        <input type="text" id="new-student-user" class="login-input" placeholder="Username">
                        <input type="password" id="new-student-pass" class="login-input" placeholder="Password">
@@ -1163,7 +1442,33 @@ body {
        <button class="tab adventure-tab" data-tab="adventure" onclick="switchTab('adventure')">🌟 Adventure</button>
        <button class="tab" data-tab="build" onclick="switchTab('build')">🏰 Build</button>
        <button class="tab" data-tab="tools" onclick="switchTab('tools')">🛠️ Tools</button>
+       <button class="tab" data-tab="tower" onclick="switchTab('tower')">🗼 Tower</button>
    </nav>
+   <!-- PRO UI: ADVENTURE HUD & JOURNAL -->
+   <div class="adventure-hud" id="adv-hud">
+       <div class="hud-pill">
+           <span id="hud-pet-icon">🐾</span>
+           <div style="width:100px; height:6px; background:#4a5568; border-radius:3px;">
+               <div id="hud-hp-fill" style="width:100%; height:100%; background:#48bb78; border-radius:3px; transition:width 0.3s;"></div>
+           </div>
+           <span id="hud-hp-text">100/100</span>
+       </div>
+       <div class="hud-pill" id="hud-combo-pill" style="display:none; border-color:#f6ad55;">
+           🔥 Math Streak: <span id="hud-combo-val">0</span>
+       </div>
+   </div>
+
+   <div class="journal-btn" id="journal-trigger" onclick="toggleJournal()">📜</div>
+
+   <div class="journal-panel" id="journal-panel">
+       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+           <h2 style="margin:0; font-size:20px;">📜 Quest Journal</h2>
+           <button class="action-btn red" style="width:40px; margin:0;" onclick="toggleJournal()">X</button>
+       </div>
+       <div id="journal-content">
+           <p style="color:gray;">No active quests. Go explore!</p>
+       </div>
+   </div>
    <main class="content">
     <section id="screen-study" class="screen active">
         <!-- PASTE INSIDE <section id="screen-study"> -->
@@ -1265,6 +1570,24 @@ body {
 
             <!-- UI Controls -->
             <div class="build-ui">
+                <!-- Visitor Entry -->
+                <div id="build-main-controls" style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <input type="text" id="visit-username" class="login-input" placeholder="Friend's Name" style="margin:0; flex:1; padding:5px; height: 35px;">
+                    <button class="action-btn blue" style="width:auto; margin:0; padding:5px 15px; font-size:12px;" onclick="visitFriendLand()">Visit ✈️</button>
+                </div>
+
+                <!-- Visitor Tools (Hidden by default) -->
+                <div id="visitor-controls" style="display: none; background: #ebf8ff; padding: 10px; border-radius: 10px; border: 2px solid #4299e1; margin-bottom: 10px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <span id="visiting-name" style="font-weight:bold; color:#2b6cb0; font-size: 14px;">Visiting: -</span>
+                        <button class="action-btn red" style="width:auto; margin:0; padding:2px 10px; font-size:12px;" onclick="exitVisit()">Exit Land</button>
+                    </div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                        <button class="action-btn green" style="font-size:12px; padding:10px;" onclick="giveStar()">⭐ Give Star</button>
+                        <button class="action-btn blue" style="font-size:12px; padding:10px;" onclick="openComplimentMenu()">🎁 Compliment</button>
+                    </div>
+                    <div id="kindness-meter" style="font-size:10px; color:#718096; margin-top:5px; text-align:center;">Kindness Purse: 100/100 BP</div>
+                </div>
                 <!-- Top Row: Tools -->
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <button class="action-btn red" style="width:auto; padding: 5px 10px; font-size: 12px;" onclick="resetBuilderView()">Reset View</button>
@@ -1390,6 +1713,21 @@ body {
      </div>
      
      <div id="battle-ui" class="battle-screen">
+    <!-- PRO RAID: FRENZY UI -->
+      <div id="raid-frenzy-overlay" class="frenzy-overlay">
+          <h2 style="color:#f6ad55; font-size: 24px; margin-bottom:0;">⚡ MATH FRENZY! ⚡</h2>
+          <p style="font-size:12px;">Shatter the shield before time runs out!</p>
+          <div class="frenzy-timer" id="frenzy-timer">30</div>
+          
+          <div id="frenzy-math-q" style="font-size: 32px; font-weight: bold; margin: 20px 0;">5 + 5 = ?</div>
+          
+          <div class="shield-bar-bg"><div id="frenzy-shield-fill" class="shield-bar-fill" style="width: 0%;"></div></div>
+          <div id="frenzy-shield-text" style="font-weight:bold; font-size:14px;">SHIELD: 0 / 5</div>
+
+          <div id="frenzy-options" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; width: 100%; max-width: 400px; margin-top:15px;">
+              <!-- Speed Buttons go here -->
+          </div>
+      </div>
       <div class="battle-arena">
        <div class="battler" id="player-container">
         <div id="battle-player-visual" class="battler-visual">🥚</div>
@@ -1494,6 +1832,49 @@ body {
             </div>
         </div>
     </section>
+    <section id="screen-tower" class="screen" style="background:#1a202c; color:white;">
+    <!-- Lobby View -->
+    <div id="tower-lobby" style="text-align:center; padding:20px;">
+        <h1 style="font-size:32px; color:#f6e05e; text-shadow: 0 0 10px #b7791f;">🗼 INFINITY TOWER</h1>
+        <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:15px; margin:20px 0;">
+            <p style="font-size:18px;">Floor: <strong id="current-floor-tag" style="color:#f6ad55;">1</strong></p>
+            <p style="font-size:12px; opacity:0.7;">Best: <span id="highest-floor-display">1</span></p>
+        </div>
+        <div id="tower-squad-preview" style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:20px;"></div>
+        <button class="gacha-btn" style="background:linear-gradient(to bottom, #5a67d8, #4c51bf);" onclick="startTowerFloor()">⚡ ASCEND TOWER</button>
+<button onclick="resetTowerProgress()" style="background:none; border:none; color:#fc8181; font-size:11px; cursor:pointer; margin-top:15px; text-decoration:underline;">Reset Progress to Floor 1</button>
+    </div>
+
+    <!-- Battle Arena View -->
+    <div id="tower-arena" style="display:none; height:100%; position:relative; background:#1a202c; overflow:hidden; border-radius:15px;">
+        
+        <!-- 1. The Visual Stage (Hero Wars Background) -->
+        <div class="tower-stage" id="tower-stage-container" style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:1;">
+            <!-- Formation and Pets are injected here by JavaScript -->
+        </div>
+
+        <!-- 2. Top Controls (Run Button) -->
+        <div style="position:absolute; top:10px; right:10px; z-index:500;">
+            <button class="action-btn red" style="width:auto; padding:5px 15px; font-size:12px;" onclick="towerConfirmEscape()">RUN 🏃</button>
+        </div>
+
+        <!-- 3. Bottom Command Dashboard (Replaces the old Manual Menu) -->
+        <div id="tower-command-bar">
+            <div id="tower-pet-name-display" style="color: #a0aec0; font-size: 11px; font-weight: bold; margin-bottom: 5px; text-align: center; text-transform: uppercase;">Commanding: Pet Name</div>
+            <div id="tower-moves-list" class="tower-action-grid">
+                <!-- Buttons like Attack and Focus are injected here by JS -->
+            </div>
+        </div>
+
+        <!-- 4. The Math Pop-up (Centered Overlay) -->
+        <div id="tower-math-popup" class="tower-math-overlay" style="z-index: 2000;">
+             <div id="tower-math-content" style="width:90%; max-width:400px; position:relative;">
+                 <!-- Question Card injected here -->
+             </div>
+        </div>
+
+    </div> <!-- END OF TOWER ARENA -->
+</section>
    </main>
   </div>
   
@@ -1505,7 +1886,6 @@ body {
       <div class="confirm-modal">
           <h2 style="color: #5a67d8;">🎒 Equip Item</h2>
           <p id="equip-slot-title">Select a Weapon:</p>
-          
           <!-- List of items you own for this slot -->
           <div id="equip-list" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; max-height: 300px; overflow-y: auto;">
               <!-- Items injected here by JS -->
@@ -1604,14 +1984,84 @@ body {
   
 
   <script>
+// --- PRO INFRASTRUCTURE: UNIVERSAL COMPRESSION DICTIONARY ---
+const SAVE_KEYS = {
+    // Top-Level State
+    brainPoints: 'bp', stamina: 'st', maxStamina: 'mst', pets: 'p',
+    inventory: 'inv', team: 'tm', currentPetId: 'cpid', mapX: 'mx',
+    mapY: 'my', dailyStreak: 'ds', lastLoginDate: 'lld', questProgress: 'qp',
+    toolHistory: 'th', grade: 'gr', examHistory: 'eh', builder: 'bld',
+    
+    // Pet & Entity Properties
+    id: 'id', type: 'tp', name: 'nm', hp: 'hp', level: 'lv', xp: 'xp', 
+    maxXp: 'mxp', powers: 'pwr', stars: 'str', isHatched: 'ih', 
+    hatchProgress: 'hpg', evolutionStage: 'evs', equipment: 'eqp',
+    rarity: 'rty', element: 'el', image: 'img', imageStyle: 'ims', emoji: 'emj',
+
+    // Item & Power Properties (From GitHub JSONs)
+    instanceId: 'iid', baseId: 'bid', prefix: 'pfx', 
+    price: 'prc', description: 'dsc', desc: 'dsc', icon: 'icn', 
+    baseStat: 'bst', stat: 'stt', statBonus: 'stb', value: 'val',
+    duration: 'dur', chance: 'chc', effect: 'eff', color: 'clr',
+    healing: 'hel', xpReward: 'xpr', logic: 'lgc', target: 'trg',
+    
+    givenToday: 'gt', notifications: 'nt', starsReceived: 'sr',
+    badges: 'bdg', badgeInventory: 'bin',
+    
+    // Add these to the existing SAVE_KEYS list
+    isVisiting: 'iv',
+    inBattle: 'ib',
+    playerName: 'pn',
+    burstMode: 'bm',
+    assignedExam: 'ax',
+    selectedTopics: 'st',highestTowerFloor: 'htf',
+    
+    // Builder & Forge
+    voxels: 'vx', landSize: 'ls', forgeScraps: 'fgs', level: 'lvl'
+};
+
+// --- PRO EQUIPMENT: PREFIX SYSTEM ---
+const ITEM_PREFIXES = {
+    basic: [
+        { name: "Sharp", stat: 5, type: "dmg", rarity: "basic", color: "#4a5568" },
+        { name: "Sturdy", stat: 15, type: "hp", rarity: "basic", color: "#4a5568" },
+        { name: "Quick", stat: 5, type: "crit", rarity: "basic", color: "#4a5568" }
+    ],
+    rare: [
+        { name: "Flaming", stat: 8, type: "dmg", rarity: "rare", color: "#2b6cb0" },
+        { name: "Chilled", stat: 8, type: "dmg", rarity: "rare", color: "#2b6cb0" },
+        { name: "Vampiric", stat: 0, type: "lifesteal", value: 0.15, rarity: "rare", color: "#2b6cb0" }
+    ],
+    legendary: [
+        { name: "Scholar's", stat: 0, type: "bp_boost", value: 5, rarity: "legendary", color: "#b7791f" },
+        { name: "Ancient", stat: 20, type: "all", rarity: "legendary", color: "#b7791f" }
+    ]
+};
+
+// --- PRO BUILDER: VOXEL COMPRESSION MAP ---
+let VOXEL_MAP = {
+    'grass': 'g', 'dirt': 'd', 'stone': 's', 'wood': 'w', 
+    'brick': 'b', 'glass': 'i', 'gold': 'o'
+};
+// This creates a reversed version for loading: { 'g': 'grass', ... }
+let VOXEL_LOOKUP = Object.fromEntries(Object.entries(VOXEL_MAP).map(([k, v]) => [v, k]));
+    
     // --- GLOBAL GAME STATE DEFINITION ---
+    let raidSyncTimer = null;
+let localPendingDamage = 0;
+let currentEquipSlot = null;
+let currentBuyingItem = null;
     let gameState = { 
         playerName: "Student", grade: null, selectedTopics: [],toolHistory: {}, activeQuestionPool: [], currentQuestion: null, brainPoints: 0, 
         pets: [], currentPetId: null, inventory: {}, inBattle: false, battleState: null, mapX: 2, mapY: 2, stamina: 100, maxStamina: 100, tempMoveToLearn: null,
         combo: 0, burstMode: false, dailyStreak: 0, lastLoginDate: null, questProgress: { active: false, flags: [] },
         questBattleActive: false, questSuccessKey: null, pendingQuestRewardData: null,
-        team: [] // ADDED: Squad Array
-    };
+    givenToday: 0, notifications: [], starsReceived: 0, isVisiting: false,
+    badgeInventory: [], highestTowerFloor: 1, 
+    currentTowerFloor: 1,
+    towerBattleActive: false,
+    team: [] // ADDED: Squad Array
+};
 
     const AUDIO_ASSETS = {
         bgm: { 
@@ -2024,12 +2474,13 @@ body {
             }
         } catch(e) { console.log("No items folder found."); }
         
-        // 5. DYNAMIC BLOCKS LOADER (Textures & Colors)
+        // 5. DYNAMIC BLOCKS LOADER (With Auto-Compression)
         try {
             console.log("🧱 Scanning 'blocks' folder...");
             const blockFiles = await fetchGithubFolder('blocks');
             
             if (blockFiles && Array.isArray(blockFiles)) {
+                let customCount = 1;
                 for (const file of blockFiles) {
                     if (file.name.endsWith('.json')) {
                         try {
@@ -2038,28 +2489,27 @@ body {
                                 const newBlocks = await res.json();
                                 if (Array.isArray(newBlocks)) {
                                     newBlocks.forEach(block => {
-                                        // Prevent duplicates
-                                        const exists = BUILDER_BLOCKS.find(b => b.id === block.id);
-                                        if (!exists) {
-                                            // Fallback: If JSON is missing specific sides, use 'top' for all
+                                        if (!BUILDER_BLOCKS.find(b => b.id === block.id)) {
                                             if (!block.side) block.side = block.top;
                                             if (!block.color) block.color = block.side;
-                                            
                                             BUILDER_BLOCKS.push(block);
+
+                                            // --- AUTO-REGISTER COMPRESSION CODE ---
+                                            // If the block doesn't have a code, give it 'z1', 'z2', etc.
+                                            if (!VOXEL_MAP[block.id]) {
+                                                const shortCode = 'z' + customCount++;
+                                                VOXEL_MAP[block.id] = shortCode;
+                                                VOXEL_LOOKUP[shortCode] = block.id; // Update the reverse lookup too
+                                            }
                                         }
                                     });
-                                    console.log(`--> Loaded ${newBlocks.length} blocks from ${file.name}`);
                                 }
                             }
-                        } catch (err) { 
-                            console.warn("Skipped invalid block file:", file.name); 
-                        }
+                        } catch (err) { console.warn("Skipped invalid block file:", file.name); }
                     }
                 }
             }
-        } catch (e) { 
-            console.log("No external blocks folder found (Optional)."); 
-        }
+        } catch (e) { console.log("No external blocks folder found."); }
 
         // 3. Dynamic Powers
         try {
@@ -2092,122 +2542,304 @@ body {
         } catch(e) {}
     }
     loadGitHubData();
-
-    // ==========================================
-// 🧠 CORE ENGINE: LOAD, SAVE, & REPAIR
+// ==========================================
+// 🚀 PRO BACKEND ENGINE: COMPRESSION & SYNC
 // ==========================================
 
-async function loadProgressFromFirebase(username) {
-    try { 
-        const docSnap = await window.fbase.getDoc(window.fbase.doc(window.db, "students", username)); 
+// --- PRO BACKEND: COMPRESSOR (FIXED FOR INVENTORY) ---
+function compressState(state) {
+    let compressed = {};
+    for (let key in state) {
+        if (['activeQuestionPool', 'battleState', 'currentQuestion', 'questBattleActive', 'pendingQuestRewardData'].includes(key)) continue;
         
-        if (docSnap.exists() && docSnap.data().saveData) { 
+        const shortKey = SAVE_KEYS[key] || key;
+        let value = state[key];
+
+        // 1. Pets Compression
+        if (key === 'pets' && Array.isArray(value)) {
+            value = value.map(pet => {
+                let cp = {};
+                const essentials = ['id', 'type', 'name', 'hp', 'level', 'xp', 'maxXp', 'powers', 'stars', 'isHatched', 'hatchProgress', 'evolutionStage', 'equipment', 'savedEvolutions'];
+                for (let k in pet) {
+                    if (essentials.includes(k)) cp[SAVE_KEYS[k] || k] = pet[k];
+                }
+                return cp;
+            });
+        }
+        
+        // 2. Inventory & Unique Items Compression (FIXED FOR BUILDER BLOCKS)
+        if (key === 'inventory' && value) {
+            let ci = {};
+            for (let k in value) {
+                if (k === 'equipment' && Array.isArray(value[k])) {
+                    ci.eqp = value[k].map(item => {
+                        let cItem = {};
+                        for (let prop in item) {
+                            if (prop === 'prefix') {
+                                let cPfx = {};
+                                for (let pk in item.prefix) cPfx[SAVE_KEYS[pk] || pk] = item.prefix[pk];
+                                cItem.pfx = cPfx;
+                            } else {
+                                cItem[SAVE_KEYS[prop] || prop] = item[prop];
+                            }
+                        }
+                        return cItem;
+                    });
+                } else {
+                    // This ensures loose numbers stay inside the 'inv' object
+                    ci[SAVE_KEYS[k] || k] = value[k];
+                }
+            }
+            compressed[shortKey] = ci;
+            continue;
+        }
+
+        // 3. Builder Compression
+        if (key === 'builder' && value) {
+            let cb = {};
+            for (let k in value) {
+                if (k === 'voxels') continue;
+                cb[SAVE_KEYS[k] || k] = value[k];
+            }
+            cb.vx = {};
+            for (let coord in value.voxels) {
+                cb.vx[coord] = VOXEL_MAP[value.voxels[coord].id] || value.voxels[coord].id;
+            }
+            compressed[shortKey] = cb;
+            continue;
+        }
+
+        compressed[shortKey] = value;
+    }
+    return compressed;
+}
+
+// --- PRO BACKEND: DECOMPRESSOR (FIXED FOR INVENTORY) ---
+function decompressData(data) {
+    let state = {};
+    const invertedKeys = Object.fromEntries(Object.entries(SAVE_KEYS).map(([k, v]) => [v, k]));
+
+    for (let key in data) {
+        const longKey = invertedKeys[key] || key;
+        let value = data[key];
+
+        // 1. Decompress Pets (FIXED VERSION to prevent NaN)
+        if (longKey === 'pets' && Array.isArray(value)) {
+            value = value.map(compressedPet => {
+                let dp = {};
+                for (let k in compressedPet) dp[invertedKeys[k] || k] = compressedPet[k];
+                
+                // 🔥 FORCE STATS TO BE NUMBERS (Prevents Immortal/NaN bug)
+                dp.hp = Number(dp.hp) || 0;
+                dp.maxHP = Number(dp.maxHP) || 50;
+                dp.level = Number(dp.level) || 1;
+                dp.xp = Number(dp.xp) || 0;
+                dp.maxXp = Number(dp.maxXp) || 300;
+
+                let baseData = null;
+                for (const rarity in PET_TYPES) {
+                    const found = PET_TYPES[rarity].find(b => b.id === dp.type);
+                    if (found) { baseData = found; break; }
+                }
+                if (baseData) {
+                    dp.image = dp.image || baseData.image;
+                    dp.imageStyle = dp.imageStyle || baseData.imageStyle;
+                    dp.element = dp.element || baseData.element;
+                    dp.rarity = dp.rarity || baseData.rarity;
+                    dp.emoji = dp.emoji || baseData.emoji;
+                }
+                return dp;
+            });
+        }
+        
+        // 2. Decompress Inventory (THE FIX!)
+        if (longKey === 'inventory' && value) {
+            let di = {};
+            for (let k in value) {
+                const lk = invertedKeys[k] || k;
+                if (lk === 'equipment' && Array.isArray(value[k])) {
+                    di.equipment = value[k].map(cItem => {
+                        let dItem = {};
+                        for (let p in cItem) {
+                            if (p === 'pfx') {
+                                dItem.prefix = {};
+                                for (let pk in cItem.pfx) dItem.prefix[invertedKeys[pk] || pk] = cItem.pfx[pk];
+                            } else {
+                                dItem[invertedKeys[p] || p] = cItem[p];
+                            }
+                        }
+                        return dItem;
+                    });
+                } else {
+                    di[lk] = value[k];
+                }
+            }
+            state[longKey] = di;
+            continue;
+        }
+
+        // 3. Decompress Builder
+        if (longKey === 'builder' && value) {
+            let db = { landSize: 6, voxels: {}, inventory: {} };
+            for (let k in value) {
+                const lk = invertedKeys[k] || k;
+                if (lk === 'voxels') {
+                    for (let coord in value[k]) {
+                        const val = value[k][coord];
+                        if (typeof val === 'string') db.voxels[coord] = { id: VOXEL_LOOKUP[val] || val };
+                        else db.voxels[coord] = val;
+                    }
+                } else { db[lk] = value[k]; }
+            }
+            state[longKey] = db;
+            continue;
+        }
+
+        state[longKey] = value;
+    }
+    return state;
+}
+
+// 3. PRO LOAD: With Legacy Bridge Detect
+async function loadProgressFromFirebase(username) {
+    try {
+        const docSnap = await window.fbase.getDoc(window.fbase.doc(window.db, "students", username));
+        if (docSnap.exists()) {
             const cloudData = docSnap.data().saveData;
+            if (!cloudData) return false;
+            
+            // Fetch Teacher World Settings
+try {
+    const studentData = docSnap.data();
+    if (studentData.teacherId) {
+        const tDoc = await window.fbase.getDoc(window.fbase.doc(window.db, "teachers", studentData.teacherId));
+        if (tDoc.exists()) {
+            gameState.teacherConfig = tDoc.data();
+            console.log("🌍 World Settings Loaded:", gameState.teacherConfig);
+        }
+    }
+} catch(e) { console.log("Could not load teacher config"); }
 
-            // 1. MERGE: Pull everything from the cloud into our game
-            // We do this carefully to ensure we don't lose the playerName
-            gameState = { ...gameState, ...cloudData }; 
+            // --- LEGACY BRIDGE ---
+            // Detect if data is already compressed (has tiny keys like 'bp')
+            const isCompressed = cloudData.bp !== undefined || cloudData.p !== undefined;
             
-            // 2. SAFETY CHECK: If the cloud was missing these folders, create them now
-            if (!gameState.toolHistory) gameState.toolHistory = {};
-            if (!gameState.inventory) gameState.inventory = {};
-            if (!gameState.pets) gameState.pets = [];
-            
-            console.log("📥 Cloud Data Loaded. Tool History:", gameState.toolHistory);
+            let finalData;
+            if (isCompressed) {
+                console.log("📦 Decompressing Pro Format...");
+                finalData = decompressData(cloudData);
+            } else {
+                console.log("🌉 Legacy Bridge: Converting old save format...");
+                finalData = cloudData; // Use as-is, repairSaveData will handle the rest
+            }
 
-            // 3. REPAIR: Initialize any missing logic (like new pets or block inventory)
-            repairSaveData(); 
-            
-            // 4. REFRESH UI: Make sure the labels at the top show the correct info
-            updateStatsDisplay(); 
-            
-            return true; 
-        } 
-    } catch (e) { 
-        console.error("❌ Cloud Load Error:", e); 
-    } 
+           gameState = { ...gameState, ...finalData };
+            repairSaveData();
+            updateStatsDisplay();
+
+            // --- COMMUNITY MAILBOX CHECK ---
+            if (gameState.notifications && gameState.notifications.length > 0) {
+                setTimeout(showMailbox, 3000); 
+            }
+            // Reset Kindness Purse on New Day
+            const today = new Date().toDateString();
+            if (gameState.lastLoginDate !== today) {
+                gameState.givenToday = 0;
+            }
+
+            return true;
+        }
+    } catch (e) { console.error("Cloud Load Error:", e); }
     return false;
 }
 
+// 4. PRO SAVE: Compression + Dirty State
 async function saveProgressToFirebase() {
-    if (!gameState.playerName) return false;
-    
-    // Create a clean copy for the database (remove temporary pools)
-    let cleanState = JSON.parse(JSON.stringify(gameState));
-    delete cleanState.activeQuestionPool; 
-    delete cleanState.battleState;
-    delete cleanState.currentQuestion;
+    if (!gameState.playerName || !hasUnsavedChanges || gameState.playerName === "Student") return;
+
+    console.log("🕒 Heartbeat Sync: Pushing compressed bundle...");
+    const compressed = compressState(gameState);
 
     try {
         const docRef = window.fbase.doc(window.db, "students", gameState.playerName);
-        await window.fbase.setDoc(docRef, { 
-            saveData: cleanState, 
+        
+        // 🔥 EXPERT FIX: We use setDoc WITHOUT {merge: true} for the saveData field specifically
+        // OR we use updateDoc to ensure we don't accidentally create loose fields at the root.
+        await window.fbase.updateDoc(docRef, { 
+            saveData: compressed, 
             lastSaved: new Date().toISOString() 
-        }, { merge: true });
-        console.log("☁️ Firebase Sync Successful");
+        });
+        
+        hasUnsavedChanges = false; 
         return true;
     } catch (e) { 
-        console.error("❌ Firebase Sync Failed:", e); 
-        return false;
+        console.error("Firebase Sync Failed. If this is a new user, using setDoc instead...");
+        // Fallback for brand new users who don't have a document yet
+        const docRef = window.fbase.doc(window.db, "students", gameState.playerName);
+        await window.fbase.setDoc(docRef, { 
+            saveData: compressed, 
+            username: gameState.playerName,
+            teacherId: gameState.teacherId || ""
+        });
+        hasUnsavedChanges = false;
     }
 }
 
-async function saveGame(forceFirebase = false) {
-    if (!gameState.playerName) return false;
+// --- PRO BACKEND: IMPROVED SAVE LOGIC ---
+function saveGame(forceFirebase = false) {
+    if (!gameState.playerName) return;
 
-    // 1. Instant Local Save (Device Memory)
+    // 1. Instant Local Backup
     localStorage.setItem('math_rpg_' + gameState.playerName, JSON.stringify(gameState));
     
-    // 2. Optional Cloud Save (Firebase)
-    if (forceFirebase) {
-        console.log("📡 Pushing to Cloud...");
-        return await saveProgressToFirebase();
+    // 2. Mark as Changed
+    hasUnsavedChanges = true;
+
+    // 3. Force Sync if requested (Buying/Upgrading)
+    if (forceFirebase === true) {
+        console.log("💾 Forced Save: Syncing to Cloud now...");
+        saveProgressToFirebase();
     }
-    return true;
 }
 
 function repairSaveData() {
     let fixed = false;
-    
-    // 1. Fix basic stats
     if (gameState.combo === undefined) { gameState.combo = 0; fixed = true; }
-    if (gameState.dailyStreak === undefined) { gameState.dailyStreak = 0; fixed = true; }
+    if (!gameState.toolHistory) { gameState.toolHistory = {}; fixed = true; }
+    if (!gameState.inventory) { gameState.inventory = {}; fixed = true; }
     if (!gameState.team || gameState.team.length === 0) { 
-        gameState.team = [gameState.currentPetId]; 
+        gameState.team = gameState.currentPetId ? [gameState.currentPetId] : []; 
         fixed = true; 
     }
-
-    // 2. CRITICAL: Initialize toolHistory folder if it doesn't exist
-    if (!gameState.toolHistory) { 
-        console.log("🛠️ Initializing Tool History Folder...");
-        gameState.toolHistory = {}; 
-        fixed = true; 
-    }
-
-    // 3. Fix Pet Data (HP/Powers)
-    if (gameState.pets) {
+    
+    // 🔥 EXPERT FIX: THE NaN CLEANER
+    if (gameState.pets && Array.isArray(gameState.pets)) {
         gameState.pets.forEach(p => {
-            if (!p.powers) { p.powers = []; fixed = true; }
-            if (isNaN(p.hp) || !p.maxHP) {
+            // 1. Repair Max HP
+            if (isNaN(p.maxHP) || p.maxHP === null || p.maxHP === undefined) {
+                console.log("🛠️ Repairing MaxHP for " + p.name);
                 p.maxHP = 50 + ((p.level || 1) * 10);
-                p.hp = p.maxHP; 
                 fixed = true;
             }
+            // 2. Repair Current HP
+            if (isNaN(p.hp) || p.hp === null || p.hp === undefined) {
+                console.log("🛠️ Repairing NaN HP for " + p.name);
+                p.hp = p.maxHP; // Reset to full health
+                fixed = true;
+            }
+            // 3. Ensure they are numbers, not strings
+            p.hp = Number(p.hp);
+            p.maxHP = Number(p.maxHP);
+            p.level = Number(p.level || 1);
         });
     }
 
-    // 4. Fix Builder Data for old accounts
-    if (!gameState.builder) {
-        gameState.builder = { landSize: 6, voxels: {}, inventory: { 'grass': 10, 'wood': 5 } };
-        fixed = true;
-    }
-
-    // 5. If we fixed anything, sync it to the Cloud immediately
     if (fixed) {
-        console.log("🛠️ Data Repaired & Initialized Successfully");
+        console.log("✅ Database Health Check: Data Refreshed.");
         saveGame(true);
     }
 }
+
     // RPG Variables
     const TILE_SIZE = 40; 
     let canvas, ctx, playerImage = new Image(), arenaIcon = new Image(); const HUMAN_SPRITE_URL = "https://i.imgur.com/J6eL2tY.png"; arenaIcon.src = 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/Copy%20of%20Zyfire%20(1).png';
@@ -2593,6 +3225,16 @@ window.addEventListener('message', (e) => {
             record.claimed = true;
             record.score = 100;
             addBP(500);
+            // --- NEW: AWARD MASTERY BADGE ---
+            const toolData = snap.data(); // Get info about the tool
+            const badgeName = toolData.topic || "Math Mastery";
+            
+            // Check if they already have this badge in their inventory
+            if (!gameState.badgeInventory.includes(badgeName)) {
+                gameState.badgeInventory.push(badgeName);
+                showToast(`🏆 New Badge Earned: ${badgeName}!`, "success");
+                updatePetSpeech(`🎉 I learned ${badgeName}! Infuse it in the Hub!`);
+            }
             updatePetSpeech("🎉 MASTERY! YOU DID IT! 🎉");
             soundManager.playSFX('levelUp');
             saveGame(true); // Sync to Cloud for the win
@@ -2721,6 +3363,66 @@ async function adminPublishTool() {
         const options = q.options || MathEngine.generateDistractors(parseFloat(q.a));
         options.forEach(opt => { const b = document.createElement('div'); b.className = 'mcq-btn'; b.innerText = opt; b.onclick = () => checkAnswer(opt); c.appendChild(b); }); 
     }
+    
+    // --- PRO COMBAT: BULLETPROOF IN-BATTLE MATH ---
+function openInBattleMath() {
+    if (gameState.battleState.turnInProgress) return;
+
+    // 1. Get Question (Priority: Assigned Topics)
+    let q;
+    if (gameState.activeQuestionPool && gameState.activeQuestionPool.length > 0) {
+        q = gameState.activeQuestionPool[Math.floor(Math.random() * gameState.activeQuestionPool.length)];
+    } else {
+        q = MathEngine.generate(gameState.grade || "1");
+    }
+
+    // 2. Create the Overlay UI
+    const battlePanel = document.querySelector('.battle-ui-panel');
+    
+    // We use single quotes '${opt}' to make sure decimals/fractions don't crash the code
+    battlePanel.innerHTML = `
+        <div id="battle-math-box" style="text-align:center; width:100%; animation: popIn 0.3s; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 10px;">
+            <div style="font-size:12px; color:#5a67d8; font-weight:bold; margin-bottom:5px; text-shadow: 1px 1px 0 white;">🧠 CONCENTRATING...</div>
+            <div style="font-size:22px; font-weight:bold; color:#2d3748; margin-bottom:10px; text-shadow: 1px 1px 0 white;">${q.qVisualHTML || q.q}</div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+                ${q.options.map(opt => `<button class="mcq-btn" style="min-height:50px; font-size:18px; padding:5px;" onclick="resolveInBattleMath('${opt}', '${q.a}')">${opt}</button>`).join('')}
+            </div>
+            <button class="action-btn red" style="margin-top:10px; padding:5px; font-size:12px;" onclick="renderBattle()">Cancel</button>
+        </div>
+    `;
+}
+    
+function resolveInBattleMath(selected, correct) {
+    if (selected == correct) {
+        soundManager.playSFX('correct');
+        gameState.combo = (gameState.combo || 0) + 1;
+        addBP(5);
+        
+        // Trigger the same heal as the study tab
+        const activePet = gameState.pets.find(p => p.id === gameState.currentPetId);
+        if (activePet && activePet.rarity === 'legendary' && activePet.hp > 0) {
+            if (activePet.element === 'light' || (Array.isArray(activePet.element) && activePet.element.includes('light'))) {
+                const healAmt = Math.floor(activePet.maxHP * 0.05);
+                activePet.hp = Math.min(activePet.maxHP, activePet.hp + healAmt);
+                // We show this as floating text in the battle
+                const pVis = document.getElementById('battle-player-visual');
+                if(pVis) showFloatingText(pVis.parentElement, `+${healAmt}`, "heal");
+            }
+        }
+        
+        if (gameState.combo >= 3) {
+            gameState.burstMode = true;
+            showToast("🔥 BURST READY! SHIELD BREAKER LOADED!", "success");
+        } else {
+            showToast(`Correct! Combo: ${gameState.combo}/3`, "success");
+        }
+    } else {
+        soundManager.playSFX('wrong');
+        gameState.combo = 0;
+        showToast("Focus Lost! Combo Reset.", "error");
+    }
+    renderBattle(); // Returns to attack buttons
+}
 
     // UPDATED MATH LOGIC: CONNECTS MATH TO BATTLE (BURST MODE)
     // --- SPAM FIX VARIABLE ---
@@ -2790,7 +3492,20 @@ async function adminPublishTool() {
             soundManager.playSFX('wrong'); 
         } 
     }
-    function addBP(a) { gameState.brainPoints += a; updateStatsDisplay(); saveGame(); }
+   function addBP(a) {
+    const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+    const gear = getPetEquipmentStats(pet);
+    
+    // Bonus from Scholar's Gear
+    const bonus = Math.floor(gear.bpBoost || 0);
+    const total = a + bonus;
+    
+    gameState.brainPoints += total;
+    updateStatsDisplay();
+    saveGame();
+    
+    if (bonus > 0) showToast(`+${total} BP (Scholar Bonus!)`, "success");
+}
 
     // --- SQUAD SYSTEM ---
 
@@ -2821,6 +3536,25 @@ async function adminPublishTool() {
     function renderHub() {
       const c = document.getElementById('hub-content'); 
       const p = gameState.pets.find(pet => pet.id === gameState.currentPetId);
+      // Calculate gear bonuses for display
+      const gear = getPetEquipmentStats(p);
+      const displayMaxHP = p.maxHP + gear.hp;
+      // Mastery Slot Logic
+      if (!p.badges) p.badges = [];
+      const totalSlots = p.level >= 30 ? 3 : (p.level >= 15 ? 2 : 1);
+      const emptySlots = totalSlots - p.badges.length;
+
+      let masteryHTML = `<div style="display:flex; gap:5px; margin-top:5px; justify-content:center;">`;
+      for(let i=0; i<3; i++) {
+          const badge = p.badges[i];
+          const isLocked = i >= totalSlots;
+          const style = isLocked ? "background:#cbd5e0; opacity:0.5;" : (badge ? "background:#ebf8ff; border:2px solid #5a67d8;" : "background:white; border:2px dashed #cbd5e0;");
+          const icon = isLocked ? "🔒" : (badge ? "🏅" : "");
+          const title = isLocked ? `Lvl ${i === 1 ? 15 : 30}` : (badge || "Empty");
+          
+          masteryHTML += `<div style="${style} width:40px; height:40px; border-radius:8px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:14px;" title="${title}">${icon}<div style="font-size:8px; font-weight:bold;">${title}</div></div>`;
+      }
+      masteryHTML += `</div>`;
       
       if (!p) { c.innerHTML = "<div class='no-pet-message'>No pet selected.</div>"; return; }
       
@@ -2876,19 +3610,60 @@ async function adminPublishTool() {
       const isInSquad = gameState.team ? gameState.team.includes(p.id) : false;
       const squadBtnColor = isInSquad ? 'red' : 'blue';
       const squadBtnText = isInSquad ? 'Remove from Squad' : 'Add to Squad';
-      const squadDisplay = `<div style="margin-top:10px; padding:10px; background:#edf2f7; border-radius:8px; font-size:14px;"><div style="display:flex; justify-content:space-between;"><strong>🛡️ Squad (${(gameState.team||[]).length}/6)</strong><button class="action-btn ${squadBtnColor}" style="width:auto; padding:5px 10px; font-size:11px; margin:0;" onclick="toggleSquadMember('${p.id}')">${squadBtnText}</button></div><div style="display:flex; gap:5px; margin-top:5px; overflow-x:auto;">${(gameState.team||[]).map(tid => { const mp = gameState.pets.find(x => x.id === tid); return `<div style="width:20px; height:20px; background:white; border-radius:50%; border:1px solid #ccc; display:flex; align-items:center; justify-content:center; font-size:12px;">${mp ? (mp.emoji || '🐾') : '?'}</div>`}).join('')}</div></div>`;
+      // --- 🛡️ IMPROVED SQUAD DISPLAY (Visual Avatars) ---
+      const squadList = (gameState.team || []).map(tid => {
+          const mp = gameState.pets.find(x => x.id === tid);
+          if (!mp) return "";
+
+          // Decide if we use an Image or Emoji
+          const visual = mp.image 
+              ? `<img src="${mp.image}" class="${mp.imageStyle}" style="width:100%; height:100%; object-fit:contain;">` 
+              : `<div style="font-size:18px;">${mp.emoji || '🐾'}</div>`;
+
+          return `
+            <div style="width:35px; height:35px; background:white; border-radius:50%; border:2px solid #5a67d8; display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" title="${mp.name}">
+                ${visual}
+            </div>`;
+      }).join('');
+
+      const squadDisplay = `
+        <div style="margin-top:10px; padding:12px; background:#edf2f7; border-radius:12px; border:1px solid #cbd5e0;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <strong style="color:#2d3748;">🛡️ Squad (${(gameState.team||[]).length}/6)</strong>
+                <button class="action-btn ${isInSquad ? 'red' : 'blue'}" style="width:auto; padding:4px 10px; font-size:10px; margin:0;" onclick="toggleSquadMember('${p.id}')">
+                    ${isInSquad ? 'Remove Me' : 'Add Me'}
+                </button>
+            </div>
+            <div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:5px;">
+                ${squadList || '<span style="color:gray; font-size:12px;">Squad is empty!</span>'}
+            </div>
+        </div>`;
 
       // Helper: Render Slot
+      // --- FIXED: RENDER GITHUB IMAGES IN SLOTS ---
       const renderSlot = (type, icon) => {
-          const itemId = p.equipment[type];
-          const item = itemId ? findShopItem(itemId) : null;
-          let content = icon;
+          const instanceId = p.equipment[type];
+          // Find the unique item in our bag
+          const item = (gameState.inventory.equipment || []).find(i => i.instanceId === instanceId);
+          
+          let content = icon; // Default to the emoji (like 🗡️)
           let css = "equip-slot";
+          let borderStyle = "";
+
           if (item) {
               css += " filled";
-              if(item.image && item.image.startsWith('http')) { content = `<img src="${item.image}" class="equip-img">`; } else { content = item.icon || '📦'; }
+              // Apply Rarity Border
+              if (item.rarity === 'rare') borderStyle = "border-color: #4299e1; box-shadow: 0 0 5px #4299e1;";
+              if (item.rarity === 'legendary') borderStyle = "border-color: #f6ad55; box-shadow: 0 0 8px #f6ad55;";
+
+              // If the item has a GitHub image, use it!
+              if (item.image && item.image.startsWith('http')) {
+                  content = `<img src="${item.image}" class="equip-img" style="width:100%; height:100%; object-fit:contain;">`;
+              } else {
+                  content = item.image || icon;
+              }
           }
-          return `<div class="${css}" onclick="openEquipMenu('${type}')">${content}<div class="equip-badge">${type}</div></div>`;
+          return `<div class="${css}" style="${borderStyle}" onclick="openEquipMenu('${type}')">${content}<div class="equip-badge">${type}</div></div>`;
       };
 
       // 4. MAIN DISPLAY
@@ -2902,6 +3677,10 @@ async function adminPublishTool() {
                 </div>
                 <!-- STARS -->
                 <div class="star-display">${starHTML}</div>
+<!-- Show Mastery Slots -->
+<div style="font-size:11px; color:#718096; margin-top:10px;">MASTERY SLOTS</div>
+${masteryHTML}
+${emptySlots > 0 && gameState.badgeInventory.length > 0 ? `<button class="action-btn blue" style="padding:5px; font-size:11px;" onclick="openInfusionMenu()">🧬 Infuse Mastery</button>` : ''}
                 <!-- STATS -->
                 <div style="font-size:12px;">XP: ${p.xp} / ${p.maxXp}</div>
                 <div class="xp-bar-container"><div class="xp-bar" style="width: ${(p.xp/p.maxXp)*100}%"></div></div>
@@ -2917,7 +3696,7 @@ async function adminPublishTool() {
             </div>
         </div>
         <div class="hub-right">
-            <div class="inventory-section"><h3>Stats</h3><div class="pet-stats"><div class="stat-box"><div class="stat-label">HP</div><div class="stat-value">${p.hp}/${p.maxHP}</div></div><div class="stat-box"><div class="stat-label">Power</div><div class="stat-value">${p.powers.length}/4</div></div></div>${squadDisplay}</div>
+            <div class="inventory-section"><h3>Stats</h3><div class="pet-stats"><div class="stat-box"><div class="stat-label">HP</div><div class="stat-value">${p.hp}/${displayMaxHP}</div></div><div class="stat-box"><div class="stat-label">Power</div><div class="stat-value">${p.powers.length}/4</div></div></div>${squadDisplay}</div>
             ${ev}
             <div class="inventory-section"><h3>🎒 Inventory</h3>${renderInventory(false)}</div>
             <div class="inventory-section"><h3>⚔️ Powers</h3>${renderPowersList(p)}</div>
@@ -2928,38 +3707,43 @@ async function adminPublishTool() {
     
     function renderCollection() { return gameState.pets.map(p => `<div class="pet-card ${p.id===gameState.currentPetId?'active':''}" onclick="switchPet('${p.id}')"><div class="pet-card-visual">${!p.isHatched?'🥚':(p.image?`<img src="${p.image}" class="${p.imageStyle}" style="width:40px;height:40px;">`:p.emoji)}</div><div style="font-size:12px;">${p.isHatched ? p.name : "Mystery Egg"}</div></div>`).join(''); }
 
-    function renderInventory(isEgg) { 
+    // --- PRO EQUIPMENT: HUB INVENTORY VIEW ---
+// --- PRO UI: CLEAN INVENTORY (Consumables Only) ---
+function renderInventory(isEgg) { 
     let h = ""; 
     const i = gameState.inventory;
-    
-    // Helper to generate button
+
+    // We only show "Stackable" consumables here to keep the UI clean.
     const btn = (key, name, icon) => {
         const count = i[key] || 0;
         if(count <= 0) return '';
         
-        // --- LOGIC CHANGE: Only allow Bulk Mode for XP Potion ---
         const action = (key === 'xp_potion' && count > 1) 
             ? `openUseQuantityModal('${key}')` 
             : `useItem('${key}')`;
 
-        return `<div class="inventory-item">
+        return `
+        <div class="inventory-item">
             <div style="font-size:20px;">${icon}</div>
-            <div style="font-weight:bold; font-size:12px;">x${count}</div>
-            <button class="buy-btn" style="padding:4px 8px; font-size:12px;" onclick="${action}">Use</button>
+            <div style="font-weight:bold; font-size:10px;">x${count}</div>
+            <button class="buy-btn" style="padding:2px; font-size:10px;" onclick="${action}">Use</button>
         </div>`;
     };
 
     if(!isEgg) { 
+        // Only show usable items
         h += btn('health_potion', 'Health', '🧪');
         h += btn('stamina_potion', 'Stamina', '⚡');
-        h += btn('xp_potion', 'XP Potion', '🌟');
+        h += btn('xp_potion', 'XP', '🌟');
+        h += btn('arena_ticket', 'Ticket', '🎟️');
     } else { 
-        if(i['premium_food']) h += `<div class="inventory-item"><div>🥩</div><div>x${i['premium_food']}</div><button class="buy-btn" onclick="useItem('premium_food')">+20%</button></div>`; 
-        if(i['warmer']) h += `<div class="inventory-item"><div>🔥</div><div>x${i['warmer']}</div><button class="buy-btn" onclick="useItem('warmer')">+10%</button></div>`; 
-        if(i['hatching_machine']) h += `<div class="inventory-item"><div>⚙️</div><div>x${i['hatching_machine']}</div><button class="buy-btn" onclick="useItem('hatching_machine')">+50%</button></div>`; 
+        // Egg hatching items
+        if(i['premium_food']) h += `<div class="inventory-item"><div>🥩</div><button class="buy-btn" onclick="useItem('premium_food')">+20%</button></div>`; 
+        if(i['warmer']) h += `<div class="inventory-item"><div>🔥</div><button class="buy-btn" onclick="useItem('warmer')">+10%</button></div>`; 
+        if(i['hatching_machine']) h += `<div class="inventory-item"><div>⚙️</div><button class="buy-btn" onclick="useItem('hatching_machine')">+50%</button></div>`; 
     }
     
-    return h || "<p style='color:#718096'>Empty.</p>";
+    return h || "<p style='color:#718096; font-size:11px;'>No items.</p>";
 }
     function renderPowersList(p) { return p.powers.length===0?"None.":p.powers.map(pid=>{const i=findShopItem(pid);return i?`<div style="padding:5px;">${i.image?`<img src="${i.image}" style="width:20px;">`:i.icon} ${i.name}</div>`:'';}).join(''); }
     function switchPet(id) { gameState.currentPetId = id; saveGame(); renderHub(); }
@@ -2992,11 +3776,18 @@ async function adminPublishTool() {
     function quickUseItem(id) {
         const p = gameState.pets.find(pet => pet.id === gameState.currentPetId);
         if (!gameState.inventory[id] || gameState.inventory[id] <= 0) { showToast("You don't have any!", "error"); return; }
+        // --- PRO FIX: GEAR-AWARE QUICK HEAL ---
         if (id === 'health_potion') {
-            if (p.hp >= p.maxHP) return showToast("HP is full!", "info");
+            const gear = getPetEquipmentStats(p);
+            const currentTotalMax = p.maxHP + gear.hp; // Calculate the real limit
+
+            if (p.hp >= currentTotalMax) return showToast("HP is full!", "info");
+            
             gameState.inventory[id]--;
-            p.hp = Math.min(p.hp + 30, p.maxHP);
-            showToast("Used Potion! (+30 HP)", "success");
+            // Heal +30, but cap it at the GEAR-BOOSTED max
+            p.hp = Math.min(p.hp + 30, currentTotalMax); 
+            
+            showToast(`Used Potion! HP: ${p.hp}/${currentTotalMax}`, "success");
             soundManager.playSFX('heal'); 
         } else if (id === 'stamina_potion') {
             if (gameState.stamina >= 100) return showToast("Stamina full!", "info");
@@ -3006,13 +3797,22 @@ async function adminPublishTool() {
         }
         updateStatsDisplay();
         document.getElementById('wild-hp-display').innerText = `HP: ${p.hp}/${p.maxHP}`;
-        saveGame();
+        saveGame(true);
     }
 
     function useItem(id) {
         if(gameState.inventory[id]>0) {
             const p = gameState.pets.find(pet=>pet.id===gameState.currentPetId); const maxLvl = LEVEL_CAPS[p.rarity] || 100;
-            if(id==='health_potion') { if(p.hp >= p.maxHP) return showToast("Health is already full!", "error"); p.hp=Math.min(p.hp+30,p.maxHP); showToast("Healed!", "success"); }
+            // --- PRO FIX: GEAR-AWARE HUB HEAL ---
+            if(id==='health_potion') { 
+                const gear = getPetEquipmentStats(p);
+                const currentTotalMax = p.maxHP + gear.hp;
+
+                if(p.hp >= currentTotalMax) return showToast("Health is already full!", "error"); 
+                
+                p.hp = Math.min(p.hp + 30, currentTotalMax); 
+                showToast("Healed!", "success"); 
+            }
             else if(id==='stamina_potion') { if(gameState.stamina >= 100) return showToast("Stamina is full!", "error"); gameState.stamina=Math.min(gameState.stamina+50,100); updateStatsDisplay(); showToast("Stamina Up!", "success"); }
             else if(id==='xp_potion') { if(p.level>=maxLvl) return showToast("Max Level!", "error"); gameState.inventory[id]--; p.xp+=100; if(p.xp>=p.maxXp && p.level<maxLvl) { p.level++; p.xp=0; p.maxXp=p.level*300+200; p.maxHP+=10; p.hp=p.maxHP; showToast("Level Up!", "success"); soundManager.playSFX('levelUp'); } else showToast("+100 XP", "success"); saveGame(); renderHub(); return; }
             else if(id==='premium_food') p.hatchProgress=Math.min(100,p.hatchProgress+20); else if(id==='warmer') p.hatchProgress=Math.min(100,p.hatchProgress+10); else if(id==='hatching_machine') p.hatchProgress=Math.min(100,p.hatchProgress+50);
@@ -3169,7 +3969,8 @@ async function adminPublishTool() {
             p.imageStyle = next.imageStyle; 
             p.rarity = next.rarity; 
             p.maxHP = next.baseHP; 
-            p.hp = p.maxHP; 
+            const gear = getPetEquipmentStats(p);
+            p.hp = (parseInt(p.maxHP) || 50) + (gear.hp || 0); 
             p.evolutionStage = (p.evolutionStage || 0) + 1;
             if (next.element) p.element = next.element;
 
@@ -3258,34 +4059,50 @@ async function adminPublishTool() {
     function closeGachaCinematic(pulls) { document.getElementById('gacha-cinematic-modal').style.display='none'; const c=document.getElementById('gacha-reveal-container'); c.innerHTML=pulls.map(p=>`<div class="gacha-card"><div>${p.image?`<img src="${p.image}" class="${p.imageStyle}" style="width:60px;">`:p.emoji}</div><div>${p.name}</div><div class="rarity-badge rarity-${p.rarity}">${p.rarity}</div></div>`).join(''); document.getElementById('gacha-reveal-modal').classList.add('active'); }
     function closeGacha() { document.getElementById('gacha-reveal-modal').classList.remove('active'); switchTab('hub'); }
     function findShopItem(id) { for(const k in SHOP_ITEMS) { const f=SHOP_ITEMS[k].find(i=>i.id===id); if(f) return f; } return null; }
-    function buyItem(id, type) { 
-        const item = findShopItem(id); 
-        if(gameState.brainPoints < item.price) return showToast("Not enough BP", "error"); 
+    function buyItem(id, type) {
+    const baseItem = findShopItem(id);
+    if (gameState.brainPoints < baseItem.price) return showToast("Not enough BP", "error");
+
+    gameState.brainPoints -= baseItem.price;
+
+    if (type === 'power') {
+        const p = gameState.pets.find(pet => pet.id === gameState.currentPetId);
+        if (p.powers.includes(id)) return showToast("Already known!", "info");
+        if (p.powers.length >= 4) { openReplaceModal(baseItem); return; }
+        p.powers.push(id);
+    } 
+    else if (type === 'equipment') {
+        const roll = Math.random();
+        let pool, rarityName;
         
-        const p = gameState.pets.find(pet => pet.id === gameState.currentPetId); 
+        // 5% chance for Legendary, 20% for Rare, 75% for Basic
+        if (roll > 0.95) { pool = ITEM_PREFIXES.legendary; rarityName = "legendary"; }
+        else if (roll > 0.75) { pool = ITEM_PREFIXES.rare; rarityName = "rare"; }
+        else { pool = ITEM_PREFIXES.basic; rarityName = "basic"; }
+
+        const prefix = pool[Math.floor(Math.random() * pool.length)];
         
-        // 1. POWERS (Limit 4)
-        if(type === 'power') { 
-            if(p.powers.includes(id)) return showToast("You already know this!", "info"); 
-            if(p.powers.length >= 4) { openReplaceModal(item); return; } 
-            p.powers.push(id); 
-        } 
-        // 2. EQUIPMENT (Inventory)
-        else if (type === 'equipment') {
-            // Equipment just goes to inventory stack, like potions
-            gameState.inventory[id] = (gameState.inventory[id] || 0) + 1;
-        }
-        // 3. CONSUMABLES
-        else { 
-            gameState.inventory[id] = (gameState.inventory[id] || 0) + 1; 
-        } 
+        // --- FIXED: CARRY OVER GITHUB IMAGES ---
+        const instance = {
+            instanceId: 'item_' + Date.now() + Math.floor(Math.random()*1000),
+            baseId: id,
+            name: `${prefix.name} ${baseItem.name}`,
+            image: baseItem.image || baseItem.icon, // <--- SAVES THE GITHUB IMAGE!
+            prefix: JSON.parse(JSON.stringify(prefix)), 
+            rarity: rarityName,
+            type: baseItem.type
+        };
+
+        if (!gameState.inventory.equipment) gameState.inventory.equipment = [];
+        gameState.inventory.equipment.push(instance);
         
-        gameState.brainPoints -= item.price; 
-        saveGame(); 
-        updateStatsDisplay(); 
-        renderShop(); 
-        showToast(`Bought ${item.name}!`, "success"); 
-    }
+        showLootReveal(instance); 
+    } 
+
+    saveGame(false);
+    updateStatsDisplay();
+    renderShop();
+}
     function openQuantityModal(id) { currentBuyingItem=findShopItem(id); const max=Math.floor(gameState.brainPoints/currentBuyingItem.price); if(max===0) return showToast("Too expensive!", "error"); document.getElementById('quantity-modal').classList.add('active'); const sl=document.getElementById('quantity-slider'); sl.max=max; sl.value=1; document.getElementById('qty-item-name').innerText=`Buy ${currentBuyingItem.name}`; document.getElementById('qty-buy-confirm-btn').onclick=()=>confirmBulkBuy(currentBuyingItem.price); updateQuantityModalDisplay(1,currentBuyingItem.price); sl.oninput=(e)=>updateQuantityModalDisplay(e.target.value,currentBuyingItem.price); }
     function updateQuantityModalDisplay(q,p) { document.getElementById('quantity-label').innerText=`Qty: ${q}`; document.getElementById('qty-cost-display').innerText=`Total: ${q*p} BP`; document.getElementById('qty-buy-confirm-btn').innerText=`Buy ${q}`; }
     function confirmBulkBuy(p) { const q=parseInt(document.getElementById('quantity-slider').value); if(gameState.brainPoints<q*p) return; gameState.brainPoints-=q*p; gameState.inventory[currentBuyingItem.id]=(gameState.inventory[currentBuyingItem.id]||0)+q; saveGame(); updateStatsDisplay(); renderShop(); document.getElementById('quantity-modal').classList.remove('active'); showToast(`Bought ${q}!`, "success"); }
@@ -3457,26 +4274,47 @@ async function adminPublishTool() {
     }
     function getArenaEnemy() { const pool = [...PET_TYPES.rare, ...PET_TYPES.epic, ...PET_TYPES.legendary]; const base = pool[Math.floor(Math.random() * pool.length)]; return { name: "Champion " + base.name, image: base.image, imageStyle: base.imageStyle, emoji: base.emoji, hp: Math.floor(base.baseHP * 2.5), damage: Math.floor(base.baseHP * 0.3), xp: 100 }; }
     
-    function getScaledEnemy(baseEnemyTemplate, playerLevel) {
-        let enemy = JSON.parse(JSON.stringify(baseEnemyTemplate));
-        const hpGrowth = (playerLevel - 1) * 5; 
-        const dmgGrowth = Math.floor((playerLevel - 1) * 0.4);
-        const xpGrowth = (playerLevel - 1) * 15; 
-        
-        enemy.hp = (enemy.hp || 30) + hpGrowth;
-        enemy.damage = (enemy.damage || 5) + dmgGrowth;
-        enemy.xp = (enemy.xp || 10) + xpGrowth;
-        
-        // Randomize HP slightly
-        enemy.hp = Math.floor(enemy.hp * (0.9 + (Math.random() * 0.2)));
-        enemy.hp = Math.max(10, enemy.hp);
-        
-        // --- NEW: Save Level for Anti-Cheat checks ---
-        enemy.level = playerLevel; 
-        enemy.name = `Lvl ${playerLevel} ${enemy.name}`;
-        
-        return enemy;
+    // --- PRO SCALING ENGINE: EXPONENTIAL GROWTH & MITIGATION ---
+function getScaledEnemy(baseEnemyTemplate, playerLevel) {
+    let enemy = JSON.parse(JSON.stringify(baseEnemyTemplate));
+    
+    // 1. EXPONENTIAL HP CURVE
+    // Level 1: ~30 HP | Level 50: ~1,800 HP | Level 100: ~7,000 HP
+    const hpMultiplier = Math.pow(playerLevel, 1.2); 
+    // Calculate the normal HP first
+    let baseCalcHP = Math.floor((enemy.hp || 30) + (hpMultiplier * 15));
+
+    // CHECK: Did the teacher turn on Endurance Mode? 
+    // If yes, we double the HP!
+    if (gameState.teacherConfig && gameState.teacherConfig.enduranceMode === true) {
+        baseCalcHP = baseCalcHP * 2;
+        console.log("🛡️ Endurance Mode Active: Enemy HP Doubled!");
     }
+
+    enemy.maxHP = baseCalcHP;
+    enemy.hp = enemy.maxHP;
+
+    // 2. DAMAGE CURVE
+    enemy.damage = Math.floor((enemy.damage || 5) + (playerLevel * 2.5));
+
+    // 3. XP REWARDS
+    enemy.xp = Math.floor((enemy.xp || 10) + (playerLevel * 25));
+
+    // 4. MITIGATION (ARMOR) - Starts appearing after Level 10
+    // Armor reduces damage by a percentage: Damage * (100 / (100 + Armor))
+    enemy.armor = 0;
+    if (playerLevel > 10) {
+        enemy.armor = Math.floor((playerLevel - 10) * 4); // Lvl 50 = 160 Armor (~60% Reduction)
+    }
+
+    // 5. RESISTANCE (Elemental Defense)
+    // High-level enemies become resistant to their own element
+    enemy.resistance = playerLevel > 30 ? 0.3 : 0; 
+
+    enemy.level = playerLevel; 
+    enemy.name = `Lvl ${playerLevel} ${enemy.name}`;
+    return enemy;
+}
     
     function getBattlerSize(entity, isBoss, isArena) {
         let size = 200; 
@@ -3532,10 +4370,12 @@ async function adminPublishTool() {
             enemy = getScaledEnemy(randomBase, scalingLevel); 
         }
 
-        // 3. EQUIPMENT ARMOR LOGIC
+       // 3. PRO GEAR INTEGRATION (Capacity Fix)
         const gear = getPetEquipmentStats(pet);
         const battleMaxHP = pet.maxHP + gear.hp;
-        const currentBattleHP = Math.min(battleMaxHP, pet.hp + gear.hp); 
+        
+        // Use the pet's existing health, but ensure it doesn't exceed the new max
+        const currentBattleHP = Math.min(battleMaxHP, pet.hp); 
 
         // 4. SETUP BATTLE STATE
         gameState.inBattle = true;
@@ -3758,6 +4598,7 @@ async function adminPublishTool() {
         }).join('');
 
         buttons += `<button class="action-btn blue" onclick="openSwapMenu()">🔄 Squad</button>`;
+        buttons += `<button class="action-btn blue" style="background:#667eea" onclick="openInBattleMath()">🧠 FOCUS</button>`;
         buttons += `<button class="action-btn red" onclick="flee()">🏃 Run</button>`;
 
         // ✅ CLEANER UI: No Log Container
@@ -3768,18 +4609,15 @@ async function adminPublishTool() {
         `;
     }
 
-   // --- 🌲 STANDARD BATTLE ENGINE (Fixed Damage Update) ---
-
+ // --- PRO COMBAT: FIXED TURN FLOW & ATTACK ENGINE ---
     async function usePowerAsync(pid) {
-        // 1. Safety Checks
         if (gameState.battleState.turnInProgress) return;
         if (gameState.battleState.playerHP <= 0) return showToast("Your pet has fainted!", "error");
 
         gameState.battleState.turnInProgress = true;
         
-        // 2. Resolve Status Effects
+        // 1. Resolve Status Effects
         const playerStunned = resolveStatusTurn('player');
-        // Update UI immediately for status damage
         updateStandardBattleUI(); 
         
         if (gameState.battleState.playerHP <= 0) { 
@@ -3790,7 +4628,7 @@ async function adminPublishTool() {
             await wait(1000); 
         } 
         else {
-            // 3. PERFORM ATTACK
+            // 2. PERFORM ATTACK
             const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
             const enemy = gameState.battleState.enemy;
             const move = findShopItem(pid);
@@ -3810,56 +4648,97 @@ async function adminPublishTool() {
             let mult = getTypeMult(move.element, enemy.element);
             let isCrit = false;
             let critMult = 1.0;
-            let critChance = 0.10 + (gear.crit / 100); 
-            
-            if (gameState.burstMode) { 
-                critMult = 2.0; isCrit = true; gameState.burstMode = false; showToast("🔥 BURST HIT!", "success"); 
-            } else if (Math.random() < critChance) { 
-                critMult = 1.5; isCrit = true; 
+            let effectiveArmor = enemy.armor || 0;
+
+            if (gameState.burstMode) {
+                critMult = 2.5; isCrit = true; effectiveArmor = 0; 
+                gameState.burstMode = false;
+                showToast("🛡️ SHIELD SHATTERED!", "success");
+                const qz = document.querySelector('.quiz-container');
+                if (qz) qz.style.boxShadow = "none";
+            } else if (Math.random() < (0.10 + (gear.crit / 100))) {
+                critMult = 1.5; isCrit = true;
             }
 
-            let rawDmg = (move.damage + (pet.level * 1.5) + gear.dmg);
-            let dmg = Math.floor((rawDmg * mult * critMult) * (Math.random() * 0.2 + 0.9));
+            // --- MASTERY SYNERGY CHECK ---
+            let synergyActive = false;
+            const currentTopic = gameState.selectedTopics[0] || ""; // Get current lesson URL
+            
+            if (pet.badges && pet.badges.length > 0) {
+                synergyActive = pet.badges.some(b => currentTopic.toLowerCase().includes(b.toLowerCase()));
+            }
+
+            // Calculate damage with potential 20% Boost
+            let masteryMult = synergyActive ? 1.2 : 1.0;
+            let rawDmg = (move.damage + (pet.level * 2) + gear.dmg) * masteryMult;
+            
+            if (synergyActive) {
+                showFloatingText(pVis.parentElement, "✨ SYNERGY!", "heal");
+            }
+            let mitigation = 100 / (100 + effectiveArmor);
+            let dmg = Math.floor((rawDmg * mult * critMult * mitigation) * (Math.random() * 0.2 + 0.9));
             
             gameState.battleState.enemyHP = Math.max(0, gameState.battleState.enemyHP - dmg);
-            
-            // --- 🚨 IMMEDIATE UI UPDATE (THE FIX) ---
-            updateStandardBattleUI(); 
-            // ----------------------------------------
 
+            // C. UI Updates
+            updateStandardBattleUI(); 
             soundManager.playSFX('hit');
             eVis.style.animation = "damageShake 0.5s";
             
             let color = isCrit ? "crit" : (mult > 1 ? "super" : (mult < 1 ? "weak" : ""));
             showFloatingText(eVis.parentElement, `-${dmg}`, color);
             addBattleLog(`${pet.name} used ${move.name}!`, isCrit ? 'crit' : 'player');
-            
-            if(typeof vibratePhone === 'function') vibratePhone(50);
 
-            // Effects
-            if (move.effect && move.effect.type === 'drain') {
-                if (Math.random() <= (move.effect.chance || 1.0)) {
-                    let healAmount = Math.ceil(dmg * move.effect.value);
-                    const pMax = gameState.battleState.playerMaxHP || pet.maxHP;
-                    gameState.battleState.playerHP = Math.min(pMax, gameState.battleState.playerHP + healAmount);
-                    showFloatingText(pVis.parentElement, `+${healAmount}`, "heal");
-                    updateStandardBattleUI(); // Update UI for heal
+            if (mitigation < 0.8 && !isCrit) {
+                showToast(`🛡️ Enemy Armor reduced damage!`, "info");
+            }
+
+            // D. MATH-LOCKED GEAR (Lifesteal & Passives)
+            // (Moved inside this bracket so 'dmg' variable is visible)
+            if (gameState.combo > 0) {
+                if (gear.lifesteal > 0 && dmg > 0) {
+                    let heal = Math.floor(dmg * gear.lifesteal);
+                    gameState.battleState.playerHP = Math.min(gameState.battleState.playerMaxHP, gameState.battleState.playerHP + heal);
+                    showFloatingText(pVis.parentElement, `+${heal}`, "heal");
                 }
-            } else if (move.effect) {
-                applyStatusEffect(move.effect, 'player', 'enemy');
+
+                if (!move.effect && gameState.battleState.enemyHP > 0) {
+                    const r = pet.rarity;
+                    if ((r === 'rare' || r === 'epic') && Math.random() < (r === 'rare' ? 0.2 : 0.35)) {
+                        let autoEffect = null;
+                        if (pet.element === 'fire') autoEffect = { type: 'burn', value: 5, duration: 2, chance: 1 };
+                        if (pet.element === 'ice') autoEffect = { type: 'freeze', duration: 1, chance: 1 };
+                        if (pet.element === 'grass') autoEffect = { type: 'poison', value: 5, duration: 3, chance: 1 };
+                        if (autoEffect) applyStatusEffect(autoEffect, 'player', 'enemy');
+                    }
+                }
             }
         }
 
-        // 4. Check Victory
+        // 3. CHECK VICTORY
         if (gameState.battleState.enemyHP <= 0) { 
             await wait(1000); winBattle(); return; 
         }
         
-        // 5. Enemy Turn
+        // 4. MATH-EARNED HEALING (Legendary Aura)
+        const activePet = gameState.pets.find(p => p.id === gameState.currentPetId);
+        if (activePet && activePet.rarity === 'legendary' && activePet.hp > 0) {
+            if (activePet.element === 'light' || (Array.isArray(activePet.element) && activePet.element.includes('light'))) {
+                const healAmt = Math.floor(activePet.maxHP * 0.05);
+                activePet.hp = Math.min(activePet.maxHP, activePet.hp + healAmt);
+                showToast(`✨ Light Aura: +${healAmt} HP Earned!`, "success");
+                // Check which screen is active to update the HUD
+const isWilds = document.getElementById('screen-wilds').classList.contains('active');
+const isAdventure = document.getElementById('screen-adventure').classList.contains('active');
+if (isWilds || isAdventure) updateAdventureHUD();
+            }
+        }
+        
+        // 5. ENEMY TURN
         await wait(800); 
         await processEnemyTurnAsync();
         
-        // 6. Reset Turn
+        // 6. RESET TURN
         if (gameState.inBattle) { 
             gameState.battleState.turnInProgress = false; 
             renderBattle(); 
@@ -3912,7 +4791,21 @@ async function adminPublishTool() {
         eVis.style.animation = "attackLunge 0.3s";
         await wait(300); eVis.style.animation = "";
 
-        let dmg = Math.floor(enemy.damage * (Math.random() * 0.2 + 0.9));
+        // --- MASTERY DEFENSE CHECK ---
+        let defenseSynergy = false;
+        const currentTopicDef = gameState.selectedTopics[0] || "";
+        const petDef = gameState.pets.find(p => p.id === gameState.currentPetId);
+
+        if (petDef.badges && petDef.badges.length > 0) {
+            defenseSynergy = petDef.badges.some(b => currentTopicDef.toLowerCase().includes(b.toLowerCase()));
+        }
+
+        let defenseMult = defenseSynergy ? 0.8 : 1.0; // Take 20% less damage
+        let dmg = Math.floor(enemy.damage * (Math.random() * 0.2 + 0.9) * defenseMult);
+        
+        if (defenseSynergy) {
+             showFloatingText(pVis.parentElement, "🛡️ GUARDED!", "heal");
+        }
         gameState.battleState.playerHP = Math.max(0, gameState.battleState.playerHP - dmg);
         soundManager.playSFX('hit');
         pVis.style.animation = "damageShake 0.5s";
@@ -3960,8 +4853,12 @@ async function adminPublishTool() {
         activePet.hp = bs.playerHP; 
         
         // 2. Calculate Base Rewards
-        let baseXP = bs.enemy.xp || 15;
-        let bpGained = bs.isBoss ? 100 : (bs.isArena ? 50 : 20); 
+        const qmMult = (gameState.teacherConfig && gameState.teacherConfig.rewardMultiplier) ? gameState.teacherConfig.rewardMultiplier : 1;
+
+let baseXP = Math.floor((bs.enemy.xp || 15) * qmMult);
+let bpGained = Math.floor((bs.isBoss ? 100 : (bs.isArena ? 50 : 20)) * qmMult); 
+
+if(qmMult > 1) showToast(`BONUS EVENT: ${qmMult}x Rewards!`, "success"); 
         
         // --- ANTI-CHEAT: OVERLEVELED PENALTY ---
         // If pet is > 5 levels higher than enemy (Wilds only), reduce rewards
@@ -4125,13 +5022,18 @@ async function adminPublishTool() {
     if(targetScreen) targetScreen.classList.add('active'); 
     
     if(t === 'wilds') soundManager.playBGM('wilds'); else soundManager.playBGM('hub'); 
-    if (t === 'hub') renderHub(); 
+    if (t === 'hub') renderHub();
+    
+    // Toggle HUD & Journal Button
+    const showAdvUI = (t === 'wilds' || t === 'adventure');
+    document.getElementById('adv-hud').style.display = showAdvUI ? 'flex' : 'none';
+    document.getElementById('journal-trigger').style.display = showAdvUI ? 'flex' : 'none';
+    if (showAdvUI) updateAdventureHUD();
     if (t === 'shop') renderShop();
     
     // --- SMART TOOLS INITIALIZATION ---
     if (t === 'tools') {
         const filterDropdown = document.getElementById('tools-grade-filter');
-        // If this is the first time opening, set it to the student's grade
         if (filterDropdown && gameState.grade) {
             filterDropdown.value = gameState.grade; 
         }
@@ -4147,11 +5049,93 @@ async function adminPublishTool() {
         }
     }
 
+    // 🔥 NEW: INFINITY TOWER INITIALIZATION
+    if (t === 'tower') {
+        // 1. Update the basic numbers (FREE - No Firebase cost)
+        document.getElementById('highest-floor-display').innerText = gameState.highestTowerFloor || 1;
+        document.getElementById('current-floor-tag').innerText = gameState.currentTowerFloor || 1;
+
+        // 2. Re-run the entire Lobby logic (FREE - No Firebase cost)
+        // This ensures the "Heal All" price is calculated using the REAL HP from the Wilds.
+        if (typeof renderTowerLobby === 'function') {
+            renderTowerLobby(); 
+        }
+    }
+
     if (t !== 'wilds') { 
         document.getElementById('rpg-wrapper').style.display = 'none'; 
         document.getElementById('battle-ui').style.display = 'none'; 
         document.getElementById('wilds-menu').style.display = 'block'; 
     } 
+}
+
+// --- PRO UI: HUD & JOURNAL LOGIC ---
+
+function updateAdventureHUD() {
+    const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+    if (!pet) return;
+
+    // Get gear stats
+    const gear = getPetEquipmentStats(pet);
+    const totalMax = pet.maxHP + gear.hp;
+
+    // 1. Update HP Bar width using the boosted total
+    const pct = (pet.hp / totalMax) * 100;
+    const hpBar = document.getElementById('hud-hp-fill');
+    if (hpBar) {
+        hpBar.style.width = pct + "%";
+        hpBar.style.backgroundColor = pct < 30 ? "#f56565" : (pct < 60 ? "#ecc94b" : "#48bb78");
+    }
+
+    // 2. Update Text
+    const hpText = document.getElementById('hud-hp-text');
+    if (hpText) hpText.innerText = `${pet.hp}/${totalMax}`;
+    
+    document.getElementById('hud-pet-icon').innerText = pet.emoji || "🐾";
+
+    // 3. Update Combo Pill
+    const comboPill = document.getElementById('hud-combo-pill');
+    if (gameState.combo > 0) {
+        comboPill.style.display = 'flex';
+        document.getElementById('hud-combo-val').innerText = gameState.combo;
+    } else {
+        comboPill.style.display = 'none';
+    }
+}
+
+function toggleJournal() {
+    const panel = document.getElementById('journal-panel');
+    panel.classList.toggle('open');
+    if (panel.classList.contains('open')) renderJournalContent();
+}
+
+function renderJournalContent() {
+    const content = document.getElementById('journal-content');
+    
+    // Check if we are in an Adventure
+    if (!window.currentQuestData) {
+        content.innerHTML = `<div class="mission-card">📍 Exploring the Wilds<br><small>Find random monsters and level up!</small></div>`;
+        return;
+    }
+
+    const q = window.currentQuestData;
+    let html = `<h3>${q.meta.title}</h3>`;
+    
+    // Professional Logic: Loop through "Logs" defined in your Quest JSON
+    // If you don't have logs, we'll show a default "Next Step"
+    if (q.meta.objectives) {
+        q.meta.objectives.forEach(obj => {
+            const isDone = gameState.questProgress.flags.includes(obj.flag);
+            html += `
+            <div class="mission-card ${isDone ? 'mission-done' : ''}">
+                ${isDone ? '✅' : '🎯'} ${obj.text}
+            </div>`;
+        });
+    } else {
+        html += `<div class="mission-card">🎯 Current Objective: Explore ${q.startMap}</div>`;
+    }
+
+    content.innerHTML = html;
 }
     function updateStatsDisplay() { document.getElementById('bp-display').innerText = gameState.brainPoints; document.getElementById('stamina-display').innerText = gameState.stamina; }
     function createProjectile(v, s, e) { const p = document.createElement('div'); p.className = 'projectile'; if (v && v.startsWith('http')) p.innerHTML = `<img src="${v}">`; else p.innerText = v; const sr = s.getBoundingClientRect(); const er = e.getBoundingClientRect(); p.style.left = (sr.left + sr.width/2 - 75) + 'px'; p.style.top = (sr.top + sr.height/2 - 75) + 'px'; document.body.appendChild(p); const a = p.animate([ { transform: 'translate(0,0) scale(0.5)', opacity: 1 }, { transform: `translate(${er.left+er.width/2 - (sr.left+sr.width/2)}px, ${er.top+er.height/2 - (sr.top+sr.height/2)}px) scale(1.2)`, opacity: 0 } ], { duration: 600 }); a.onfinish = () => p.remove(); }
@@ -4175,12 +5159,6 @@ autoSaveInterval = setInterval(() => {
     }
 }, 60000); // 60 seconds
 
-// Safety: Save if they close the tab
-window.addEventListener("beforeunload", () => {
-    if (hasUnsavedChanges) {
-        saveProgressToFirebase();
-    }
-});
     function logout() { location.reload(); }
     function releasePet() { if(gameState.pets.length<=1) return; window.petToRelease = gameState.pets.find(p => p.id === gameState.currentPetId); const m = document.getElementById('release-modal'); m.classList.add('active'); }
     document.getElementById('release-confirm').addEventListener('click', () => { 
@@ -4503,8 +5481,7 @@ function checkAdventureRandomEncounter(tileType) {
 
     // --- Helpers ---
     function interactNPC(npc) { 
-        const dBox = document.ge
-tElementById('quest-dialog'); 
+        const dBox = document.getElementById('quest-dialog'); 
         document.getElementById('quest-npc-name').innerText = npc.name; 
         document.getElementById('quest-text').innerText = npc.dialogue[0]; 
         dBox.style.display = 'block'; 
@@ -4679,31 +5656,58 @@ function toggleTeacherLogin() {
     function toggleAllStudents(c) { document.querySelectorAll('.student-select-checkbox').forEach(cb => cb.checked = c); updateBulkActionBar(); }
     function updateBulkActionBar() { const c = document.querySelectorAll('.student-select-checkbox:checked').length; const b = document.getElementById('bulk-action-bar'); document.getElementById('bulk-selected-count').innerText = `${c} Selected`; b.style.display = c > 0 ? 'flex' : 'none'; }
     
-    async function loadStudentList() {
+   async function loadStudentList() {
     if (!currentLoggedTeacher) return;
 
     const d = document.getElementById('student-list-container'); 
     d.innerHTML = '<div style="padding:20px;text-align:center;color:gray;">Loading class roster...</div>';
     
-    // FETCH ALL STUDENTS
-    // (Ideally, we would use a Firestore Query here, but client-side filtering is easier for now)
-    const q = await window.fbase.getDocs(window.fbase.collection(window.db, "students")); 
+    // Server-side Query (Only download YOUR students)
+    const studentQuery = window.fbase.query(
+        window.fbase.collection(window.db, "students"), 
+        window.fbase.where("teacherId", "==", currentLoggedTeacher)
+    );
+    
+    const q = await window.fbase.getDocs(studentQuery); 
     
     const grouped = {};
     let count = 0;
 
     q.forEach(doc => {
         const s = doc.data();
-        
-        // --- FILTER: ONLY SHOW MY STUDENTS ---
-        if (s.teacherId !== currentLoggedTeacher) return; 
-        
         count++;
         const g = s.assignedGrade || "Unassigned"; 
-        const bp = (s.saveData && s.saveData.brainPoints) ? s.saveData.brainPoints : 0;
         
+        // Get stats from saveData
+        const saveData = s.saveData || {};
+        const bp = saveData.brainPoints || 0;
+        const history = saveData.examHistory || {};
+        const examCount = Object.keys(history).length;
+        
+        const examStatus = examCount > 0 
+            ? `<span style="color:#48bb78; font-size:10px; font-weight:bold;">✅ ${examCount} Exams Done</span>` 
+            : `<span style="color:#a0aec0; font-size:10px;">⏳ No Exams</span>`;
+
         if (!grouped[g]) grouped[g] = [];
-        grouped[g].push(`<div class="student-list-item"><input type="checkbox" class="student-select-checkbox" data-username="${s.username}" onchange="updateBulkActionBar()"><div class="student-info" style="display:flex; flex-direction:column; align-items:flex-start;"><div style="font-size:16px; font-weight:bold;">${s.username}</div><div style="font-size:12px; background:#fef3c7; color:#92400e; padding:2px 8px; border-radius:10px; margin-top:2px;">🧠 ${bp} BP</div></div><div style="display:flex; gap:5px;"><button class="action-btn green" style="width:auto; padding:5px 10px; font-size:12px;" onclick="giveStudentBP('${s.username}')">🎁 +BP</button><button class="action-btn blue" style="width:auto; padding:5px 10px; font-size:12px;" onclick="openTopicManager('${s.username}')">Manage</button><button class="action-btn red" style="width:auto; padding:5px 10px; font-size:12px;" onclick="openDeleteModal('${s.username}')">🗑️</button></div></div>`);
+        
+        // ADD STUDENT TO LIST (ONLY ONCE)
+        grouped[g].push(`
+            <div class="student-list-item">
+                <input type="checkbox" class="student-select-checkbox" data-username="${s.username}" onchange="updateBulkActionBar()">
+                <div class="student-info" style="display:flex; flex-direction:column; align-items:flex-start;">
+                    <div style="font-size:16px; font-weight:bold;">${s.username}</div>
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <div style="font-size:11px; background:#fef3c7; color:#92400e; padding:1px 6px; border-radius:8px;">🧠 ${bp} BP</div>
+                        ${examStatus}
+                    </div>
+                </div>
+                <div style="display:flex; gap:5px;">
+                    <button class="action-btn green" style="width:auto; padding:5px 10px; font-size:12px;" onclick="giveStudentBP('${s.username}')">🎁 +BP</button>
+                    <button class="action-btn blue" style="width:auto; padding:5px 10px; font-size:12px;" onclick="openTopicManager('${s.username}')">Manage</button>
+                    <button class="action-btn red" style="width:auto; padding:5px 10px; font-size:12px;" onclick="openDeleteModal('${s.username}')">🗑️</button>
+                </div>
+            </div>
+        `);
     });
     
     if (count === 0) { 
@@ -4714,7 +5718,16 @@ function toggleTeacherLogin() {
     let finalHtml = ''; 
     const grades = Object.keys(grouped).sort(); 
     grades.forEach(grade => { 
-        finalHtml += `<div class="grade-group"><div class="grade-summary" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'"><span>📂 Grade ${grade}</span><span>${grouped[grade].length} Students ▼</span></div><div class="grade-student-list">${grouped[grade].join('')}</div></div>`; 
+        finalHtml += `
+            <div class="grade-group">
+                <div class="grade-summary" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">
+                    <span>📂 Grade ${grade}</span>
+                    <span>${grouped[grade].length} Students ▼</span>
+                </div>
+                <div class="grade-student-list" style="display:block;">
+                    ${grouped[grade].join('')}
+                </div>
+            </div>`; 
     }); 
     d.innerHTML = finalHtml; 
 }
@@ -4722,7 +5735,28 @@ function toggleTeacherLogin() {
     let studentToDelete = null;
     function openDeleteModal(username) { studentToDelete = username; document.getElementById('delete-student-name-display').innerText = username; document.getElementById('teacher-delete-modal').classList.add('active'); }
     async function confirmDeleteStudent() { if(!studentToDelete) return; await window.fbase.deleteDoc(window.fbase.doc(window.db, "students", studentToDelete)); document.getElementById('teacher-delete-modal').classList.remove('active'); showToast("Student Deleted", "success"); loadStudentList(); }
-    async function giveStudentBP(username) { const amount = prompt(`How many Brain Points (BP) for ${username}?`, "50"); if (!amount || isNaN(amount)) return; const val = parseInt(amount); if (val <= 0) return; const docRef = window.fbase.doc(window.db, "students", username); try { await window.fbase.updateDoc(docRef, { "saveData.brainPoints": window.fbase.increment(val) }); showToast(`✅ Sent ${val} BP to ${username}!`, "success"); } catch (e) { try { await window.fbase.setDoc(docRef, { saveData: { brainPoints: val } }, { merge: true }); showToast(`✅ Sent ${val} BP to ${username}!`, "success"); } catch (err) { showToast("Error giving points.", "error"); } } }
+    async function giveStudentBP(username) {
+    const amount = prompt(`How many Brain Points (BP) for ${username}?`, "50");
+    if (!amount || isNaN(amount)) return;
+    const val = parseInt(amount);
+    if (val <= 0) return;
+
+    const docRef = window.fbase.doc(window.db, "students", username);
+    
+    try {
+        // 🔥 EXPERT FIX: We must use the compressed key 'bp' 
+        // to match the student's saveData format.
+        await window.fbase.updateDoc(docRef, { 
+            "saveData.bp": window.fbase.increment(val) 
+        });
+        
+        showToast(`✅ Sent ${val} BP to ${username}!`, "success");
+        loadStudentList(); // Refresh the list to see the new total
+    } catch (e) {
+        console.error("Error giving BP:", e);
+        showToast("Error: Make sure the student has logged in at least once.", "error");
+    }
+}
     
     async function openTopicManager(username) { 
         currentManagingStudent = username; document.getElementById('tm-student-name').innerText=username; document.getElementById('topic-manager-modal').style.display='flex';
@@ -5167,76 +6201,67 @@ function setupRaidData(data, docId) {
 
     // 4. Attack Transaction (Prevent Race Conditions)
     let raidCooldown = false;
-    async function attackRaidBoss() {
-        if (raidCooldown) return;
-        
-        // Get Current Active Pet
-        let pet = gameState.pets.find(p => p.id === gameState.currentPetId);
-        
-        // Auto-swap logic if current is dead
-        if (pet.hp <= 0) {
-            const nextLive = getSquad().find(p => p.hp > 0);
-            if (nextLive) {
-                gameState.currentPetId = nextLive.id;
-                pet = nextLive;
-                showToast(`Swapped to ${pet.name}!`, "info");
-            } else {
-                return showToast("Entire squad fainted! Revive them.", "error");
-            }
-        }
+    // Recommendation 1: Buffered Raid Attack (Saves Firebase Writes)
+async function attackRaidBoss() {
+    if (raidCooldown) return;
+    
+    let pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+    if (pet.hp <= 0) return showToast("Pet fainted!", "error");
 
-        raidCooldown = true;
-        const btn = document.getElementById('raid-atk-btn');
-        btn.style.opacity = 0.5;
+    raidCooldown = true;
+    const btn = document.getElementById('raid-atk-btn');
+    btn.style.opacity = 0.5;
 
-        // Calc Damage
-        const dmg = 20 + (pet.level * 2) + Math.floor(Math.random()*10);
+    const dmg = 20 + (pet.level * 2) + Math.floor(Math.random() * 10);
+    
+    // Update locally instantly for "Juice"
+    localPendingDamage += dmg; 
+    currentRunDamage += dmg; 
 
-        const ref = window.fbase.doc(window.db, "world_boss", "active");
+    const vis = document.getElementById('raid-boss-visual');
+    vis.style.transform = "scale(0.9) rotate(5deg)";
+    setTimeout(() => vis.style.transform = "scale(1)", 100);
+    showFloatingText(vis.parentElement, `-${dmg}`, "super");
 
-        try {
-            await window.fbase.runTransaction(window.db, async (transaction) => {
-                const sfDoc = await transaction.get(ref);
-                if (!sfDoc.exists()) throw "Boss missing!";
-                
-                const curHP = sfDoc.data().hp;
-                if (curHP <= 0) throw "Boss dead";
-
-                // Damage Boss
-                const newHP = Math.max(0, curHP - dmg);
-                
-                // Record Player Damage (Atomic increment)
-                const myDmgPath = `damageDealers.${gameState.playerName}`;
-                const dealers = sfDoc.data().damageDealers || {};
-                const currentMyDmg = dealers[gameState.playerName] || 0;
-
-                transaction.update(ref, { 
-                    hp: newHP,
-                    active: newHP > 0, // Set inactive if dead
-                    [myDmgPath]: currentMyDmg + dmg
-                });
-            });
-
-            // Visuals
-            const vis = document.getElementById('raid-boss-visual');
-            vis.style.transform = "scale(0.9) rotate(5deg)";
-            setTimeout(()=> vis.style.transform = "scale(1)", 100);
-            showToast(`Dealt ${dmg} DMG!`, "success");
-
-            // Boss Hits Back (Local Calc)
-            if (Math.random() > 0.5) {
-                pet.hp -= 10;
-                if(pet.hp < 0) pet.hp = 0;
-                saveGame();
-                if(pet.hp === 0) showToast(`${pet.name} fainted!`, "error");
-            }
-
-        } catch (e) {
-            console.log(e);
-        }
-
-        setTimeout(() => { raidCooldown = false; btn.style.opacity = 1; }, 800);
+    // Start the sync timer if it isn't running
+    if (!raidSyncTimer) {
+        raidSyncTimer = setInterval(syncRaidDamageToCloud, 5000); 
     }
+
+    if (Math.random() > 0.6) {
+        const bossAtk = (localRaidData && localRaidData.attack) ? localRaidData.attack : 15;
+        pet.hp = Math.max(0, pet.hp - bossAtk);
+        renderRaidPlayerSide();
+    }
+
+    setTimeout(() => { raidCooldown = false; btn.style.opacity = 1; }, 400);
+}
+
+// New helper to send buffered damage to cloud
+async function syncRaidDamageToCloud() {
+    if (localPendingDamage <= 0 || !window.currentRaidDocPath) return;
+
+    const dmgToSend = localPendingDamage;
+    localPendingDamage = 0; 
+    
+    const ref = window.fbase.doc(window.db, "world_boss", window.currentRaidDocPath);
+    try {
+        await window.fbase.runTransaction(window.db, async (t) => {
+            const doc = await t.get(ref);
+            if (!doc.exists()) return;
+            const d = doc.data();
+            const myTotal = (d.damageDealers && d.damageDealers[gameState.playerName]) ? d.damageDealers[gameState.playerName] : 0;
+
+            t.update(ref, { 
+                hp: window.fbase.increment(-dmgToSend),
+                [`damageDealers.${gameState.playerName}`]: myTotal + dmgToSend
+            });
+        });
+        console.log("📡 Synced damage to cloud:", dmgToSend);
+    } catch (e) {
+        localPendingDamage += dmgToSend; // Put it back to try again if it failed
+    }
+}
 
  // ===============================================
 // SECURE VICTORY SYSTEM (Prevents Infinite Claiming)
@@ -5602,137 +6627,106 @@ window.resolveRaidMath = function(moveId, selected, correct) {
     let localRaidData = { attack: 15 }; // <--- NEW: Defaults to 15
 
 // --- 🛡️ ROBUST RAID ENGINE (Fixed for Battle UI) ---
-
-
 async function startRaidEngine(path) {
     const docPath = path || "global";
     window.currentRaidDocPath = docPath; 
+    currentRunDamage = 0;
+    currentPhase = 1;
+    frenzyActive = false;
 
-    // Reset local damage
-    currentRunDamage = 0; 
-    
-    // 1. GET DOC ONCE
-    const docRef = window.fbase.doc(window.db, "world_boss", docPath);
-    const docSnap = await window.fbase.getDoc(docRef);
+    // Reset combat counters
+    raidMovesCounter = 0;
+    raidBuffCharges = 0;
 
-    // 2. CHECK IF ACTIVE
-    if (!docSnap.exists() || !docSnap.data().active) {
-        showToast("Raid is no longer active.", "error");
-        exitRaidBattle();
-        return;
-    }
+    if (raidListenerUnsub) raidListenerUnsub();
 
-    const data = docSnap.data();
+    // --- REAL-TIME PHASE MONITOR ---
+    raidListenerUnsub = window.fbase.onSnapshot(window.fbase.doc(window.db, "world_boss", docPath), (doc) => {
+        const data = doc.data();
+        if (!doc.exists() || !data.active) { finalizeExit(); return; }
+        
+        localRaidData = data;
+        const hpPct = (data.hp / data.maxHP) * 100;
 
-    // --- SANITIZE DATA (Prevents NaN/Zero Glitch) ---
-    if (!data.maxHP || isNaN(data.maxHP) || data.maxHP === 0) {
-        data.maxHP = (data.hp > 0) ? data.hp : 50000; 
-    }
-    data.hp = parseInt(data.hp) || 0;
-    // ------------------------------------------------
+        // 🛑 DEAD CHECK: If boss dies while you are in the menu
+        if (data.hp <= 0) { handleRaidVictory(); return; }
 
-    // 3. DEAD CHECK
-    if (data.hp <= 0) {
-         handleRaidVictory();
-         return;
-    }
+        // 1. PHASE 3: ENRAGE DETECTION (10% HP)
+        if (hpPct <= 10) {
+            currentPhase = 3; 
+            document.getElementById('battle-enemy-visual').classList.add('enrage-filter');
+        } 
+        // 2. PHASE 2: FRENZY DETECTION (50% HP)
+        else if (hpPct <= 50 && currentPhase < 2) {
+            if (!frenzyActive) triggerMathFrenzy(); 
+        }
 
-    // 4. SETUP BATTLE STATE
-    localRaidData = data; 
-    gameState.inBattle = true;
+        // 3. UPDATE BOSS UI
+        const hpBar = document.getElementById('enemy-hp-bar');
+        if(hpBar) hpBar.style.width = hpPct + "%";
+        
+        const namePlate = document.getElementById('enemy-name');
+        if(namePlate) {
+            namePlate.innerHTML = `
+                <div style="color:${currentPhase === 3 ? '#ff4d4d' : '#e53e3e'}; font-size:16px; font-weight:bold;">
+                    ${currentPhase === 3 ? '💢 ENRAGED ' : '☠️ '}${data.name}
+                </div>
+                <div style="font-size:12px; color:white; font-weight:bold;">${Math.ceil(data.hp)} / ${data.maxHP}</div>
+            `;
+        }
+        
+        const enemyVis = document.getElementById('battle-enemy-visual');
+        if (enemyVis && !enemyVis.innerHTML.includes('img') && data.image) {
+            enemyVis.innerHTML = `<img src="${data.image}" class="battler-image" style="width:250px; height:250px; filter:drop-shadow(0 0 15px red);">`;
+        }
 
-    // 5. UPDATE VISUALS (Standard Battle UI)
-    const enemyVis = document.getElementById('battle-enemy-visual');
-    enemyVis.className = "battler-visual flipped-opponent"; // Ensure class is reset
-    
-    if (data.image) {
-        enemyVis.innerHTML = `<img src="${data.image}" class="battler-image" style="width:250px; height:250px; filter:drop-shadow(0 0 15px red);">`;
-    } else {
-        enemyVis.innerHTML = '<div style="font-size:100px;">👹</div>';
-    }
-
-    // --- 6. UPDATE HP BAR & TEXT (THE FIX) ---
-    
-    // Calculate Percentage
-    const hpPercent = Math.max(0, Math.min(100, (data.hp / data.maxHP * 100)));
-    
-    // A. Update the Green Bar (In Battle UI)
-    const battleBar = document.getElementById('enemy-hp-bar');
-    if (battleBar) battleBar.style.width = hpPercent + "%";
-
-    // B. Inject Numbers into Name Plate (Since Battle UI has no separate text box)
-    const namePlate = document.getElementById('enemy-name');
-    if (namePlate) {
-        namePlate.innerHTML = `
-            <div style="color:#e53e3e; font-size:16px;">☠️ ${data.name}</div>
-            <div style="font-size:12px; color:white; font-weight:bold;">${Math.ceil(data.hp)} / ${data.maxHP}</div>
-        `;
-    }
-    // ------------------------------------------
-    
-    // 7. Setup Player Side
-    renderRaidPlayerSide();
-    console.log("⚔️ Raid Started. HP:", data.hp);
+        // Only draw player buttons if the Math Frenzy isn't blocking the screen
+        if (!frenzyActive) renderRaidPlayerSide();
+    });
 }
-    function renderRaidPlayerSide() {
+
+function renderRaidPlayerSide() {
     const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+    if (!pet) return;
+
+    // 1. Update Player HP & Visuals
+    const gear = getPetEquipmentStats(pet);
+    const totalMax = pet.maxHP + gear.hp;
     
-    // 1. Render Visuals (Player Sprite & HP)
+    document.getElementById('player-hp-bar').style.width = (pet.hp / totalMax * 100) + "%";
+    document.getElementById('player-hp-text').innerText = `${Math.ceil(pet.hp)}/${totalMax}`;
+    
     const pVis = document.getElementById('battle-player-visual');
-    pVis.classList.remove('flipped-opponent');
     pVis.innerHTML = pet.image 
         ? `<img src="${pet.image}" class="battler-image ${pet.imageStyle}" style="width:200px; height:200px;">` 
         : `<div style="font-size:100px;">${pet.emoji}</div>`;
 
-    document.getElementById('player-battle-name').innerText = pet.name;
-    document.getElementById('player-hp-bar').style.width = (pet.hp / pet.maxHP * 100) + "%";
-    document.getElementById('player-hp-text').innerText = `${Math.ceil(pet.hp)}/${pet.maxHP}`;
-
-    // 2. Prepare the Status Message (The Text above buttons)
+    // 2. Handle Button Logic (3-Turn Buff System)
+    const panel = document.querySelector('.battle-ui-panel');
     let statusMsg = "";
-    
-    if (raidBuffCharges > 0) {
-        // Gold Message
-        statusMsg = `<div style="width:100%; text-align:center; color:#f6e05e; font-weight:bold; font-size:12px; margin-bottom:5px; text-shadow:0 1px 3px black; animation: pulseGold 1s infinite;">
-            ⚡ CHARGED UP: ${raidBuffCharges} Attacks Left! ⚡
-        </div>`;
-    } else if (raidMovesCounter >= 3) {
-        // Red Warning
-        statusMsg = `<div style="width:100%; text-align:center; color:#fc8181; font-weight:bold; font-size:12px; margin-bottom:5px; text-shadow:0 1px 3px black;">
-            ⚠️ NEXT ATTACK: Math Challenge!
-        </div>`;
-    }
-
-    // 3. Prepare Buttons
     let btnStyle = "border:2px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.3);";
-    let buffText = "";
+    let buffTag = "";
 
     if (raidBuffCharges > 0) {
-        btnStyle = "border:2px solid #f6e05e; background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); box-shadow: 0 0 15px #f6e05e; transform: scale(1.05); font-weight:bold;";
-        buffText = " (2x)";
+        statusMsg = `<div style="width:100%; text-align:center; color:#f6e05e; font-weight:bold; font-size:12px; margin-bottom:5px; animation: pulseGold 1s infinite;">⚡ SUPER CHARGED: ${raidBuffCharges} Hits Left!</div>`;
+        btnStyle = "border:2px solid #f6e05e; background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); box-shadow: 0 0 15px #f6e05e; transform: scale(1.05);";
+        buffTag = " (2x)";
     } else if (raidMovesCounter >= 3) {
+        statusMsg = `<div style="width:100%; text-align:center; color:#fc8181; font-weight:bold; font-size:12px; margin-bottom:5px;">⚠️ NEXT ATTACK: Math Challenge!</div>`;
         btnStyle = "border:2px solid #fc8181; animation: pulseGold 1s infinite;";
-        buffText = " (❓)";
+        buffTag = " (❓)";
     }
 
     let buttonsHtml = pet.powers.map(pid => {
         const move = findShopItem(pid);
-        return `<button class="action-btn green" style="${btnStyle}" onclick="window.FORCE_RAID_ATTACK('${pid}')">${move.name}${buffText}</button>`;
+        return `<button class="action-btn green" style="${btnStyle}" onclick="window.FORCE_RAID_ATTACK('${pid}')">${move.name}${buffTag}</button>`;
     }).join('');
     
     buttonsHtml += `<button class="action-btn blue" onclick="openSwapMenu()">🔄 Squad</button>`;
     buttonsHtml += `<button class="action-btn red" onclick="exitRaidBattle()">🏃 Escape</button>`;
 
-    // 4. FINAL RENDER (Overwrite the panel completely to prevent stacking)
-    // We target the .battle-ui-panel class to ensure we control the whole bottom area
-    const panel = document.querySelector('.battle-ui-panel');
     if (panel) {
-        panel.innerHTML = `
-            ${statusMsg}
-            <div id="action-buttons-grid" class="battle-actions">
-                ${buttonsHtml}
-            </div>
-        `;
+        panel.innerHTML = `${statusMsg} <div id="action-buttons-grid" class="battle-actions">${buttonsHtml}</div>`;
     }
 }
     // --- The Connector (Animation + Database Transaction) ---
@@ -5746,6 +6740,11 @@ async function startRaidEngine(path) {
 
 let isRaidTurnProcessing = false;
 let currentRunDamage = 0; // Accumulated damage for THIS fight only
+let frenzyActive = false;
+let frenzyCount = 0;
+let frenzyTimer = 30;
+let frenzyInterval = null;
+let currentPhase = 1; // 1: Normal, 2: Frenzy, 3: Enraged
 
 // 1. THE ATTACK FUNCTION (100% Local - No Internet Usage)
 // ===============================================
@@ -5812,6 +6811,11 @@ window.useRaidMove = async function(moveId, playerMult = 1.0, bossMult = 1.0) {
         const variance = Math.floor(baseAtk * 0.2); 
         const rawBossDmg = baseAtk + (Math.floor(Math.random() * variance * 2) - variance);
         const finalBossDmg = Math.floor(rawBossDmg * bossMult);
+        // --- PHASE 3 ENRAGE: DOUBLE DAMAGE ---
+        if (currentPhase === 3) {
+            finalBossDmg *= 2; 
+            console.log("Boss is ENRAGED! Double damage dealt.");
+        }
 
         pet.hp = Math.max(0, pet.hp - finalBossDmg);
         showFloatingText(pVis.parentElement, `-${finalBossDmg}`, bossMult > 1 ? "crit" : "weak");
@@ -6410,6 +7414,28 @@ async function registerNewTeacher() {
     const docSnap = await window.fbase.getDoc(docRef);
 
     if (docSnap.exists()) {
+        const rawDocData = docSnap.data();
+        
+        // --- 🧹 DATABASE AUTO-CLEANER ---
+        // If we find loose blocks at the root, move them to inventory
+        const looseBlocks = ['boulder', 'brick', 'bush', 'diamond', 'dirt', 'gold', 'grass', 'grass2', 'ice', 'stone', 'wood'];
+        let foundLeak = false;
+        
+        looseBlocks.forEach(blockId => {
+            if (rawDocData[blockId] !== undefined) {
+                console.log(`🧹 Cleaning up leaked block: ${blockId}`);
+                // Move to builder inventory
+                if (!gameState.builder.inventory) gameState.builder.inventory = {};
+                gameState.builder.inventory[blockId] = (gameState.builder.inventory[blockId] || 0) + rawDocData[blockId];
+                foundLeak = true;
+            }
+        });
+
+        if (foundLeak) {
+            saveGame(true); // Force a clean save immediately
+            showToast("Vault Cleaned & Organized!", "info");
+        }
+        // -------------------------------
         return showToast("Teacher username already exists!", "error");
     }
 
@@ -6741,7 +7767,14 @@ window.loginTeacher = async function() {
                 const title = document.querySelector('#teacher-dashboard-screen h1');
                 if(title) title.innerText = `👨‍🏫 Class: ${user}`;
                 
-                if(typeof loadStudentList === 'function') loadStudentList(); 
+                if(typeof loadStudentList === 'function') loadStudentList();
+                // Load the teacher's world settings
+const teacherData = docSnap.data();
+if(teacherData.enduranceMode) document.getElementById('qm-endurance-toggle').checked = true;
+if(teacherData.rewardMultiplier) {
+    document.getElementById('qm-reward-slider').value = teacherData.rewardMultiplier;
+    document.getElementById('qm-mult-display').innerText = teacherData.rewardMultiplier + 'x';
+}
                 showToast("Welcome back!", "success");
             } else {
                 showToast("Wrong Password", "error");
@@ -6755,6 +7788,24 @@ window.loginTeacher = async function() {
         alert("Login Error: " + err.message);
     }
 };
+
+// Function to save World Settings
+async function saveQuestMasterSettings() {
+    if (!currentLoggedTeacher) return;
+    
+    const endurance = document.getElementById('qm-endurance-toggle').checked;
+    const multiplier = parseFloat(document.getElementById('qm-reward-slider').value);
+
+    try {
+        await window.fbase.updateDoc(window.fbase.doc(window.db, "teachers", currentLoggedTeacher), {
+            enduranceMode: endurance,
+            rewardMultiplier: multiplier
+        });
+        showToast("World Updated! Settings are now LIVE.", "success");
+    } catch (e) {
+        showToast("Error saving settings.", "error");
+    }
+}
 // ===============================================
 // ADMIN PATCHER SYSTEM (Remote Database Fixes)
 // ===============================================
@@ -7463,104 +8514,124 @@ function getStatusIcon(type) {
     const map = { 'burn':'🔥', 'poison':'🤢', 'freeze':'❄️', 'stun':'💫' };
     return map[type] || '✨';
 }
-// ==========================================
-    // 🎒 EQUIPMENT LOGIC
-    // ==========================================
+// --- PRO FORGE: EQUIPMENT MENU WITH UPGRADE & SALVAGE ---
+function openEquipMenu(slotType) {
+    currentEquipSlot = slotType;
+    const p = gameState.pets.find(pet => pet.id === gameState.currentPetId);
+    if (!p.equipment) p.equipment = {};
+
+    document.getElementById('equip-slot-title').innerText = `Select ${slotType.toUpperCase()} for ${p.name}:`;
+    const list = document.getElementById('equip-list');
+    list.innerHTML = "";
     
-    let currentEquipSlot = null; // Tracks which slot we are clicking
+    if (!gameState.inventory.equipment || gameState.inventory.equipment.length === 0) {
+        list.innerHTML = `<div style="grid-column:span 2; text-align:center; color:gray; padding:20px;">No gear found! Buy some in the Shop.</div>`;
+    } else {
+        const validItems = gameState.inventory.equipment.filter(item => item.type === slotType);
 
-    function openEquipMenu(slotType) {
-        currentEquipSlot = slotType;
-        const p = gameState.pets.find(pet => pet.id === gameState.currentPetId);
-        
-        // 1. Setup Modal
-        document.getElementById('equip-slot-title').innerText = `Select ${slotType.toUpperCase()} for ${p.name}:`;
-        const list = document.getElementById('equip-list');
-        list.innerHTML = "";
-        
-        // 2. Filter Inventory for this slot type
-        // We look through all keys in inventory, find the Item Data, and check if type matches
-        let found = false;
-        
-        // We need to check all shop items to find matches
-        const allItems = [
-            ...(SHOP_ITEMS.equipment || [])
-        ];
+        validItems.forEach(item => {
+            // 1. Find who is currently wearing this specific item
+            const ownerPet = gameState.pets.find(op => op.equipment && Object.values(op.equipment).includes(item.instanceId));
+            
+            const isEquippedByMe = ownerPet && ownerPet.id === p.id;
+            const isEquippedByOther = ownerPet && ownerPet.id !== p.id;
 
-        Object.keys(gameState.inventory).forEach(itemId => {
-            const count = gameState.inventory[itemId];
-            if (count > 0) {
-                const itemData = allItems.find(i => i.id === itemId);
+            const prefix = item.prefix || {};
+            const rarityClass = `rarity-${item.rarity || 'basic'}`;
+            const itemLvl = item.level || 1;
+            const upgradeCost = itemLvl * 10;
+
+            let bonusText = "";
+            if (prefix.stat) bonusText = `+${prefix.stat} ${prefix.type.toUpperCase()}`;
+            if (prefix.value) bonusText = `+${Math.round(prefix.value * 100)}% ${prefix.type.toUpperCase()}`;
+
+            const div = document.createElement('div');
+            div.className = rarityClass;
+            div.style.cssText = `padding: 12px; border-radius: 12px; cursor: default; text-align: left; position: relative; margin-bottom:10px; border: 2px solid #e2e8f0; background: white;`;
+            
+            let visual = item.image || (item.type === 'weapon' ? '🗡️' : '🛡️');
+            let visualHtml = visual.startsWith('http') ? `<img src="${visual}" style="width:40px; height:40px; object-fit:contain; margin-right:10px;">` : `<div style="font-size:24px; margin-right:10px;">${visual}</div>`;
+
+            // --- 🖼️ THE PET OWNER BADGE ---
+            let ownerBadgeHtml = "";
+            if (ownerPet) {
+                let petImg = ownerPet.image 
+                    ? `<img src="${ownerPet.image}" class="${ownerPet.imageStyle}" style="width:24px; height:24px; border-radius:50%; border:2px solid #5a67d8; background:white;">` 
+                    : `<div style="font-size:18px; width:24px; height:24px; display:flex; align-items:center; justify-content:center; border-radius:50%; border:2px solid #5a67d8; background:white;">${ownerPet.emoji}</div>`;
                 
-                // If it's a valid item AND matches the slot (weapon/armor/etc)
-                if (itemData && itemData.type === slotType) {
-                    found = true;
-                    
-                    // Visual
-                    let visual = itemData.icon || '📦';
-                    if (itemData.image && itemData.image.startsWith('http')) {
-                        visual = `<img src="${itemData.image}" style="width:30px;">`;
-                    }
-                    
-                    const div = document.createElement('div');
-                    div.style.background = "#f7fafc";
-                    div.style.border = "1px solid #cbd5e0";
-                    div.style.padding = "10px";
-                    div.style.borderRadius = "8px";
-                    div.style.cursor = "pointer";
-                    div.style.textAlign = "left";
-                    
-                    div.innerHTML = `
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <span style="font-weight:bold;">${visual} ${itemData.name}</span>
-                            <span style="font-size:12px; background:#edf2f7; padding:2px 6px; border-radius:10px;">x${count}</span>
-                        </div>
-                        <div style="font-size:10px; color:#718096; margin-top:5px;">${itemData.description || itemData.desc || 'No desc'}</div>
-                    `;
-                    
-                    div.onclick = () => confirmEquip(itemId);
-                    list.appendChild(div);
-                }
+                ownerBadgeHtml = `
+                    <div style="position:absolute; top:-10px; right:-5px; display:flex; align-items:center; gap:5px; background:white; padding:2px 8px; border-radius:15px; border:1px solid #cbd5e0; box-shadow: 0 2px 5px rgba(0,0,0,0.1); z-index:10;">
+                        ${petImg}
+                        <span style="font-size:9px; font-weight:bold; color:#4a5568;">${isEquippedByMe ? "YOU" : ownerPet.name.toUpperCase()}</span>
+                    </div>`;
             }
+
+            // --- BUTTON LOGIC ---
+            let buttonLabel = "EQUIP";
+            let buttonClass = "blue";
+            let buttonDisabled = isEquippedByOther ? "disabled" : "";
+            
+            if (isEquippedByMe) {
+                buttonLabel = "EQUIPPED";
+                buttonClass = "green";
+                buttonDisabled = "disabled";
+            } else if (isEquippedByOther) {
+                buttonLabel = "IN USE";
+                buttonClass = "gray";
+            }
+
+            div.innerHTML = `
+                ${ownerBadgeHtml}
+                <div style="display:flex; align-items:center; margin-bottom:10px;">
+                    ${visualHtml}
+                    <div style="flex:1;">
+                        <div style="font-weight:bold; color:${prefix.color || '#2d3748'}; font-size:14px;">${item.name} <span style="color:#5a67d8;">[Lvl ${itemLvl}]</span></div>
+                        <div style="font-size:11px; color:#48bb78; font-weight:bold;">${bonusText}</div>
+                    </div>
+                </div>
+                <div style="display:flex; gap:5px;">
+                    <button class="action-btn ${buttonClass}" style="flex:1; margin:0; font-size:10px; padding:8px;" ${buttonDisabled} onclick="confirmEquip('${item.instanceId}')">${buttonLabel}</button>
+                    <button class="action-btn green" style="flex:1; margin:0; font-size:10px; padding:8px;" onclick="upgradeItem('${item.instanceId}', event)">⚙️ UPGRADE (${upgradeCost})</button>
+                    <button class="action-btn red" style="width:35px; margin:0; font-size:10px; padding:8px;" onclick="salvageItem('${item.instanceId}', event)">🗑️</button>
+                </div>
+            `;
+            list.appendChild(div);
         });
-        
-        if (!found) {
-            list.innerHTML = `<div style="grid-column:span 2; text-align:center; color:gray;">You have no ${slotType}s in your bag.<br>Go to the Shop!</div>`;
-        }
-        
-        // 3. Handle Unequip Button
-        const unequipBtn = document.getElementById('unequip-btn');
-        if (p.equipment && p.equipment[slotType]) {
-            unequipBtn.style.display = 'block';
-            unequipBtn.onclick = () => unequipCurrent(slotType);
-        } else {
-            unequipBtn.style.display = 'none';
-        }
-
-        document.getElementById('equip-modal').classList.add('active');
     }
 
-    function confirmEquip(newItemId) {
-        const p = gameState.pets.find(pet => pet.id === gameState.currentPetId);
-        const slot = currentEquipSlot;
-        
-        // 1. If something is already equipped, put it back in bag
-        if (p.equipment[slot]) {
-            const oldItem = p.equipment[slot];
-            gameState.inventory[oldItem] = (gameState.inventory[oldItem] || 0) + 1;
+    // Add a Scraps counter at the bottom of the modal
+    const footer = document.createElement('div');
+    footer.style.cssText = "margin-top:15px; font-weight:bold; color:#718096; font-size:12px; text-align:center;";
+    footer.innerHTML = `My Forge Scraps: <span style="color:#5a67d8;">${gameState.inventory.forgeScraps} ⚙️</span>`;
+    list.appendChild(footer);
+
+    document.getElementById('equip-modal').classList.add('active');
+}
+
+    function confirmEquip(instanceId) {
+    const p = gameState.pets.find(pet => pet.id === gameState.currentPetId);
+    const slot = currentEquipSlot; 
+    
+    // 🛡️ Safety: Final check to see if anyone else is using it
+    let alreadyInUse = false;
+    gameState.pets.forEach(pet => {
+        if (pet.equipment && Object.values(pet.equipment).includes(instanceId)) {
+            alreadyInUse = true;
         }
-        
-        // 2. Equip new item (remove from bag)
-        p.equipment[slot] = newItemId;
-        gameState.inventory[newItemId]--;
-        if (gameState.inventory[newItemId] <= 0) delete gameState.inventory[newItemId];
-        
-        // 3. Save & Close
-        saveGame(true);
-        renderHub();
-        document.getElementById('equip-modal').classList.remove('active');
-        showToast("Equipped!", "success");
+    });
+
+    if (alreadyInUse) {
+        return showToast("This item is already equipped elsewhere!", "error");
     }
+
+    if (!p.equipment) p.equipment = {};
+    p.equipment[slot] = instanceId;
+    
+    saveGame(true);
+    renderHub();
+    document.getElementById('equip-modal').classList.remove('active');
+    showToast("Equipped!", "success");
+}
 
     function unequipCurrent(slot) {
         const p = gameState.pets.find(pet => pet.id === gameState.currentPetId);
@@ -7570,43 +8641,44 @@ function getStatusIcon(type) {
             gameState.inventory[oldItem] = (gameState.inventory[oldItem] || 0) + 1;
             delete p.equipment[slot];
             
-            saveGame(true);
+            saveGame(false);
             renderHub();
             document.getElementById('equip-modal').classList.remove('active');
             showToast("Unequipped.", "info");
         }
     }
-    // ==========================================
-// 🧮 EQUIPMENT STATS CALCULATOR
-// ==========================================
+// --- PRO EQUIPMENT: SAFE CALCULATOR (NO MORE NaN) ---
 function getPetEquipmentStats(pet) {
-    let bonuses = { 
-        dmg: 0,   // Weapon
-        hp: 0,    // Armor
-        crit: 0,  // Accessory (% chance, e.g. 5)
-        immune: [] // Charm (List of strings like 'poison')
-    };
+    let stats = { dmg: 0, hp: 0, crit: 0, lifesteal: 0, bpBoost: 0, immune: [] };
+    if (!pet || !pet.equipment || !gameState.inventory || !gameState.inventory.equipment) return stats;
 
-    if (!pet.equipment) return bonuses;
+    Object.values(pet.equipment).forEach(instanceId => {
+        const item = gameState.inventory.equipment.find(i => i.instanceId === instanceId);
+        if (!item) return;
 
-    // Check all 4 slots
-    ['weapon', 'armor', 'accessory', 'charm'].forEach(slot => {
-        const itemId = pet.equipment[slot];
-        if (itemId) {
-            const item = findShopItem(itemId);
-            if (item) {
-                // Add Stats based on type
-                if (item.type === 'weapon') bonuses.dmg += (item.stat || 0);
-                if (item.type === 'armor') bonuses.hp += (item.stat || 0);
-                if (item.type === 'accessory') bonuses.crit += (item.stat || 0);
-                if (item.type === 'charm' && item.immunity) {
-                    bonuses.immune.push(item.immunity);
-                }
-            }
+        const base = findShopItem(item.baseId) || {};
+        const prefix = item.prefix || {};
+
+        // 🔥 FIX: Use Number() and || 0 on every single value to prevent NaN
+        const bStat = Number(base.baseStat) || 0;
+        if (item.type === 'weapon') stats.dmg += bStat;
+        if (item.type === 'armor') stats.hp += bStat;
+
+        const pStat = Number(prefix.stat) || 0;
+        const pVal = Number(prefix.value) || 0;
+
+        if (prefix.type === "dmg") stats.dmg += pStat;
+        if (prefix.type === "hp") stats.hp += pStat;
+        if (prefix.type === "crit") stats.crit += pStat;
+        if (prefix.type === "lifesteal") stats.lifesteal += pVal;
+        if (prefix.type === "bp_boost") stats.bpBoost += pVal;
+        if (prefix.type === "all") { stats.dmg += pStat; stats.hp += pStat; }
+        
+        if (prefix.type === "immunity" && prefix.effect) {
+            stats.immune.push(prefix.effect);
         }
     });
-    
-    return bonuses;
+    return stats;
 }
 // ==========================================
     // ⚗️ FUSION & ULTRA EVOLUTION ENGINE
@@ -7845,95 +8917,76 @@ function getPetEquipmentStats(pet) {
     }
 
     function renderBuilderScene() {
-        const world = document.getElementById('world');
-        const LAND_SCALE = 40; // Pixel size of one block
-        const size = gameState.builder.landSize * LAND_SCALE;
-        
-        // Center the world based on the container size (400x400)
-        const CONTAINER_SIZE = 400;
-        const centerOffset = CONTAINER_SIZE / 2;
-        
-        // Apply camera rotation
-        world.style.transform = `rotateX(${buildState.viewRot.x}deg) rotateZ(${buildState.viewRot.z}deg) translateZ(-50px)`;
-        
-        let html = '';
+    const world = document.getElementById('world');
+    if (!world) return;
 
-        // 1. Draw Grid Base (The Floor)
-        html += `<div class="grid-base" style="
-            width:${size}px; height:${size}px; 
-            grid-template-columns:repeat(${gameState.builder.landSize}, 1fr); 
-            left:50%; top:50%; 
-            transform:translate3d(-50%, -50%, 0px);">`;
-            
-        for(let y=0; y<gameState.builder.landSize; y++) {
-            for(let x=0; x<gameState.builder.landSize; x++) {
-                html += `<div class="grid-cell" onclick="placeBlock(${x},${y},0)"></div>`;
-            }
+    // DECIDE WHICH HOUSE TO DRAW: My house or Friend's house
+    const activeBuilder = gameState.isVisiting ? visitingVoxels : gameState.builder;
+    
+    if (!activeBuilder || !activeBuilder.voxels) return;
+
+    const LAND_SCALE = 40; 
+    const size = activeBuilder.landSize * LAND_SCALE;
+    const CONTAINER_SIZE = 400;
+    const centerOffset = CONTAINER_SIZE / 2;
+    
+    // Apply camera rotation
+    world.style.transform = `rotateX(${buildState.viewRot.x}deg) rotateZ(${buildState.viewRot.z}deg) translateZ(-50px)`;
+    
+    let html = '';
+
+    // 1. Draw Grid Base (The Floor)
+    html += `<div class="grid-base" style="width:${size}px; height:${size}px; grid-template-columns:repeat(${activeBuilder.landSize}, 1fr); left:50%; top:50%; transform:translate3d(-50%, -50%, 0px);">`;
+    for(let y=0; y<activeBuilder.landSize; y++) {
+        for(let x=0; x<activeBuilder.landSize; x++) {
+            html += `<div class="grid-cell" onclick="placeBlock(${x},${y},0)"></div>`;
         }
-        html += `</div>`;
-
-        // 2. Draw Voxels (Now supports Images AND Colors)
-        for(const [key, data] of Object.entries(gameState.builder.voxels)) {
-            const [x, y, z] = key.split(',').map(Number);
-            const b = BUILDER_BLOCKS.find(bl => bl.id === data.id);
-            
-            if(b) {
-                const ox = (x * LAND_SCALE) - (size / 2) + centerOffset;
-                const oy = (y * LAND_SCALE) - (size / 2) + centerOffset;
-                // Lift z by half block height + correction
-                const oz = (z * LAND_SCALE) + 20; 
-                
-                // --- 🌟 NEW: HYBRID TEXTURE LOGIC ---
-                // If it starts with http, wrap in url(''). If not, assume it's a Hex Color.
-                const getStyle = (val) => val && val.toString().startsWith('http') ? `url('${val}')` : val;
-                
-                // If it is an image, force it to cover the face
-                const bgProps = (val) => val && val.toString().startsWith('http') ? 'background-size: cover; background-repeat: no-repeat;' : '';
-
-                html += `
-                <div class="voxel-cube" style="transform: translate3d(${ox}px, ${oy}px, ${oz}px)">
-                    <div class="face face-top"   style="background:${getStyle(b.top)}; ${bgProps(b.top)}" onclick="clickVoxel(${x},${y},${z}, 'top', event)"></div>
-                    <div class="face face-front" style="background:${getStyle(b.side)}; ${bgProps(b.side)}" onclick="clickVoxel(${x},${y},${z}, 'front', event)"></div>
-                    <div class="face face-back"  style="background:${getStyle(b.side)}; ${bgProps(b.side)}" onclick="clickVoxel(${x},${y},${z}, 'back', event)"></div>
-                    <div class="face face-right" style="background:${getStyle(b.color)}; ${bgProps(b.color)}" onclick="clickVoxel(${x},${y},${z}, 'right', event)"></div>
-                    <div class="face face-left"  style="background:${getStyle(b.color)}; ${bgProps(b.color)}" onclick="clickVoxel(${x},${y},${z}, 'left', event)"></div>
-                </div>`;
-            }
-        }
-
-        // --- 3. RENDER PETS (3D THICKNESS VERSION) ---
-        if (typeof builderPets !== 'undefined' && builderPets.length > 0) {
-            builderPets.forEach(pet => {
-                const ox = (pet.x * 40) - (size / 2) + centerOffset;
-                const oy = (pet.y * 40) - (size / 2) + centerOffset;
-                const oz = (pet.z * 40) + 20; 
-
-                const content = pet.image 
-                    ? `<img src="${pet.image}" style="width:30px; height:30px; object-fit:contain;">`
-                    : `<div style="font-size:24px;">${pet.emoji}</div>`;
-
-                html += `
-                <div class="voxel-pet" style="
-                    position: absolute;
-                    width: 40px; height: 40px;
-                    transform-style: preserve-3d;
-                    transform: translate3d(${ox}px, ${oy}px, ${oz}px) rotateX(-90deg);
-                    pointer-events: none; 
-                    transition: transform 0.5s linear;
-                ">
-                    <!-- Layer 1 -->
-                    <div style="position:absolute; width:100%; height:100%; display:flex; justify-content:center; align-items:center; transform: translateZ(2px);">${content}</div>
-                    <!-- Layer 2 -->
-                    <div style="position:absolute; width:100%; height:100%; display:flex; justify-content:center; align-items:center; transform: translateZ(0px); filter: brightness(0.8);">${content}</div>
-                    <!-- Layer 3 -->
-                    <div style="position:absolute; width:100%; height:100%; display:flex; justify-content:center; align-items:center; transform: translateZ(-2px); filter: brightness(0.5);">${content}</div>
-                </div>`;
-            });
-        }
-
-        world.innerHTML = html;
-        document.getElementById('land-size-display').innerText = `${gameState.builder.landSize}x${gameState.builder.landSize}`;
     }
+    html += `</div>`;
+
+    // 2. Draw Voxels (Blocks)
+    for(const [key, data] of Object.entries(activeBuilder.voxels)) {
+        const [x, y, z] = key.split(',').map(Number);
+        const b = BUILDER_BLOCKS.find(bl => bl.id === data.id);
+        if(b) {
+            const ox = (x * LAND_SCALE) - (size / 2) + centerOffset;
+            const oy = (y * LAND_SCALE) - (size / 2) + centerOffset;
+            const oz = (z * LAND_SCALE) + 20; 
+            const getStyle = (val) => val && val.toString().startsWith('http') ? `url('${val}')` : val;
+            const bgProps = (val) => val && val.toString().startsWith('http') ? 'background-size: cover; background-repeat: no-repeat;' : '';
+
+            html += `<div class="voxel-cube" style="transform: translate3d(${ox}px, ${oy}px, ${oz}px)">
+                <div class="face face-top" style="background:${getStyle(b.top)}; ${bgProps(b.top)}" onclick="clickVoxel(${x},${y},${z}, 'top', event)"></div>
+                <div class="face face-front" style="background:${getStyle(b.side)}; ${bgProps(b.side)}" onclick="clickVoxel(${x},${y},${z}, 'front', event)"></div>
+                <div class="face face-back" style="background:${getStyle(b.side)}; ${bgProps(b.side)}" onclick="clickVoxel(${x},${y},${z}, 'back', event)"></div>
+                <div class="face face-right" style="background:${getStyle(b.color)}; ${bgProps(b.color)}" onclick="clickVoxel(${x},${y},${z}, 'right', event)"></div>
+                <div class="face face-left" style="background:${getStyle(b.color)}; ${bgProps(b.color)}" onclick="clickVoxel(${x},${y},${z}, 'left', event)"></div>
+            </div>`;
+        }
+    }
+
+    // 3. RENDER PETS (Walking around the house)
+    if (typeof builderPets !== 'undefined' && builderPets.length > 0) {
+        builderPets.forEach(pet => {
+            const ox = (pet.x * 40) - (size / 2) + centerOffset;
+            const oy = (pet.y * 40) - (size / 2) + centerOffset;
+            const oz = (pet.z * 40) + 20; 
+
+            const content = pet.image 
+                ? `<img src="${pet.image}" style="width:30px; height:30px; object-fit:contain;">`
+                : `<div style="font-size:24px;">${pet.emoji}</div>`;
+
+            html += `<div class="voxel-pet" style="position: absolute; width: 40px; height: 40px; transform-style: preserve-3d; transform: translate3d(${ox}px, ${oy}px, ${oz}px) rotateX(-90deg); pointer-events: none; transition: transform 0.5s linear;">
+                <div style="position:absolute; width:100%; height:100%; display:flex; justify-content:center; align-items:center; transform: translateZ(2px);">${content}</div>
+                <div style="position:absolute; width:100%; height:100%; display:flex; justify-content:center; align-items:center; transform: translateZ(0px); filter: brightness(0.8);">${content}</div>
+                <div style="position:absolute; width:100%; height:100%; display:flex; justify-content:center; align-items:center; transform: translateZ(-2px); filter: brightness(0.5);">${content}</div>
+            </div>`;
+        });
+    }
+
+    world.innerHTML = html;
+    document.getElementById('land-size-display').innerText = `${activeBuilder.landSize}x${activeBuilder.landSize}`;
+}
 
     function renderPalette() {
         const p = document.getElementById('block-palette');
@@ -8030,38 +9083,36 @@ function getPetEquipmentStats(pet) {
 }
 
     function placeBlock(x, y, z) {
-        // Prevent placement if dragging or erasing
-        if(buildState.isDragging) return;
-        if(buildState.selectedTool === 'eraser') return;
+    if (gameState.isVisiting) return; // READ-ONLY MODE
 
-        const key = `${x},${y},${z}`;
-        if(gameState.builder.voxels[key]) return; // Spot occupied
+    if(buildState.isDragging) return;
+    if(buildState.selectedTool === 'eraser') return;
 
-        const qty = gameState.builder.inventory[buildState.selectedTool] || 0;
+    const key = `${x},${y},${z}`;
+    if(gameState.builder.voxels[key]) return; 
+
+    const qty = gameState.builder.inventory[buildState.selectedTool] || 0;
+    
+    if(qty > 0) {
+        gameState.builder.voxels[key] = { id: buildState.selectedTool };
+        gameState.builder.inventory[buildState.selectedTool]--;
         
-        if(qty > 0) {
-            // 1. Place the block
-            gameState.builder.voxels[key] = { id: buildState.selectedTool };
-            gameState.builder.inventory[buildState.selectedTool]--;
-            
-            // 2. Save & Render
-            saveGame();
-            renderBuilderScene();
-            renderPalette();
+        saveGame(false);
+        renderBuilderScene();
+        renderPalette();
 
-            // --- 🚧 NEW: TRIGGER QUIZ EVERY 5 BLOCKS ---
-            blocksPlacedSession++;
-            if (blocksPlacedSession % 5 === 0) {
-                setTimeout(triggerBuildQuiz, 300); // Small delay so they see the block appear first
-            }
-            // -------------------------------------------
-
-        } else {
-            showToast("Out of blocks!", "error");
+        // Increment session counter for Construction Quizzes
+        blocksPlacedSession++;
+        if (blocksPlacedSession % 5 === 0) {
+            setTimeout(triggerBuildQuiz, 300); 
         }
+    } else {
+        showToast("Out of blocks!", "error");
     }
+}
 
     function clickVoxel(x, y, z, face, e) {
+        if (gameState.isVisiting) return; // VISITOR SAFETY
         e.stopPropagation(); // Don't click grid behind it
         if(buildState.isDragging) return;
 
@@ -8338,13 +9389,788 @@ function triggerBuildQuiz() {
     // 4. Lock the Screen
     modal.classList.add('active');
 }
-// Background safety save every 60 seconds
-setInterval(() => {
-    if (gameState.playerName && activeToolId) {
-        console.log("🕒 Background sync...");
-        saveGame(true); 
+// --- PRO BACKEND: MASTER SYNC ENGINE ---
+// 1. Emergency Save: Triggers the moment the tab is closed
+window.addEventListener("beforeunload", (event) => {
+    if (hasUnsavedChanges && gameState.playerName && gameState.playerName !== "Student") {
+        saveProgressToFirebase();
     }
-}, 60000);
+});
+
+// 2. Heartbeat Timer: Checks every 45 seconds and saves IF changes were made
+if (autoSaveInterval) clearInterval(autoSaveInterval);
+autoSaveInterval = setInterval(() => {
+    if (hasUnsavedChanges && gameState.playerName && gameState.playerName !== "Student") {
+        console.log("🕒 Heartbeat: Syncing changes to Cloud...");
+        saveProgressToFirebase();
+    }
+}, 45000); // 45 seconds is the "Sweet Spot" for safety vs cost
+// --- PRO UI: LOOT REVEAL ENGINE ---
+function showLootReveal(item) {
+    const overlay = document.getElementById('item-reveal-overlay');
+    const card = document.getElementById('reveal-card-inner');
+    const name = document.getElementById('reveal-item-name');
+    const desc = document.getElementById('reveal-item-desc');
+    const tag = document.getElementById('reveal-rarity-tag');
+    const container = document.getElementById('reveal-visual-container');
+
+    // 1. Setup Rarity
+    const rarity = item.rarity || 'basic';
+    tag.innerText = rarity.toUpperCase();
+    tag.style.color = item.prefix.color;
+    
+    // Apply special background class
+    card.className = "reveal-card rarity-" + rarity;
+
+    // 2. Setup Name & Stats
+    name.innerText = item.name;
+    let bonus = item.prefix.stat ? `+${item.prefix.stat} ${item.prefix.type.toUpperCase()}` : `+${Math.round(item.prefix.value*100)}% ${item.prefix.type.toUpperCase()}`;
+    desc.innerHTML = `<span style="color:#48bb78; font-weight:bold;">${bonus}</span><br>Permanent Equipment Added to Hub`;
+
+    // 3. Setup Visual
+    if (item.image && item.image.startsWith('http')) {
+        container.innerHTML = `<img src="${item.image}" class="reveal-image">`;
+    } else {
+        container.innerHTML = `<div style="font-size:100px; margin: 20px 0;">${item.image || '🗡️'}</div>`;
+    }
+
+    // 4. Play Sound & Show
+    soundManager.playSFX('gacha'); 
+    overlay.style.display = 'flex';
+}
+
+function closeLootReveal() {
+    document.getElementById('item-reveal-overlay').style.display = 'none';
+    renderShop(); // Refresh shop to show updated BP
+}
+// --- PRO FORGE: SALVAGE ENGINE ---
+function salvageItem(instanceId, event) {
+    if(event) event.stopPropagation();
+    const item = gameState.inventory.equipment.find(i => i.instanceId === instanceId);
+    
+    if (!confirm(`Salvage ${item.name}?\n\nYou will get Forge Scraps, but the item will be destroyed forever!`)) return;
+
+    // 1. Give scraps based on rarity
+    const rewards = { 'basic': 5, 'rare': 20, 'legendary': 100 };
+    const amount = rewards[item.rarity || 'basic'];
+    gameState.inventory.forgeScraps += amount;
+
+    // 2. Remove from inventory
+    gameState.inventory.equipment = gameState.inventory.equipment.filter(i => i.instanceId !== instanceId);
+    
+    // 3. If the pet was wearing it, unequip it
+    gameState.pets.forEach(p => {
+        if (p.equipment) {
+            for (let slot in p.equipment) {
+                if (p.equipment[slot] === instanceId) delete p.equipment[slot];
+            }
+        }
+    });
+
+    showToast(`♻️ Salvaged! +${amount} Scraps`, "success");
+    saveGame(false);
+    openEquipMenu(currentEquipSlot); // Refresh
+}
+
+
+
+// --- PRO FORGE: UPGRADE ENGINE ---
+function upgradeItem(instanceId, event) {
+    if(event) event.stopPropagation();
+    const item = gameState.inventory.equipment.find(i => i.instanceId === instanceId);
+    const itemLvl = item.level || 1;
+    const cost = itemLvl * 10;
+
+    if (gameState.inventory.forgeScraps < cost) {
+        showToast(`Need ${cost} Scraps to upgrade!`, "error");
+        return;
+    }
+
+    // 1. Pay for it
+    gameState.inventory.forgeScraps -= cost;
+    
+    // 2. Power up!
+    item.level = itemLvl + 1;
+    
+    // If it's a flat stat (like +5 DMG), add +3 per level
+    if (item.prefix.stat !== undefined) {
+        item.prefix.stat += 3;
+    } 
+    // If it's a percentage (like +15% Lifesteal), add +2% per level
+    else if (item.prefix.value !== undefined) {
+        item.prefix.value += 0.02;
+    }
+
+    soundManager.playSFX('levelUp');
+    showToast(`✨ Upgraded! ${item.name} is now Lvl ${item.level}`, "success");
+    
+    saveGame(false);
+    openEquipMenu(currentEquipSlot); // Refresh
+}
+// --- PRO RAID: PHASE 2 FRENZY LOGIC ---
+function triggerMathFrenzy() {
+    frenzyActive = true;
+    currentPhase = 2;
+    frenzyCount = 0;
+    frenzyTimer = 30;
+    
+    document.getElementById('raid-frenzy-overlay').style.display = 'flex';
+    document.getElementById('frenzy-timer').innerText = frenzyTimer;
+    
+    // Start Countdown
+    frenzyInterval = setInterval(() => {
+        frenzyTimer--;
+        document.getElementById('frenzy-timer').innerText = frenzyTimer;
+        if (frenzyTimer <= 0) endFrenzy(false); // FAIL
+    }, 1000);
+
+    generateFrenzyQuestion();
+}
+
+function generateFrenzyQuestion() {
+    // Designer Choice: Use Grade - 1 for Speed Fluency
+    let easyGrade = Math.max(0, (parseInt(gameState.grade) || 1) - 1);
+    const q = MathEngine.generate(easyGrade.toString());
+    
+    document.getElementById('frenzy-math-q').innerHTML = q.qVisualHTML || q.q;
+    const opts = document.getElementById('frenzy-options');
+    opts.innerHTML = '';
+
+    q.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = "mcq-btn";
+        btn.style.padding = "10px";
+        btn.innerText = opt;
+        btn.onclick = () => {
+            if (opt == q.a) {
+                frenzyCount++;
+                soundManager.playSFX('correct');
+                const pct = (frenzyCount / 5) * 100;
+                document.getElementById('frenzy-shield-fill').style.width = pct + "%";
+                document.getElementById('frenzy-shield-text').innerText = `SHIELD: ${frenzyCount} / 5`;
+                if (frenzyCount >= 5) endFrenzy(true); // SUCCESS
+                else generateFrenzyQuestion();
+            } else {
+                soundManager.playSFX('wrong');
+                frenzyTimer -= 2; // Time penalty for wrong answer
+                showToast("-2 Seconds!", "error");
+                generateFrenzyQuestion();
+            }
+        };
+        opts.appendChild(btn);
+    });
+}
+
+async function endFrenzy(success) {
+    clearInterval(frenzyInterval);
+    frenzyActive = false;
+    document.getElementById('raid-frenzy-overlay').style.display = 'none';
+
+    const pVis = document.getElementById('battle-player-visual');
+    const eVis = document.getElementById('battle-enemy-visual');
+
+    if (success) {
+        showToast("💥 SHIELD SHATTERED! MEGA HIT!", "success");
+        eVis.style.animation = "damageShake 1s";
+        // Deal massive bonus damage to the boss
+        currentRunDamage += 500; 
+        soundManager.playSFX('levelUp');
+    } else {
+        showToast("❌ FAILED! Boss unleashes a Roar!", "error");
+        const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+        const dmg = Math.floor(pet.hp * 0.4); // 40% damage
+        pet.hp -= dmg;
+        pVis.style.animation = "damageShake 1s";
+        showFloatingText(pVis.parentElement, `-${dmg}`, "crit");
+        saveGame();
+    }
+    renderRaidPlayerSide();
+}
+// --- ✈️ VISITOR & KINDNESS ENGINE ---
+const COMPLIMENTS = [
+    "Your house design is genius!", "I love the colors you picked!", 
+    "This is the coolest land I’ve seen!", "You are a master architect!", 
+    "Your build is so creative!", "Thank you for helping me in class today!", 
+    "You are an amazing friend!", "Thanks for explaining that math problem!", 
+    "You are a great team player!", "I appreciate your kindness today!", 
+    "Keep up the great work!", "Your pet has an awesome home!", 
+    "High five for being awesome!", "You have really great ideas!", 
+    "I'm glad we are in the same class!"
+];
+
+let visitingVoxels = null;
+let currentFriendName = "";
+
+async function visitFriendLand() {
+    const friendName = document.getElementById('visit-username').value.trim();
+    if (!friendName || friendName === gameState.playerName) return;
+
+    showToast("Traveling to " + friendName + "...", "info");
+
+    try {
+        const docSnap = await window.fbase.getDoc(window.fbase.doc(window.db, "students", friendName));
+        if (!docSnap.exists()) return showToast("Student not found!", "error");
+
+        const friendDocData = docSnap.data().saveData;
+        const decodedData = decompressData(friendDocData);
+
+        if (!decodedData.builder) return showToast("Friend hasn't built anything yet!", "info");
+
+        // 1. Enter Visiting State
+        gameState.isVisiting = true;
+        currentFriendName = friendName;
+        visitingVoxels = decodedData.builder; // Capture friend's land
+
+        // 2. Toggle UI
+        document.getElementById('build-main-controls').style.display = 'none';
+        document.getElementById('block-palette').style.display = 'none';
+        document.getElementById('visitor-controls').style.display = 'block';
+        document.getElementById('visiting-name').innerText = "Visiting: " + friendName;
+        updateKindnessUI();
+
+        // 3. Render Land
+        renderVisitorLand();
+        initBuilderPets(); // Your pets walk in their land!
+        
+    } catch (e) { console.error(e); }
+}
+
+function renderVisitorLand() {
+    renderBuilderScene(); // That's it!
+}
+
+function exitVisit() {
+    gameState.isVisiting = false;
+    document.getElementById('build-main-controls').style.display = 'flex';
+    document.getElementById('block-palette').style.display = 'flex';
+    document.getElementById('visitor-controls').style.display = 'none';
+    initBuilder(); // Restore my house
+    initBuilderPets();
+}
+
+function updateKindnessUI() {
+    const remaining = 100 - (gameState.givenToday || 0);
+    const meter = document.getElementById('kindness-meter');
+    if(meter) meter.innerText = `Kindness Purse: ${remaining}/100 BP`;
+}
+
+async function giveStar() {
+    if (!gameState.isVisiting) return;
+    
+    // 1. Check if they have enough BP
+    if (gameState.brainPoints < 5) {
+        return showToast("Need 5 BP to give a Star!", "error");
+    }
+
+    // 2. Check Daily Kindness Limit
+    if (gameState.givenToday + 5 > 100) {
+        return showToast("Daily Kindness Limit reached!", "error");
+    }
+
+    // 3. Deduct from Visitor
+    gameState.brainPoints -= 5;
+    gameState.givenToday += 5;
+    updateStatsDisplay();
+    updateKindnessUI();
+
+    // 4. Send to Friend (5 BP + 2 Bonus = 7 BP received)
+    await sendFriendNotification(currentFriendName, "star", 7, "gave you a Star!");
+    
+    showToast("Star Sent! (-5 BP)", "success");
+    saveGame(true); // Save the BP deduction immediately
+}
+
+function openComplimentMenu() {
+    const remaining = 100 - (gameState.givenToday || 0);
+    if (remaining <= 0) return showToast("Daily Kindness Limit Reached!", "info");
+
+    let html = `<div style="max-height:300px; overflow-y:auto; text-align:left;">`;
+    COMPLIMENTS.forEach((msg) => {
+        html += `<div class="move-replace-btn" onclick="sendGifterCompliment('${msg.replace(/'/g, "\\'")}')" style="margin-bottom:5px; font-size:13px; padding:10px; border:1px solid #eee;">${msg}</div>`;
+    });
+    html += `</div>`;
+
+    const modal = document.querySelector('#arena-modal .confirm-modal');
+    const overlay = document.getElementById('arena-modal');
+    modal.innerHTML = `<h3>Choose a Compliment</h3><p style='font-size:12px;'>Sends 20 BP (+5 Bonus) to friend.</p>${html}<button class='confirm-btn no' style="width:100%; margin-top:10px;" onclick='document.getElementById("arena-modal").classList.remove("active")'>Cancel</button>`;
+    overlay.classList.add('active');
+}
+
+async function sendGifterCompliment(msg) {
+    document.getElementById("arena-modal").classList.remove("active");
+    
+    if (gameState.givenToday + 20 > 100) return showToast("Daily Kindness limit reached!", "error");
+    if (gameState.brainPoints < 20) return showToast("Not enough BP to give!", "error");
+
+    gameState.brainPoints -= 20;
+    gameState.givenToday += 20;
+    updateStatsDisplay();
+    updateKindnessUI();
+
+    await sendFriendNotification(currentFriendName, "compliment", 25, msg);
+    showToast("Gift Sent! Message delivered.", "success");
+    saveGame(true);
+}
+
+async function sendFriendNotification(friend, type, bpAmount, message) {
+    const ref = window.fbase.doc(window.db, "students", friend);
+    
+    // The note itself can stay readable, but the keys in the database MUST be tiny
+    const note = { 
+        from: gameState.playerName, 
+        type: type, 
+        bp: bpAmount, // Amount of BP in the gift
+        text: message, 
+        time: Date.now() 
+    };
+
+    try {
+        await window.fbase.updateDoc(ref, {
+            // 🔥 FIX: Use 'nt' instead of 'notifications'
+            "saveData.nt": window.fbase.arrayUnion(note), 
+            
+            // 🔥 FIX: Use 'bp' instead of 'brainPoints'
+            "saveData.bp": window.fbase.increment(bpAmount)
+        });
+    } catch (e) {
+        console.error("Failed to send gift:", e);
+    }
+}
+
+function showMailbox() {
+    const notes = gameState.notifications || [];
+    let html = notes.map(n => `
+        <div style="background:#f7fafc; padding:10px; border-radius:8px; border-left:4px solid #48bb78; margin-bottom:10px; text-align:left;">
+            <div style="font-weight:bold; font-size:14px; color:#2d3748;">📬 From: ${n.from}</div>
+            <div style="font-size:13px; color:#4a5568; margin:5px 0;">"${n.text}"</div>
+            ${n.bp > 0 ? `<div style="font-weight:bold; color:#d69e2e; font-size:12px;">🎁 Received: ${n.bp} BP!</div>` : ''}
+        </div>
+    `).join('');
+
+    const totalBP = notes.reduce((sum, n) => sum + (n.bp || 0), 0);
+    const modal = document.querySelector('#arena-modal .confirm-modal');
+    const overlay = document.getElementById('arena-modal');
+    
+    modal.innerHTML = `
+        <h2 style="color:#48bb78;">Community Mailbox</h2>
+        <p>Friends visited your land while you were away!</p>
+        <div style="max-height:250px; overflow-y:auto; margin:15px 0;">${html}</div>
+        <div style="background:#fef3c7; padding:10px; border-radius:10px; font-weight:bold; color:#92400e; margin-bottom:15px;">
+            Total Collected: +${totalBP} BP
+        </div>
+        <button class="confirm-btn yes" style="width:100%;" onclick="clearMailbox()">Awesome!</button>
+    `;
+    overlay.classList.add('active');
+}
+
+async function clearMailbox() {
+    document.getElementById("arena-modal").classList.remove("active");
+    gameState.notifications = [];
+    await window.fbase.updateDoc(window.fbase.doc(window.db, "students", gameState.playerName), {
+        "saveData.notifications": []
+    });
+    saveGame(true);
+}
+// --- 🧬 MASTERY INFUSION SYSTEM ---
+
+function openInfusionMenu() {
+    const p = gameState.pets.find(pet => pet.id === gameState.currentPetId);
+    if (!p.badges) p.badges = [];
+    
+    let html = `<div style="max-height:300px; overflow-y:auto; text-align:left;">`;
+    
+    if (gameState.badgeInventory.length === 0) {
+        html += `<p style="text-align:center; padding:20px; color:gray;">No Mastery Badges found. Visit the Math Lab!</p>`;
+    }
+
+    gameState.badgeInventory.forEach((badge) => {
+        html += `
+        <div class="move-replace-btn" onclick="confirmInfusion('${badge}')" style="margin-bottom:10px;">
+            <div style="font-weight:bold; color:#5a67d8;">🏅 ${badge}</div>
+            <div style="font-size:10px; color:#718096;">Gives +20% Power when solving ${badge} problems!</div>
+        </div>`;
+    });
+    
+    html += `</div>`;
+
+    const modal = document.querySelector('#arena-modal .confirm-modal');
+    const overlay = document.getElementById('arena-modal');
+    modal.innerHTML = `
+        <h2 style="color:#5a67d8;">🧬 Infuse Mastery</h2>
+        <p style="font-size:13px;">Linking a badge to <strong>${p.name}</strong> is <strong style="color:#e53e3e;">PERMANENT</strong>.</p>
+        ${html}
+        <button class='confirm-btn no' style="width:100%;" onclick='document.getElementById("arena-modal").classList.remove("active")'>Cancel</button>
+    `;
+    overlay.classList.add('active');
+}
+
+async function confirmInfusion(badgeName) {
+    const p = gameState.pets.find(pet => pet.id === gameState.currentPetId);
+    
+    if(!confirm(`Are you sure? This badge will be PERMANENTLY linked to ${p.name}.`)) return;
+
+    // 1. Add to Pet
+    p.badges.push(badgeName);
+    
+    // 2. Remove from Inventory
+    gameState.badgeInventory = gameState.badgeInventory.filter(b => b !== badgeName);
+    
+    document.getElementById("arena-modal").classList.remove("active");
+    showToast(`${p.name} mastered ${badgeName}!`, "success");
+    soundManager.playSFX('levelUp');
+    
+    saveGame(true);
+    renderHub();
+}
+// --- 🗼 INFINITY TOWER ENGINE 5.1 (STABLE & MATCHED) ---
+let isTowerActing = false;
+let towerFocusActive = false;
+let towerTurnIndex = 0; 
+
+// 1. THE LOBBY
+function renderTowerLobby() {
+    isTowerActing = false;
+    towerTurnIndex = 0;
+    towerFocusActive = false;
+    document.getElementById('tower-arena').style.display = 'none';
+    document.getElementById('tower-command-bar').style.display = 'none';
+    const lobby = document.getElementById('tower-lobby');
+    lobby.style.display = 'block';
+    
+    const floor = gameState.currentTowerFloor || 1;
+
+    // --- LOOPHOLE FIX: ALWAYS GET FRESH HP FROM GLOBAL STATE ---
+    let totalMissingHP = 0;
+    gameState.team.forEach(id => {
+        const petInInventory = gameState.pets.find(p => p.id === id);
+        if (petInInventory) {
+            totalMissingHP += (petInInventory.maxHP - petInInventory.hp);
+        }
+    });
+    const healCost = Math.ceil(totalMissingHP * 2); // 2 BP per 1 HP
+    // ----------------------------------------------------------
+
+    // ... (rest of your lobby.innerHTML code) ...
+    // Note: Make sure the button line uses the new ${healCost} variable:
+    // <button ...> 💊 HEAL ALL (${healCost} BP) </button>
+    // ---------------------------------------
+
+    lobby.innerHTML = `
+        <h1 style="font-size:32px; color:#f6e05e; text-shadow: 0 0 10px #b7791f;">🗼 INFINITY TOWER</h1>
+        <div class="tower-lobby-card">
+            <div style="font-size:18px; font-weight:bold;">FLOOR ${floor}</div>
+            <div style="font-size:11px; color:#a0aec0;">Best: ${gameState.highestTowerFloor || 1}</div>
+        </div>
+        <div id="tower-squad-preview" style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;"></div>
+        <div style="display:flex; gap:10px; justify-content:center;">
+            <button class="action-btn blue" style="font-size:12px;" onclick="towerOpenSquadManager()">👥 SQUAD</button>
+            <button class="action-btn green" style="font-size:12px;" onclick="towerHealFullTeam()">
+                💊 HEAL ALL (${healCost} BP)
+            </button>
+        </div>
+        <button class="gacha-btn" style="background:#48bb78; margin-top:20px;" onclick="startTowerFloor()">⚡ ASCEND (10 Stamina)</button>
+        <button onclick="resetTowerProgress()" style="background:none; border:none; color:#fc8181; font-size:11px; cursor:pointer; margin-top:15px; text-decoration:underline;">Reset Progress</button>
+
+        <div id="tower-squad-modal" class="tower-modal">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h2 style="margin:0;">Manage Squad</h2>
+                <button class="action-btn red" style="width:40px;" onclick="towerCloseSquadManager()">X</button>
+            </div>
+            <div id="tower-squad-list" style="flex:1; overflow-y:auto; display:grid; grid-template-columns:1fr 1fr; gap:10px;"></div>
+            <button class="action-btn green" style="margin-top:15px;" onclick="towerCloseSquadManager()">CONFIRM TEAM</button>
+        </div>
+    `;
+    towerRenderSquadPreview();
+}
+
+// 2. START FLOOR
+async function startTowerFloor() {
+    if (gameState.stamina < 10) return showToast("Need 10 Stamina", "error");
+    const squad = getSquad();
+    if (squad.every(p => p.hp <= 0)) return showToast("Heal your team first!", "error");
+
+    isTowerActing = true;
+    gameState.stamina -= 10;
+    updateStatsDisplay();
+    await saveGame(true);
+
+    const floor = gameState.currentTowerFloor || 1;
+    const enemyTeam = [];
+    const pool = [...PET_TYPES.common, ...PET_TYPES.uncommon, ...PET_TYPES.rare];
+    
+    for(let i=0; i<6; i++) {
+        let base = JSON.parse(JSON.stringify(pool[Math.floor(Math.random() * pool.length)]));
+        const hpVal = 50 + (floor * 25);
+        enemyTeam.push({ ...base, currentHP: hpVal, maxHP: hpVal, id: 'te_'+i });
+    }
+
+    towerBattleState = { playerTeam: squad.map(p => ({...p, currentHP: p.hp})), enemyTeam: enemyTeam };
+    towerTurnIndex = 0;
+
+    document.getElementById('tower-lobby').style.display = 'none';
+    document.getElementById('tower-arena').style.display = 'block';
+    
+    towerRenderStage();
+    setTimeout(towerNextTurn, 1000);
+}
+
+// 3. TURN LOGIC
+function towerNextTurn() {
+    // WIN CHECK: If all enemies are dead
+    if (towerBattleState.enemyTeam.every(e => e.currentHP <= 0)) {
+        towerWinFloor();
+        return;
+    }
+    
+    // PLAYER TURN END CHECK
+    if (towerTurnIndex >= towerBattleState.playerTeam.length) {
+        towerTurnIndex = 0;
+        towerEnemyTurn();
+        return;
+    }
+
+    const pet = towerBattleState.playerTeam[towerTurnIndex];
+    if (pet.currentHP <= 0) {
+        towerTurnIndex++;
+        towerNextTurn();
+        return;
+    }
+
+    towerRenderStage();
+    towerShowCommandBar(pet);
+}
+
+function towerShowCommandBar(pet) {
+    const bar = document.getElementById('tower-command-bar');
+    const list = document.getElementById('tower-moves-list');
+    document.getElementById('tower-pet-name-display').innerText = `COMMANDING: ${pet.name}`;
+    
+    bar.style.display = 'flex';
+    const moves = (pet.powers && pet.powers.length > 0) ? pet.powers : ['claw_attack'];
+
+    let html = moves.map(pid => {
+        const move = findShopItem(pid);
+        return `<button class="action-btn green" onclick="towerDoMove('${pid}')">${move.name}</button>`;
+    }).join('');
+
+    html += `<button class="action-btn blue" onclick="towerStartFocus()">${towerFocusActive ? '✨ LOADED' : '🧠 FOCUS'}</button>`;
+    list.innerHTML = html;
+
+    const el = document.getElementById(`tp-${pet.id}`);
+    if(el) el.classList.add('tower-active-glow');
+}
+
+async function towerDoMove(moveId) {
+    document.getElementById('tower-command-bar').style.display = 'none';
+    const pet = towerBattleState.playerTeam[towerTurnIndex];
+    const move = findShopItem(moveId);
+    
+    await towerAnimate(pet, move, towerFocusActive ? 2.5 : 1.0, true);
+    
+    towerFocusActive = false;
+    towerTurnIndex++;
+    
+    // Check for win immediately after attack
+    if (towerBattleState.enemyTeam.every(e => e.currentHP <= 0)) {
+        setTimeout(towerWinFloor, 800);
+    } else {
+        setTimeout(towerNextTurn, 600);
+    }
+}
+
+async function towerEnemyTurn() {
+    showToast("Enemies attacking...", "error");
+    for (let enemy of towerBattleState.enemyTeam) {
+        if (enemy.currentHP <= 0) continue;
+        await towerAnimate(enemy, { name: 'Strike', icon: '💢' }, 1.0, false);
+        if (towerBattleState.playerTeam.every(p => p.currentHP <= 0)) break;
+    }
+
+    if (towerBattleState.playerTeam.every(p => p.currentHP <= 0)) {
+        alert("Squad Fainted! Rematch once you heal."); towerFinalize();
+    } else {
+        towerTurnIndex = 0; towerNextTurn();
+    }
+}
+
+// 4. THE ANIMATION (With GetBoundingClientRect Fix)
+async function towerAnimate(attacker, move, mult, isPlayer) {
+    const atkId = isPlayer ? `tp-${attacker.id}` : `te-${attacker.id}`;
+    const atkEl = document.getElementById(atkId);
+    
+    const targets = isPlayer ? towerBattleState.enemyTeam : towerBattleState.playerTeam;
+    const target = targets.find(t => t.currentHP > 0);
+    if (!target) return;
+    
+    const defId = isPlayer ? `te-${target.id}` : `tp-${target.id}`;
+    const defEl = document.getElementById(defId);
+
+    // ERROR PROTECTION SHIELD
+    if (!atkEl || !defEl) {
+        console.warn("Visuals not found, calculating damage only.");
+        target.currentHP = Math.max(0, target.currentHP - 25);
+        return;
+    }
+
+    atkEl.style.transform = isPlayer ? "translateX(40px)" : "translateX(-40px)";
+    createProjectile(move.image || move.icon || '💥', atkEl, defEl);
+    
+    await new Promise(r => setTimeout(r, 450));
+    const dmg = Math.floor((20 + (attacker.level || 1) * 2) * mult);
+    target.currentHP = Math.max(0, target.currentHP - dmg);
+    
+    defEl.style.animation = "damageShake 0.4s";
+    showFloatingText(defEl, `-${dmg}`, mult > 1 ? "crit" : "weak");
+    
+    await new Promise(r => setTimeout(r, 300));
+    atkEl.style.transform = "none";
+}
+
+// 5. STAGING & WINNING
+function towerWinFloor() {
+    const floor = gameState.currentTowerFloor;
+    const reward = floor * 100;
+    addBP(reward);
+    
+    alert(`🏆 FLOOR ${floor} CLEAR! \n\nRewards: +${reward} BP`);
+    
+    gameState.currentTowerFloor++;
+    if(gameState.currentTowerFloor > (gameState.highestTowerFloor || 1)) {
+        gameState.highestTowerFloor = gameState.currentTowerFloor;
+    }
+    towerFinalize();
+}
+
+async function towerFinalize() {
+    towerBattleState.playerTeam.forEach(p => {
+        const real = gameState.pets.find(rp => rp.id === p.id);
+        if(real) real.hp = Math.ceil(p.currentHP);
+    });
+    await saveGame(true);
+    renderTowerLobby();
+}
+
+function towerConfirmEscape() { if(confirm("Quit and save team health?")) towerFinalize(); }
+
+// 6. UTILS (HEAL/SQUAD/PREVIEW)
+function towerRenderSquadPreview() {
+    const squad = getSquad();
+    const container = document.getElementById('tower-squad-preview');
+    if(!container) return;
+    container.innerHTML = squad.map(p => {
+        const hpPct = (p.hp / p.maxHP) * 100;
+        return `
+        <div style="background:rgba(255,255,255,0.1); padding:5px; border-radius:8px; border:1px solid ${p.hp <= 0 ? '#f56565' : '#48bb78'}; text-align:center; width:55px;">
+            <img src="${p.image}" style="width:30px; height:30px; object-fit:contain; ${p.hp <= 0 ? 'filter:grayscale(1) opacity:0.5' : ''}">
+            <div style="width:100%; height:3px; background:#333; margin-top:3px;"><div style="width:${hpPct}%; height:100%; background:#48bb78;"></div></div>
+            <div style="font-size:7px; color:white;">${Math.ceil(p.hp)} HP</div>
+        </div>`;
+    }).join('');
+}
+
+async function towerHealFullTeam() {
+    // 1. RE-CALCULATE based on current Global HP
+    let totalMissingHP = 0;
+    gameState.team.forEach(id => {
+        const p = gameState.pets.find(x => x.id === id);
+        if(p) totalMissingHP += (p.maxHP - p.hp);
+    });
+
+    const finalCost = Math.ceil(totalMissingHP * 2);
+
+    if (finalCost <= 0) return showToast("Squad is already full health!", "info");
+
+    // 2. Check if they can afford the REAL current cost
+    if (gameState.brainPoints < finalCost) {
+        return showToast(`Need ${finalCost} BP to heal your current squad!`, "error");
+    }
+
+    // 3. Deduct and Heal
+    gameState.brainPoints -= finalCost;
+    gameState.team.forEach(id => {
+        const p = gameState.pets.find(x => x.id === id);
+        if(p) p.hp = p.maxHP;
+    });
+
+    updateStatsDisplay();
+    saveGame(false);
+    
+    // 4. Refresh the Lobby to update the preview and the button price
+    renderTowerLobby(); 
+    showToast(`Team Restored! -${finalCost} BP`, "success");
+}
+
+function towerRenderStage() {
+    const stage = document.getElementById('tower-stage-container');
+    stage.innerHTML = '';
+    // FIXED PERCENTAGES FOR YOUR BACKGROUND (32% is center-left, 58% is center-right)
+    const pSlots = [[25,40,'row-top'], [15,40,'row-top'], [0,40,'row-top'], [30,50,'row-bottom'], [20,50,'row-bottom'], [5,50,'row-bottom']];
+    const eSlots = [[50,40,'row-top'], [65,40,'row-top'], [80,40,'row-top'], [60,50,'row-bottom'], [75,50,'row-bottom'], [90,50,'row-bottom']];
+
+    towerBattleState.playerTeam.forEach((p, i) => {
+        const div = document.createElement('div');
+        div.className = `hero-slot ${pSlots[i][2]}`;
+        div.id = `tp-${p.id}`;
+        div.style.left = pSlots[i][0] + "%"; div.style.top = pSlots[i][1] + "%";
+        if(p.currentHP <= 0) div.style.filter = "grayscale(1) opacity(0.4)";
+        div.innerHTML = `<div class="hero-hp-number">${p.currentHP <= 0 ? 'KO' : Math.ceil(p.currentHP)}</div><img src="${p.image}" class="hero-img-unit ${p.imageStyle}">`;
+        stage.appendChild(div);
+    });
+
+    towerBattleState.enemyTeam.forEach((e, i) => {
+        const div = document.createElement('div');
+        div.className = `hero-slot ${eSlots[i][2]}`;
+        div.id = `te-${e.id}`;
+        div.style.left = eSlots[i][0] + "%"; div.style.top = eSlots[i][1] + "%";
+        div.innerHTML = `<div class="hero-hp-number enemy-hp-number">${e.currentHP <= 0 ? '' : Math.ceil(e.currentHP)}</div><img src="${e.image}" class="hero-img-unit" style="transform:scaleX(-1); ${e.currentHP <= 0 ? 'opacity:0' : ''}">`;
+        stage.appendChild(div);
+    });
+}
+
+function towerStartFocus() {
+    let q = (gameState.activeQuestionPool && gameState.activeQuestionPool.length > 0) 
+        ? gameState.activeQuestionPool[Math.floor(Math.random() * gameState.activeQuestionPool.length)] 
+        : MathEngine.generate(gameState.grade || "1");
+
+    document.getElementById('tower-math-popup').style.display = 'flex';
+    document.getElementById('tower-math-content').innerHTML = `
+        <div class="tower-command-box" style="border-color:#f6e05e; color:#2d3748;">
+            <div style="text-align:center; font-weight:bold; color:#d97706;">⚡ CRITICAL CHALLENGE ⚡</div>
+            <div style="font-size:28px; text-align:center; margin:20px 0; font-weight:bold;">${q.qVisualHTML || q.q || q.text}</div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                ${q.options.map(opt => `<button class="mcq-btn" onclick="towerResolveFocus('${opt}', '${q.a}')">${opt}</button>`).join('')}
+            </div>
+        </div>`;
+}
+
+function towerResolveFocus(ans, correct) {
+    document.getElementById('tower-math-popup').style.display = 'none';
+    if (ans == correct) { towerFocusActive = true; soundManager.playSFX('correct'); showToast("POWER LOADED!", "success"); }
+    else { towerFocusActive = false; soundManager.playSFX('wrong'); }
+    towerShowCommandBar(towerBattleState.playerTeam[towerTurnIndex]);
+}
+
+function towerOpenSquadManager() { 
+    const modal = document.getElementById('tower-squad-modal');
+    modal.style.display = 'flex';
+    const list = document.getElementById('tower-squad-list');
+    list.innerHTML = '';
+    gameState.pets.forEach(p => {
+        if (!p.isHatched) return;
+        const isIn = gameState.team.includes(p.id);
+        const card = document.createElement('div');
+        card.className = `pet-card ${isIn ? 'active' : ''}`;
+        card.innerHTML = `<img src="${p.image}" style="width:35px;"><div style="font-size:10px;">${p.name}</div>`;
+        card.onclick = () => {
+            if(isIn) { if(gameState.team.length > 1) gameState.team = gameState.team.filter(id => id !== p.id); }
+            else { if(gameState.team.length < 6) gameState.team.push(p.id); }
+            towerOpenSquadManager(); towerRenderSquadPreview();
+        };
+        list.appendChild(card);
+    });
+}
+function towerCloseSquadManager() { document.getElementById('tower-squad-modal').style.display = 'none'; }
+function resetTowerProgress() { if(confirm("Return to Floor 1?")) { gameState.currentTowerFloor = 1; saveGame(true); renderTowerLobby(); } }
   </script>
   <!-- 🚧 CONSTRUCTION QUIZ MODAL -->
 <div class="modal-overlay" id="build-quiz-modal" style="z-index: 9999;">
@@ -8366,5 +10192,23 @@ setInterval(() => {
         </div>
     </div>
 </div>
+<!-- PRO UI: ITEM REVEAL MODAL -->
+<div id="item-reveal-overlay" class="reveal-overlay">
+    <div class="reveal-card" id="reveal-card-inner">
+        <div class="reveal-shine"></div>
+        <div style="font-size: 14px; font-weight: bold; color: #718096; text-transform: uppercase; letter-spacing: 2px;">You Discovered</div>
+        <div id="reveal-rarity-tag" style="margin: 10px 0; font-weight: 900; font-size: 24px;">LEGENDARY</div>
+        
+        <div id="reveal-visual-container">
+            <!-- Image or Emoji injected here -->
+        </div>
+
+        <h2 id="reveal-item-name" style="font-size: 28px; margin: 10px 0; color: #2d3748;">Sharp Sword</h2>
+        <p id="reveal-item-desc" style="color: #4a5568; margin-bottom: 25px;">+5 Damage Bonus</p>
+        
+        <button class="gacha-btn" style="padding: 15px; margin: 0;" onclick="closeLootReveal()">CLAIM ITEM</button>
+    </div>
+</div>
 </body>
  </html>
+
