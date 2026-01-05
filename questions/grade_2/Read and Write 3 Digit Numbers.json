@@ -1,0 +1,282 @@
+[
+{
+"q": "What number is shown by the base-ten blocks?",
+"qVisualHTML": "<svg width='200' height='120' viewBox='0 0 200 120' style='background:#f8fafc'><rect x='10' y='10' width='40' height='40' fill='#4ade80' stroke='#166534' stroke-width='1'/><line x1='15' y1='10' x2='15' y2='50' stroke='#166534'/><line x1='20' y1='10' x2='20' y2='50' stroke='#166534'/><line x1='25' y1='10' x2='25' y2='50' stroke='#166534'/><line x1='30' y1='10' x2='30' y2='50' stroke='#166534'/><line x1='35' y1='10' x2='35' y2='50' stroke='#166534'/><line x1='40' y1='10' x2='40' y2='50' stroke='#166534'/><line x1='45' y1='10' x2='45' y2='50' stroke='#166534'/><line x1='10' y1='15' x2='50' y2='15' stroke='#166534'/><line x1='10' y1='20' x2='50' y2='20' stroke='#166534'/><line x1='10' y1='25' x2='50' y2='25' stroke='#166534'/><line x1='10' y1='30' x2='50' y2='30' stroke='#166534'/><line x1='10' y1='35' x2='50' y2='35' stroke='#166534'/><line x1='10' y1='40' x2='50' y2='40' stroke='#166534'/><line x1='10' y1='45' x2='50' y2='45' stroke='#166534'/><rect x='60' y='10' width='8' height='40' fill='#facc15' stroke='#854d0e'/><rect x='72' y='10' width='8' height='40' fill='#facc15' stroke='#854d0e'/><rect x='84' y='10' width='8' height='40' fill='#facc15' stroke='#854d0e'/><rect x='100' y='10' width='8' height='8' fill='#f87171' stroke='#991b1b'/><rect x='100' y='22' width='8' height='8' fill='#f87171' stroke='#991b1b'/></svg>",
+"a": "132",
+"options": ["132", "123", "312", "130"]
+},
+{
+"q": "What is the expanded form of 406?",
+"qVisualHTML": "",
+"a": "400 + 6",
+"options": ["400 + 60", "40 + 6", "400 + 6", "400 + 0 + 60"]
+},
+{
+"q": "How many tens are in the number 580?",
+"qVisualHTML": "",
+"a": "58",
+"options": ["8", "58", "80", "5"]
+},
+{
+"q": "Which number has a 7 in the hundreds place, 0 in the tens place, and 3 in the ones place?",
+"qVisualHTML": "",
+"a": "703",
+"options": ["730", "307", "703", "73"]
+},
+{
+"q": "Look at the model. What is the value of the digits?",
+"qVisualHTML": "<div style='display:flex; gap:10px;'><span>🟦🟦</span><span>||||</span><span>..</span></div><p style='font-size:12px'>(Each 🟦 = 100, | = 10, . = 1)</p>",
+"a": "242",
+"options": ["242", "422", "204", "240"]
+},
+{
+"q": "Write 9 hundreds + 2 tens + 5 ones in standard form.",
+"qVisualHTML": "",
+"a": "925"
+},
+{
+"q": "What is the value of the digit 4 in the number 492?",
+"qVisualHTML": "",
+"a": "400",
+"options": ["4", "40", "400", "4000"]
+},
+{
+"q": "Solve: 300 + 50 + 8 = ?",
+"qVisualHTML": "",
+"a": "358"
+},
+{
+"q": "Which is another way to write the number seven hundred fourteen?",
+"qVisualHTML": "",
+"a": "714",
+"options": ["741", "70014", "714", "74"]
+},
+{
+"q": "Identify the number shown: 6 hundreds and 14 ones.",
+"qVisualHTML": "",
+"a": "614",
+"options": ["614", "641", "60014", "74"]
+},
+{
+"q": "What is 200 + 90 + 3?",
+"qVisualHTML": "",
+"a": "293"
+},
+{
+"q": "Which number matches the model?",
+"qVisualHTML": "<svg width='200' height='100'><rect x='10' y='10' width='30' height='30' fill='#4ade80' stroke='black'/><rect x='50' y='10' width='30' height='30' fill='#4ade80' stroke='black'/><rect x='90' y='10' width='5' height='30' fill='#facc15' stroke='black'/><rect x='105' y='10' width='5' height='5' fill='#f87171' stroke='black'/></svg>",
+"a": "211",
+"options": ["211", "121", "221", "210"]
+},
+{
+"q": "What is the standard form of eight hundred fifty?",
+"qVisualHTML": "",
+"a": "850",
+"options": ["805", "85", "850", "580"]
+},
+{
+"q": "How many hundreds are in 904?",
+"qVisualHTML": "",
+"a": "9"
+},
+{
+"q": "What is 700 + 40 + 0?",
+"qVisualHTML": "",
+"a": "740",
+"options": ["704", "74", "740", "470"]
+},
+{
+"q": "What is the value of the digit 9 in 195?",
+"qVisualHTML": "",
+"a": "90",
+"options": ["9", "90", "900", "95"]
+},
+{
+"q": "Which number is shown by: 🟦🟦🟦 |||||",
+"qVisualHTML": "<p>(🟦=100, |=10)</p>",
+"a": "350",
+"options": ["350", "305", "530", "35"]
+},
+{
+"q": "Write 500 + 80 + 2 in standard form.",
+"qVisualHTML": "",
+"a": "582"
+},
+{
+"q": "What number is one hundred sixty-two?",
+"qVisualHTML": "",
+"a": "162",
+"options": ["126", "162", "612", "10062"]
+},
+{
+"q": "How many ones are in the number 427?",
+"qVisualHTML": "",
+"a": "7"
+},
+{
+"q": "What is the expanded form of 999?",
+"qVisualHTML": "",
+"a": "900 + 90 + 9",
+"options": ["90 + 90 + 9", "900 + 9 + 9", "900 + 90 + 9", "990 + 9"]
+},
+{
+"q": "What number is 4 hundreds, 0 tens, and 8 ones?",
+"qVisualHTML": "",
+"a": "408"
+},
+{
+"q": "Which number is shown by 5 hundreds and 2 tens?",
+"qVisualHTML": "",
+"a": "520",
+"options": ["502", "52", "520", "250"]
+},
+{
+"q": "What is the value of the 1 in 143?",
+"qVisualHTML": "",
+"a": "100"
+},
+{
+"q": "Write 300 + 7 in standard form.",
+"qVisualHTML": "",
+"a": "307",
+"options": ["370", "307", "37", "703"]
+},
+{
+"q": "How many tens are in 120?",
+"qVisualHTML": "",
+"a": "12",
+"options": ["2", "12", "20", "1"]
+},
+{
+"q": "What number is shown? 🟦🟦🟦🟦 ....",
+"qVisualHTML": "<p>(🟦=100, .=1)</p>",
+"a": "404",
+"options": ["440", "44", "404", "4004"]
+},
+{
+"q": "Write six hundred three in standard form.",
+"qVisualHTML": "",
+"a": "603"
+},
+{
+"q": "What is 800 + 10 + 9?",
+"qVisualHTML": "",
+"a": "819"
+},
+{
+"q": "Which number has a 5 in the tens place?",
+"qVisualHTML": "",
+"a": "152",
+"options": ["512", "125", "152", "555"]
+},
+{
+"q": "What is the expanded form of 230?",
+"qVisualHTML": "",
+"a": "200 + 30",
+"options": ["200 + 3", "20 + 30", "200 + 30", "230 + 0"]
+},
+{
+"q": "How many ones are in 811?",
+"qVisualHTML": "",
+"a": "1"
+},
+{
+"q": "Write 4 hundreds + 1 ten + 9 ones.",
+"qVisualHTML": "",
+"a": "419"
+},
+{
+"q": "What number is two hundred eleven?",
+"qVisualHTML": "",
+"a": "211",
+"options": ["211", "221", "121", "20011"]
+},
+{
+"q": "What is 100 + 0 + 1?",
+"qVisualHTML": "",
+"a": "101"
+},
+{
+"q": "Which number matches: 🟦🟦 ||||||||| ...",
+"qVisualHTML": "<p>(🟦=100, |=10, .=1)</p>",
+"a": "293",
+"options": ["293", "239", "392", "290"]
+},
+{
+"q": "How many hundreds are in 56?",
+"qVisualHTML": "",
+"a": "0"
+},
+{
+"q": "What is the value of the 0 in 704?",
+"qVisualHTML": "",
+"a": "0",
+"options": ["0", "10", "100", "70"]
+},
+{
+"q": "Write 700 + 70 + 7 in standard form.",
+"qVisualHTML": "",
+"a": "777"
+},
+{
+"q": "What number is shown by 8 hundreds and 3 ones?",
+"qVisualHTML": "",
+"a": "803",
+"options": ["830", "803", "308", "83"]
+},
+{
+"q": "What is the expanded form of 115?",
+"qVisualHTML": "",
+"a": "100 + 10 + 5"
+},
+{
+"q": "Which digit is in the hundreds place of 349?",
+"qVisualHTML": "",
+"a": "3",
+"options": ["3", "4", "9", "300"]
+},
+{
+"q": "What is 500 + 40?",
+"qVisualHTML": "",
+"a": "540"
+},
+{
+"q": "Write nine hundred ninety in standard form.",
+"qVisualHTML": "",
+"a": "990",
+"options": ["909", "990", "99", "90090"]
+},
+{
+"q": "How many tens are in 600?",
+"qVisualHTML": "",
+"a": "60",
+"options": ["0", "6", "60", "600"]
+},
+{
+"q": "Which number is 1 hundred more than 432?",
+"qVisualHTML": "",
+"a": "532",
+"options": ["442", "532", "433", "332"]
+},
+{
+"q": "What is the value of the digit 6 in 261?",
+"qVisualHTML": "",
+"a": "60"
+},
+{
+"q": "Write 200 + 80 + 8 in standard form.",
+"qVisualHTML": "",
+"a": "288"
+},
+{
+"q": "How many ones are in 100?",
+"qVisualHTML": "",
+"a": "0"
+},
+{
+"q": "Which number matches the name: four hundred forty-four?",
+"qVisualHTML": "",
+"a": "444",
+"options": ["404", "440", "444", "44"]
+}
+]
