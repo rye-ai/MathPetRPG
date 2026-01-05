@@ -133,12 +133,72 @@
     .pet-display { display: flex; flex-direction: column; align-items: center; text-align: center; width: 100%; }
     
     /* Battle Screen */
-    .battle-screen { display: none; background-color: #2d3748; background-size: cover; background-position: center bottom; background-repeat: no-repeat; border-radius: 15px; aspect-ratio: 16/9; width: 100%; max-height: 100%; position: relative; overflow: hidden; box-shadow: inset 0 0 50px rgba(0,0,0,0.6); }
-    .battle-screen.active { display: block; height: 100%; width: 100%; position: relative; }
-    .battle-arena { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 10; }
-    .battler { position: absolute; text-align: center; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.6)); width: 40%; max-width: 400px; transition: all 0.3s ease-out; }
-    #player-container { bottom: 15%; left: 15%; z-index: 20; }
-    #enemy-container { bottom: 15%; right: 12%; z-index: 20; transform: none; }
+   /* Battle Screen: Game Boy Container */
+    .battle-screen { 
+        display: none; 
+        flex-direction: column; /* Vertical Stack */
+        height: 100%; 
+        width: 100%; 
+        background-color: #1a202c; /* Dark frame */
+        overflow: hidden; 
+        position: relative;
+    }
+    .battle-screen.active { display: flex; }
+
+    /* The Stage: 16:9 Locked Aspect Ratio */
+    .battle-arena { 
+        position: relative; 
+        width: 100%; 
+        aspect-ratio: 16 / 9; /* THE MAGIC NUMBER */
+        background-size: 100% 100%; /* Stretch image to fit box exactly */
+        background-position: center; 
+        background-repeat: no-repeat; 
+        flex-shrink: 0; /* Never shrink the stage */
+        z-index: 10;
+        margin: 0 auto; /* Center on wide screens */
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    /* The Controls: Fills remaining bottom space */
+    .battle-ui-panel { 
+        position: relative; 
+        flex-grow: 1; /* Grow to fill bottom */
+        width: 100%; 
+        background: #f7fafc; 
+        border-top: 4px solid #5a67d8; 
+        padding: 10px; 
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.2); 
+        z-index: 20; 
+        display: flex; 
+        flex-direction: column; 
+        justify-content: center;
+        bottom: 0; left: 0; /* Reset positioning */
+    }
+    /* 🎨 MANUAL POSITIONING: "Painted on Background" */
+    
+    .battler { 
+        position: absolute; 
+        text-align: center; 
+        width: 35%; /* 📏 SIZE: Change this to make pets bigger/smaller */
+        max-width: 300px; 
+        z-index: 20;
+        filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); /* Shadow on floor */
+        transition: all 0.3s ease-out; 
+    }
+
+    /* 🟢 PLAYER (You) */
+    #player-container { 
+        bottom: 5%;  /* ⬆️ Height: Higher number = Higher on screen */
+        left: 15%;    /* ⬅️ Horizontal: Higher number = More to the right */
+        z-index: 30; /* Keep in front */
+    }
+
+    /* 🔴 ENEMY (Opponent) */
+    #enemy-container { 
+        bottom: 7%; /* ⬆️ Height: Higher looks "Further away" in distance */
+        right: 15%;   /* ➡️ Horizontal: Higher number = More to the left */
+        z-index: 20;
+    }
     .battler-visual { font-size: clamp(60px, 15vw, 140px); margin-bottom: 10px; position: relative; transition: transform 0.1s; }
     
     /* DAMAGE TEXT SYSTEM */
@@ -152,13 +212,34 @@
     @keyframes critShake { 0% { transform: translate(-50%, -50%) rotate(0deg); } 25% { transform: translate(-55%, -55%) rotate(-10deg); } 75% { transform: translate(-45%, -45%) rotate(10deg); } 100% { transform: translate(-50%, -50%) rotate(0deg); } }
 
     .hp-bar-container { background: rgba(0,0,0,0.7); border-radius: 15px; height: 15px; overflow: hidden; border: 2px solid rgba(255,255,255,0.3); max-width: 100%; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.3); margin-bottom: 5px; }
-    .hp-bar { height: 100%; background: linear-gradient(180deg, #48bb78 0%, #2f855a 100%); transition: width 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); position: relative; z-index: 2; }
+    .hp-bar { 
+    height: 100%; 
+    background: linear-gradient(180deg, #48bb78 0%, #2f855a 100%); 
+    transition: width 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); 
+    position: relative; 
+    z-index: 2; 
+    max-width: 100%; /* 🛑 STOP at the edge! */
+}
     .hp-bar-trail { position: absolute; top:0; left:0; height:100%; width:100%; background: white; z-index: 1; transition: width 0.8s ease-out 0.3s; }
     @keyframes attackLunge { 0% { transform: translateX(0) scale(1); } 50% { transform: translateX(60px) scale(1.1); } 100% { transform: translateX(0) scale(1); } }
     @keyframes damageShake { 0%, 100% { transform: translate(0, 0); filter: brightness(1); } 10%, 90% { transform: translate(-8px, -2px); filter: brightness(2) saturate(0); } 20%, 80% { transform: translate(6px, 4px); } 30%, 50%, 70% { transform: translate(-8px, -8px); } 40%, 60% { transform: translate(8px, 8px); } }
     .battler-visual.flipped-opponent { transform: none; }
     .battler-visual.flipped-opponent img, .battler-visual.flipped-opponent .emoji-wrapper { transform: scaleX(-1); display: inline-block; }
-    .battle-ui-panel { position: absolute; bottom: 0; left: 0; width: 100%; height: auto; background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid rgba(255,255,255,0.4); padding: 10px; box-shadow: 0 -4px 30px rgba(0,0,0,0.1); z-index: 50; display: flex; flex-direction: column; }
+    /* The Command Deck: Stacks immediately below the image */
+    .battle-ui-panel { 
+        position: relative; /* Sit naturally in the flow */
+        flex: 1; /* Fill all remaining space downwards */
+        width: 100%; 
+        background: #f7fafc; /* White/Gray panel color */
+        border-top: 4px solid #5a67d8; 
+        padding: 20px 10px; 
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.2); 
+        z-index: 20; 
+        display: flex; 
+        flex-direction: column; 
+        justify-content: flex-start; /* Push buttons to the top of this panel */
+        overflow-y: auto; /* Allow scrolling if too many buttons */
+    }
     .battle-actions { display: flex; flex-direction: row; justify-content: space-between; align-items: center; gap: 8px; width: 100%; }
     .battle-actions .action-btn { margin: 0; padding: 12px 2px; font-size: 13px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; flex: 1; min-width: 0; border-radius: 8px; }
     
@@ -707,39 +788,6 @@ body {
     }
     .build-ui { padding-bottom: 40px; }
 
-    /* 3. BATTLE SCREEN: The "Split" Container */
-    .battle-screen {
-        display: flex !important;
-        flex-direction: column;
-        height: 100vh !important;
-        width: 100vw !important;
-        background-color: #2d3748; 
-    }
-
-    /* 4. ZONE A: THE STAGE (Top 60%) - "The TV Screen" */
-    .battle-arena {
-        position: relative;
-        flex: 6; /* Takes up 60% of vertical space */
-        width: 100%;
-        overflow: hidden;
-        z-index: 10;
-        /* Force background image to anchor to the floor of this zone */
-        background-position: center bottom !important; 
-        background-size: cover !important;
-    }
-
-    /* 5. PET POSITIONING (Diagonal Cinema Depth) */
-    
-    /* PLAYER: Bottom-Left of the Top Zone */
-    #player-container {
-        bottom: 0 !important; /* Sit exactly on the "floor" */
-        left: -5% !important; 
-        width: 55% !important; /* Make big */
-        transform: scale(1.2); 
-        transform-origin: bottom center;
-        z-index: 20; 
-    }
-
     /* ENEMY: Top-Right of the Top Zone */
     #enemy-container {
         bottom: auto !important;
@@ -760,21 +808,6 @@ body {
         border-radius: 4px;
     }
 
-    /* 6. ZONE B: THE COMMAND DECK (Bottom 40%) - "The Controller" */
-    .battle-ui-panel {
-        position: relative !important;
-        flex: 4; /* Takes up 40% of vertical space */
-        width: 100%;
-        background: #f7fafc !important; /* Solid Panel Color */
-        border-top: 4px solid #cbd5e0;
-        padding: 15px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center; /* Center buttons vertically */
-        box-shadow: 0 -5px 20px rgba(0,0,0,0.2);
-        z-index: 30;
-    }
-
     /* Big, Tappable Buttons Grid */
     .battle-actions {
         display: grid;
@@ -792,10 +825,26 @@ body {
 }
 
 /* --- PRO UI: HUD & JOURNAL STYLES --- */
+/* SMART HUD: Top-Left Positioning */
 .adventure-hud {
-    position: absolute; bottom: 85px; left: 15px; 
-    z-index: 1500; pointer-events: none;
-    display: none; flex-direction: column; gap: 10px;
+    position: fixed; /* Sticks to the screen */
+    top: 140px;      /* Sits below Header & Tabs */
+    left: 10px;      /* Left alignment */
+    z-index: 1500; 
+    pointer-events: none; /* Lets you click THROUGH it (Crucial!) */
+    display: none; 
+    flex-direction: column; 
+    gap: 5px;
+    transform-origin: top left; /* Scale from the corner */
+    transition: all 0.3s ease;
+}
+
+/* MOBILE OPTIMIZATION */
+@media (max-width: 768px) {
+    .adventure-hud {
+        top: 125px; /* Move slightly higher on phones */
+        transform: scale(0.75); /* Shrink to 75% size so it doesn't cover the map */
+    }
 }
 .hud-pill {
     background: rgba(0,0,0,0.7); backdrop-filter: blur(5px);
@@ -2432,18 +2481,63 @@ let currentBuyingItem = null;
             }
         } catch(e) { console.log("No event list found."); }
 
-        // 2. Load Pets/Evolutions
-        try { 
-            const res = await fetch(getGhUrl('pets/evolutions.json')); 
-            if(res.ok) { 
-                const data = await res.json(); 
-                if (Array.isArray(data)) { 
-                    const newData = data.filter(d => !EXTERNAL_PET_DATA.find(e => e.id === d.id));
-                    EXTERNAL_PET_DATA = [...EXTERNAL_PET_DATA, ...newData]; 
-                    loadExternalPets(); 
-                } 
-            } 
-        } catch(e) { console.error("Error loading evolutions:", e); }
+        // 2. DYNAMIC PET LOADER (Scans the entire 'pets' folder)
+        try {
+            console.log("🐾 Scanning 'pets' folder on GitHub...");
+            const petFiles = await fetchGithubFolder('pets');
+            
+            if (petFiles && Array.isArray(petFiles)) {
+                for (const file of petFiles) {
+                    // Skip if it's not a JSON file
+                    if (!file.name.endsWith('.json')) continue;
+
+                    try {
+                        const res = await fetch(file.download_url);
+                        if (res.ok) {
+                            const data = await res.json();
+                            
+                            // HELPER: Add a single pet to the game
+                            const registerPet = (p) => {
+                                // Ensure the rarity array exists
+                                const r = p.rarity || 'common';
+                                if (!PET_TYPES[r]) PET_TYPES[r] = [];
+                                
+                                // Prevent duplicates
+                                if (!PET_TYPES[r].find(existing => existing.id === p.id)) {
+                                    PET_TYPES[r].push(p);
+                                    console.log(`✨ Loaded Pet: ${p.name}`);
+                                }
+                                
+                                // Register Evolutions if present
+                                if (p.evolutions) {
+                                    EVOLUTION_CHAINS[p.id] = p.evolutions;
+                                }
+                            };
+
+                            // Handle Arrays (List of pets) vs Objects (Single pet)
+                            if (Array.isArray(data)) {
+                                data.forEach(item => {
+                                    // Some files might be evolution chains, some might be base pets
+                                    if (item.base) { 
+                                        // It's an evolution chain object
+                                        registerPet(item.base);
+                                        if (item.evolutions) EVOLUTION_CHAINS[item.base.id] = item.evolutions;
+                                    } else {
+                                        // It's a simple pet object
+                                        registerPet(item);
+                                    }
+                                });
+                            } else {
+                                // Single Object
+                                registerPet(data);
+                            }
+                        }
+                    } catch (err) {
+                        console.warn("⚠️ Failed to load pet file:", file.name, err);
+                    }
+                }
+            }
+        } catch(e) { console.error("Error scanning pets folder:", e); }
         
         // 4. Dynamic Equipment (NEW!)
         try {
@@ -2473,6 +2567,110 @@ let currentBuyingItem = null;
                 console.log("🎒 Loaded Equipment:", SHOP_ITEMS.equipment.length);
             }
         } catch(e) { console.log("No items folder found."); }
+        
+        // ============================================================
+        // 🕵️ DEEP SCANNER: EVENTS & EXAMS (Fixes "Undefined" Pets)
+        // ============================================================
+        try {
+            // 1. Define all folders to check (Events + All Grades)
+            const foldersToCheck = ['events'];
+            ['K', '1', '2', '3', '4', '5', '6'].forEach(g => foldersToCheck.push(`tests/grade_${g}`));
+
+            console.log("🕵️ Deep Scan Initiated: Searching for hidden reward pets...");
+
+            // 2. Loop through every folder
+            for (const folder of foldersToCheck) {
+                const files = await fetchGithubFolder(folder);
+                
+                if (files && Array.isArray(files)) {
+                    for (const file of files) {
+                        if (!file.name.endsWith('.json')) continue;
+
+                        try {
+                            const res = await fetch(file.download_url);
+                            if (res.ok) {
+                                const data = await res.json();
+                                
+                                // 3. Detect Pet Reward
+                                // Checks: meta.rewards.pet OR rewards.pet
+                                let hiddenPet = null;
+                                if (data.meta && data.meta.rewards && data.meta.rewards.pet) {
+                                    hiddenPet = data.meta.rewards.pet;
+                                } else if (data.rewards && data.rewards.pet) {
+                                    hiddenPet = data.rewards.pet;
+                                }
+
+                                // 4. Register the Pet
+                                if (hiddenPet) {
+                                    const r = hiddenPet.rarity || 'epic';
+                                    
+                                    // Ensure category exists
+                                    if (!PET_TYPES[r]) PET_TYPES[r] = [];
+                                    
+                                    // Check for duplicates before adding
+                                    if (!PET_TYPES[r].find(p => p.id === hiddenPet.id)) {
+                                        PET_TYPES[r].push(hiddenPet);
+                                        console.log(`🎁 Recovered Pet: ${hiddenPet.name} from ${file.name}`);
+                                    }
+
+                                    // Register hidden evolutions too
+                                    if (hiddenPet.evolutions) {
+                                        EVOLUTION_CHAINS[hiddenPet.id] = hiddenPet.evolutions;
+                                    }
+                                }
+                            }
+                        } catch (err) { }
+                    }
+                }
+            }
+        } catch(e) { console.log("Deep scan skipped or failed."); }
+        
+        // 6. EVENT REWARD SCANNER (Finds pets hidden inside Quest JSONs)
+        try {
+            console.log("🕵️ Scanning 'events' folder for hidden pets...");
+            const eventFiles = await fetchGithubFolder('events');
+            
+            if (eventFiles && Array.isArray(eventFiles)) {
+                for (const file of eventFiles) {
+                    if (!file.name.endsWith('.json')) continue;
+
+                    try {
+                        const res = await fetch(file.download_url);
+                        if (res.ok) {
+                            const qData = await res.json();
+                            
+                            // Check: Is there a pet reward inside?
+                            // Structure usually: { meta: { rewards: { pet: { ... } } } }
+                            // OR sometimes just: { rewards: { pet: { ... } } }
+                            
+                            let rewardPet = null;
+                            if (qData.meta && qData.meta.rewards && qData.meta.rewards.pet) {
+                                rewardPet = qData.meta.rewards.pet;
+                            } else if (qData.rewards && qData.rewards.pet) {
+                                rewardPet = qData.rewards.pet;
+                            }
+
+                            if (rewardPet) {
+                                // We found a hidden pet! Register it.
+                                const r = rewardPet.rarity || 'epic'; // Default to epic if missing
+                                if (!PET_TYPES[r]) PET_TYPES[r] = [];
+                                
+                                // Prevent duplicates
+                                if (!PET_TYPES[r].find(p => p.id === rewardPet.id)) {
+                                    PET_TYPES[r].push(rewardPet);
+                                    console.log(`🎁 Discovered Event Pet: ${rewardPet.name}`);
+                                }
+                                
+                                // Register Evolutions if hidden there too
+                                if (rewardPet.evolutions) {
+                                    EVOLUTION_CHAINS[rewardPet.id] = rewardPet.evolutions;
+                                }
+                            }
+                        }
+                    } catch (err) { }
+                }
+            }
+        } catch(e) { console.log("Event scan skipped."); }
         
         // 5. DYNAMIC BLOCKS LOADER (With Auto-Compression)
         try {
@@ -4404,7 +4602,8 @@ function getScaledEnemy(baseEnemyTemplate, playerLevel) {
         document.getElementById('multiplayer-menu').style.display = 'none';
         document.getElementById('raid-arena').style.display = 'none';
 
-        document.getElementById('battle-ui').style.backgroundImage = `url('${bg}')`;
+        // Apply BG to the 16:9 Arena Stage only
+        document.querySelector('#battle-ui .battle-arena').style.backgroundImage = `url('${bg}')`;
         document.getElementById('battle-ui').style.display = 'flex'; 
         
         renderBattle();
@@ -5075,25 +5274,34 @@ function updateAdventureHUD() {
     const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
     if (!pet) return;
 
-    // Get gear stats
+    // 1. Calculate Real Max HP (Base + Gear)
     const gear = getPetEquipmentStats(pet);
-    const totalMax = pet.maxHP + gear.hp;
+    let totalMax = (pet.maxHP || 50) + (gear.hp || 0);
 
-    // 1. Update HP Bar width using the boosted total
-    const pct = (pet.hp / totalMax) * 100;
+    // 🛡️ LOGIC FIX: If you have 300 HP but Max says 50, 
+    // simply pretend Max is 300 for the display.
+    if (pet.hp > totalMax) {
+        totalMax = pet.hp;
+    }
+
+    // 2. Update HP Bar width (Clamped to 100% max)
+    let pct = (pet.hp / totalMax) * 100;
+    pct = Math.min(100, Math.max(0, pct)); // Force between 0% and 100%
+
     const hpBar = document.getElementById('hud-hp-fill');
     if (hpBar) {
         hpBar.style.width = pct + "%";
+        // Change color based on health
         hpBar.style.backgroundColor = pct < 30 ? "#f56565" : (pct < 60 ? "#ecc94b" : "#48bb78");
     }
 
-    // 2. Update Text
+    // 3. Update Text (Now it will say 300/300 instead of 300/50)
     const hpText = document.getElementById('hud-hp-text');
-    if (hpText) hpText.innerText = `${pet.hp}/${totalMax}`;
+    if (hpText) hpText.innerText = `${Math.ceil(pet.hp)}/${Math.ceil(totalMax)}`;
     
     document.getElementById('hud-pet-icon').innerText = pet.emoji || "🐾";
 
-    // 3. Update Combo Pill
+    // 4. Update Combo Pill
     const comboPill = document.getElementById('hud-combo-pill');
     if (gameState.combo > 0) {
         comboPill.style.display = 'flex';
@@ -5905,7 +6113,7 @@ function toggleTeacherLogin() {
                     document.getElementById('pvp-lobby-screen').style.display='none'; 
                     const availableBGs = [...Object.values(BATTLE_BACKGROUNDS), ...ARENA_IMGS];
                     const randomBG = availableBGs[Math.floor(Math.random() * availableBGs.length)];
-                    document.getElementById('battle-ui').style.backgroundImage = `url('${randomBG}')`;
+                    document.querySelector('#battle-ui .battle-arena').style.backgroundImage = `url('${randomBG}')`;
                     document.getElementById('battle-ui').style.display='flex'; 
                     soundManager.playBGM('boss'); 
                 } 
@@ -6494,7 +6702,8 @@ async function joinRaid() {
     const ui = document.getElementById('battle-ui');
     ui.style.display = 'flex';
     // Default raid background
-    ui.style.backgroundImage = `url('https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(3).png')`; 
+    // Apply BG to the 16:9 Arena Stage only
+    document.querySelector('#battle-ui .battle-arena').style.backgroundImage = `url('https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(3).png')`; 
 
     // 5. Start Engine
     startRaidEngine(raidPath);
@@ -10211,4 +10420,3 @@ function resetTowerProgress() { if(confirm("Return to Floor 1?")) { gameState.cu
 </div>
 </body>
  </html>
-
