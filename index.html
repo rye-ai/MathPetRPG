@@ -2198,7 +2198,7 @@ let currentBuyingItem = null;
     function getGhUrl(path) { return `https://raw.githubusercontent.com/${GITHUB_CONFIG.username}/${GITHUB_CONFIG.repo}/${GITHUB_CONFIG.branch}/${path}`; }
     async function fetchGithubFolder(folderPath) { try { const res = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.username}/${GITHUB_CONFIG.repo}/contents/${folderPath}?ref=${GITHUB_CONFIG.branch}`); if (res.status === 404 || !res.ok) return []; return await res.json(); } catch (e) { return []; } }
     let currentLoggedTeacher = null; // Stores "MrSmith" after login
-    let EXTERNAL_PET_DATA = [ { id: 'shadow_dragon_line', base: { id: 'light_bearcat_baby', name: 'OlaBear', rarity: 'legendary', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/V1/43.png', imageStyle: 'blend-multiply', emoji: '❓', baseHP: 50 }, evolutions: [ { name: 'Teen Shadow Dragon', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/V1/43.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'legendary', baseHP: 100, cost: 100 }, { name: 'Elder Shadow Dragon', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/V1/43.png', imageStyle: 'blend-multiply', emoji: '❓', rarity: 'legendary', baseHP: 150, cost: 200 } ] } ];
+    let EXTERNAL_PET_DATA = []; // Now loaded from GitHub
     let QUESTION_REPOSITORY = {}; const LEVEL_CAPS = { common: 50, uncommon: 50, rare: 60, epic: 75, legendary: 100 };
     const BATTLE_BACKGROUNDS = { 1: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur.png', 4: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(1).png', 5: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(3).png', 6: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(2).png', 7: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/%E2%80%9CA%20high-quality%20monster-inspired%20battle%20arena%20in%20landscape%20orientation.%20A%20large%2C%20circular%20stadium%20floor%20made%20of%20smooth%20stone%20tiles%20with%20subtle%20glowing%20patterns.%20Surrounding%20the%20arena%20are%20tall%20stadium%20walls%2C%20bright%20.jpg' }; const ARENA_IMGS = [ 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur.png', 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(1).png', 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(2).png', 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(3).png' ];
     
@@ -3733,44 +3733,49 @@ function resolveInBattleMath(selected, correct) {
 
     function renderHub() {
       const c = document.getElementById('hub-content'); 
-     // ----------------------------------------------------
+      const p = gameState.pets.find(pet => pet.id === gameState.currentPetId);
+      // ----------------------------------------------------
       // 🛠️ AUTO-REPAIR: Fix Missing Evolution Images
       // ----------------------------------------------------
       if (p && p.isHatched) {
-          // 1. Get the evolution chain for this pet type
+          // 1. Get the evolution chain (From your new rewards.json)
           let chain = EVOLUTION_CHAINS[p.type];
           
-          // If not found globally, check if the pet has it saved locally (legacy support)
+          // Legacy Fallback: If not found globally, check local save
           if (!chain && p.savedEvolutions) {
               chain = p.savedEvolutions;
-              // Register it globally for future use
               EVOLUTION_CHAINS[p.type] = p.savedEvolutions;
           }
 
-          // 2. If we found a chain, check if the image matches the stage
+          // 2. Apply Fix based on Stage
           if (chain && Array.isArray(chain)) {
-              // Stage 1 (First Evolution)
+              
+              // ➤ STAGE 1 FIX (e.g., Level 10-19)
+              // If they evolved once, use the 1st image in the list
               if (p.evolutionStage === 1 && chain[0] && chain[0].image) {
                   if (p.image !== chain[0].image) {
-                      console.log("🔧 Fixing Stage 1 Image for " + p.name);
+                      console.log("🔧 Repairing Stage 1 Image: " + p.name);
                       p.image = chain[0].image;
                       p.imageStyle = chain[0].imageStyle || p.imageStyle;
-                      if(chain[0].element) p.element = chain[0].element; // Sync Element too
+                      if(chain[0].element) p.element = chain[0].element; // Fix Element too
+                      saveGame(); // Save immediately so it sticks
                   }
               }
-              // Stage 2 (Second Evolution - Legend/Elder)
+              
+              // ➤ STAGE 2 FIX (e.g., Level 20+)
+              // If they evolved twice, use the 2nd image in the list
               else if (p.evolutionStage >= 2 && chain[1] && chain[1].image) {
                   if (p.image !== chain[1].image) {
-                      console.log("🔧 Fixing Stage 2 Image for " + p.name);
+                      console.log("🔧 Repairing Stage 2 Image: " + p.name);
                       p.image = chain[1].image;
                       p.imageStyle = chain[1].imageStyle || p.imageStyle;
-                      if(chain[1].element) p.element = chain[1].element;
+                      if(chain[1].element) p.element = chain[1].element; // Fix Element too
+                      saveGame(); // Save immediately so it sticks
                   }
               }
           }
       }
       // ----------------------------------------------------
-      const p = gameState.pets.find(pet => pet.id === gameState.currentPetId);
       // Calculate gear bonuses for display
       const gear = getPetEquipmentStats(p);
       const displayMaxHP = p.maxHP + gear.hp;
@@ -10303,13 +10308,36 @@ function towerRenderSquadPreview() {
     const squad = getSquad();
     const container = document.getElementById('tower-squad-preview');
     if(!container) return;
+    
     container.innerHTML = squad.map(p => {
-        const hpPct = (p.hp / p.maxHP) * 100;
+        // 1. Calculate Real Max HP (Base + Gear)
+        const gear = getPetEquipmentStats(p);
+        let totalMax = (p.maxHP || 50) + (gear.hp || 0);
+        
+        // Safety: If current HP is somehow higher than total, use current as max
+        if (p.hp > totalMax) totalMax = p.hp;
+
+        // 2. Calculate Percentage (Clamped to 100%)
+        let hpPct = (p.hp / totalMax) * 100;
+        if (hpPct > 100) hpPct = 100;
+        if (hpPct < 0) hpPct = 0;
+
+        // 3. Color Logic
+        const color = p.hp <= 0 ? '#f56565' : '#48bb78'; // Red if dead, Green if alive
+        const filter = p.hp <= 0 ? 'filter:grayscale(1) opacity:0.5' : '';
+
+        // 4. Render (With overflow:hidden on the bar background)
         return `
-        <div style="background:rgba(255,255,255,0.1); padding:5px; border-radius:8px; border:1px solid ${p.hp <= 0 ? '#f56565' : '#48bb78'}; text-align:center; width:55px;">
-            <img src="${p.image}" style="width:30px; height:30px; object-fit:contain; ${p.hp <= 0 ? 'filter:grayscale(1) opacity:0.5' : ''}">
-            <div style="width:100%; height:3px; background:#333; margin-top:3px;"><div style="width:${hpPct}%; height:100%; background:#48bb78;"></div></div>
-            <div style="font-size:7px; color:white;">${Math.ceil(p.hp)} HP</div>
+        <div style="background:rgba(255,255,255,0.1); padding:5px; border-radius:8px; border:1px solid ${color}; text-align:center; width:60px;">
+            <img src="${p.image}" style="width:35px; height:35px; object-fit:contain; ${filter}">
+            
+            <!-- Bar Container (Gray Background) -->
+            <div style="width:100%; height:4px; background:#333; margin-top:4px; border-radius:2px; overflow:hidden;">
+                <!-- Actual Health Fill -->
+                <div style="width:${hpPct}%; height:100%; background:${color}; transition:width 0.3s;"></div>
+            </div>
+            
+            <div style="font-size:9px; color:white; font-weight:bold; margin-top:2px;">${Math.ceil(p.hp)}/${Math.ceil(totalMax)}</div>
         </div>`;
     }).join('');
 }
