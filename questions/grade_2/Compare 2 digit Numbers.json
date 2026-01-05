@@ -2,14 +2,7 @@
 {
 "q": "Which number is greater?",
 "qVisualHTML": "<div style='display: flex; gap: 20px; align-items: center;'><div style='border: 2px solid black; padding: 10px; text-align: center;'><strong>152</strong>
-
-
-
-<small>3 digits</small></div><div style='border: 2px solid black; padding: 10px; text-align: center;'><strong>89</strong>
-
-
-
-<small>2 digits</small></div></div>",
+<small>3 digits</small></div><div style='border: 2px solid black; padding: 10px; text-align: center;'><strong>89</strong><small>2 digits</small></div></div>",
 "a": "152",
 "options": ["152", "89", "They are equal", "Cannot tell"]
 },
