@@ -3733,6 +3733,43 @@ function resolveInBattleMath(selected, correct) {
 
     function renderHub() {
       const c = document.getElementById('hub-content'); 
+     // ----------------------------------------------------
+      // 🛠️ AUTO-REPAIR: Fix Missing Evolution Images
+      // ----------------------------------------------------
+      if (p && p.isHatched) {
+          // 1. Get the evolution chain for this pet type
+          let chain = EVOLUTION_CHAINS[p.type];
+          
+          // If not found globally, check if the pet has it saved locally (legacy support)
+          if (!chain && p.savedEvolutions) {
+              chain = p.savedEvolutions;
+              // Register it globally for future use
+              EVOLUTION_CHAINS[p.type] = p.savedEvolutions;
+          }
+
+          // 2. If we found a chain, check if the image matches the stage
+          if (chain && Array.isArray(chain)) {
+              // Stage 1 (First Evolution)
+              if (p.evolutionStage === 1 && chain[0] && chain[0].image) {
+                  if (p.image !== chain[0].image) {
+                      console.log("🔧 Fixing Stage 1 Image for " + p.name);
+                      p.image = chain[0].image;
+                      p.imageStyle = chain[0].imageStyle || p.imageStyle;
+                      if(chain[0].element) p.element = chain[0].element; // Sync Element too
+                  }
+              }
+              // Stage 2 (Second Evolution - Legend/Elder)
+              else if (p.evolutionStage >= 2 && chain[1] && chain[1].image) {
+                  if (p.image !== chain[1].image) {
+                      console.log("🔧 Fixing Stage 2 Image for " + p.name);
+                      p.image = chain[1].image;
+                      p.imageStyle = chain[1].imageStyle || p.imageStyle;
+                      if(chain[1].element) p.element = chain[1].element;
+                  }
+              }
+          }
+      }
+      // ----------------------------------------------------
       const p = gameState.pets.find(pet => pet.id === gameState.currentPetId);
       // Calculate gear bonuses for display
       const gear = getPetEquipmentStats(p);
