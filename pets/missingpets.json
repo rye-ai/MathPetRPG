@@ -1,0 +1,134 @@
+[
+  {
+    "id": "baseten_01",
+    "type": "baseten_01",
+    "name": "Onesy",
+    "rarity": "rare",
+    "element": "wind",
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/baseten/1.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "🟦",
+    "baseHP": 60,
+    "evolutions": [
+      {
+        "name": "Onesy (Epic)", 
+        "level": 10,
+        "cost": 100,
+        "baseHP": 100,
+        "rarity": "epic",
+        "element": "wind",
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/baseten/2.png",
+        "imageStyle": "blend-multiply"
+      },
+      {
+        "name": "Onesy (Legend)",
+        "level": 20,
+        "cost": 200,
+        "baseHP": 200,
+        "rarity": "legendary",
+        "element": "wind",
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/baseten/3.png",
+        "imageStyle": "blend-multiply"
+      }
+    ]
+  },
+  {
+    "id": "tree_01",
+    "type": "tree_01",
+    "name": "Groochy",
+    "rarity": "epic",
+    "element": ["grass", "ice"],
+    "baseHP": 60,
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/xmasreward/1.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "🐺",
+    "evolutions": [
+      {
+        "name": "Groochy (Mature)", 
+        "level": 10,
+        "cost": 100,
+        "baseHP": 100,
+        "rarity": "epic",
+        "element": ["grass", "ice"],
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/xmasreward/2.png",
+        "imageStyle": "blend-multiply"
+      },
+      {
+        "name": "Groochy (Elder)",
+        "level": 20,
+        "cost": 200,
+        "baseHP": 200,
+        "rarity": "legendary",
+        "element": ["grass", "ice"],
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/xmasreward/3.png",
+        "imageStyle": "blend-multiply"
+      }
+    ]
+  },
+  {
+    "id": "Rudolf_01",
+    "type": "Rudolf_01",
+    "name": "Rudolf",
+    "rarity": "epic",
+    "element": ["light", "ice"],
+    "baseHP": 60,
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/pets/christmaspet/1.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "🦌",
+    "evolutions": [
+      {
+        "name": "Rudolf (Flyer)",
+        "level": 10,
+        "cost": 100,
+        "baseHP": 100,
+        "rarity": "epic",
+        "element": ["light", "ice"],
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/pets/christmaspet/2.png",
+        "imageStyle": "blend-multiply"
+      },
+      {
+        "name": "Rudolf (Legend)",
+        "level": 20,
+        "cost": 200,
+        "baseHP": 200,
+        "rarity": "legendary",
+        "element": ["light", "ice"],
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/pets/christmaspet/3.png",
+        "imageStyle": "blend-multiply"
+      }
+    ]
+  },
+  {
+    "id": "ray",
+    "type": "ray",
+    "name": "Raygon",
+    "rarity": "legendary",
+    "element": ["light", "wind"],
+    "baseHP": 70,
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/raygon/1.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "🐉",
+    "evolutions": [
+      {
+        "name": "Raygon (Awakened)", 
+        "level": 10,
+        "cost": 100,
+        "baseHP": 100,
+        "rarity": "legendary",
+        "element": ["light", "wind"],
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/raygon/2.png",
+        "imageStyle": "blend-multiply"
+      },
+      {
+        "name": "Raygon (God)",
+        "level": 20,
+        "cost": 200,
+        "baseHP": 200,
+        "rarity": "legendary",
+        "element": ["light", "wind"],
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/raygon/3.png",
+        "imageStyle": "blend-multiply"
+      }
+    ]
+  }
+]
