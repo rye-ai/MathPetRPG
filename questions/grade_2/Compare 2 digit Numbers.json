@@ -1,7 +1,305 @@
-[ { "q": "Which number is greater?", "qVisualHTML": "<div style='display: flex; gap: 20px; align-items: center;'><div style='border: 2px solid black; padding: 10px; text-align: center;'><strong>152</strong>
+[
+{
+"q": "Which number is greater?",
+"qVisualHTML": "<div style='display: flex; gap: 20px; align-items: center;'><div style='border: 2px solid black; padding: 10px; text-align: center;'><strong>152</strong>
+
 
 
 <small>3 digits</small></div><div style='border: 2px solid black; padding: 10px; text-align: center;'><strong>89</strong>
 
 
-<small>2 digits</small></div></div>", "a": "152", "options": ["152", "89", "They are equal", "Cannot tell"] }, { "q": "Compare these numbers: 245 ____ 67", "qVisualHTML": "", "a": ">", "options": [">", "<", "=", "+"] }, { "q": "Which digit in 343 is in the hundreds place?", "qVisualHTML": "<svg width='150' height='60'><rect x='5' y='5' width='40' height='40' fill='none' stroke='black'/><rect x='55' y='5' width='40' height='40' fill='none' stroke='black'/><rect x='105' y='5' width='40' height='40' fill='none' stroke='black'/><text x='20' y='32' font-family='Arial' font-size='20' text-anchor='middle'>3</text><text x='75' y='32' font-family='Arial' font-size='20' text-anchor='middle'>4</text><text x='125' y='32' font-family='Arial' font-size='20' text-anchor='middle'>3</text></svg>", "a": "3", "options": ["3", "4", "43", "0"] }, { "q": "Keisha has digits 1, 2, and 4. Will has digits 7 and 9. Who can make the greater number?", "qVisualHTML": "", "a": "Keisha", "options": ["Keisha", "Will", "Both same", "Neither"] }, { "q": "Which symbol makes this true? 98 ____ 101", "qVisualHTML": "", "a": "<", "options": [">", "<", "=", "None"] }, { "q": "Solve: 100 + 30 + 5", "qVisualHTML": "", "a": "135" }, { "q": "How many hundreds are in the number 421?", "qVisualHTML": "<div style='background: #f0f0f0; padding: 10px; border-radius: 5px; font-weight: bold;'>421</div>", "a": "4", "options": ["4", "2", "1", "400"] }, { "q": "Which number is less than 100?", "qVisualHTML": "", "a": "99", "options": ["100", "101", "99", "200"] }, { "q": "Compare using the correct symbol: 355 ____ 355", "qVisualHTML": "", "a": "=", "options": [">", "<", "=", "x"] }, { "q": "What is the largest number you can make with 5, 3, and 4?", "qVisualHTML": "🏀 🏀 🏀", "a": "543", "options": ["534", "345", "543", "453"] }, { "q": "A three-digit number is ________ a two-digit number.", "qVisualHTML": "", "a": "always greater than", "options": ["always greater than", "sometimes less than", "always equal to", "always less than"] }, { "q": "Look at the place value chart. What is the number?", "qVisualHTML": "<table border='1' style='border-collapse: collapse; width: 150px; text-align: center;'><tr><td>H</td><td>T</td><td>O</td></tr><tr><td>1</td><td>5</td><td>2</td></tr></table>", "a": "152" }, { "q": "Which number is the greatest?", "qVisualHTML": "", "a": "343", "options": ["44", "43", "343", "34"] }, { "q": "Which symbol represents 'less than'?", "qVisualHTML": "", "a": "<", "options": [">", "<", "=", "+"] }, { "q": "Sabra rolls 2 and 6. Malik rolls 3, 4, and 5. Malik's numbers are all greater than 100.", "qVisualHTML": "", "a": "True", "options": ["True", "False"] }, { "q": "Compare: 132 ____ 56", "qVisualHTML": "", "a": ">", "options": [">", "<", "=", "!"] }, { "q": "What is the value of the 1 in 152?", "qVisualHTML": "", "a": "100", "options": ["1", "10", "100", "0"] }, { "q": "If a number has 0 hundreds and 9 tens, is it a 3-digit number?", "qVisualHTML": "", "a": "No", "options": ["Yes", "No"] }, { "q": "Which number matches this model?", "qVisualHTML": "<div style='display: flex; gap: 5px;'>🟦 (100) 🟦 (100) 🟧 (10) 🟧 (10) 🟧 (10) ⬜ (1)</div>", "a": "231", "options": ["231", "132", "213", "321"] }, { "q": "Compare: 80 ____ 108", "qVisualHTML": "", "a": "<", "options": [">", "<", "=", "None"] }, { "q": "What is the smallest three-digit number?", "qVisualHTML": "", "a": "100", "options": ["100", "111", "999", "001"] }, { "q": "Which digit is in the tens place of 421?", "qVisualHTML": "", "a": "2", "options": ["4", "2", "1", "0"] }, { "q": "Compare: 456 ____ 456", "qVisualHTML": "", "a": "=", "options": [">", "<", "=", "+"] }, { "q": "How many tens are in the number 89?", "qVisualHTML": "", "a": "8", "options": ["8", "9", "80", "0"] }, { "q": "Which number is greater: 124 or 421?", "qVisualHTML": "", "a": "421", "options": ["124", "421", "They are equal"] }, { "q": "Choose the correct symbol: 56 ____ 132", "qVisualHTML": "", "a": "<", "options": [">", "<", "=", "None"] }, { "q": "True or False: 18 > 14", "qVisualHTML": "", "a": "True", "options": ["True", "False"] }, { "q": "What number is shown here?", "qVisualHTML": "⭐⭐⭐⭐⭐ (5 ones), 🟡🟡🟡🟡 (4 tens), 🟥 (1 hundred)", "a": "145" }, { "q": "Which number is less than 152?", "qVisualHTML": "", "a": "89", "options": ["152", "160", "89", "200"] }, { "q": "Compare: 34 ____ 343", "qVisualHTML": "", "a": "<", "options": [">", "<", "=", "/"] }, { "q": "Is 79 greater than 100?", "qVisualHTML": "", "a": "No", "options": ["Yes", "No"] }, { "q": "Which symbol points to the smaller number?", "qVisualHTML": "", "a": "<", "options": ["The opening", "The point", "The equal sign"] }, { "q": "What is the value of 5 in 543?", "qVisualHTML": "", "a": "500", "options": ["5", "50", "500", "5000"] }, { "q": "Compare: 10 + 6 ____ 16", "qVisualHTML": "", "a": "=", "options": [">", "<", "=", "None"] }, { "q": "Which is the smallest number using digits 1, 2, 4?", "qVisualHTML": "", "a": "124", "options": ["421", "241", "124", "142"] }, { "q": "A two-digit number has how many hundreds?", "qVisualHTML": "", "a": "0", "options": ["0", "1", "2", "10"] }, { "q": "Compare: 238 ____ 283", "qVisualHTML": "", "a": "<", "options": [">", "<", "=", "x"] }, { "q": "Which number has the most hundreds?", "qVisualHTML": "", "a": "343", "options": ["343", "152", "89", "97"] }, { "q": "What is 1 hundred, 2 tens, and 4 ones?", "qVisualHTML": "", "a": "124" }, { "q": "Compare: 789 ____ 456", "qVisualHTML": "", "a": ">", "options": [">", "<", "=", "None"] }, { "q": "Which place do you check FIRST when comparing 152 and 89?", "qVisualHTML": "", "a": "Hundreds", "options": ["Hundreds", "Tens", "Ones", "None"] }, { "q": "How do you write '1 hundred is greater than 0 hundreds'?", "qVisualHTML": "", "a": "100 > 0", "options": ["100 > 0", "100 < 0", "100 = 0", "0 > 100"] }, { "q": "What number is 4 hundreds, 2 tens, and 1 one?", "qVisualHTML": "", "a": "421" }, { "q": "Compare: 44 ____ 43", "qVisualHTML": "", "a": ">", "options": [">", "<", "=", "None"] }, { "q": "True or False: 97 < 421", "qVisualHTML": "", "a": "True", "options": ["True", "False"] }, { "q": "Which digit is in the ones place of 343?", "qVisualHTML": "", "a": "3", "options": ["3", "4", "300", "0"] }, { "q": "What is the greatest 2-digit number?", "qVisualHTML": "", "a": "99", "options": ["99", "100", "90", "9"] }, { "q": "Compare: 62 ____ 543", "qVisualHTML": "", "a": "<", "options": [">", "<", "=", "None"] }, { "q": "Does 152 have more tens than 89?", "qVisualHTML": "", "a": "No", "options": ["Yes", "No"] }, { "q": "Which number is greater?", "qVisualHTML": "<div style='display:flex; gap:10px;'><div style='padding:5px; border:1px solid gray;'>412</div><div style='padding:5px; border:1px solid gray;'>421</div></div>", "a": "421", "options": ["412", "421", "Equal"] } ]
+
+<small>2 digits</small></div></div>",
+"a": "152",
+"options": ["152", "89", "They are equal", "Cannot tell"]
+},
+{
+"q": "Compare these numbers: 245 ____ 67",
+"qVisualHTML": "",
+"a": ">",
+"options": [">", "<", "=", "+"]
+},
+{
+"q": "Which digit in 343 is in the hundreds place?",
+"qVisualHTML": "<svg width='150' height='60'><rect x='5' y='5' width='40' height='40' fill='none' stroke='black'/><rect x='55' y='5' width='40' height='40' fill='none' stroke='black'/><rect x='105' y='5' width='40' height='40' fill='none' stroke='black'/><text x='25' y='32' font-family='Arial' font-size='20' text-anchor='middle'>3</text><text x='75' y='32' font-family='Arial' font-size='20' text-anchor='middle'>4</text><text x='125' y='32' font-family='Arial' font-size='20' text-anchor='middle'>3</text></svg>",
+"a": "3",
+"options": ["3", "4", "43", "0"]
+},
+{
+"q": "Keisha has digits 1, 2, and 4. Will has digits 7 and 9. Who can make the greater number?",
+"qVisualHTML": "",
+"a": "Keisha",
+"options": ["Keisha", "Will", "Both same", "Neither"]
+},
+{
+"q": "Which symbol makes this true? 98 ____ 101",
+"qVisualHTML": "",
+"a": "<",
+"options": [">", "<", "=", "None"]
+},
+{
+"q": "Solve: 100 + 30 + 5",
+"qVisualHTML": "",
+"a": "135"
+},
+{
+"q": "How many hundreds are in the number 421?",
+"qVisualHTML": "<div style='background: #f0f0f0; padding: 10px; border-radius: 5px; font-weight: bold;'>421</div>",
+"a": "4",
+"options": ["4", "2", "1", "400"]
+},
+{
+"q": "Which number is less than 100?",
+"qVisualHTML": "",
+"a": "99",
+"options": ["100", "101", "99", "200"]
+},
+{
+"q": "Compare using the correct symbol: 355 ____ 355",
+"qVisualHTML": "",
+"a": "=",
+"options": [">", "<", "=", "x"]
+},
+{
+"q": "What is the largest number you can make with 5, 3, and 4?",
+"qVisualHTML": "🏀 🏀 🏀",
+"a": "543",
+"options": ["534", "345", "543", "453"]
+},
+{
+"q": "A three-digit number is ________ a two-digit number.",
+"qVisualHTML": "",
+"a": "always greater than",
+"options": ["always greater than", "sometimes less than", "always equal to", "always less than"]
+},
+{
+"q": "Look at the place value chart. What is the number?",
+"qVisualHTML": "<table border='1' style='border-collapse: collapse; width: 150px; text-align: center;'><tr><td>H</td><td>T</td><td>O</td></tr><tr><td>1</td><td>5</td><td>2</td></tr></table>",
+"a": "152"
+},
+{
+"q": "Which number is the greatest?",
+"qVisualHTML": "",
+"a": "343",
+"options": ["44", "43", "343", "34"]
+},
+{
+"q": "Which symbol represents 'less than'?",
+"qVisualHTML": "",
+"a": "<",
+"options": [">", "<", "=", "+"]
+},
+{
+"q": "Sabra rolls 2 and 6. Malik rolls 3, 4, and 5. Malik's numbers are all greater than 100.",
+"qVisualHTML": "",
+"a": "True",
+"options": ["True", "False"]
+},
+{
+"q": "Compare: 132 ____ 56",
+"qVisualHTML": "",
+"a": ">",
+"options": [">", "<", "=", "!"]
+},
+{
+"q": "What is the value of the 1 in 152?",
+"qVisualHTML": "",
+"a": "100",
+"options": ["1", "10", "100", "0"]
+},
+{
+"q": "If a number has 0 hundreds and 9 tens, is it a 3-digit number?",
+"qVisualHTML": "",
+"a": "No",
+"options": ["Yes", "No"]
+},
+{
+"q": "Which number matches this model?",
+"qVisualHTML": "<div style='display: flex; gap: 5px;'>🟦 (100) 🟦 (100) 🟧 (10) 🟧 (10) 🟧 (10) ⬜ (1)</div>",
+"a": "231",
+"options": ["231", "132", "213", "321"]
+},
+{
+"q": "Compare: 80 ____ 108",
+"qVisualHTML": "",
+"a": "<",
+"options": [">", "<", "=", "None"]
+},
+{
+"q": "What is the smallest three-digit number?",
+"qVisualHTML": "",
+"a": "100",
+"options": ["100", "111", "999", "001"]
+},
+{
+"q": "Which digit is in the tens place of 421?",
+"qVisualHTML": "",
+"a": "2",
+"options": ["4", "2", "1", "0"]
+},
+{
+"q": "Compare: 456 ____ 456",
+"qVisualHTML": "",
+"a": "=",
+"options": [">", "<", "=", "+"]
+},
+{
+"q": "How many tens are in the number 89?",
+"qVisualHTML": "",
+"a": "8",
+"options": ["8", "9", "80", "0"]
+},
+{
+"q": "Which number is greater: 124 or 421?",
+"qVisualHTML": "",
+"a": "421",
+"options": ["124", "421", "They are equal"]
+},
+{
+"q": "Choose the correct symbol: 56 ____ 132",
+"qVisualHTML": "",
+"a": "<",
+"options": [">", "<", "=", "None"]
+},
+{
+"q": "True or False: 18 > 14",
+"qVisualHTML": "",
+"a": "True",
+"options": ["True", "False"]
+},
+{
+"q": "What number is shown here?",
+"qVisualHTML": "⭐⭐⭐⭐⭐ (5 ones), 🟡🟡🟡🟡 (4 tens), 🟥 (1 hundred)",
+"a": "145"
+},
+{
+"q": "Which number is less than 152?",
+"qVisualHTML": "",
+"a": "89",
+"options": ["152", "160", "89", "200"]
+},
+{
+"q": "Compare: 34 ____ 343",
+"qVisualHTML": "",
+"a": "<",
+"options": [">", "<", "=", "/"]
+},
+{
+"q": "Is 79 greater than 100?",
+"qVisualHTML": "",
+"a": "No",
+"options": ["Yes", "No"]
+},
+{
+"q": "Which symbol points to the smaller number?",
+"qVisualHTML": "",
+"a": "<",
+"options": ["The opening", "The point", "The equal sign"]
+},
+{
+"q": "What is the value of 5 in 543?",
+"qVisualHTML": "",
+"a": "500",
+"options": ["5", "50", "500", "5000"]
+},
+{
+"q": "Compare: 10 + 6 ____ 16",
+"qVisualHTML": "",
+"a": "=",
+"options": [">", "<", "=", "None"]
+},
+{
+"q": "Which is the smallest number using digits 1, 2, 4?",
+"qVisualHTML": "",
+"a": "124",
+"options": ["421", "241", "124", "142"]
+},
+{
+"q": "A two-digit number has how many hundreds?",
+"qVisualHTML": "",
+"a": "0",
+"options": ["0", "1", "2", "10"]
+},
+{
+"q": "Compare: 238 ____ 283",
+"qVisualHTML": "",
+"a": "<",
+"options": [">", "<", "=", "x"]
+},
+{
+"q": "Which number has the most hundreds?",
+"qVisualHTML": "",
+"a": "343",
+"options": ["343", "152", "89", "97"]
+},
+{
+"q": "What is 1 hundred, 2 tens, and 4 ones?",
+"qVisualHTML": "",
+"a": "124"
+},
+{
+"q": "Compare: 789 ____ 456",
+"qVisualHTML": "",
+"a": ">",
+"options": [">", "<", "=", "None"]
+},
+{
+"q": "Which place do you check FIRST when comparing 152 and 89?",
+"qVisualHTML": "",
+"a": "Hundreds",
+"options": ["Hundreds", "Tens", "Ones", "None"]
+},
+{
+"q": "How do you write '1 hundred is greater than 0 hundreds'?",
+"qVisualHTML": "",
+"a": "100 > 0",
+"options": ["100 > 0", "100 < 0", "100 = 0", "0 > 100"]
+},
+{
+"q": "What number is 4 hundreds, 2 tens, and 1 one?",
+"qVisualHTML": "",
+"a": "421"
+},
+{
+"q": "Compare: 44 ____ 43",
+"qVisualHTML": "",
+"a": ">",
+"options": [">", "<", "=", "None"]
+},
+{
+"q": "True or False: 97 < 421",
+"qVisualHTML": "",
+"a": "True",
+"options": ["True", "False"]
+},
+{
+"q": "Which digit is in the ones place of 343?",
+"qVisualHTML": "",
+"a": "3",
+"options": ["3", "4", "300", "0"]
+},
+{
+"q": "What is the greatest 2-digit number?",
+"qVisualHTML": "",
+"a": "99",
+"options": ["99", "100", "90", "9"]
+},
+{
+"q": "Compare: 62 ____ 543",
+"qVisualHTML": "",
+"a": "<",
+"options": [">", "<", "=", "None"]
+},
+{
+"q": "Does 152 have more tens than 89?",
+"qVisualHTML": "",
+"a": "No",
+"options": ["Yes", "No"]
+},
+{
+"q": "Which number is greater?",
+"qVisualHTML": "<div style='display:flex; gap:10px;'><div style='padding:5px; border:1px solid gray;'>412</div><div style='padding:5px; border:1px solid gray;'>421</div></div>",
+"a": "421",
+"options": ["412", "421", "Equal"]
+}
+]
