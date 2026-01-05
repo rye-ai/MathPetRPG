@@ -33,6 +33,39 @@
     ]
   },
   {
+    "id": "light_bearcat_baby",
+    "type": "light_bearcat_baby",
+    "name": "OlaBear",
+    "rarity": "legendary",
+    "element": ["light", "normal"],
+    "baseHP": 50,
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/V1/43.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "🐼",
+    "evolutions": [
+      {
+        "name": "Teen OlaBear", 
+        "level": 10,
+        "cost": 100,
+        "baseHP": 100,
+        "rarity": "legendary",
+        "element": ["light", "normal"],
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/V1/44.png",
+        "imageStyle": "blend-multiply"
+      },
+      {
+        "name": "Elder OlaBear",
+        "level": 20,
+        "cost": 200,
+        "baseHP": 200,
+        "rarity": "legendary",
+        "element": ["light", "normal"],
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/V1/45.png",
+        "imageStyle": "blend-multiply"
+      }
+    ]
+  },
+  {
     "id": "tree_01",
     "type": "tree_01",
     "name": "Groochy",
