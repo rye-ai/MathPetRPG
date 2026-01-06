@@ -140,6 +140,7 @@
         height: 100%; 
         width: 100%; 
         background-color: #1a202c; /* Dark frame */
+        background-image: none !important; /* 🛑 FORCE NO IMAGE ON CONTAINER */
         overflow: hidden; 
         position: relative;
     }
@@ -174,23 +175,31 @@
         justify-content: center;
         bottom: 0; left: 0; /* Reset positioning */
     }
-    /* 🎨 MANUAL POSITIONING: "Painted on Background" */
+    /* 🎨 BATTLE ENTITIES: Anchored to Floor */
     
     .battler { 
         position: absolute; 
-        text-align: center; 
-        width: 35%; /* 📏 SIZE: Change this to make pets bigger/smaller */
-        max-width: 300px; 
+        display: flex; 
+        flex-direction: column; 
+        justify-content: flex-end; /* ⚓ FORCE CONTENT TO BOTTOM (The Feet) */
+        align-items: center;       /* Center horizontally */
+        
+        width: 30%; /* Slightly smaller for depth */
+        height: 40%; /* Give it height so it can align to bottom */
+        
         z-index: 20;
-        filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); /* Shadow on floor */
+        filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
         transition: all 0.3s ease-out; 
+        
+        /* 🛑 Debugging: Uncomment this if you still can't see why it floats */
+        /* border: 1px solid red; */
     }
 
     /* 🟢 PLAYER (You) */
     #player-container { 
         bottom: 5%;  /* ⬆️ Height: Higher number = Higher on screen */
         left: 15%;    /* ⬅️ Horizontal: Higher number = More to the right */
-        z-index: 30; /* Keep in front */
+        z-index: 30; /* Keep in front */ 
     }
 
     /* 🔴 ENEMY (Opponent) */
@@ -199,7 +208,25 @@
         right: 15%;   /* ➡️ Horizontal: Higher number = More to the left */
         z-index: 20;
     }
-    .battler-visual { font-size: clamp(60px, 15vw, 140px); margin-bottom: 10px; position: relative; transition: transform 0.1s; }
+
+    /* 🖼️ VISUAL SCALER (Fixes Giant Emojis) */
+    .battler-visual { 
+        font-size: clamp(30px, 8vw, 100px) !important; /* 📏 Dynamic Emoji Size */
+        width: 100%;
+        display: flex; 
+        justify-content: center; 
+        align-items: flex-end; /* Align image/emoji to bottom of this div */
+        margin-bottom: 0 !important; /* Remove gaps */
+        line-height: 1; /* Fix Emoji floating text gap */
+    }
+    
+    /* Ensure Images fill the width */
+    .battler-image {
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+        display: block; /* Removes tiny bottom gap inline images have */
+    }
     
     /* DAMAGE TEXT SYSTEM */
     .floating-text { position: absolute; top: 0; left: 50%; transform: translate(-50%, -50%); color: #fff; font-family: 'Arial Black', sans-serif; font-size: 40px; font-weight: 900; text-shadow: 2px 2px 0 #000; pointer-events: none; z-index: 100; animation: floatUp 1s ease-out forwards; }
@@ -256,7 +283,6 @@
     .pet-visual { font-size: 150px; margin: 10px 0; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.2)); position: relative; display: inline-block; min-width: 200px; min-height: 200px; }
     .pet-image { width: 350px; height: 350px; object-fit: contain; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.2)); }
     .blend-multiply { mix-blend-mode: multiply; }
-    .battler-image { width: 150px; height: 150px; object-fit: contain; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.2)); }
     .pet-name { font-size: 20px; color: #2c5282; margin: 10px 0; font-weight: bold; }
     .rarity-badge { display: inline-block; padding: 4px 12px; border-radius: 15px; font-size: 12px; font-weight: bold; margin-left: 5px; text-transform: uppercase; letter-spacing: 1px; }
     .rarity-common { background: #9ca3af; color: white; }
