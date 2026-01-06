@@ -1324,6 +1324,7 @@ body {
                    <div id="bulk-action-bar" style="background:#ebf8ff; padding:10px 15px; border-bottom:1px solid #cceeff; display:none; justify-content:space-between; align-items:center;">
                        <span id="bulk-selected-count" style="font-weight:bold; color:#5a67d8;">0 Selected</span>
                        <button class="action-btn green" style="width:auto; padding:5px 10px; font-size:12px;" onclick="openBulkTopicManager()">Assign Topics</button>
+                       <button class="action-btn" style="width:auto; padding:5px 10px; font-size:12px; background:#d69e2e; margin-left:5px;" onclick="bulkRewardBP()">🎁 Reward BP</button>
                    </div>
                    <div id="student-list-container" style="flex:1; overflow-y: auto;">
                        <div style="padding:20px; text-align:center; color:gray;">Loading list...</div>
@@ -2815,10 +2816,17 @@ function saveGame(forceFirebase = false) {
 function repairSaveData() {
     let fixed = false;
 
-    // 1. Repair Basic State
+    // 1. Repair Basic State & Forge Currency
     if (gameState.combo === undefined) { gameState.combo = 0; fixed = true; }
     if (!gameState.toolHistory) { gameState.toolHistory = {}; fixed = true; }
     if (!gameState.inventory) { gameState.inventory = {}; fixed = true; }
+    
+    // 🛡️ SECURITY FIX: Force Scraps to 0 if missing or broken
+    if (gameState.inventory.forgeScraps === undefined || isNaN(gameState.inventory.forgeScraps)) { 
+        gameState.inventory.forgeScraps = 0; 
+        fixed = true; 
+    }
+    
     if (!gameState.team || gameState.team.length === 0) { 
         gameState.team = gameState.currentPetId ? [gameState.currentPetId] : []; 
         fixed = true; 
@@ -2827,34 +2835,49 @@ function repairSaveData() {
     // 2. The Health Aligner (Original Plan: 50 + Lvl*10)
     if (gameState.pets && Array.isArray(gameState.pets)) {
         gameState.pets.forEach(p => {
-            // Ensure numbers are numbers
             p.level = Number(p.level || 1);
-            
-            // Calculate what MaxHP SHOULD be based on your original math
-            // Level 1 = 60, Level 10 = 150, Level 30 = 350
             const correctMaxHP = 50 + (p.level * 10);
-            
-            // If the pet is missing stats or has the wrong HP
             if (isNaN(p.maxHP) || p.maxHP !== correctMaxHP) {
-                console.log(`🏥 Medical Fix for ${p.name}: HP aligned to Lvl ${p.level}`);
                 p.maxHP = correctMaxHP;
-                p.hp = p.maxHP; // Restore to full health for the fix
+                p.hp = p.maxHP;
+                fixed = true;
+            }
+            p.hp = Number(p.hp);
+            if (isNaN(p.hp) || p.hp > p.maxHP) { p.hp = p.maxHP; fixed = true; }
+        });
+    }
+
+    // 3. ⚖️ THE FAIRNESS RESET (Global Equipment Level Wipe)
+    if (gameState.inventory.equipment && Array.isArray(gameState.inventory.equipment)) {
+        gameState.inventory.equipment.forEach(item => {
+            // Reset every item back to Level 1
+            if (item.level > 1) {
+                console.log(`⚖️ Fairness Reset: ${item.name} set to Level 1`);
+                item.level = 1; 
                 fixed = true;
             }
 
-            // Final safety cleaning for current HP
-            p.hp = Number(p.hp);
-            if (isNaN(p.hp) || p.hp > p.maxHP) {
-                p.hp = p.maxHP;
-                fixed = true;
+            // Stat Reset: Return stats to "Starting Power"
+            // This removes the thousands of HP/ATK gained from the exploit
+            if (item.prefix) {
+                const rarity = item.rarity || 'basic';
+                let fairStat = 10; // Default for basic
+                if (rarity === 'rare') fairStat = 15;
+                if (rarity === 'legendary') fairStat = 25;
+
+                // Only reset if the stat is currently higher than the fair starting point
+                if (item.prefix.stat > fairStat) {
+                    item.prefix.stat = fairStat;
+                    fixed = true;
+                }
             }
         });
     }
 
-    // 3. Save the repaired data back to Firebase
+    // 4. Final Save: Commit the cleanup to the Cloud
     if (fixed) {
-        console.log("✅ Database Health Check: All Pets Standardized.");
-        saveGame(true); // Force sync to Cloud
+        console.log("✅ Database Fairness Check: All Gear Reset to Level 1.");
+        saveGame(true); 
     }
 }
 
@@ -5924,25 +5947,33 @@ function toggleTeacherLogin() {
     function openDeleteModal(username) { studentToDelete = username; document.getElementById('delete-student-name-display').innerText = username; document.getElementById('teacher-delete-modal').classList.add('active'); }
     async function confirmDeleteStudent() { if(!studentToDelete) return; await window.fbase.deleteDoc(window.fbase.doc(window.db, "students", studentToDelete)); document.getElementById('teacher-delete-modal').classList.remove('active'); showToast("Student Deleted", "success"); loadStudentList(); }
     async function giveStudentBP(username) {
-    const amount = prompt(`How many Brain Points (BP) for ${username}?`, "50");
+    const amount = prompt(`How many Brain Points for ${username}?`, "50");
     if (!amount || isNaN(amount)) return;
     const val = parseInt(amount);
-    if (val <= 0) return;
+
+    const message = prompt(`Attach a message for ${username}?`, "Reward for great work!");
+    if (message === null) return;
 
     const docRef = window.fbase.doc(window.db, "students", username);
+    const teacherName = currentLoggedTeacher || "The Teacher";
+
+    const note = {
+        from: teacherName,
+        type: "reward",
+        bp: val,
+        text: message,
+        time: Date.now()
+    };
     
     try {
-        // 🔥 EXPERT FIX: We must use the compressed key 'bp' 
-        // to match the student's saveData format.
         await window.fbase.updateDoc(docRef, { 
-            "saveData.bp": window.fbase.increment(val) 
+            "saveData.bp": window.fbase.increment(val),
+            "saveData.nt": window.fbase.arrayUnion(note)
         });
-        
-        showToast(`✅ Sent ${val} BP to ${username}!`, "success");
-        loadStudentList(); // Refresh the list to see the new total
+        showToast(`✅ Sent reward mail to ${username}!`, "success");
+        loadStudentList();
     } catch (e) {
-        console.error("Error giving BP:", e);
-        showToast("Error: Make sure the student has logged in at least once.", "error");
+        showToast("User not found or offline.", "error");
     }
 }
     
@@ -6065,6 +6096,53 @@ function toggleTeacherLogin() {
     
     showToast(`Successfully updated ${selectedStudents.length} students!`, "success"); 
     document.getElementById('bulk-assign-modal').style.display='none';
+}
+
+async function bulkRewardBP() {
+    const selected = Array.from(document.querySelectorAll('.student-select-checkbox:checked'))
+                          .map(cb => cb.dataset.username);
+    
+    if (selected.length === 0) return showToast("No students selected", "error");
+
+    // 1. Ask for Reward Details
+    const amount = prompt(`Reward ${selected.length} students with how many Brain Points?`, "50");
+    if (!amount || isNaN(amount)) return;
+    const val = parseInt(amount);
+    
+    const message = prompt("Attach a message? (Optional)", "Great job in class today!");
+    if (message === null) return; // Cancel if they hit cancel on message
+
+    // 2. Process the Batch
+    const batch = window.fbase.writeBatch(window.db);
+    const teacherName = currentLoggedTeacher || "The Teacher";
+
+    selected.forEach(user => {
+        const ref = window.fbase.doc(window.db, "students", user);
+        
+        // Create the Mailbox Note
+        const note = {
+            from: teacherName,
+            type: "reward",
+            bp: val,
+            text: message,
+            time: Date.now()
+        };
+
+        batch.update(ref, { 
+            "saveData.bp": window.fbase.increment(val),
+            "saveData.nt": window.fbase.arrayUnion(note) // Adds to student's mail
+        });
+    });
+
+    try {
+        await batch.commit();
+        showToast(`🎁 Mail sent to ${selected.length} students!`, "success");
+        loadStudentList(); 
+        toggleAllStudents(false);
+    } catch (e) {
+        console.error(e);
+        showToast("Error sending rewards.", "error");
+    }
 }
 
 
@@ -9685,11 +9763,24 @@ function salvageItem(instanceId, event) {
 
 
 
-// --- PRO FORGE: UPGRADE ENGINE ---
 function upgradeItem(instanceId, event) {
     if(event) event.stopPropagation();
     const item = gameState.inventory.equipment.find(i => i.instanceId === instanceId);
-    const itemLvl = item.level || 1;
+    if (!item) return;
+
+    // 🛡️ SECURITY FIX: Force scraps to be a number (prevents the infinite bug)
+    if (gameState.inventory.forgeScraps === undefined || isNaN(gameState.inventory.forgeScraps)) {
+        gameState.inventory.forgeScraps = 0;
+    }
+
+    const itemLvl = Number(item.level || 1);
+    
+    // 🛡️ SECURITY FIX: Level Cap (Max Level 10)
+    if (itemLvl >= 10) {
+        showToast("Item is already at MAX level!", "info");
+        return;
+    }
+
     const cost = itemLvl * 10;
 
     if (gameState.inventory.forgeScraps < cost) {
@@ -9703,20 +9794,20 @@ function upgradeItem(instanceId, event) {
     // 2. Power up!
     item.level = itemLvl + 1;
     
-    // If it's a flat stat (like +5 DMG), add +3 per level
+    // 🛡️ SECURITY FIX: Balanced Scaling (Prevents "Thousands" of HP)
     if (item.prefix.stat !== undefined) {
-        item.prefix.stat += 3;
+        item.prefix.stat += (item.rarity === 'legendary' ? 5 : 3);
     } 
-    // If it's a percentage (like +15% Lifesteal), add +2% per level
     else if (item.prefix.value !== undefined) {
-        item.prefix.value += 0.02;
+        item.prefix.value += 0.02; 
     }
 
     soundManager.playSFX('levelUp');
-    showToast(`✨ Upgraded! ${item.name} is now Lvl ${item.level}`, "success");
+    showToast(`✨ Upgraded to Lvl ${item.level}`, "success");
     
-    saveGame(false);
-    openEquipMenu(currentEquipSlot); // Refresh
+    // 🛡️ SECURITY FIX: Force Cloud Sync (No "Refresh" cheating)
+    saveGame(true); 
+    openEquipMenu(currentEquipSlot); 
 }
 // --- PRO RAID: PHASE 2 FRENZY LOGIC ---
 function triggerMathFrenzy() {
