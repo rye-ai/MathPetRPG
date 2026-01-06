@@ -5693,27 +5693,45 @@ function checkAdventureRandomEncounter(tileType) {
             } 
         } 
         else if (gate.type === 'battle') { 
-            // --- NEW: Monster Lookup Logic ---
-            let targetMonster = null;
-            if (gate.enemyId) {
-                // Look for monster in your existing lists
-                targetMonster = MONSTER_TYPES.find(m => m.name === gate.enemyId || m.id === gate.enemyId) ||
-                                BOSS_TYPES.find(b => b.name === gate.enemyId || b.id === gate.enemyId);
+            // --- 🎲 UNIVERSAL EVENT ENGINE ---
+            let eid = gate.enemyId;
+
+            // 1. RANDOMIZER: If the enemyId is a list [ ], pick one at random
+            if (Array.isArray(eid)) {
+                eid = eid[Math.floor(Math.random() * eid.length)];
+                console.log("🎲 Random Event Enemy Picked:", eid);
             }
-            // ---------------------------------
 
-            const name = targetMonster ? targetMonster.name : "Monster";
+            let targetMonster = null;
 
-            if(confirm(`⚠️ BATTLE: Fight ${name}?`)) { 
+            // 2. LOOKUP: Search through Wild Monsters and Bosses
+            targetMonster = MONSTER_TYPES.find(m => m.id === eid || m.name === eid) ||
+                            BOSS_TYPES.find(b => b.id === eid || b.name === eid);
+            
+            // 3. PET CONVERSION: If not found, check if it's a Pet ID
+            if (!targetMonster) {
+                for (const rarity in PET_TYPES) {
+                    const found = PET_TYPES[rarity].find(p => p.id === eid || p.name === eid);
+                    if (found) {
+                        targetMonster = {
+                            ...found,
+                            hp: found.baseHP || 60,
+                            damage: 20 
+                        };
+                        break;
+                    }
+                }
+            }
+
+            const name = targetMonster ? (gate.enemyName || targetMonster.name) : "Mystery Foe";
+
+            if(confirm(`⚠️ DANGER: ${name} appeared! Fight?`)) { 
                 gameState.questBattleActive = true; 
                 gameState.questSuccessKey = gate.onSuccess; 
-                
                 if (gate.rewardData) gameState.pendingQuestRewardData = gate.rewardData;
-                
-                // Pass the specific monster to startBattle
                 startBattle(7, true, false, targetMonster); 
             } 
-        } 
+        }
         else if (gate.type === 'item') { 
         gameState.questProgress.flags.push(gate.onSuccess); 
         
