@@ -2427,329 +2427,101 @@ let currentBuyingItem = null;
         }
     };
 
-    // QUEST & DATA LOADING
-    let availableEvents = [];
+   // --- PRO REGISTRY ENGINE (0% API Usage) ---
+let GITHUB_REGISTRY = null;
 
-    async function loadGitHubData() {
-        if (!GITHUB_CONFIG.enabled) return;
-        
-        console.log("☁️ Connecting to GitHub Content...");
+async function loadGitHubData() {
+    if (!GITHUB_CONFIG.enabled) return;
+    console.log("🚀 Initializing Master Registry...");
 
-        // ===============================================
-        // DYNAMIC ENEMY LOADER (AUTO-FETCH FROM GITHUB)
-        // ===============================================
-        try {
-            console.log("📂 Scanning 'enemies' folder...");
-            // 1. Get list of all files in the 'enemies' folder
-            const enemyFiles = await fetchGithubFolder('enemies');
-            
-            if (enemyFiles && Array.isArray(enemyFiles)) {
-                for (const file of enemyFiles) {
-                    // Only process JSON files
-                    if (file.name.endsWith('.json')) {
-                        try {
-                            const res = await fetch(file.download_url);
-                            if (res.ok) {
-                                const data = await res.json();
-                                if (Array.isArray(data)) {
-                                    // 2. Sort them into the right categories based on filename
-                                    if (file.name.includes('boss')) {
-                                        BOSS_TYPES = [...BOSS_TYPES, ...data];
-                                        console.log(`💀 Loaded Bosses from: ${file.name}`);
-                                    } 
-                                    else if (file.name.includes('arena')) {
-                                        ARENA_MONSTERS = [...ARENA_MONSTERS, ...data];
-                                        console.log(`⚔️ Loaded Arena foes from: ${file.name}`);
-                                    } 
-                                    else {
-                                        // Everything else (forest.json, christmas.json, etc.) goes to Wilds
-                                        MONSTER_TYPES = [...MONSTER_TYPES, ...data];
-                                        console.log(`🌲 Loaded Wild Monsters from: ${file.name}`);
-                                    }
-                                }
-                            }
-                        } catch (err) { 
-                            console.warn("Skipped invalid file:", file.name); 
+    try {
+        // 1. Fetch the Registry (Address Book)
+        const registryRes = await fetch(getGhUrl('registry.json'));
+        if (!registryRes.ok) throw new Error("registry.json not found on GitHub");
+        GITHUB_REGISTRY = await registryRes.json();
+
+        // HELPER: Fetch that handles spaces in names automatically
+        const directFetch = async (folder, file) => {
+            // encodeURIComponent fixes the "Space" problem by turning " " into "%20"
+            const safePath = file.split('/').map(part => encodeURIComponent(part)).join('/');
+            const res = await fetch(getGhUrl(`${folder}/${safePath}`));
+            if (!res.ok) {
+                console.warn(`⚠️ File Missing: ${folder}/${file}`);
+                return null;
+            }
+            return await res.json();
+        };
+
+        // 2. LOAD PETS (Smart Unwrapper)
+        if (GITHUB_REGISTRY.pets) {
+            for (const file of GITHUB_REGISTRY.pets) {
+                const data = await directFetch('pets', file);
+                if (data) {
+                    // This helper registers the pet and saves their evolution path
+                    const registerOne = (petObj, evoList = null) => {
+                        const r = petObj.rarity || 'common';
+                        if (!PET_TYPES[r]) PET_TYPES[r] = [];
+                        if (!PET_TYPES[r].find(x => x.id === petObj.id)) {
+                            PET_TYPES[r].push(petObj);
+                            // Link evolutions if provided in the object or passed separately
+                            if (evoList) EVOLUTION_CHAINS[petObj.id] = evoList;
+                            else if (petObj.evolutions) EVOLUTION_CHAINS[petObj.id] = petObj.evolutions;
                         }
-                    }
-                }
-            }
-        } catch (e) { 
-            console.error("Could not fetch enemy folder list. Check GitHub config."); 
-        }
-        // ===============================================
-        
-        // 1. Load Event List (Quest Board)
-        try {
-            const res = await fetch(getGhUrl('events/event_list.json'));
-            if(res.ok) {
-                availableEvents = await res.json();
-                if(availableEvents.length > 0) {
-                     document.querySelector('.adventure-tab').style.display = 'block';
-                     renderAdventureList();
-                }
-            }
-        } catch(e) { console.log("No event list found."); }
+                    };
 
-        // 2. DYNAMIC PET LOADER (Scans the entire 'pets' folder)
-        try {
-            console.log("🐾 Scanning 'pets' folder on GitHub...");
-            const petFiles = await fetchGithubFolder('pets');
-            
-            if (petFiles && Array.isArray(petFiles)) {
-                for (const file of petFiles) {
-                    // Skip if it's not a JSON file
-                    if (!file.name.endsWith('.json')) continue;
-
-                    try {
-                        const res = await fetch(file.download_url);
-                        if (res.ok) {
-                            const data = await res.json();
-                            
-                            // HELPER: Add a single pet to the game
-                            const registerPet = (p) => {
-                                // Ensure the rarity array exists
-                                const r = p.rarity || 'common';
-                                if (!PET_TYPES[r]) PET_TYPES[r] = [];
-                                
-                                // Prevent duplicates
-                                if (!PET_TYPES[r].find(existing => existing.id === p.id)) {
-                                    PET_TYPES[r].push(p);
-                                    console.log(`✨ Loaded Pet: ${p.name}`);
-                                }
-                                
-                                // Register Evolutions if present
-                                if (p.evolutions) {
-                                    EVOLUTION_CHAINS[p.id] = p.evolutions;
-                                }
-                            };
-
-                            // Handle Arrays (List of pets) vs Objects (Single pet)
-                            if (Array.isArray(data)) {
-                                data.forEach(item => {
-                                    // Some files might be evolution chains, some might be base pets
-                                    if (item.base) { 
-                                        // It's an evolution chain object
-                                        registerPet(item.base);
-                                        if (item.evolutions) EVOLUTION_CHAINS[item.base.id] = item.evolutions;
-                                    } else {
-                                        // It's a simple pet object
-                                        registerPet(item);
-                                    }
-                                });
+                    if (Array.isArray(data)) {
+                        data.forEach(item => {
+                            if (item.base) {
+                                // CASE: List of families (Like your evolutions.json)
+                                registerOne(item.base, item.evolutions);
                             } else {
-                                // Single Object
-                                registerPet(data);
+                                // CASE: List of simple pets
+                                registerOne(item);
                             }
-                        }
-                    } catch (err) {
-                        console.warn("⚠️ Failed to load pet file:", file.name, err);
+                        });
+                    } else if (data.base) {
+                        // CASE: Single family object
+                        registerOne(data.base, data.evolutions);
+                    } else {
+                        // CASE: Single simple pet object
+                        registerOne(data);
                     }
                 }
             }
-        } catch(e) { console.error("Error scanning pets folder:", e); }
+        }
+        // 3. LOAD ENEMIES
+        for (const file of (GITHUB_REGISTRY.enemies || [])) {
+            const data = await directFetch('enemies', file);
+            if (data && Array.isArray(data)) {
+                if (file.includes('boss')) BOSS_TYPES = [...BOSS_TYPES, ...data];
+                else MONSTER_TYPES = [...MONSTER_TYPES, ...data];
+            }
+        }
+
+        // 4. LOAD ITEMS & POWERS
+        const itemData = await Promise.all((GITHUB_REGISTRY.items || []).map(f => directFetch('items', f)));
+        itemData.forEach(d => { if(d && Array.isArray(d)) SHOP_ITEMS.equipment = [...(SHOP_ITEMS.equipment||[]), ...d]; });
         
-        // 4. Dynamic Equipment (NEW!)
-        try {
-            // Initialize array if missing
-            if (!SHOP_ITEMS.equipment) SHOP_ITEMS.equipment = [];
-            
-            const files = await fetchGithubFolder('items');
-            if (files && files.length > 0) {
-                for (const file of files) {
-                    if (file.name.endsWith('.json')) {
-                        try {
-                            const res = await fetch(file.download_url);
-                            if (res.ok) {
-                                const newItems = await res.json();
-                                if (Array.isArray(newItems)) {
-                                    newItems.forEach(item => {
-                                        // Prevent duplicates based on ID
-                                        if (!SHOP_ITEMS.equipment.find(i => i.id === item.id)) {
-                                            SHOP_ITEMS.equipment.push(item);
-                                        }
-                                    });
-                                }
-                            }
-                        } catch (err) { console.error("Item load error:", err); }
-                    }
-                }
-                console.log("🎒 Loaded Equipment:", SHOP_ITEMS.equipment.length);
-            }
-        } catch(e) { console.log("No items folder found."); }
-        
-        // ============================================================
-        // 🕵️ DEEP SCANNER: EVENTS & EXAMS (Fixes "Undefined" Pets)
-        // ============================================================
-        try {
-            // 1. Define all folders to check (Events + All Grades)
-            const foldersToCheck = ['events'];
-            ['K', '1', '2', '3', '4', '5', '6'].forEach(g => foldersToCheck.push(`tests/grade_${g}`));
+        const powerData = await Promise.all((GITHUB_REGISTRY.powers || []).map(f => directFetch('powers', f)));
+        powerData.forEach(d => { if(d && Array.isArray(d)) SHOP_ITEMS.power_items = [...SHOP_ITEMS.power_items, ...d]; });
 
-            console.log("🕵️ Deep Scan Initiated: Searching for hidden reward pets...");
+        // 5. LOAD EVENT LIST (Required for Adventure Tab)
+        const events = await directFetch('events', 'event_list.json');
+        if (events) {
+            availableEvents = events;
+            const advTab = document.querySelector('.adventure-tab');
+            if(advTab) advTab.style.display = 'block';
+            renderAdventureList();
+        }
 
-            // 2. Loop through every folder
-            for (const folder of foldersToCheck) {
-                const files = await fetchGithubFolder(folder);
-                
-                if (files && Array.isArray(files)) {
-                    for (const file of files) {
-                        if (!file.name.endsWith('.json')) continue;
-
-                        try {
-                            const res = await fetch(file.download_url);
-                            if (res.ok) {
-                                const data = await res.json();
-                                
-                                // 3. Detect Pet Reward
-                                // Checks: meta.rewards.pet OR rewards.pet
-                                let hiddenPet = null;
-                                if (data.meta && data.meta.rewards && data.meta.rewards.pet) {
-                                    hiddenPet = data.meta.rewards.pet;
-                                } else if (data.rewards && data.rewards.pet) {
-                                    hiddenPet = data.rewards.pet;
-                                }
-
-                                // 4. Register the Pet
-                                if (hiddenPet) {
-                                    const r = hiddenPet.rarity || 'epic';
-                                    
-                                    // Ensure category exists
-                                    if (!PET_TYPES[r]) PET_TYPES[r] = [];
-                                    
-                                    // Check for duplicates before adding
-                                    if (!PET_TYPES[r].find(p => p.id === hiddenPet.id)) {
-                                        PET_TYPES[r].push(hiddenPet);
-                                        console.log(`🎁 Recovered Pet: ${hiddenPet.name} from ${file.name}`);
-                                    }
-
-                                    // Register hidden evolutions too
-                                    if (hiddenPet.evolutions) {
-                                        EVOLUTION_CHAINS[hiddenPet.id] = hiddenPet.evolutions;
-                                    }
-                                }
-                            }
-                        } catch (err) { }
-                    }
-                }
-            }
-        } catch(e) { console.log("Deep scan skipped or failed."); }
-        
-        // 6. EVENT REWARD SCANNER (Finds pets hidden inside Quest JSONs)
-        try {
-            console.log("🕵️ Scanning 'events' folder for hidden pets...");
-            const eventFiles = await fetchGithubFolder('events');
-            
-            if (eventFiles && Array.isArray(eventFiles)) {
-                for (const file of eventFiles) {
-                    if (!file.name.endsWith('.json')) continue;
-
-                    try {
-                        const res = await fetch(file.download_url);
-                        if (res.ok) {
-                            const qData = await res.json();
-                            
-                            // Check: Is there a pet reward inside?
-                            // Structure usually: { meta: { rewards: { pet: { ... } } } }
-                            // OR sometimes just: { rewards: { pet: { ... } } }
-                            
-                            let rewardPet = null;
-                            if (qData.meta && qData.meta.rewards && qData.meta.rewards.pet) {
-                                rewardPet = qData.meta.rewards.pet;
-                            } else if (qData.rewards && qData.rewards.pet) {
-                                rewardPet = qData.rewards.pet;
-                            }
-
-                            if (rewardPet) {
-                                // We found a hidden pet! Register it.
-                                const r = rewardPet.rarity || 'epic'; // Default to epic if missing
-                                if (!PET_TYPES[r]) PET_TYPES[r] = [];
-                                
-                                // Prevent duplicates
-                                if (!PET_TYPES[r].find(p => p.id === rewardPet.id)) {
-                                    PET_TYPES[r].push(rewardPet);
-                                    console.log(`🎁 Discovered Event Pet: ${rewardPet.name}`);
-                                }
-                                
-                                // Register Evolutions if hidden there too
-                                if (rewardPet.evolutions) {
-                                    EVOLUTION_CHAINS[rewardPet.id] = rewardPet.evolutions;
-                                }
-                            }
-                        }
-                    } catch (err) { }
-                }
-            }
-        } catch(e) { console.log("Event scan skipped."); }
-        
-        // 5. DYNAMIC BLOCKS LOADER (With Auto-Compression)
-        try {
-            console.log("🧱 Scanning 'blocks' folder...");
-            const blockFiles = await fetchGithubFolder('blocks');
-            
-            if (blockFiles && Array.isArray(blockFiles)) {
-                let customCount = 1;
-                for (const file of blockFiles) {
-                    if (file.name.endsWith('.json')) {
-                        try {
-                            const res = await fetch(file.download_url);
-                            if (res.ok) {
-                                const newBlocks = await res.json();
-                                if (Array.isArray(newBlocks)) {
-                                    newBlocks.forEach(block => {
-                                        if (!BUILDER_BLOCKS.find(b => b.id === block.id)) {
-                                            if (!block.side) block.side = block.top;
-                                            if (!block.color) block.color = block.side;
-                                            BUILDER_BLOCKS.push(block);
-
-                                            // --- AUTO-REGISTER COMPRESSION CODE ---
-                                            // If the block doesn't have a code, give it 'z1', 'z2', etc.
-                                            if (!VOXEL_MAP[block.id]) {
-                                                const shortCode = 'z' + customCount++;
-                                                VOXEL_MAP[block.id] = shortCode;
-                                                VOXEL_LOOKUP[shortCode] = block.id; // Update the reverse lookup too
-                                            }
-                                        }
-                                    });
-                                }
-                            }
-                        } catch (err) { console.warn("Skipped invalid block file:", file.name); }
-                    }
-                }
-            }
-        } catch (e) { console.log("No external blocks folder found."); }
-
-        // 3. Dynamic Powers
-        try {
-            const files = await fetchGithubFolder('powers');
-            if (files && files.length > 0) {
-                let addedCount = 0;
-                const existingIds = new Set(SHOP_ITEMS.power_items.map(p => p.id));
-                for (const file of files) {
-                    if (file.name.endsWith('.json')) {
-                        try {
-                            const res = await fetch(file.download_url);
-                            if (res.ok) {
-                                const newPowers = await res.json();
-                                if (Array.isArray(newPowers)) {
-                                    newPowers.forEach(power => {
-                                        if (!existingIds.has(power.id)) {
-                                            if (!power.image && !power.icon) power.icon = '📜';
-                                            SHOP_ITEMS.power_items.push(power);
-                                            existingIds.add(power.id);
-                                            addedCount++;
-                                        }
-                                    });
-                                }
-                            }
-                        } catch (err) {}
-                    }
-                }
-                if (document.getElementById('screen-shop').classList.contains('active')) { renderShop(); }
-            }
-        } catch(e) {}
+        console.log("✅ Registry Loaded: All Systems Static.");
+    } catch (e) {
+        console.error("❌ Registry Critical Error:", e.message);
     }
-    loadGitHubData();
+}
+
+// Initial Start
+loadGitHubData();
 // ==========================================
 // 🚀 PRO BACKEND ENGINE: COMPRESSION & SYNC
 // ==========================================
@@ -3012,6 +2784,8 @@ function saveGame(forceFirebase = false) {
 
 function repairSaveData() {
     let fixed = false;
+
+    // 1. Repair Basic State
     if (gameState.combo === undefined) { gameState.combo = 0; fixed = true; }
     if (!gameState.toolHistory) { gameState.toolHistory = {}; fixed = true; }
     if (!gameState.inventory) { gameState.inventory = {}; fixed = true; }
@@ -3020,31 +2794,37 @@ function repairSaveData() {
         fixed = true; 
     }
     
-    // 🔥 EXPERT FIX: THE NaN CLEANER
+    // 2. The Health Aligner (Original Plan: 50 + Lvl*10)
     if (gameState.pets && Array.isArray(gameState.pets)) {
         gameState.pets.forEach(p => {
-            // 1. Repair Max HP
-            if (isNaN(p.maxHP) || p.maxHP === null || p.maxHP === undefined) {
-                console.log("🛠️ Repairing MaxHP for " + p.name);
-                p.maxHP = 50 + ((p.level || 1) * 10);
-                fixed = true;
-            }
-            // 2. Repair Current HP
-            if (isNaN(p.hp) || p.hp === null || p.hp === undefined) {
-                console.log("🛠️ Repairing NaN HP for " + p.name);
-                p.hp = p.maxHP; // Reset to full health
-                fixed = true;
-            }
-            // 3. Ensure they are numbers, not strings
-            p.hp = Number(p.hp);
-            p.maxHP = Number(p.maxHP);
+            // Ensure numbers are numbers
             p.level = Number(p.level || 1);
+            
+            // Calculate what MaxHP SHOULD be based on your original math
+            // Level 1 = 60, Level 10 = 150, Level 30 = 350
+            const correctMaxHP = 50 + (p.level * 10);
+            
+            // If the pet is missing stats or has the wrong HP
+            if (isNaN(p.maxHP) || p.maxHP !== correctMaxHP) {
+                console.log(`🏥 Medical Fix for ${p.name}: HP aligned to Lvl ${p.level}`);
+                p.maxHP = correctMaxHP;
+                p.hp = p.maxHP; // Restore to full health for the fix
+                fixed = true;
+            }
+
+            // Final safety cleaning for current HP
+            p.hp = Number(p.hp);
+            if (isNaN(p.hp) || p.hp > p.maxHP) {
+                p.hp = p.maxHP;
+                fixed = true;
+            }
         });
     }
 
+    // 3. Save the repaired data back to Firebase
     if (fixed) {
-        console.log("✅ Database Health Check: Data Refreshed.");
-        saveGame(true);
+        console.log("✅ Database Health Check: All Pets Standardized.");
+        saveGame(true); // Force sync to Cloud
     }
 }
 
@@ -3825,7 +3605,33 @@ function resolveInBattleMath(selected, correct) {
       
       // 1. INCUBATOR VIEW (If egg)
       if (!p.isHatched) { 
-          c.innerHTML = `<div style="text-align:center; padding:20px;"><h2>🥚 Incubator</h2><div class="pet-visual" style="font-size:100px;">🥚</div><h3>${p.isHatched ? p.name : "Mystery Egg"}</h3><div style="margin:20px 0;">${p.hatchProgress}% <div class="hatch-bar-container"><div class="hatch-bar" style="width: ${p.hatchProgress}%;"></div></div></div>${p.hatchProgress >= 100 ? `<button class="action-btn green" onclick="hatchPet()">✨ HATCH NOW! ✨</button>` : `<p style="color:#718096">Use Items in Shop to speed up!</p>`}<div style="margin-top:20px;">${renderInventory(true)}</div></div><div class="pet-collection">${renderCollection()}</div>`; return; 
+          c.innerHTML = `
+            <div style="text-align:center; padding:20px;">
+                <h2>🥚 Incubator</h2>
+                <div class="pet-visual" style="font-size:100px;">🥚</div>
+                <h3>Mystery Egg</h3>
+                
+                <div style="margin:20px 0;">
+                    ${p.hatchProgress}% 
+                    <div class="hatch-bar-container"><div class="hatch-bar" style="width: ${p.hatchProgress}%;"></div></div>
+                </div>
+
+                <!-- Action Buttons Container -->
+                <div style="display:flex; flex-direction:column; gap:10px; max-width:280px; margin: 0 auto;">
+                    ${p.hatchProgress >= 100 
+                        ? `<button class="action-btn green" onclick="hatchPet()">✨ HATCH NOW! ✨</button>` 
+                        : `<p style="color:#718096; font-size:12px;">Use Items in Shop to speed up!</p>`
+                    }
+                    <!-- THE NEW SELL BUTTON -->
+                    <button class="action-btn" style="background:#ed8936; color:white; box-shadow: 0 4px 0 #c05621;" onclick="sellEgg()">
+                        💰 Sell Egg (+50 BP)
+                    </button>
+                </div>
+
+                <div style="margin-top:20px;">${renderInventory(true)}</div>
+            </div>
+            <div class="pet-collection">${renderCollection()}</div>`; 
+          return; 
       }
       
       // --- STAR DISPLAY ---
@@ -4024,6 +3830,35 @@ function renderInventory(isEgg) {
             b.onclick = () => { m.style.display = 'none'; };
         } 
     }
+    
+    function sellEgg() {
+    const p = gameState.pets.find(pet => pet.id === gameState.currentPetId);
+    
+    // Safety check: only eggs can be sold here
+    if (!p || p.isHatched) return;
+
+    if (confirm("Sell this mystery egg for 50 BP? This cannot be undone!")) {
+        const idToRemove = p.id;
+
+        // 1. Give the reward
+        addBP(50);
+
+        // 2. Remove the egg from the list
+        gameState.pets = gameState.pets.filter(pet => pet.id !== idToRemove);
+
+        // 3. Auto-select the next available pet so the screen updates
+        if (gameState.pets.length > 0) {
+            gameState.currentPetId = gameState.pets[0].id;
+        } else {
+            gameState.currentPetId = null;
+        }
+
+        // 4. Save to Cloud and Refresh
+        saveGame(true); 
+        renderHub();
+        showToast("Egg sold for 50 BP!", "success");
+    }
+}
 
     // WILDS QUICK ITEM USAGE
     function quickUseItem(id) {
@@ -5176,7 +5011,49 @@ if(qmMult > 1) showToast(`BONUS EVENT: ${qmMult}x Rewards!`, "success");
             gameState.pets.push(newEgg); 
             setTimeout(() => { showToast("✨ Found a Mystery Egg! ✨", "success"); }, 1500);
         }
+// --- 🎒 BATTLE LOOT ENGINE ---
+        // 1. Roll for 40% Drop Chance
+        const lootRoll = Math.random();
+        const isBossOrQuest = bs.isBoss || gameState.questBattleActive;
+        const dropThreshold = isBossOrQuest ? 0.8 : 0.4; // Bosses/Quests drop more often (80%)
 
+        if (lootRoll < dropThreshold && SHOP_ITEMS.equipment && SHOP_ITEMS.equipment.length > 0) {
+            console.log("🎁 Loot Drop Triggered!");
+            
+            // 2. Determine Rarity (Higher level pets find better stuff)
+            const rarityRoll = Math.random();
+            let rarityTier = "basic";
+            
+            if (rarityRoll < 0.05) rarityTier = "legendary"; // 5% Top Tier
+            else if (rarityRoll < 0.25) rarityTier = "rare"; // 20% Rare Tier
+            else rarityTier = "basic";                       // 75% Common Tier
+
+            // 3. Pick Item & Prefix
+            const pool = ITEM_PREFIXES[rarityTier] || ITEM_PREFIXES.basic;
+            const prefix = pool[Math.floor(Math.random() * pool.length)];
+            const baseItem = SHOP_ITEMS.equipment[Math.floor(Math.random() * SHOP_ITEMS.equipment.length)];
+
+            // 4. Create Unique Instance
+            const droppedItem = {
+                instanceId: 'drop_' + Date.now() + Math.floor(Math.random()*1000),
+                baseId: baseItem.id,
+                name: `${prefix.name} ${baseItem.name}`,
+                image: baseItem.image || baseItem.icon,
+                prefix: JSON.parse(JSON.stringify(prefix)), 
+                rarity: rarityTier,
+                type: baseItem.type,
+                level: 1
+            };
+
+            // 5. Add to Inventory
+            if (!gameState.inventory.equipment) gameState.inventory.equipment = [];
+            gameState.inventory.equipment.push(droppedItem);
+            
+            // 6. Delay the show slightly so it doesn't overlap victory text
+            setTimeout(() => {
+                showLootReveal(droppedItem);
+            }, 1000);
+        }
         gameState.inBattle = false; 
         document.getElementById('battle-ui').style.display = 'none'; 
         
@@ -9073,37 +8950,39 @@ function getPetEquipmentStats(pet) {
     let evoQuizScore = 0;
     
     async function startUltraEvolve() {
-        const p = gameState.pets.find(pet => pet.id === gameState.currentPetId);
+    const p = gameState.pets.find(pet => pet.id === gameState.currentPetId);
+    
+    // 1. Fetch Data using our safe Registry Engine
+    try {
+        console.log("🧬 Fetching Ultra Data for:", p.type);
         
-        // 1. Fetch Data
-        try {
-            const files = await fetchGithubFolder('pets');
-            const file = files.find(f => f.name === 'ultra_evolutions.json');
-            if(!file) throw new Error("Evolution file not found");
-            
-            const res = await fetch(file.download_url);
-            const data = await res.json();
-            
-            const ultraData = data.find(u => u.base_id === p.type);
-            
-            if (!ultraData) {
-                alert("This pet does not have an Ultra Form discovered yet!");
-                return;
-            }
-            
-            ultraTargetPet = p;
-            ultraTargetData = ultraData.ultra_form;
-            
-            // 2. Start The Trial
-            if(confirm(`🧬 ULTRA EVOLUTION DETECTED!\n\nTo evolve into ${ultraData.ultra_form.name}, you must pass the Trial of Knowledge.\n\nAnswer 5 Questions. Pass 4 to Evolve.\n\nReady?`)) {
-                startEvoQuiz();
-            }
-
-        } catch(e) {
-            console.error(e);
-            showToast("Error connecting to Evolution Server", "error");
+        // Use our directFetch helper (which handles spaces and API limits)
+        const res = await fetch(getGhUrl('pets/ultra_evolutions.json'));
+        if(!res.ok) throw new Error("Evolution file not found");
+        
+        const data = await res.json();
+        
+        // Find the specific data for THIS pet
+        const ultraData = data.find(u => u.base_id === p.type);
+        
+        if (!ultraData) {
+            alert("This pet does not have an Ultra Form discovered yet! (Check ID in ultra_evolutions.json)");
+            return;
         }
+        
+        ultraTargetPet = p;
+        ultraTargetData = ultraData.ultra_form;
+        
+        // 2. Start The Trial of Knowledge
+        if(confirm(`🧬 ULTRA EVOLUTION DETECTED!\n\nTo evolve into ${ultraTargetData.name}, you must pass the Trial of Knowledge.\n\nAnswer 5 Questions. Pass 4 to Evolve.\n\nReady?`)) {
+            startEvoQuiz();
+        }
+
+    } catch(e) {
+        console.error("Ultra Evolution Error:", e);
+        showToast("Error connecting to Evolution Server", "error");
     }
+}
 
     function startEvoQuiz() {
         evoQuizScore = 0;
