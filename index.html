@@ -1450,7 +1450,16 @@ body {
                        <!-- Options loaded via JS -->
                    </select>
                </div>
-
+<!-- Choice: Add or Reset -->
+<div style="margin-bottom:15px; padding:10px; background:#fff5f5; border-radius:8px; border:1px solid #feb2b2;">
+    <label style="display:flex; align-items:center; cursor:pointer; gap:10px;">
+        <input type="checkbox" id="bulk-clear-checkbox" style="width:20px; height:20px;">
+        <div>
+            <span style="font-weight:bold; color:#c53030;">🗑️ Clear Existing Topics?</span>
+            <div style="font-size:10px; color:#718096;">If checked, students will ONLY have the new topics selected below.</div>
+        </div>
+    </label>
+</div>
                <!-- 3. Topic List -->
                <label style="font-weight:bold; color:#4a5568;">3. Add Review Topics:</label>
                <div id="bulk-topic-list" style="max-height:150px; overflow-y:auto; border:1px solid #eee; padding:10px; border-radius:5px; margin-bottom:20px;">Loading...</div>
@@ -3267,6 +3276,7 @@ function repairSaveData() {
 // ==========================================
 
 let activeToolId = null;
+let activeToolTopic = ""; // New: Remembers the topic for the badge
 let lastKnownScore = 0;
 
 // 1. RENDER TOOLS GRID (Shows Badges)
@@ -3338,6 +3348,7 @@ async function launchTool(docId) {
         if (!docSnap.exists()) return showToast("Tool not found", "error");
 
         const data = docSnap.data();
+        activeToolTopic = data.topic || data.title || "Math Mastery"; // Capture the topic
         activeToolId = docId;
 
         // 1. Get saved progress
@@ -3399,47 +3410,48 @@ window.addEventListener('message', (e) => {
     const newScore = parseInt(e.data.score) || 0;
     document.getElementById('focus-score-display').innerText = newScore;
     
-    // Ensure the tool history folder exists
     if (!gameState.toolHistory) gameState.toolHistory = {};
-
-    // Get the current record or create a fresh one
     let record = gameState.toolHistory[activeToolId] || { score: 0, claimed: false };
 
-    // Update Pet Speech on progress
     if (newScore > lastKnownScore) {
         const cheers = ["Great job!", "Keep going!", "You're a genius!", "Brain power increasing!"];
         updatePetSpeech(cheers[Math.floor(Math.random() * cheers.length)]);
     }
     lastKnownScore = newScore;
 
-    // --- SECURE SAVE LOGIC ---
     if (!record.claimed) {
-        // Update the numbers
         record.score = newScore;
-        
-        // RE-ATTACH TO GLOBAL STATE (This is the important part!)
         gameState.toolHistory[activeToolId] = record;
         
         if (newScore >= 100) {
             record.claimed = true;
             record.score = 100;
-            addBP(500);
-            // --- NEW: AWARD MASTERY BADGE ---
-            const toolData = snap.data(); // Get info about the tool
-            const badgeName = toolData.topic || "Math Mastery";
             
-            // Check if they already have this badge in their inventory
+            // 1. Award BP
+            addBP(500);
+
+            // 2. Award Mastery Badge using our saved topic
+            const badgeName = activeToolTopic; 
             if (!gameState.badgeInventory.includes(badgeName)) {
                 gameState.badgeInventory.push(badgeName);
-                showToast(`🏆 New Badge Earned: ${badgeName}!`, "success");
-                updatePetSpeech(`🎉 I learned ${badgeName}! Infuse it in the Hub!`);
             }
+
+            // 3. Effects
             updatePetSpeech("🎉 MASTERY! YOU DID IT! 🎉");
             soundManager.playSFX('levelUp');
-            saveGame(true); // Sync to Cloud for the win
-            triggerRewardCeremony("TOOL MASTERED!", "Perfect Score! +500 BP", "🛠️", null);
+            
+            // 4. Save
+            saveGame(true); 
+
+            // 5. Success Ceremony
+            triggerRewardCeremony(
+                "TOOL MASTERED!", 
+                `Perfect Score! +500 BP & ${badgeName} Badge`, 
+                "🛠️", 
+                null
+            );
         } else {
-            saveGame(false); // Background local save
+            saveGame(false); 
         }
     }
 });
@@ -5905,6 +5917,19 @@ function toggleTeacherLogin() {
     loadStudentList(); // Refresh list
 }
     function toggleAllStudents(c) { document.querySelectorAll('.student-select-checkbox').forEach(cb => cb.checked = c); updateBulkActionBar(); }
+    function toggleGradeStudents(checkbox, grade) {
+    // 1. Find the parent group container
+    const group = checkbox.closest('.grade-group');
+    // 2. Find only the student checkboxes inside THIS specific grade group
+    const boxes = group.querySelectorAll('.student-select-checkbox');
+    
+    boxes.forEach(cb => {
+        cb.checked = checkbox.checked;
+    });
+    
+    // 3. Update the bulk action bar (the blue bar at the top)
+    updateBulkActionBar();
+}
     function updateBulkActionBar() { const c = document.querySelectorAll('.student-select-checkbox:checked').length; const b = document.getElementById('bulk-action-bar'); document.getElementById('bulk-selected-count').innerText = `${c} Selected`; b.style.display = c > 0 ? 'flex' : 'none'; }
     
    async function loadStudentList() {
@@ -5971,15 +5996,24 @@ function toggleTeacherLogin() {
     grades.forEach(grade => { 
         finalHtml += `
             <div class="grade-group">
-                <div class="grade-summary" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">
-                    <span>📂 Grade ${grade}</span>
-                    <span>${grouped[grade].length} Students ▼</span>
+                <div class="grade-summary" style="display:flex; align-items:center; gap:12px; background:#e2e8f0; border-bottom:1px solid #cbd5e0;">
+                    <!-- The New Grade Selector Checkbox -->
+                    <input type="checkbox" 
+                           style="width:22px; height:22px; cursor:pointer; margin-left:5px;" 
+                           onclick="event.stopPropagation(); toggleGradeStudents(this, '${grade}')">
+                    
+                    <!-- The Clickable Header (To Open/Close the folder) -->
+                    <div style="flex:1; cursor:pointer; padding:12px 0;" 
+                         onclick="const list = this.parentElement.nextElementSibling; list.style.display = list.style.display === 'none' ? 'block' : 'none'">
+                        <span style="font-weight:bold; color:#2d3748;">📂 Grade ${grade}</span>
+                        <span style="float:right; font-size:12px; color:#718096; margin-right:15px;">${grouped[grade].length} Students ▼</span>
+                    </div>
                 </div>
                 <div class="grade-student-list" style="display:block;">
                     ${grouped[grade].join('')}
                 </div>
             </div>`; 
-    }); 
+    });
     d.innerHTML = finalHtml; 
 }
 
@@ -6085,36 +6119,50 @@ function toggleTeacherLogin() {
     }
 
     async function saveBulkStudentTopics() {
-        const selectedStudents = Array.from(document.querySelectorAll('.student-select-checkbox:checked')).map(cb => cb.dataset.username); 
-        const topics = Array.from(document.querySelectorAll('#bulk-topic-list input:checked')).map(cb => cb.value); 
-        const grade = document.getElementById('bulk-grade-select').value;
-        const exam = document.getElementById('bulk-exam-select').value;
+    const selectedStudents = Array.from(document.querySelectorAll('.student-select-checkbox:checked')).map(cb => cb.dataset.username); 
+    const topics = Array.from(document.querySelectorAll('#bulk-topic-list input:checked')).map(cb => cb.value); 
+    const grade = document.getElementById('bulk-grade-select').value;
+    const exam = document.getElementById('bulk-exam-select').value;
+    const shouldClear = document.getElementById('bulk-clear-checkbox').checked;
 
-        if (selectedStudents.length === 0) return showToast("No students selected", "error");
+    if (selectedStudents.length === 0) return showToast("No students selected", "error");
+    if (topics.length === 0 && shouldClear && !confirm("You selected 'Clear' but picked no new topics. This will leave students with NO lessons. Continue?")) return;
+    
+    const batch = window.fbase.writeBatch(window.db);
+    
+    selectedStudents.forEach(user => { 
+        const ref = window.fbase.doc(window.db, "students", user); 
         
-        const batch = window.fbase.writeBatch(window.db);
+        // 1. Set the Grade
+        const updateData = { assignedGrade: grade }; 
         
-        selectedStudents.forEach(user => { 
-            const ref = window.fbase.doc(window.db, "students", user); 
-            const updateData = { assignedGrade: grade }; 
-            
-            // Merge topics (add new ones to existing list)
-            if (topics.length > 0) { 
+        // 2. Handle Topics (The New Logic)
+        if (shouldClear) {
+            // REPLACEMENT MODE: Just set the array exactly as it is
+            updateData.assignedTopics = topics;
+        } else {
+            // ADDITIVE MODE: Use arrayUnion to keep old ones
+            if (topics.length > 0) {
                 updateData.assignedTopics = window.fbase.arrayUnion(...topics); 
             }
-            
-            // Update Exam (Only if a specific one was picked)
-            if (exam && exam !== "") {
-                updateData.assignedExam = exam;
-            }
-            
-            batch.update(ref, updateData); 
-        });
+        }
         
-        await batch.commit(); 
-        showToast(`Updated ${selectedStudents.length} students!`, "success"); 
-        document.getElementById('bulk-assign-modal').style.display='none';
-    }
+        // 3. Update Exam (If one was picked)
+        if (exam && exam !== "") {
+            updateData.assignedExam = exam;
+        }
+        
+        batch.update(ref, updateData); 
+    });
+    
+    await batch.commit(); 
+    
+    // Cleanup: Reset the checkbox for next time
+    document.getElementById('bulk-clear-checkbox').checked = false;
+    
+    showToast(`Successfully updated ${selectedStudents.length} students!`, "success"); 
+    document.getElementById('bulk-assign-modal').style.display='none';
+}
 
 
     let currentRoomId=null, pvpUnsubscribe=null, isHost=false, localOpponentHP=0, localPlayerHP=0;
@@ -7276,7 +7324,7 @@ function triggerRewardCeremony(title, message, visualHTML, callback) {
 
     const modal = document.createElement('div');
     modal.className = 'modal-overlay active';
-    modal.style.zIndex = "5000";
+    modal.style.zIndex = "10001"; // Higher than Focus Mode (9999)
     modal.innerHTML = `
         <div class="reward-card-glow">
             <div class="reward-shine"></div>
