@@ -1,0 +1,21 @@
+{
+  "pets": [
+    "all_pets.json",
+    "holiday_pets.json",
+    "ultra_evolutions.json"
+  ],
+  "enemies": [
+    "forest.json",
+    "boss.json",
+    "arena.json"
+  ],
+  "items": [
+    "equipment.json"
+  ],
+  "powers": [
+    "powers.json"
+  ],
+  "blocks": [
+    "basic_blocks.json"
+  ]
+}
