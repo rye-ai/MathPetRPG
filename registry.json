@@ -1,21 +1,47 @@
 {
   "pets": [
-    "all_pets.json",
-    "holiday_pets.json",
-    "ultra_evolutions.json"
+    "ultra_evolutions.json",
+    "evolutions.json",
+    "missingpets.json"
   ],
   "enemies": [
-    "forest.json",
     "boss.json",
-    "arena.json"
+    "forest.json"
   ],
   "items": [
-    "equipment.json"
+    "schoolgear.json",
+    "special_items.json"
   ],
   "powers": [
-    "powers.json"
+    "powerv1.json",
+    "powerv2.json"
   ],
   "blocks": [
-    "basic_blocks.json"
-  ]
+    "custom_blocks.json"
+  ],
+  "events": [
+    "event_list.json",
+    "christmas_reward.json",
+    "quests/christmas_rescue.json",
+    "quests/worldboss1.json"
+  ],
+  "questions": {
+    "grade_1": ["1.json"],
+    "grade_2": [
+      "Addition and Subtraction Fluency.json",
+      "Addition up to hundred.json",
+      "Compare Numbers.json",
+      "Finding the Valueof 3 Digit Number.json",
+      "Number Names.json",
+      "Place Value.json",
+      "Read and Write 3 Digit Numbers.json",
+      "Reading Time.json",
+      "odd or even.json"
+    ],
+    "grade_6": ["Median, Mode, Range.json"],
+    "grade_K": ["Counting Up to 10.json"]
+  },
+  "tests": {
+    "grade_2": ["test_Place_Value.json"]
+  }
 }
