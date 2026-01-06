@@ -62,6 +62,7 @@
     align-items: center;
     justify-content: center;
     backdrop-filter: blur(5px);
+    z-index: 15000; /* Force it above all other layers */
 }
     :root {
         --bg-login: url('https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/Untitled%20design.png'); 
@@ -1925,15 +1926,16 @@ body {
             </div>
         </div>
 
-        <!-- 4. The Math Pop-up (Centered Overlay) -->
-        <div id="tower-math-popup" class="tower-math-overlay" style="z-index: 2000;">
-             <div id="tower-math-content" style="width:90%; max-width:400px; position:relative;">
-                 <!-- Question Card injected here -->
-             </div>
-        </div>
 
     </div> <!-- END OF TOWER ARENA -->
 </section>
+
+<!-- 4. The Math Pop-up (Centered Overlay) -->
+<div id="tower-math-popup" class="tower-math-overlay" style="z-index: 2000;">
+     <div id="tower-math-content" style="width:90%; max-width:400px; position:relative;">
+         <!-- Question Card injected here -->
+     </div>
+</div>
    </main>
   </div>
   
@@ -3355,47 +3357,45 @@ async function adminPublishTool() {
         options.forEach(opt => { const b = document.createElement('div'); b.className = 'mcq-btn'; b.innerText = opt; b.onclick = () => checkAnswer(opt); c.appendChild(b); }); 
     }
     
-    // --- PRO COMBAT: BULLETPROOF IN-BATTLE MATH ---
-function openInBattleMath() {
+   function openInBattleMath() {
     if (gameState.battleState.turnInProgress) return;
 
-    // 1. Get Question (Priority: Assigned Topics)
-    let q;
-    if (gameState.activeQuestionPool && gameState.activeQuestionPool.length > 0) {
-        q = gameState.activeQuestionPool[Math.floor(Math.random() * gameState.activeQuestionPool.length)];
-    } else {
-        q = MathEngine.generate(gameState.grade || "1");
-    }
+    let q = (gameState.activeQuestionPool && gameState.activeQuestionPool.length > 0) 
+        ? gameState.activeQuestionPool[Math.floor(Math.random() * gameState.activeQuestionPool.length)] 
+        : MathEngine.generate(gameState.grade || "1");
 
-    // 2. Create the Overlay UI
-    const battlePanel = document.querySelector('.battle-ui-panel');
+    // Use the Tower Overlay as a Universal Overlay
+    const overlay = document.getElementById('tower-math-popup');
+    const content = document.getElementById('tower-math-content');
     
-    // We use single quotes '${opt}' to make sure decimals/fractions don't crash the code
-    battlePanel.innerHTML = `
-        <div id="battle-math-box" style="text-align:center; width:100%; animation: popIn 0.3s; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 10px;">
-            <div style="font-size:12px; color:#5a67d8; font-weight:bold; margin-bottom:5px; text-shadow: 1px 1px 0 white;">🧠 CONCENTRATING...</div>
-            <div style="font-size:22px; font-weight:bold; color:#2d3748; margin-bottom:10px; text-shadow: 1px 1px 0 white;">${q.qVisualHTML || q.q}</div>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
-                ${q.options.map(opt => `<button class="mcq-btn" style="min-height:50px; font-size:18px; padding:5px;" onclick="resolveInBattleMath('${opt}', '${q.a}')">${opt}</button>`).join('')}
+    overlay.style.display = 'flex';
+    content.innerHTML = `
+        <div class="tower-command-box" style="border-color:#5a67d8; color:#2d3748; background:white; padding:20px; border-radius:15px; border:4px solid #5a67d8; text-align:center;">
+            <div style="font-weight:bold; color:#5a67d8; margin-bottom:10px;">🧠 FOCUSING...</div>
+            <div style="font-size:32px; font-weight:bold; margin-bottom:20px;">${q.qVisualHTML || q.q}</div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                ${q.options.map(opt => `<button class="mcq-btn" style="min-height:60px; font-size:22px;" onclick="resolveInBattleMath('${opt}', '${q.a}')">${opt}</button>`).join('')}
             </div>
-            <button class="action-btn red" style="margin-top:10px; padding:5px; font-size:12px;" onclick="renderBattle()">Cancel</button>
+            <button class="action-btn red" style="margin-top:15px; padding:5px; font-size:12px;" onclick="document.getElementById('tower-math-popup').style.display='none'">Cancel</button>
         </div>
     `;
 }
     
 function resolveInBattleMath(selected, correct) {
+    // 1. Hide the pop-up immediately
+    document.getElementById('tower-math-popup').style.display = 'none';
+
     if (selected == correct) {
         soundManager.playSFX('correct');
         gameState.combo = (gameState.combo || 0) + 1;
         addBP(5);
         
-        // Trigger the same heal as the study tab
+        // Legendary Light Aura Heal
         const activePet = gameState.pets.find(p => p.id === gameState.currentPetId);
         if (activePet && activePet.rarity === 'legendary' && activePet.hp > 0) {
             if (activePet.element === 'light' || (Array.isArray(activePet.element) && activePet.element.includes('light'))) {
                 const healAmt = Math.floor(activePet.maxHP * 0.05);
                 activePet.hp = Math.min(activePet.maxHP, activePet.hp + healAmt);
-                // We show this as floating text in the battle
                 const pVis = document.getElementById('battle-player-visual');
                 if(pVis) showFloatingText(pVis.parentElement, `+${healAmt}`, "heal");
             }
@@ -3403,7 +3403,7 @@ function resolveInBattleMath(selected, correct) {
         
         if (gameState.combo >= 3) {
             gameState.burstMode = true;
-            showToast("🔥 BURST READY! SHIELD BREAKER LOADED!", "success");
+            showToast("🔥 BURST READY!", "success");
         } else {
             showToast(`Correct! Combo: ${gameState.combo}/3`, "success");
         }
@@ -3412,7 +3412,9 @@ function resolveInBattleMath(selected, correct) {
         gameState.combo = 0;
         showToast("Focus Lost! Combo Reset.", "error");
     }
-    renderBattle(); // Returns to attack buttons
+    
+    // Refresh the battle UI to show the new combo/health
+    renderBattle(); 
 }
 
     // UPDATED MATH LOGIC: CONNECTS MATH TO BATTLE (BURST MODE)
@@ -6853,8 +6855,14 @@ async function startRaidEngine(path) {
         }
         
         const enemyVis = document.getElementById('battle-enemy-visual');
-        if (enemyVis && !enemyVis.innerHTML.includes('img') && data.image) {
-            enemyVis.innerHTML = `<img src="${data.image}" class="battler-image" style="width:250px; height:250px; filter:drop-shadow(0 0 15px red);">`;
+        if (enemyVis && data.image) {
+            // Ensure the flip class is applied so the boss faces the player
+            enemyVis.classList.add('flipped-opponent');
+            
+            // Only update innerHTML if it's currently empty or doesn't have the image
+            if (!enemyVis.innerHTML.includes('img')) {
+                enemyVis.innerHTML = `<img src="${data.image}" class="battler-image" style="width:250px; height:250px; filter:drop-shadow(0 0 15px red);">`;
+            }
         }
 
         // Only draw player buttons if the Math Frenzy isn't blocking the screen
@@ -7418,7 +7426,7 @@ function launchRaidQuiz(moveId) {
     // B. Build Overlay
     const overlay = document.createElement('div');
     overlay.id = "raid-math-overlay";
-    overlay.style.cssText = `position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; animation:popIn 0.2s; padding:20px;`;
+    overlay.style.cssText = `position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:20000; display:flex; flex-direction:column; align-items:center; justify-content:center; animation:popIn 0.2s; padding:20px;`;
     
     overlay.innerHTML = `
         <div style="font-size: 24px; color: #f6e05e; font-weight:bold; margin-bottom: 10px; text-shadow:0 0 10px red; text-align:center;">
@@ -10334,13 +10342,16 @@ function towerStartFocus() {
         ? gameState.activeQuestionPool[Math.floor(Math.random() * gameState.activeQuestionPool.length)] 
         : MathEngine.generate(gameState.grade || "1");
 
-    document.getElementById('tower-math-popup').style.display = 'flex';
-    document.getElementById('tower-math-content').innerHTML = `
-        <div class="tower-command-box" style="border-color:#f6e05e; color:#2d3748;">
-            <div style="text-align:center; font-weight:bold; color:#d97706;">⚡ CRITICAL CHALLENGE ⚡</div>
-            <div style="font-size:28px; text-align:center; margin:20px 0; font-weight:bold;">${q.qVisualHTML || q.q || q.text}</div>
+    const overlay = document.getElementById('tower-math-popup');
+    const content = document.getElementById('tower-math-content');
+
+    overlay.style.display = 'flex';
+    content.innerHTML = `
+        <div class="tower-command-box" style="border-color:#f6e05e; color:#2d3748; background:white; padding:20px; border-radius:15px; border:4px solid #f6e05e;">
+            <div style="text-align:center; font-weight:bold; color:#d97706;">⚡ TOWER FOCUS ⚡</div>
+            <div style="font-size:32px; text-align:center; margin:20px 0; font-weight:bold;">${q.qVisualHTML || q.q}</div>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                ${q.options.map(opt => `<button class="mcq-btn" onclick="towerResolveFocus('${opt}', '${q.a}')">${opt}</button>`).join('')}
+                ${q.options.map(opt => `<button class="mcq-btn" style="min-height:60px; font-size:22px;" onclick="towerResolveFocus('${opt}', '${q.a}')">${opt}</button>`).join('')}
             </div>
         </div>`;
 }
