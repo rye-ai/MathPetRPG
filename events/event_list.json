@@ -1,10 +1,10 @@
 [
   {
-    "id": "xmas_2025",
-    "title": "Christmas Rescue",
-    "description": "Navigate Grinchy's snowy fortress and retrieve the stolen Heart!",
+    "id": "New_Year2026",
+    "title": "The Luxosaur Chronicles",
+    "description": "Travel back 65 million years to find the Luxosaur egg and save the future from the Shadow Mist!",
     "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/enemies/christmasenemy/5.png",
-    "status": "active",
-    "file": "events/quests/christmas_rescue.json"
+    "status": "inactive",
+    "file": "events/quests/luxosaur.json"
   }
 ]
