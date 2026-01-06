@@ -2515,6 +2515,34 @@ async function loadGitHubData() {
             if(advTab) advTab.style.display = 'block';
             renderAdventureList();
         }
+        
+        // 6. LOAD BLOCKS (The Voxel Builder Library)
+        if (GITHUB_REGISTRY.blocks) {
+            for (const file of GITHUB_REGISTRY.blocks) {
+                const data = await directFetch('blocks', file);
+                if (data && Array.isArray(data)) {
+                    data.forEach(block => {
+                        // Ensure the block isn't already registered
+                        if (!BUILDER_BLOCKS.find(b => b.id === block.id)) {
+                            // Professional Fix: Add fallbacks so the 3D faces don't disappear
+                            if (!block.side) block.side = block.top || block.color;
+                            if (!block.color) block.color = block.side;
+                            
+                            BUILDER_BLOCKS.push(block);
+                            
+                            // Map the ID to a tiny "Code" for Firebase saving (e.g. 'z1', 'z2')
+                            const nextIndex = Object.keys(VOXEL_MAP).length + 1;
+                            const code = 'z' + nextIndex;
+                            
+                            if (!VOXEL_MAP[block.id]) {
+                                VOXEL_MAP[block.id] = code;
+                                VOXEL_LOOKUP[code] = block.id;
+                            }
+                        }
+                    });
+                }
+            }
+        }
 
         console.log("✅ Registry Loaded: All Systems Static.");
     } catch (e) {
