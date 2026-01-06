@@ -4364,45 +4364,41 @@ function renderInventory(isEgg) {
     }
     function getArenaEnemy() { const pool = [...PET_TYPES.rare, ...PET_TYPES.epic, ...PET_TYPES.legendary]; const base = pool[Math.floor(Math.random() * pool.length)]; return { name: "Champion " + base.name, image: base.image, imageStyle: base.imageStyle, emoji: base.emoji, hp: Math.floor(base.baseHP * 2.5), damage: Math.floor(base.baseHP * 0.3), xp: 100 }; }
     
-    // --- PRO SCALING ENGINE: EXPONENTIAL GROWTH & MITIGATION ---
 function getScaledEnemy(baseEnemyTemplate, playerLevel) {
     let enemy = JSON.parse(JSON.stringify(baseEnemyTemplate));
-    
-    // 1. EXPONENTIAL HP CURVE
-    // Level 1: ~30 HP | Level 50: ~1,800 HP | Level 100: ~7,000 HP
-    const hpMultiplier = Math.pow(playerLevel, 1.2); 
-    // Calculate the normal HP first
-    let baseCalcHP = Math.floor((enemy.hp || 30) + (hpMultiplier * 15));
+    const lvl = Number(playerLevel || 1);
 
-    // CHECK: Did the teacher turn on Endurance Mode? 
-    // If yes, we double the HP!
+    // 1. FAIR HP SCALING (Linear)
+    // Goal: Enemy should have roughly 20-30% more HP than a same-level player.
+    // Player Lvl 30 has 350 HP. Enemy Lvl 30 will now have ~430 HP.
+    let baseCalcHP = Math.floor(40 + (lvl * 13)); 
+
+    // CHECK: Endurance Mode (Teacher Toggle)
     if (gameState.teacherConfig && gameState.teacherConfig.enduranceMode === true) {
         baseCalcHP = baseCalcHP * 2;
-        console.log("🛡️ Endurance Mode Active: Enemy HP Doubled!");
+        console.log("🛡️ Endurance Mode: HP Doubled for extra challenge!");
     }
 
     enemy.maxHP = baseCalcHP;
     enemy.hp = enemy.maxHP;
 
-    // 2. DAMAGE CURVE
-    enemy.damage = Math.floor((enemy.damage || 5) + (playerLevel * 2.5));
+    // 2. FAIR DAMAGE SCALING
+    // Lvl 1: ~8 Damage | Lvl 30: ~53 Damage. 
+    // This allows a player (350 HP) to survive about 6-7 hits.
+    enemy.damage = Math.floor(5 + (lvl * 1.6));
 
-    // 3. XP REWARDS
-    enemy.xp = Math.floor((enemy.xp || 10) + (playerLevel * 25));
+    // 3. THE ARMOR CAP (Crucial Fix)
+    // We slow down armor growth and CAP it at 50. 
+    // 50 Armor = 33% Damage Reduction. The student will NEVER feel weak.
+    let rawArmor = (lvl > 10) ? (lvl - 10) * 2 : 0;
+    enemy.armor = Math.min(rawArmor, 50); 
 
-    // 4. MITIGATION (ARMOR) - Starts appearing after Level 10
-    // Armor reduces damage by a percentage: Damage * (100 / (100 + Armor))
-    enemy.armor = 0;
-    if (playerLevel > 10) {
-        enemy.armor = Math.floor((playerLevel - 10) * 4); // Lvl 50 = 160 Armor (~60% Reduction)
-    }
+    // 4. REWARDS
+    // XP and BP should feel satisfying.
+    enemy.xp = Math.floor(15 + (lvl * 10));
+    enemy.level = lvl; 
+    enemy.name = `Lvl ${lvl} ${enemy.name}`;
 
-    // 5. RESISTANCE (Elemental Defense)
-    // High-level enemies become resistant to their own element
-    enemy.resistance = playerLevel > 30 ? 0.3 : 0; 
-
-    enemy.level = playerLevel; 
-    enemy.name = `Lvl ${playerLevel} ${enemy.name}`;
     return enemy;
 }
     
