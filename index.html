@@ -4192,7 +4192,7 @@ function renderInventory(isEgg) {
     function buyGacha() {
         if(gameState.brainPoints<5000) { showToast("Need 5000 BP!", "error"); return; }
         gameState.brainPoints-=5000; updateStatsDisplay(); saveGame();
-        const pulls=[]; for(let i=0;i<3;i++){ const r=Math.random(); const pool=r<0.75?PET_TYPES.rare:(r<0.95?PET_TYPES.epic:PET_TYPES.legendary); const p=pool[Math.floor(Math.random()*pool.length)]; pulls.push({id:'p'+Date.now()+i,type:p.id,name:p.name,image:p.image,imageStyle:p.imageStyle,emoji:p.emoji,rarity:p.rarity||'rare',hp:p.baseHP,maxHP:p.baseHP,powers:[],isHatched:true,hatchProgress:100,evolutionStage:0,level:1,xp:0,maxXp:100,element:p.element}); }
+        const pulls=[]; for(let i=0;i<3;i++){ const r=Math.random(); const pool = r < 0.50 ? PET_TYPES.rare : (r < 0.95 ? PET_TYPES.epic : PET_TYPES.legendary); const p=pool[Math.floor(Math.random()*pool.length)]; pulls.push({id:'p'+Date.now()+i,type:p.id,name:p.name,image:p.image,imageStyle:p.imageStyle,emoji:p.emoji,rarity:p.rarity||'rare',hp:p.baseHP,maxHP:p.baseHP,powers:[],isHatched:true,hatchProgress:100,evolutionStage:0,level:1,xp:0,maxXp:100,element:p.element}); }
         gameState.pets.push(...pulls); startGachaAnimation(pulls);
     }
     function startGachaAnimation(pulls) { soundManager.playSFX('gacha'); document.getElementById('gacha-cinematic-modal').style.display='flex'; document.getElementById('gacha-flash-overlay').style.animation='gachaFlash 1s ease-out 1.5s'; setTimeout(()=>revealNextPet(pulls,0), 2500); }
