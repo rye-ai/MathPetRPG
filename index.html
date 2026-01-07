@@ -4419,36 +4419,31 @@ function getScaledEnemy(baseEnemyTemplate, playerLevel) {
     let enemy = JSON.parse(JSON.stringify(baseEnemyTemplate));
     const lvl = Number(playerLevel || 1);
 
-    // 1. FAIR HP SCALING (Linear)
-    // Goal: Enemy should have roughly 20-30% more HP than a same-level player.
-    // Player Lvl 30 has 350 HP. Enemy Lvl 30 will now have ~430 HP.
-    let baseCalcHP = Math.floor(40 + (lvl * 13)); 
+    // 1. CALCULATE FAIR MATH (The "Wilds" standard)
+    let fairHP = Math.floor(40 + (lvl * 13)); 
+    let fairAtk = Math.floor(5 + (lvl * 1.6));
 
-    // CHECK: Endurance Mode (Teacher Toggle)
+    // 2. CHECK FOR JSON OVERRIDES
+    // We only use the JSON number if it's "Hardcoded" (like your 1500 HP Boss)
+    // If it's a random bug (30 HP), we use the Fair Math instead.
+    enemy.maxHP = (baseEnemyTemplate.hp && baseEnemyTemplate.hp > fairHP) ? baseEnemyTemplate.hp : fairHP;
+    enemy.damage = (baseEnemyTemplate.damage && baseEnemyTemplate.damage > fairAtk) ? baseEnemyTemplate.damage : fairAtk;
+
+    // Apply Endurance Mode (if teacher turned it on)
     if (gameState.teacherConfig && gameState.teacherConfig.enduranceMode === true) {
-        baseCalcHP = baseCalcHP * 2;
-        console.log("🛡️ Endurance Mode: HP Doubled for extra challenge!");
+        enemy.maxHP = enemy.maxHP * 2;
     }
 
-    enemy.maxHP = baseCalcHP;
     enemy.hp = enemy.maxHP;
 
-    // 2. FAIR DAMAGE SCALING
-    // Lvl 1: ~8 Damage | Lvl 30: ~53 Damage. 
-    // This allows a player (350 HP) to survive about 6-7 hits.
-    enemy.damage = Math.floor(5 + (lvl * 1.6));
+    // 3. IMAGE & NAME OVERRIDES
+    if (baseEnemyTemplate.enemyImage) enemy.image = baseEnemyTemplate.enemyImage;
+    enemy.name = baseEnemyTemplate.enemyName || `Lvl ${lvl} ${enemy.name}`;
 
-    // 3. THE ARMOR CAP (Crucial Fix)
-    // We slow down armor growth and CAP it at 50. 
-    // 50 Armor = 33% Damage Reduction. The student will NEVER feel weak.
-    let rawArmor = (lvl > 10) ? (lvl - 10) * 2 : 0;
-    enemy.armor = Math.min(rawArmor, 50); 
-
-    // 4. REWARDS
-    // XP and BP should feel satisfying.
+    // Standard scaling for secondary stats (XP/Armor)
+    enemy.armor = Math.min((lvl > 10 ? (lvl - 10) * 2 : 0), 50); 
     enemy.xp = Math.floor(15 + (lvl * 10));
     enemy.level = lvl; 
-    enemy.name = `Lvl ${lvl} ${enemy.name}`;
 
     return enemy;
 }
@@ -5684,57 +5679,68 @@ function checkAdventureRandomEncounter(tileType) {
     }
 
     function triggerQuestAction(actionKey) { 
-        const gate = window.currentQuestData.gates ? window.currentQuestData.gates[actionKey] : null; 
-        if(!gate) return; 
-        
-        if(gate.type === 'academic_challenge') { 
-            if(confirm(`🔒 LOCKED! Answer ${gate.questionCount} questions to pass?`)) { 
-                startAcademicGate(gate.questionCount, gate.onSuccess); 
-            } 
+    const gate = window.currentQuestData.gates ? window.currentQuestData.gates[actionKey] : null; 
+    if(!gate) return; 
+    
+    // --- 1. MATH CHALLENGES (The Riddles) ---
+    if(gate.type === 'academic_challenge') { 
+        if(confirm(`🔒 LOCKED! Answer ${gate.questionCount} questions to pass?`)) { 
+            startAcademicGate(gate.questionCount, gate.onSuccess); 
         } 
-        else if (gate.type === 'battle') { 
-            // --- 🎲 UNIVERSAL EVENT ENGINE ---
-            let eid = gate.enemyId;
+    } 
+    
+    // --- 2. BATTLE CHALLENGES (The Bosses & Minions) ---
+    else if (gate.type === 'battle') { 
+        // 🛡️ SECURITY: Prevent fighting the same boss twice
+        if (gate.onSuccess && gameState.questProgress.flags.includes(gate.onSuccess)) {
+            showToast("Challenge already complete!", "info");
+            return;
+        }
 
-            // 1. RANDOMIZER: If the enemyId is a list [ ], pick one at random
-            if (Array.isArray(eid)) {
-                eid = eid[Math.floor(Math.random() * eid.length)];
-                console.log("🎲 Random Event Enemy Picked:", eid);
+        let eid = gate.enemyId;
+        // Randomizer: if enemyId is a list [ ], pick one.
+        if (Array.isArray(eid)) eid = eid[Math.floor(Math.random() * eid.length)];
+
+        let targetMonster = null;
+        // Look in Monsters or Bosses
+        targetMonster = MONSTER_TYPES.find(m => m.id === eid || m.name === eid) ||
+                        BOSS_TYPES.find(b => b.id === eid || b.id === eid);
+        
+        // If not found, look in Pet folders
+        if (!targetMonster) {
+            for (const rarity in PET_TYPES) {
+                const found = PET_TYPES[rarity].find(p => p.id === eid || p.name === eid);
+                if (found) { targetMonster = { ...found, hp: found.baseHP || 60 }; break; }
             }
+        }
 
-            let targetMonster = null;
-
-            // 2. LOOKUP: Search through Wild Monsters and Bosses
-            targetMonster = MONSTER_TYPES.find(m => m.id === eid || m.name === eid) ||
-                            BOSS_TYPES.find(b => b.id === eid || b.name === eid);
+        if (targetMonster) {
+            // --- 🚀 THE MASTER HANDSHAKE ---
+            // This copies your 1500 HP and Legend Image from the JSON to the Monster
+            const questMonsterTemplate = {
+                ...targetMonster,
+                hp: gate.hp || targetMonster.hp,
+                damage: gate.damage || targetMonster.damage,
+                enemyImage: gate.enemyImage || targetMonster.image,
+                enemyName: gate.enemyName || gate.enemyId
+            };
             
-            // 3. PET CONVERSION: If not found, check if it's a Pet ID
-            if (!targetMonster) {
-                for (const rarity in PET_TYPES) {
-                    const found = PET_TYPES[rarity].find(p => p.id === eid || p.name === eid);
-                    if (found) {
-                        targetMonster = {
-                            ...found,
-                            hp: found.baseHP || 60,
-                            damage: 20 
-                        };
-                        break;
-                    }
-                }
-            }
-
-            const name = targetMonster ? (gate.enemyName || targetMonster.name) : "Mystery Foe";
-
-            if(confirm(`⚠️ DANGER: ${name} appeared! Fight?`)) { 
+            if(confirm(`⚠️ DANGER: ${questMonsterTemplate.enemyName} appeared! Fight?`)) { 
                 gameState.questBattleActive = true; 
                 gameState.questSuccessKey = gate.onSuccess; 
+                
+                // Keep the reward pet data ready
                 if (gate.rewardData) gameState.pendingQuestRewardData = gate.rewardData;
-                startBattle(7, true, false, targetMonster); 
+                
+                // Trigger the Battle!
+                startBattle(7, true, false, questMonsterTemplate); 
             } 
         }
-        else if (gate.type === 'item') { 
+    } 
+    
+    // --- 3. TREASURE ITEMS (The Chests) ---
+    else if (gate.type === 'item') { 
         gameState.questProgress.flags.push(gate.onSuccess); 
-        
         const rewardName = gate.itemName || 'Hidden Item';
         const rewardAmt = gate.reward || 0;
         
@@ -5742,12 +5748,10 @@ function checkAdventureRandomEncounter(tileType) {
             "TREASURE FOUND!",
             `You discovered: ${rewardName}`,
             "💎", 
-            () => {
-                if(rewardAmt > 0) addBP(rewardAmt);
-            }
+            () => { if(rewardAmt > 0) addBP(rewardAmt); }
         );
     }
-    }
+}
 
     function startAcademicGate(count, successKey) { 
         switchTab('study'); 
