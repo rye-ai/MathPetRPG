@@ -173,21 +173,23 @@
     "gate_math_7": { "type": "academic_challenge", "questionCount": 3, "onSuccess": "flag_math_7" },
     "gate_boss": { 
       "type": "battle", 
-      "enemyId": "Luxosaur", 
+      "enemyId": "Shadow King", 
       "enemyName": "Luxy Light Dweller",
+      "hp": 1500,
+      "enemyImage": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/33.png",
       "onSuccess": "boss_defeated",
       "rewardData": {
         "name": "Luxosaur",
-        "type": "luxosaur_01",
+        "type": "luxo_01",
         "rarity": "epic",
-        "element": ["light", "fire"],
-        "hp": 80,
-        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/rare/10.png",
+        "element": "light",
+        "hp": 60,
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/31.png",
         "imageStyle": "blend-multiply",
-        "emoji": "🦖",
+        "emoji": "✨",
         "evolutions": [
-          { "level": 10, "cost": 100, "baseHP": 150, "rarity": "epic", "element": ["light", "fire"], "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/rare/11.png", "imageStyle": "blend-multiply" },
-          { "level": 20, "cost": 200, "baseHP": 300, "rarity": "legendary", "element": ["light", "fire"], "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/rare/12.png", "imageStyle": "blend-multiply" }
+          { "level": 10, "cost": 100, "baseHP": 120, "rarity": "epic", "element": "light", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/32.png", "imageStyle": "blend-multiply" },
+          { "level": 20, "cost": 200, "baseHP": 250, "rarity": "legendary", "element": "light", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/33.png", "imageStyle": "blend-multiply" }
         ]
       }
     }
