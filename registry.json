@@ -22,7 +22,7 @@
   "events": [
     "event_list.json",
     "christmas_reward.json",
-    "quests/christmas_rescue.json",
+    "quests/events/quests/luxosaur.json",
     "quests/worldboss1.json"
   ],
   "questions": {
