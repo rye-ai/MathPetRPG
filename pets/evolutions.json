@@ -315,6 +315,111 @@
     ]
   },
   {
+    "id": "family_trex",
+    "base": {
+      "id": "trex_01",
+      "name": "Tyrannosaurus",
+      "rarity": "epic",
+      "element": "fire",
+      "baseHP": 60,
+      "image": "img",
+      "imageStyle": "blend-multiply",
+      "emoji": "🔥"
+    },
+    "evolutions": [
+      {
+        "name": "Tyrannosaurus",
+        "level": 10,
+        "cost": 100,
+        "baseHP": 120,
+        "rarity": "epic",
+        "element": "fire",
+        "image": "img",
+        "imageStyle": "blend-multiply"
+      },
+      {
+        "name": "Tyrannosaurus",
+        "level": 20,
+        "cost": 200,
+        "baseHP": 250,
+        "rarity": "legendary",
+        "element": "fire",
+        "image": "img",
+        "imageStyle": "blend-multiply"
+      }
+    ]
+  },
+  {
+    "id": "family_trice",
+    "base": {
+      "id": "trice_01",
+      "name": "Triceratops",
+      "rarity": "epic",
+      "element": "grass",
+      "baseHP": 60,
+      "image": "img",
+      "imageStyle": "blend-multiply",
+      "emoji": "🌿"
+    },
+    "evolutions": [
+      {
+        "name": "Triceratops",
+        "level": 10,
+        "cost": 100,
+        "baseHP": 120,
+        "rarity": "epic",
+        "element": "grass",
+        "image": "img",
+        "imageStyle": "blend-multiply"
+      },
+      {
+        "name": "Triceratops",
+        "level": 20,
+        "cost": 200,
+        "baseHP": 250,
+        "rarity": "legendary",
+        "element": "grass",
+        "image": "img",
+        "imageStyle": "blend-multiply"
+      }
+    ]
+  },
+  {
+    "id": "family_raptor",
+    "base": {
+      "id": "raptor_01",
+      "name": "Velociraptor",
+      "rarity": "epic",
+      "element": "electric",
+      "baseHP": 60,
+      "image": "img",
+      "imageStyle": "blend-multiply",
+      "emoji": "⚡"
+    },
+    "evolutions": [
+      {
+        "name": "Velociraptor",
+        "level": 10,
+        "cost": 100,
+        "baseHP": 120,
+        "rarity": "epic",
+        "element": "electric",
+        "image": "img",
+        "imageStyle": "blend-multiply"
+      },
+      {
+        "name": "Velociraptor",
+        "level": 20,
+        "cost": 200,
+        "baseHP": 250,
+        "rarity": "legendary",
+        "element": "electric",
+        "image": "img",
+        "imageStyle": "blend-multiply"
+      }
+    ]
+  },
+  {
     "id": "family_romzilla",
     "base": {
       "id": "romzilla_01",
