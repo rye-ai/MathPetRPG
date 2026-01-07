@@ -4,7 +4,7 @@
     "title": "The Luxosaur Chronicles",
     "description": "Travel back 65 million years to find the Luxosaur egg and save the future from the Shadow Mist!",
     "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/enemies/christmasenemy/5.png",
-    "status": "inactive",
+    "status": "active",
     "file": "events/quests/luxosaur.json"
   }
 ]
