@@ -157,7 +157,7 @@
       "start": { "x": 1, "y": 1 },
       "portals": [],
       "npcs": [
-        { "x": 5, "y": 5, "name": "Ancient Guardian", "sprite": "👺", "dialogue": ["You seek the Luxosaur?", "Prove your worth!"], "action": "gate_boss" }
+        { "x": 5, "y": 5, "name": "Ancient Guardian", "sprite": "👺", "dialogue": ["You seek the Luxosaur?", "Prove your worth!"], "action": "gate_boss", "hideOnFlag": "boss_defeated" }
       ]
     }
   },
@@ -172,26 +172,32 @@
     "gate_math_6": { "type": "academic_challenge", "questionCount": 3, "onSuccess": "flag_math_6" },
     "gate_math_7": { "type": "academic_challenge", "questionCount": 3, "onSuccess": "flag_math_7" },
     "gate_boss": { 
-      "type": "battle", 
-      "enemyId": "Shadow King", 
-      "enemyName": "Luxy Light Dweller",
-      "hp": 1500,
-      "enemyImage": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/33.png",
-      "onSuccess": "boss_defeated",
-      "rewardData": {
-        "name": "Luxosaur",
-        "type": "luxo_01",
-        "rarity": "epic",
-        "element": "light",
-        "hp": 60,
-        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/31.png",
-        "imageStyle": "blend-multiply",
-        "emoji": "✨",
-        "evolutions": [
-          { "level": 10, "cost": 100, "baseHP": 120, "rarity": "epic", "element": "light", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/32.png", "imageStyle": "blend-multiply" },
-          { "level": 20, "cost": 200, "baseHP": 250, "rarity": "legendary", "element": "light", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/33.png", "imageStyle": "blend-multiply" }
-        ]
+  "type": "battle", 
+  "enemyId": "Shadow King", 
+  "enemyName": "Luxy Light Dweller",
+  "hp": 1500,
+  "enemyImage": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/33.png",
+  "onSuccess": "boss_defeated",
+  "rewardData": {
+    "name": "Luxosaur",
+    "type": "luxo_01",
+    "rarity": "epic",
+    "element": "light",
+    "hp": 60,
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/31.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "✨",
+    "evolutions": [
+      {
+        "level": 10, "cost": 100, "baseHP": 120, "rarity": "epic", "element": "light",
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/32.png",
+        "imageStyle": "blend-multiply"
+      },
+      {
+        "level": 20, "cost": 200, "baseHP": 250, "rarity": "legendary", "element": "light",
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/33.png",
+        "imageStyle": "blend-multiply"
       }
-    }
+    ]
   }
 }
