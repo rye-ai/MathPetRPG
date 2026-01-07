@@ -41,27 +41,26 @@
       "start": { "x": 1, "y": 1 },
       "portals": [{ "x": 5, "y": 0, "toMap": "map_3" }],
       "npcs": [
-        { "x": 5, "y": 1, "name": "Rift Guard", "sprite": "🌑", "dialogue": ["Only a sharp mind can cross the rift!"], "action": "gate_math_2", "hideOnFlag": "flag_math_2" },
-        { "x": 9, "y": 5, "name": "Shadow Creeper", "sprite": "👾", "dialogue": ["SKREEE!"], "action": "gate_battle_1", "hideOnFlag": "flag_battle_1" }
+        { "x": 5, "y": 1, "name": "Rift Guard", "sprite": "🌑", "dialogue": ["Only a sharp mind can cross the rift!"], "action": "gate_math_2", "hideOnFlag": "flag_math_2" }
       ]
     },
     "map_3": {
       "layout": [
         [1,1,1,1,1,1,1,1,1,1,1,1],
-    [1,4,4,4,1,1,1,1,4,4,4,1],
-    [1,4,1,4,1,1,1,1,4,1,4,1],
-    [1,4,1,4,4,4,4,4,4,1,4,1],
-    [1,1,1,1,1,4,1,1,1,1,1,1],
-    [1,1,1,1,1,4,1,1,1,1,1,1],
-    [1,4,4,4,4,4,4,4,4,4,4,1],
-    [1,4,1,1,1,1,1,1,1,1,4,1],
-    [1,8,1,1,1,1,1,1,1,1,4,1],
-    [1,1,1,1,1,1,1,1,1,1,1,1]
+        [1,4,4,4,1,1,1,1,4,4,4,1],
+        [1,4,1,4,1,1,1,1,4,1,4,1],
+        [1,4,1,4,4,4,4,4,4,1,4,1],
+        [1,1,1,1,1,4,1,1,1,1,1,1],
+        [1,1,1,1,1,4,1,1,1,1,1,1],
+        [1,4,4,4,4,4,4,4,4,4,4,1],
+        [1,4,1,1,1,1,1,1,1,1,4,1],
+        [1,8,1,1,1,1,1,1,1,1,4,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1]
       ],
       "start": { "x": 10, "y": 1 },
       "portals": [{ "x": 1, "y": 8, "toMap": "map_4" }],
       "npcs": [
-        { "x": 5, "y": 4, "name": "Ice Mammoth", "sprite": "🐘", "dialogue": ["It is too cold to pass.", "Calculate the thermal heat!"], "action": "gate_math_3", "hideOnFlag": "flag_math_3" }
+        { "x": 5, "y": 4, "name": "Ice Mammoth", "sprite": "🐘", "dialogue": ["The path is frozen shut!", "Only math can melt this ice!"], "action": "gate_math_3", "hideOnFlag": "flag_math_3" }
       ]
     },
     "map_4": {
@@ -80,7 +79,7 @@
       "start": { "x": 10, "y": 1 },
       "portals": [{ "x": 1, "y": 8, "toMap": "map_5" }],
       "npcs": [
-        { "x": 5, "y": 4, "name": "Swamp Elf", "sprite": "🧝", "dialogue": ["The water is rising!", "Quick, solve these!"], "action": "gate_math_4", "hideOnFlag": "flag_math_4" }
+        { "x": 5, "y": 4, "name": "Ancient Swamper", "sprite": "🐊", "dialogue": ["Answer or stay stuck in the mud!"], "action": "gate_math_4", "hideOnFlag": "flag_math_4" }
       ]
     },
     "map_5": {
@@ -99,7 +98,7 @@
       "start": { "x": 1, "y": 1 },
       "portals": [{ "x": 10, "y": 8, "toMap": "map_6" }],
       "npcs": [
-        { "x": 8, "y": 3, "name": "Golems", "sprite": "🗿", "dialogue": ["Rocks block the ridge.", "Answer us!"], "action": "gate_math_5", "hideOnFlag": "flag_math_5" }
+        { "x": 8, "y": 3, "name": "Prehistoric Golem", "sprite": "🗿", "dialogue": ["Rock solid math needed here!"], "action": "gate_math_5", "hideOnFlag": "flag_math_5" }
       ]
     },
     "map_6": {
@@ -118,8 +117,7 @@
       "start": { "x": 10, "y": 1 },
       "portals": [{ "x": 1, "y": 8, "toMap": "map_7" }],
       "npcs": [
-        { "x": 3, "y": 4, "name": "Vine Monster", "sprite": "🌿", "dialogue": ["The jungle is hungry!"], "action": "gate_battle_2", "hideOnFlag": "flag_battle_2" },
-        { "x": 5, "y": 1, "name": "Jungle Scout", "sprite": "🏹", "dialogue": ["The volcano approach is near."], "action": "gate_math_6", "hideOnFlag": "flag_math_6" }
+        { "x": 5, "y": 1, "name": "Jungle Keeper", "sprite": "🦖", "dialogue": ["The volcano is near! Stay sharp!"], "action": "gate_math_6", "hideOnFlag": "flag_math_6" }
       ]
     },
     "map_7": {
@@ -138,7 +136,7 @@
       "start": { "x": 1, "y": 1 },
       "portals": [{ "x": 10, "y": 8, "toMap": "map_8" }],
       "npcs": [
-        { "x": 5, "y": 3, "name": "Magma Minion", "sprite": "🔥", "dialogue": ["Hot math coming through!"], "action": "gate_math_7", "hideOnFlag": "flag_math_7" }
+        { "x": 5, "y": 3, "name": "Magma Guardian", "sprite": "🔥", "dialogue": ["Almost there! One last hurdle!"], "action": "gate_math_7", "hideOnFlag": "flag_math_7" }
       ]
     },
     "map_8": {
@@ -154,50 +152,58 @@
         [9,0,0,0,0,0,0,0,0,0,0,9],
         [9,9,9,9,9,9,9,9,9,9,9,9]
       ],
-      "start": { "x": 1, "y": 1 },
+      "start": { "x": 1, "y": 5 },
       "portals": [],
       "npcs": [
-        { "x": 5, "y": 5, "name": "Ancient Guardian", "sprite": "👺", "dialogue": ["You seek the Luxosaur?", "Prove your worth!"], "action": "gate_boss", "hideOnFlag": "boss_defeated" }
+        { 
+          "x": 5, "y": 5, 
+          "name": "Ancient Guardian", 
+          "sprite": "💀", 
+          "dialogue": ["I have waited eons...", "Defeat me and save the future!"], 
+          "action": "gate_boss", 
+          "hideOnFlag": "boss_defeated" 
+        }
       ]
     }
   },
   "gates": {
     "gate_math_1": { "type": "academic_challenge", "questionCount": 3, "onSuccess": "flag_math_1" },
     "gate_math_2": { "type": "academic_challenge", "questionCount": 3, "onSuccess": "flag_math_2" },
-    "gate_battle_1": { "type": "battle", "enemyId": ["myatt_01", "romzilla_01"], "onSuccess": "flag_battle_1" },
     "gate_math_3": { "type": "academic_challenge", "questionCount": 3, "onSuccess": "flag_math_3" },
     "gate_math_4": { "type": "academic_challenge", "questionCount": 3, "onSuccess": "flag_math_4" },
     "gate_math_5": { "type": "academic_challenge", "questionCount": 3, "onSuccess": "flag_math_5" },
-    "gate_battle_2": { "type": "battle", "enemyId": ["jaxire_01", "noahsaur_01"], "onSuccess": "flag_battle_2" },
     "gate_math_6": { "type": "academic_challenge", "questionCount": 3, "onSuccess": "flag_math_6" },
     "gate_math_7": { "type": "academic_challenge", "questionCount": 3, "onSuccess": "flag_math_7" },
     "gate_boss": { 
-  "type": "battle", 
-  "enemyId": "Shadow King", 
-  "enemyName": "Luxy Light Dweller",
-  "hp": 1500,
-  "enemyImage": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/33.png",
-  "onSuccess": "boss_defeated",
-  "rewardData": {
-    "name": "Luxosaur",
-    "type": "luxo_01",
-    "rarity": "epic",
-    "element": "light",
-    "hp": 60,
-    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/31.png",
-    "imageStyle": "blend-multiply",
-    "emoji": "✨",
-    "evolutions": [
-      {
-        "level": 10, "cost": 100, "baseHP": 120, "rarity": "epic", "element": "light",
-        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/32.png",
-        "imageStyle": "blend-multiply"
-      },
-      {
-        "level": 20, "cost": 200, "baseHP": 250, "rarity": "legendary", "element": "light",
-        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/33.png",
-        "imageStyle": "blend-multiply"
+      "type": "battle", 
+      "enemyId": "Shadow King", 
+      "enemyName": "Luxy Light Dweller",
+      "hp": 1500,
+      "damage": 60,
+      "enemyImage": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/33.png",
+      "onSuccess": "boss_defeated",
+      "rewardData": {
+        "name": "Luxosaur",
+        "type": "luxo_01",
+        "rarity": "epic",
+        "element": "light",
+        "hp": 60,
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/31.png",
+        "imageStyle": "blend-multiply",
+        "emoji": "✨",
+        "evolutions": [
+          {
+            "level": 10, "cost": 100, "baseHP": 120, "rarity": "epic", "element": "light",
+            "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/32.png",
+            "imageStyle": "blend-multiply"
+          },
+          {
+            "level": 20, "cost": 200, "baseHP": 250, "rarity": "legendary", "element": "light",
+            "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/33.png",
+            "imageStyle": "blend-multiply"
+          }
+        ]
       }
-    ]
+    }
   }
 }
