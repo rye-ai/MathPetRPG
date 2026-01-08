@@ -1,0 +1,77 @@
+{
+  "meta": {
+    "title": "Comparing Three-Digit Numbers",
+    "passThreshold": 0.7,
+    "rewards": {
+      "bp": 1000,
+      "items": [
+        {
+          "id": "xp_potion",
+          "qty": 10}
+      ],
+      "pet": null
+    }
+  },
+  "questions": [
+    {
+      "q": "Which of these numbers are LESS than 650?",
+      "qVisualHTML": "<div style='padding:10px; border:2px solid #4a5568; border-radius:8px; text-align:center; background:#edf2f7;'><span style='font-size:24px; font-weight:bold;'>Target: < 650</span></div>",
+      "a": "640, 506, 604, 565",
+      "options": ["660, 656", "640, 506, 604, 565", "650, 651", "500, 700"]
+    },
+    {
+      "q": "Charlie's model shows 236 cars on Saturday. On Sunday, there are MORE cars. How many could be there?",
+      "qVisualHTML": "<div style='display:flex; justify-content:center; gap:10px;'><svg width='180' height='100' viewBox='0 0 180 100'><rect x='5' y='5' width='40' height='40' fill='#cbd5e0' stroke='#2d3748'/><rect x='50' y='5' width='40' height='40' fill='#cbd5e0' stroke='#2d3748'/><rect x='100' y='5' width='10' height='40' fill='#a0aec0' stroke='#2d3748'/><rect x='115' y='5' width='10' height='40' fill='#a0aec0' stroke='#2d3748'/><rect x='130' y='5' width='10' height='40' fill='#a0aec0' stroke='#2d3748'/><circle cx='150' cy='10' r='3' fill='#4a5568'/><circle cx='160' cy='10' r='3' fill='#4a5568'/><circle cx='150' cy='20' r='3' fill='#4a5568'/><circle cx='160' cy='20' r='3' fill='#4a5568'/><circle cx='150' cy='30' r='3' fill='#4a5568'/><circle cx='160' cy='30' r='3' fill='#4a5568'/></svg></div><p style='text-align:center; font-size:14px;'>Saturday's Count: 236</p>",
+      "a": "263",
+      "options": ["233", "137", "263", "236"]
+    },
+    {
+      "q": "Bella's school has 528 students. Norman's school has 546. Which school has MORE students?",
+      "qVisualHTML": "<div style='font-family:monospace; font-size:18px; line-height:1.5;'>Bella: 528<br>Norman: 546</div>",
+      "a": "Norman's School",
+      "options": ["Bella's School", "Norman's School", "They are equal", "506 students"]
+    },
+    {
+      "q": "Compare the numbers 274 and 247 using the correct symbol.",
+      "qVisualHTML": "<div style='font-size:32px; font-weight:bold; color:#2d3748; text-align:center;'>274 [ ? ] 247</div>",
+      "a": "274 > 247",
+      "options": ["274 < 247", "274 = 247", "274 > 247", "247 > 274"]
+    },
+    {
+      "q": "Compare: 3 hundreds 4 tens [ ? ] 3 hundreds 41 ones",
+      "qVisualHTML": "<div style='background:#fff5f5; padding:15px; border-radius:5px; border-left:5px solid #feb2b2;'><p>Left: 3 hundreds, 4 tens</p><p>Right: 3 hundreds, 41 ones</p></div>",
+      "a": "<",
+      "options": ["<", ">", "=", "None"]
+    },
+    {
+      "q": "Compare: 675 [ ? ] 679",
+      "qVisualHTML": "<div style='display:flex; justify-content:center; align-items:center; height:60px; font-size:28px;'>675 <span style='margin:0 20px; border-bottom:2px solid #000; width:40px; display:inline-block;'></span> 679</div>",
+      "a": "<",
+      "options": ["<", ">", "=", "680"]
+    },
+    {
+      "q": "Compare: 130 [ ? ] 1 hundred 3 tens",
+      "qVisualHTML": "<div style='text-align:center; font-size:20px;'>130 ____ 13 tens</div>",
+      "a": "=",
+      "options": ["<", ">", "=", "103"]
+    },
+    {
+      "q": "Compare: 754 [ ? ] 745",
+      "qVisualHTML": "<div style='font-size:24px; text-align:center;'>754 [ ] 745</div>",
+      "a": ">",
+      "options": ["<", ">", "=", "700"]
+    },
+    {
+      "q": "Which number is the largest?",
+      "qVisualHTML": "<div style='display:grid; grid-template-columns: 1fr 1fr; gap:10px;'><div style='border:1px solid #ccc; padding:5px;'>A: 899</div><div style='border:1px solid #ccc; padding:5px;'>B: 901</div><div style='border:1px solid #ccc; padding:5px;'>C: 910</div><div style='border:1px solid #ccc; padding:5px;'>D: 819</div></div>",
+      "a": "910",
+      "options": ["899", "901", "910", "819"]
+    },
+    {
+      "q": "If you have 4 hundreds and 2 ones, is that more or less than 420?",
+      "qVisualHTML": "<div style='background:#f0fff4; padding:10px; border-radius:10px; border:2px dashed #68d391;'>Value: 402 vs 420</div>",
+      "a": "Less",
+      "options": ["More", "Less", "Equal", "422"]
+    }
+  ]
+}
