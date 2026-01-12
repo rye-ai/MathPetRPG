@@ -250,8 +250,24 @@
     .element-icon { font-size: 16px; filter: drop-shadow(0 0 2px white); }
 
     /* Common */
-    .player-info { display: flex; align-items: center; gap: 10px; flex: 1; }
-    .stats-container { display: flex; gap: 10px; align-items: center; }
+    .player-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0; /* Allows text to shrink if needed */
+}
+.header-action-btns {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto; /* This is the "Magic" that pushes buttons to the right-middle */
+}
+    .stats-container {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-shrink: 0; /* Ensures BP/Stamina never get squashed */
+}
     .logout-btn { padding: 6px 12px; background: #e53e3e; color: white; border: none; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; margin-left: auto; }
     .currency-display { background: #fef3c7; padding: 6px 12px; border-radius: 20px; font-weight: bold; color: #92400e; border: 2px solid #fcd34d; font-size: 14px; white-space: nowrap; }
     .stamina-display { background: #e0f2fe; padding: 6px 12px; border-radius: 20px; font-weight: bold; color: #0369a1; border: 2px solid #7dd3fc; font-size: 14px; white-space: nowrap; }
@@ -769,7 +785,18 @@ body {
     padding-bottom: env(safe-area-inset-bottom);
 }
 .header {
-    padding-top: max(10px, env(safe-area-inset-top)); /* Avoid camera notch */
+    background: rgba(255,255,255,0.95);
+    padding: 10px 15px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between; /* Pushes Name to Left, Stats to Right */
+    align-items: center;
+    gap: 15px;
+    z-index: 100;
+    position: relative;
+    flex-wrap: nowrap; /* Prevents squashing into multiple rows */
 }
 /* =========================================
    📱 MOBILE "GAMEBOY" SPLIT-SCREEN PATCH
@@ -1085,6 +1112,184 @@ body {
     display: none; align-items: center; justify-content: center;
     flex-direction: column; color: white; text-align: center;
 }
+
+/* --- ARCHAEOLOGY & BEACON PRO STYLES --- */
+.study-dashboard {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+.excavation-card {
+    background: linear-gradient(135deg, #5d4037 0%, #3e2723 100%);
+    border: 3px solid #2d1b10;
+    border-radius: 15px;
+    padding: 12px;
+    color: white;
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.6);
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.beacon-card {
+    background: white;
+    border: 3px solid #5a67d8;
+    border-radius: 15px;
+    padding: 12px;
+}
+.fossil-well {
+    width: 60px;
+    height: 60px;
+    background: rgba(0,0,0,0.4);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+.fossil-img {
+    width: 45px;
+    height: 45px;
+    object-fit: contain;
+    transition: all 0.5s;
+}
+/* This creates the mystery silhouette */
+.is-fossil {
+    filter: brightness(0) drop-shadow(0 0 2px rgba(255,255,255,0.2));
+}
+.is-revealing {
+    filter: brightness(0.4) sepia(1) hue-rotate(-50deg) saturate(5); /* Dark glowing amber */
+}
+.progress-container {
+    width: 100%; height: 10px; background: rgba(0,0,0,0.3); border-radius: 5px; overflow: hidden; margin-top: 5px;
+}
+.dig-fill { height: 100%; background: #f6ad55; width: 0%; transition: width 0.3s; }
+.beacon-fill { height: 100%; background: #667eea; width: 0%; transition: width 1s; }
+
+/* --- CLASSROOM BEACON STYLES --- */
+.beacon-boost-glow {
+    box-shadow: inset 0 0 50px rgba(246, 224, 94, 0.4) !important;
+    border: 5px solid #f6ad55 !important;
+}
+.boost-active-text {
+    animation: pulseGold 1s infinite alternate;
+    color: #d97706;
+    font-weight: 900;
+}
+/* --- ANALYTICS & MONITORING STYLES --- */
+.monitor-bar-bg {
+    width: 100%; height: 8px; background: #edf2f7; border-radius: 4px; overflow: hidden; margin-top: 4px;
+}
+.monitor-bar-fill {
+    height: 100%; transition: width 0.5s ease;
+}
+.score-tag {
+    font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; margin-left: 5px;
+}
+.cycle-badge {
+    background: #e9d8fd; color: #553c9a; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold;
+}
+
+/* --- 🏆 HALL OF FAME (LEADERBOARD) MODAL STYLES --- */
+#leaderboard-modal .confirm-modal {
+    max-width: 450px;
+    border: 4px solid #4299e1;
+    padding: 0; 
+    overflow: hidden;
+    background: white;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+.lb-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    border-bottom: 1px solid #edf2f7;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.lb-row:last-child { border-bottom: none; }
+
+.lb-rank { 
+    font-weight: bold; 
+    width: 30px; 
+    color: #718096; 
+    font-size: 16px;
+}
+
+.lb-name { 
+    flex: 1; 
+    font-weight: bold; 
+    color: #2d3748; 
+    display: flex;
+    align-items: center;
+}
+
+.lb-score { 
+    background: #ebf8ff; 
+    color: #2b6cb0; 
+    padding: 4px 12px; 
+    border-radius: 15px; 
+    font-weight: 900; 
+    font-size: 12px; 
+    border: 1px solid #bee3f8;
+}
+
+/* Highlight style for the current student */
+.lb-me { 
+    background: #fffaf0 !important; 
+    border-left: 5px solid #f6ad55 !important;
+    border-right: 5px solid #f6ad55 !important;
+}
+
+.medal { 
+    font-size: 20px; 
+    margin-right: 10px; 
+}
+
+/* Header button in the top bar */
+.lb-rank-btn {
+    background: #ebf8ff;
+    border: 2px solid #4299e1;
+    border-radius: 8px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 18px;
+    margin-right: 10px;
+    box-shadow: 0 2px 0 #4299e1;
+}
+
+.lb-rank-btn:active {
+    transform: translateY(2px);
+    box-shadow: none;
+}
+
+.quest-board { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 20px; width: 100%; }
+    .quest-card { background: white; border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px; display: flex; align-items: center; gap: 12px; transition: all 0.3s; position: relative; }
+    .quest-card.complete { border-color: #48bb78; background: #f0fff4; }
+    .quest-card.claimed { opacity: 0.6; filter: grayscale(0.5); pointer-events: none; }
+    .quest-icon { font-size: 24px; width: 40px; height: 40px; background: #edf2f7; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+    .quest-info { flex: 1; }
+    .quest-title { font-weight: bold; font-size: 14px; color: #2d3748; }
+    .quest-progress-bg { width: 100%; height: 6px; background: #edf2f7; border-radius: 3px; margin-top: 4px; overflow: hidden; }
+    .quest-progress-fill { height: 100%; background: #5a67d8; transition: width 0.4s ease; }
+    .quest-card.complete .quest-progress-fill { background: #48bb78; }
+    .btn-claim { background: #48bb78; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); box-shadow: 0 0 10px rgba(72,187,120,0.5); } 100% { transform: scale(1); } }
+    
+    .quest-card { background: white; border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px; display: flex; align-items: center; gap: 12px; margin-bottom:10px; text-align:left; }
+.quest-card.complete { border-color: #48bb78; background: #f0fff4; }
+.quest-card.claimed { opacity: 0.5; filter: grayscale(1); }
+.quest-icon { font-size: 24px; }
+.quest-info { flex: 1; }
+.quest-title { font-weight: bold; font-size: 14px; color: #2d3748; }
+.quest-progress-bg { width: 100%; height: 6px; background: #edf2f7; border-radius: 3px; margin-top: 4px; overflow: hidden; }
+.quest-progress-fill { height: 100%; background: #f56565; transition: width 0.4s ease; }
+.quest-card.complete .quest-progress-fill { background: #48bb78; }
+
   </style>
   </head>
  <body><!-- Login Screen -->
@@ -1228,7 +1433,7 @@ body {
                
                <!-- Button Group (Right Side) -->
                <div style="display:flex; align-items:center;">
-                   <button class="action-btn blue" style="width:auto; padding:10px 20px; margin:0 10px 0 0;" onclick="document.getElementById('gradebook-modal').style.display='flex'">📊 Gradebook</button>
+                   <button class="action-btn blue" onclick="loadStudentList(); document.getElementById('gradebook-modal').style.display='flex'">📊 Gradebook</button>
                    <button class="action-btn red" style="width:auto; padding:10px 20px; margin:0;" onclick="location.reload()">Log Out</button>
                </div>
            </div>
@@ -1263,6 +1468,36 @@ body {
     </div>
 
     <button class="action-btn green" style="margin:0; border:2px solid white;" onclick="saveQuestMasterSettings()">Apply Settings to Class</button>
+</div>
+<!-- 🌟 BEACON COMMAND CENTER (FOR TEACHERS) -->
+<div style="background:linear-gradient(135deg, #5a67d8 0%, #4c51bf 100%); padding:20px; border-radius:15px; margin-bottom: 20px; color: white; border: 3px solid #f6e05e;">
+    <h2 style="font-size:18px; font-weight:bold; margin-bottom:10px;">🌟 Class Beacon</h2>
+    <div style="background:rgba(0,0,0,0.2); padding:10px; border-radius:10px; margin-bottom:15px;">
+        <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px;">
+            <span>Current Class Charge:</span>
+            <span id="t-beacon-val">0 / 1000</span>
+        </div>
+        <div class="progress-container" style="background:rgba(255,255,255,0.2); height:15px; border-radius:10px; overflow:hidden;">
+            <div id="t-beacon-fill" style="width:0%; height:100%; background:#f6e05e; transition:width 0.5s;"></div>
+        </div>
+    </div>
+    <button id="activate-boost-btn" class="gacha-btn" style="padding:10px; font-size:14px; background:#48bb78; border:none; display:none; width:100%;" onclick="triggerClassBoost()">
+        🚀 ACTIVATE BRAIN BOOST (20 MIN)
+    </button>
+    <div id="boost-active-msg" style="text-align:center; font-weight:bold; color:#f6ad55; display:none;">
+        🔥 BOOST IS CURRENTLY ACTIVE!
+    </div>
+</div>
+<!-- 🔄 MATH CYCLE MANAGEMENT (FOR TEACHERS) -->
+<div style="background: white; border: 3px solid #ed8936; padding: 20px; border-radius: 15px; margin-bottom: 20px;">
+    <h3 style="color:#c05621; margin:0 0 10px 0; display:flex; align-items:center; gap:8px;">🔄 Cycle Manager</h3>
+    <p style="font-size: 12px; color: #718096; margin-bottom: 15px;">
+        Reset progress when starting a new lesson. Current Topic: <span id="t-active-topic" class="cycle-badge">General Review</span>
+    </p>
+    <div style="display:flex; gap:10px;">
+        <input type="text" id="new-cycle-name" class="login-input" placeholder="e.g. Fractions Week" style="margin:0; flex:1; font-size:14px;">
+        <button class="action-btn red" style="width:auto; margin:0; padding:0 20px;" onclick="resetMathCycle()">RESET BOARD</button>
+    </div>
 </div>
                        <h2 style="font-size:20px; font-weight:bold; margin-bottom:15px;">Create Student Account</h2>
                        <input type="text" id="new-student-user" class="login-input" placeholder="Username">
@@ -1490,7 +1725,16 @@ body {
   <!-- We add an ID and force it to be hidden initially -->
 <div class="game-container" id="main-game-ui" style="display: none;">
    <header class="header">
-    <div class="player-info"><span style="font-size: 24px; margin-right: 5px;">👤</span><div><div style="font-weight: bold; font-size: 16px;" id="display-name">Player</div><div style="font-size: 12px; color: #718096;" id="display-grade">Grade: -</div></div><button class="logout-btn" onclick="logout()">Logout</button></div>
+    <div class="player-info"><span style="font-size: 24px; margin-right: 5px;">👤</span><div><div style="font-weight: bold; font-size: 16px;" id="display-name">Player</div><div style="font-size: 12px; color: #718096;" id="display-grade">Grade: -</div><button class="lb-rank-btn" onclick="toggleLeaderboard(true)" title="Math Leaderboard">
+    <span>🏆</span>
+    <span class="lb-text-label">Math Leaderboard</span>
+</button>
+<button class="lb-rank-btn" onclick="toggleQuestBoard(true)" style="background:#fff5f5; border-color:#f56565; color:#c53030; position:relative;">
+    <span>🎯</span>
+    <span class="lb-text-label">Daily Quests</span>
+    <div id="quest-notif-dot" style="display:none; position:absolute; top:-5px; right:-5px; width:12px; height:12px; background:red; border-radius:50%; border:2px solid white;"></div>
+</button>
+<button class="logout-btn" onclick="logout()">Logout</button></div>
     <div class="stats-container"><button id="mute-btn" onclick="toggleAudio()" style="background:none; border:none; font-size:24px; cursor:pointer;" title="Mute/Unmute">🔊</button>
     <button onclick="toggleFullscreen()" style="background:none; border:none; font-size:24px; cursor:pointer; margin-right:10px;" title="Fullscreen">⛶</button>
     <div class="stamina-display">⚡ <span id="stamina-display">100</span>/100</div><div class="currency-display">🧠 <span id="bp-display">0</span> BP</div></div>
@@ -1531,13 +1775,38 @@ body {
        </div>
    </div>
    <main class="content">
-    <section id="screen-study" class="screen active">
-        <!-- PASTE INSIDE <section id="screen-study"> -->
-    <div id="active-exam-card" class="exam-card">
-         <h2 style="color: #c53030; font-size: 24px; font-weight: bold; margin-bottom: 5px;">⚠️ ACTIVE EXAM</h2>
-         <p id="exam-card-title" style="color: #742a2a; font-weight: bold; font-size: 18px; margin-bottom:10px;">Loading...</p>
-         <div id="exam-card-status" style="margin-bottom: 15px; font-size: 14px; color: #4a5568;"></div>
-         <button id="start-exam-btn" class="action-btn red" style="font-size: 20px; padding: 15px;" onclick="initExamMode()">📝 TAKE EXAM</button>
+   <section id="screen-study" class="screen active">
+    <!-- NEW: MASTER ENGAGEMENT DASHBOARD -->
+    <div class="study-dashboard">
+        <!-- ⛏️ ARCHAEOLOGY SITE -->
+        <div class="excavation-card">
+            <div class="fossil-well" id="fossil-well">
+                <img id="fossil-icon" src="" class="fossil-img is-fossil">
+            </div>
+            <div style="flex:1">
+                <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:bold;">
+                    <span>MYSTERY DIG</span>
+                    <span id="dig-count">0/20</span>
+                </div>
+                <div class="progress-container">
+                    <div id="dig-fill" class="dig-fill"></div>
+                </div>
+                <div id="dig-hint" style="font-size:9px; color:#a0aec0; margin-top:4px;">Keep solving to uncover the relic!</div>
+            </div>
+        </div>
+        
+
+        <!-- 🌟 CLASS BEACON -->
+        <div class="beacon-card">
+            <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:bold; color:#5a67d8;">
+                <span>CLASS GOAL</span>
+                <span id="beacon-text">0/1000</span>
+            </div>
+            <div class="progress-container" style="background:#edf2f7;">
+                <div id="beacon-fill" class="beacon-fill"></div>
+            </div>
+            <div style="font-size:9px; color:#718096; margin-top:4px;">Group Brain Boost: <b>Double XP</b></div>
+        </div>
     </div>
 
     <!-- 1. THE EXAM INTERFACE (Lockdown) -->
@@ -2029,6 +2298,25 @@ body {
   
   <!-- Daily Reward Modal -->
   <div class="modal-overlay" id="daily-modal"><div class="confirm-modal"><h2>📅 Daily Reward</h2><p>Welcome back! Keep your streak alive.</p><div class="calendar-grid" id="daily-calendar"></div><button class="confirm-btn green" style="margin-top:20px; width:100%;" onclick="document.getElementById('daily-modal').classList.remove('active')">Collect Reward</button></div></div>
+  
+  <!-- 🏆 HALL OF FAME MODAL -->
+<div class="modal-overlay" id="leaderboard-modal">
+    <div class="confirm-modal">
+        <div class="leaderboard-header">
+            <h2 style="margin:0; color:white; font-size:20px;">🏆 Top Scholars</h2>
+            <button onclick="toggleLeaderboard(false)" style="background:none; border:none; color:white; font-size:24px; cursor:pointer;">&times;</button>
+        </div>
+        <p style="font-size:12px; color:#718096; margin-top:-10px;">Current Topic: <span id="lb-topic-name" style="font-weight:bold; color:#4299e1;">General Review</span></p>
+        
+        <div id="scholar-leaderboard-list" style="max-height: 400px; overflow-y: auto;">
+            <!-- Names injected here by JS -->
+        </div>
+
+        <div class="confirm-buttons" style="margin-top:20px;">
+            <button class="confirm-btn no" style="width:100%;" onclick="toggleLeaderboard(false)">Back to Game</button>
+        </div>
+    </div>
+</div>
 
   <!-- FEATURE 2: TEAM SWAP MODAL -->
   <div class="modal-overlay" id="swap-pet-modal">
@@ -2059,6 +2347,8 @@ const SAVE_KEYS = {
     maxXp: 'mxp', powers: 'pwr', stars: 'str', isHatched: 'ih', 
     hatchProgress: 'hpg', evolutionStage: 'evs', equipment: 'eqp',
     rarity: 'rty', element: 'el', image: 'img', imageStyle: 'ims', emoji: 'emj',
+    dailyQuests: 'dq',
+    isFirstAttempt: 'ifa',
 
     // Item & Power Properties (From GitHub JSONs)
     instanceId: 'iid', baseId: 'bid', prefix: 'pfx', 
@@ -2068,7 +2358,7 @@ const SAVE_KEYS = {
     healing: 'hel', xpReward: 'xpr', logic: 'lgc', target: 'trg',
     
     givenToday: 'gt', notifications: 'nt', starsReceived: 'sr',
-    badges: 'bdg', badgeInventory: 'bin',
+    badges: 'bdg', badgeInventory: 'bin',lastCycleId: 'lcid',
     
     // Add these to the existing SAVE_KEYS list
     isVisiting: 'iv',
@@ -2113,8 +2403,11 @@ let VOXEL_LOOKUP = Object.fromEntries(Object.entries(VOXEL_MAP).map(([k, v]) => 
 let localPendingDamage = 0;
 let currentEquipSlot = null;
 let currentBuyingItem = null;
-    let gameState = { 
-        playerName: "Student", grade: null, selectedTopics: [],toolHistory: {}, activeQuestionPool: [], currentQuestion: null, brainPoints: 0, 
+    let gameState = {
+        mathCorrect: 0,
+        mathTotal: 0,
+        lastCycleId: "",
+        playerName: "Student", grade: null, selectedTopics: [],toolHistory: {},isBrainBoosted: false, activeQuestionPool: [], currentQuestion: null, brainPoints: 0, 
         pets: [], currentPetId: null, inventory: {}, inBattle: false, battleState: null, mapX: 2, mapY: 2, stamina: 100, maxStamina: 100, tempMoveToLearn: null,
         combo: 0, burstMode: false, dailyStreak: 0, lastLoginDate: null, questProgress: { active: false, flags: [] },
         questBattleActive: false, questSuccessKey: null, pendingQuestRewardData: null,
@@ -2745,6 +3038,10 @@ try {
             }
 
            gameState = { ...gameState, ...finalData };
+          // 🛡️ ARCHITECT FIX: Align local math score with saved math score
+            gameState.mathCorrect = finalData.mathCorrect || 0;
+            gameState.mathTotal = finalData.mathTotal || 0;
+            gameState.teacherId = docSnap.data().teacherId; // Ensure teacher ID is loaded
             repairSaveData();
             updateStatsDisplay();
 
@@ -2826,6 +3123,9 @@ function repairSaveData() {
         gameState.inventory.forgeScraps = 0; 
         fixed = true; 
     }
+    
+    if (!gameState.dailyQuests) gameState.dailyQuests = { lastDate: "", math: 0, combat: 0, social: 0, claimed: [false, false, false] };
+    if (gameState.isFirstAttempt === undefined) gameState.isFirstAttempt = true;
     
     if (!gameState.team || gameState.team.length === 0) { 
         gameState.team = gameState.currentPetId ? [gameState.currentPetId] : []; 
@@ -3037,6 +3337,9 @@ function repairSaveData() {
       document.getElementById('display-grade').innerText = `Grade: ${gameState.grade}`;
       updateStatsDisplay();
       
+      RelicEngine.updateUI(); 
+      initClassBeacon();
+      
       // --- START OF FIX ---
       
       // 1. Hide the Login Screen completely
@@ -3049,11 +3352,13 @@ function repairSaveData() {
       // --- END OF FIX ---
       
       soundManager.playBGM('hub'); 
-      generateNextQuestion(); 
-      renderHub();
-      
-      checkActiveExam();
-    });
+          generateNextQuestion(); 
+          renderHub();
+          updateDailyQuests(); // <--- ADD THIS HERE
+          initClassBeacon();
+          setTimeout(() => { syncToClassLeaderboard(); }, 2000); 
+          checkActiveExam();
+        });
 
     function loadExternalPets() {
         EXTERNAL_PET_DATA.forEach(line => {
@@ -3062,6 +3367,13 @@ function repairSaveData() {
             }
             if (line.evolutions && Array.isArray(line.evolutions)) { EVOLUTION_CHAINS[line.base.id] = line.evolutions; }
         });
+    gameState.dailyQuests = {
+            lastDate: new Date().toDateString(),
+            math: 0, combat: 0, social: 0,
+            claimed: [false, false, false]
+        };
+        gameState.isFirstAttempt = true;
+        
     }
 
     function initializeGame() { 
@@ -3394,7 +3706,62 @@ async function adminPublishTool() {
         document.getElementById('daily-modal').classList.add('active');
     }
 
+    function updateDailyQuests() {
+    const today = new Date().toDateString();
+    // 1. Daily Reset
+    if (gameState.dailyQuests.lastDate !== today) {
+        gameState.dailyQuests = {
+            lastDate: today,
+            math: 0, combat: 0, social: 0,
+            claimed: [false, false, false]
+        };
+        saveGame(true);
+    }
+    renderQuestBoard();
+}
+
+function renderQuestBoard() {
+    const dq = gameState.dailyQuests;
+    const board = document.getElementById('daily-quest-board');
+    if (!board) return;
+
+    const quests = [
+        { id: 0, icon: '🎓', title: 'Scholar', desc: 'Solve 20 Perfect Questions', val: dq.math, target: 20, reward: 500 },
+        { id: 1, icon: '⚔️', title: 'Warrior', desc: 'Defeat 5 Wild Monsters', val: dq.combat, target: 5, reward: 100 },
+        { id: 2, icon: '🤝', title: 'Citizen', desc: 'Send a Compliment/Heart', val: dq.social, target: 1, reward: 50 }
+    ];
+
+    board.innerHTML = quests.map(q => {
+        const isDone = q.val >= q.target;
+        const isClaimed = dq.claimed[q.id];
+        const pct = Math.min(100, (q.val / q.target) * 100);
+        
+        return `
+        <div class="quest-card ${isDone ? 'complete' : ''} ${isClaimed ? 'claimed' : ''}">
+            <div class="quest-icon">${q.icon}</div>
+            <div class="quest-info">
+                <div class="quest-title">${q.title}: ${q.val}/${q.target}</div>
+                <div style="font-size:11px; color:#718096;">${q.desc}</div>
+                <div class="quest-progress-bg"><div class="quest-progress-fill" style="width:${pct}%"></div></div>
+            </div>
+            ${isDone && !isClaimed ? `<button class="btn-claim" onclick="claimQuestReward(${q.id}, ${q.reward})">CLAIM ${q.reward}BP</button>` : ''}
+            ${isClaimed ? '<div style="color:#48bb78; font-weight:bold;">✅</div>' : ''}
+        </div>`;
+    }).join('');
+}
+
+function claimQuestReward(id, amount) {
+    if (gameState.dailyQuests.claimed[id]) return;
+    gameState.dailyQuests.claimed[id] = true;
+    addBP(amount);
+    soundManager.playSFX('levelUp');
+    triggerRewardCeremony("QUEST COMPLETE!", `You earned your daily ${amount} BP reward!`, "💰", null);
+    renderQuestBoard();
+    saveGame(true);
+}
+    
     function generateNextQuestion() { 
+        gameState.isFirstAttempt = true; // Reset first attempt for the new question
         let q;
         if (!gameState.activeQuestionPool || gameState.activeQuestionPool.length === 0) { q = MathEngine.generate(gameState.grade); } 
         else { q = gameState.activeQuestionPool[Math.floor(Math.random() * gameState.activeQuestionPool.length)]; }
@@ -3486,12 +3853,37 @@ function resolveInBattleMath(selected, correct) {
         const fb = document.getElementById('feedback'); 
         
         if (input == gameState.currentQuestion.a) { 
-            // 2. LOCK: Block clicks
             isProcessingAnswer = true;
-
-            // Correct Answer
+            recordMathParticipation(true); 
             soundManager.playSFX('correct'); 
-            addBP(10); 
+
+            // --- DAILY QUEST LOGIC ---
+            if (gameState.isFirstAttempt) {
+                if (!gameState.dailyQuests) updateDailyQuests(); // Safety check
+                gameState.dailyQuests.math = Math.min(20, (gameState.dailyQuests.math || 0) + 1);
+                checkQuestNotifications(); // This turns on the Red Dot in the header!
+            }
+            // -------------------------
+
+            let finalReward = gameState.isBrainBoosted ? 20 : 10;
+            addBP(finalReward);
+
+            // (Keep your Excavation/Beacon code that you pasted here earlier right below this) 
+            
+            // --- NEW: EXCAVATION & BEACON UPDATE ---
+            gameState.digProgress = (gameState.digProgress || 0) + 1;
+            if (gameState.digProgress >= 20) {
+                gameState.digProgress = 0;
+                RelicEngine.grantReward();
+            } else {
+                RelicEngine.updateUI();
+            }
+            if (gameState.teacherId) {
+                const bRef = window.fbase.doc(window.db, "class_stats", `beacon_${gameState.teacherId}`);
+                window.fbase.updateDoc(bRef, { totalEnergy: window.fbase.increment(1) }).catch(() => {
+                    window.fbase.setDoc(bRef, { totalEnergy: 1, teacherId: gameState.teacherId });
+                });
+            }
             
             // COMBO LOGIC
             gameState.combo = (gameState.combo || 0) + 1;
@@ -3520,7 +3912,9 @@ function resolveInBattleMath(selected, correct) {
                 if(gameState.combo < 3) document.querySelector('.quiz-container').style.boxShadow = "none";
             }, 1000); 
 
-        } else { 
+        } else {
+            gameState.isFirstAttempt = false; // They missed it! No longer counts for the quest
+            recordMathParticipation(false);
             // Wrong Answer (No lock needed here)
             const d = Math.min(gameState.brainPoints, 5); 
             gameState.brainPoints -= d; 
@@ -4975,7 +5369,8 @@ if (isWilds || isAdventure) updateAdventureHUD();
         if(alivePets.length > 0) { openSwapMenu(true); } else { loseBattle(); }
     }
 
-    function winBattle() { 
+    function winBattle() {
+        gameState.dailyQuests.combat = Math.min(5, (gameState.dailyQuests.combat || 0) + 1);
         soundManager.stopBGM(); 
         soundManager.playSFX('victory'); 
         
@@ -5344,6 +5739,88 @@ autoSaveInterval = setInterval(() => {
 }, 60000); // 60 seconds
 
     function logout() { location.reload(); }
+    function toggleLeaderboard(show) {
+        const modal = document.getElementById('leaderboard-modal');
+        if (show) {
+            modal.classList.add('active');
+            // This checks the teacher's dashboard for the topic name, or defaults to "General Review"
+            const topicLabel = document.getElementById('t-active-topic');
+            const lbTopicDisplay = document.getElementById('lb-topic-name');
+            if (lbTopicDisplay) {
+                lbTopicDisplay.innerText = topicLabel ? topicLabel.innerText : "General Review";
+            }
+        } else {
+            modal.classList.remove('active');
+        }
+    }
+    
+    function toggleQuestBoard(show) {
+    const modal = document.getElementById('quest-modal');
+    if (show) {
+        modal.classList.add('active');
+        renderQuestBoard();
+    } else {
+        modal.classList.remove('active');
+    }
+}
+
+function updateDailyQuests() {
+    if (!gameState.dailyQuests) {
+        gameState.dailyQuests = { lastDate: "", math: 0, combat: 0, social: 0, claimed: [false, false, false] };
+    }
+    const today = new Date().toDateString();
+    if (gameState.dailyQuests.lastDate !== today) {
+        gameState.dailyQuests = { lastDate: today, math: 0, combat: 0, social: 0, claimed: [false, false, false] };
+        saveGame(true);
+    }
+    checkQuestNotifications();
+}
+
+function checkQuestNotifications() {
+    const dq = gameState.dailyQuests;
+    const dot = document.getElementById('quest-notif-dot');
+    const hasUnclaimed = (dq.math >= 20 && !dq.claimed[0]) || (dq.combat >= 5 && !dq.claimed[1]) || (dq.social >= 1 && !dq.claimed[2]);
+    if (dot) dot.style.display = hasUnclaimed ? 'block' : 'none';
+}
+
+function renderQuestBoard() {
+    const dq = gameState.dailyQuests;
+    const list = document.getElementById('daily-quest-list');
+    if (!list) return;
+
+    const quests = [
+        { id: 0, icon: '🎓', title: 'Scholar', desc: '20 Perfect Math Answers', val: dq.math, target: 20, reward: 500 },
+        { id: 1, icon: '⚔️', title: 'Warrior', desc: 'Defeat 5 Wild Monsters', val: dq.combat, target: 5, reward: 100 },
+        { id: 2, icon: '🤝', title: 'Citizen', desc: 'Send a Compliment/Heart', val: dq.social, target: 1, reward: 50 }
+    ];
+
+    list.innerHTML = quests.map(q => {
+        const isDone = q.val >= q.target;
+        const isClaimed = dq.claimed[q.id];
+        const pct = Math.min(100, (q.val / q.target) * 100);
+        return `
+        <div class="quest-card ${isDone ? 'complete' : ''} ${isClaimed ? 'claimed' : ''}">
+            <div class="quest-icon">${q.icon}</div>
+            <div class="quest-info">
+                <div class="quest-title">${q.title}: ${q.val}/${q.target}</div>
+                <div style="font-size:11px; color:#718096;">${q.desc}</div>
+                <div class="quest-progress-bg"><div class="quest-progress-fill" style="width:${pct}%"></div></div>
+            </div>
+            ${isDone && !isClaimed ? `<button class="btn-claim" onclick="claimQuestReward(${q.id}, ${q.reward})">CLAIM</button>` : ''}
+            ${isClaimed ? '✅' : ''}
+        </div>`;
+    }).join('');
+    checkQuestNotifications();
+}
+
+function claimQuestReward(id, amount) {
+    gameState.dailyQuests.claimed[id] = true;
+    addBP(amount);
+    soundManager.playSFX('levelUp');
+    triggerRewardCeremony("QUEST COMPLETE!", `+${amount} BP Bounty Claimed!`, "💰", null);
+    renderQuestBoard();
+    saveGame(true);
+}
     function releasePet() { if(gameState.pets.length<=1) return; window.petToRelease = gameState.pets.find(p => p.id === gameState.currentPetId); const m = document.getElementById('release-modal'); m.classList.add('active'); }
     document.getElementById('release-confirm').addEventListener('click', () => { 
     const idToRemove = gameState.currentPetId;
@@ -5886,83 +6363,112 @@ function toggleTeacherLogin() {
     const d = document.getElementById('student-list-container'); 
     d.innerHTML = '<div style="padding:20px;text-align:center;color:gray;">Loading class roster...</div>';
     
-    // Server-side Query (Only download YOUR students)
-    const studentQuery = window.fbase.query(
-        window.fbase.collection(window.db, "students"), 
-        window.fbase.where("teacherId", "==", currentLoggedTeacher)
-    );
-    
-    const q = await window.fbase.getDocs(studentQuery); 
-    
-    const grouped = {};
-    let count = 0;
+    try {
+        // 1. Get the Teacher's current Lesson ID from the Class Beacon
+        const beaconRef = window.fbase.doc(window.db, "class_stats", `beacon_${currentLoggedTeacher}`);
+        const beaconSnap = await window.fbase.getDoc(beaconRef);
+        const activeCycleId = beaconSnap.exists() ? beaconSnap.data().currentCycleId : "";
 
-    q.forEach(doc => {
-        const s = doc.data();
-        count++;
-        const g = s.assignedGrade || "Unassigned"; 
+        // 2. Query only the students assigned to YOU
+        const studentQuery = window.fbase.query(
+            window.fbase.collection(window.db, "students"), 
+            window.fbase.where("teacherId", "==", currentLoggedTeacher)
+        );
         
-        // Get stats from saveData
-        const saveData = s.saveData || {};
-        const bp = saveData.brainPoints || 0;
-        const history = saveData.examHistory || {};
-        const examCount = Object.keys(history).length;
-        
-        const examStatus = examCount > 0 
-            ? `<span style="color:#48bb78; font-size:10px; font-weight:bold;">✅ ${examCount} Exams Done</span>` 
-            : `<span style="color:#a0aec0; font-size:10px;">⏳ No Exams</span>`;
+        const q = await window.fbase.getDocs(studentQuery); 
+        const grouped = {};
+        let count = 0;
 
-        if (!grouped[g]) grouped[g] = [];
-        
-        // ADD STUDENT TO LIST (ONLY ONCE)
-        grouped[g].push(`
-            <div class="student-list-item">
-                <input type="checkbox" class="student-select-checkbox" data-username="${s.username}" onchange="updateBulkActionBar()">
-                <div class="student-info" style="display:flex; flex-direction:column; align-items:flex-start;">
-                    <div style="font-size:16px; font-weight:bold;">${s.username}</div>
-                    <div style="display:flex; gap:10px; align-items:center;">
-                        <div style="font-size:11px; background:#fef3c7; color:#92400e; padding:1px 6px; border-radius:8px;">🧠 ${bp} BP</div>
-                        ${examStatus}
+        q.forEach(doc => {
+            const s = doc.data();
+            count++;
+            const g = s.assignedGrade || "Unassigned"; 
+            
+            // Check for compressed 'sd' or long 'saveData'
+            const saveData = s.saveData || {};
+
+            // 🛡️ ARCHITECT'S "CYCLE RESET" LOGIC
+            // We compare the student's last recorded lesson ID to your current one.
+            let displayCorrect = saveData.mathCorrect || 0;
+            let displayTotal = saveData.mathTotal || 0;
+            
+            if (saveData.lastCycleId !== activeCycleId) {
+                // If they don't match, they haven't logged in for this lesson yet.
+                // We show 0/0 so the teacher knows they haven't started.
+                displayCorrect = 0;
+                displayTotal = 0;
+            }
+
+            const history = saveData.examHistory || {};
+            const examCount = Object.keys(history).length;
+            const examStatus = examCount > 0 
+                ? `<span style="color:#48bb78; font-size:10px; font-weight:bold;">✅ ${examCount} Exams</span>` 
+                : `<span style="color:#a0aec0; font-size:10px;">⏳ No Exams</span>`;
+
+            if (!grouped[g]) grouped[g] = [];
+            
+            // Render the Student Row
+            grouped[g].push(`
+                <div class="student-list-item">
+                    <input type="checkbox" class="student-select-checkbox" data-username="${s.username}" onchange="updateBulkActionBar()">
+                    <div class="student-info" style="display:flex; flex-direction:column; align-items:flex-start;">
+                        <div style="font-size:16px; font-weight:bold;">${s.username}</div>
+                        <div style="display:flex; align-items:center; gap:10px; margin-top:5px; width:100%;">
+                            <div style="font-size:11px; background:#fef3c7; color:#92400e; padding:1px 6px; border-radius:8px; white-space:nowrap;">🧠 ${saveData.brainPoints || 0} BP</div>
+                            
+                            <!-- 📊 NEW: LESSON-SPECIFIC PROGRESS BAR -->
+                            <div style="flex:1; min-width:150px;">
+                                <div style="display:flex; justify-content:space-between; font-size:10px; font-weight:bold;">
+                                    <span>Lesson Effort: ${displayCorrect} / ${displayTotal}</span>
+                                    <span style="color:${displayTotal > 0 && (displayCorrect/displayTotal) > 0.8 ? '#48bb78' : '#718096'}">
+                                        ${displayTotal > 0 ? Math.round((displayCorrect/displayTotal)*100) : 0}%
+                                    </span>
+                                </div>
+                                <div class="monitor-bar-bg">
+                                    <div class="monitor-bar-fill" style="width:${displayTotal > 0 ? Math.min(100, (displayCorrect/displayTotal)*100) : 0}%; background:${(displayCorrect/displayTotal) > 0.7 ? '#48bb78' : '#f6ad55'};"></div>
+                                </div>
+                            </div>
+                            ${examStatus}
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:5px;">
+                        <button class="action-btn green" style="width:auto; padding:5px 10px; font-size:12px; margin:0;" onclick="giveStudentBP('${s.username}')">🎁</button>
+                        <button class="action-btn blue" style="width:auto; padding:5px 10px; font-size:12px; margin:0;" onclick="openTopicManager('${s.username}')">Manage</button>
+                        <button class="action-btn red" style="width:auto; padding:5px 10px; font-size:12px; margin:0;" onclick="openDeleteModal('${s.username}')">🗑️</button>
                     </div>
                 </div>
-                <div style="display:flex; gap:5px;">
-                    <button class="action-btn green" style="width:auto; padding:5px 10px; font-size:12px;" onclick="giveStudentBP('${s.username}')">🎁 +BP</button>
-                    <button class="action-btn blue" style="width:auto; padding:5px 10px; font-size:12px;" onclick="openTopicManager('${s.username}')">Manage</button>
-                    <button class="action-btn red" style="width:auto; padding:5px 10px; font-size:12px;" onclick="openDeleteModal('${s.username}')">🗑️</button>
-                </div>
-            </div>
-        `);
-    });
-    
-    if (count === 0) { 
-        d.innerHTML = '<div style="padding:20px;text-align:center;">No students found for your class.</div>'; 
-        return; 
+            `);
+        });
+        
+        if (count === 0) { 
+            d.innerHTML = '<div style="padding:20px;text-align:center;">No students found for your class.</div>'; 
+            return; 
+        }
+
+        // 3. Render Grade Folders
+        let finalHtml = ''; 
+        const grades = Object.keys(grouped).sort(); 
+        grades.forEach(grade => { 
+            finalHtml += `
+                <div class="grade-group">
+                    <div class="grade-summary" style="display:flex; align-items:center; gap:12px; background:#e2e8f0; border-bottom:1px solid #cbd5e0;">
+                        <input type="checkbox" style="width:22px; height:22px; cursor:pointer; margin-left:5px;" onclick="event.stopPropagation(); toggleGradeStudents(this, '${grade}')">
+                        <div style="flex:1; cursor:pointer; padding:12px 0;" onclick="const list = this.parentElement.nextElementSibling; list.style.display = list.style.display === 'none' ? 'block' : 'none'">
+                            <span style="font-weight:bold; color:#2d3748;">📂 Grade ${grade}</span>
+                            <span style="float:right; font-size:12px; color:#718096; margin-right:15px;">${grouped[grade].length} Students ▼</span>
+                        </div>
+                    </div>
+                    <div class="grade-student-list" style="display:block;">
+                        ${grouped[grade].join('')}
+                    </div>
+                </div>`; 
+        });
+        d.innerHTML = finalHtml; 
+
+    } catch (e) {
+        console.error("Dashboard Load Error:", e);
+        d.innerHTML = "Error loading roster. Check database permissions.";
     }
-
-    let finalHtml = ''; 
-    const grades = Object.keys(grouped).sort(); 
-    grades.forEach(grade => { 
-        finalHtml += `
-            <div class="grade-group">
-                <div class="grade-summary" style="display:flex; align-items:center; gap:12px; background:#e2e8f0; border-bottom:1px solid #cbd5e0;">
-                    <!-- The New Grade Selector Checkbox -->
-                    <input type="checkbox" 
-                           style="width:22px; height:22px; cursor:pointer; margin-left:5px;" 
-                           onclick="event.stopPropagation(); toggleGradeStudents(this, '${grade}')">
-                    
-                    <!-- The Clickable Header (To Open/Close the folder) -->
-                    <div style="flex:1; cursor:pointer; padding:12px 0;" 
-                         onclick="const list = this.parentElement.nextElementSibling; list.style.display = list.style.display === 'none' ? 'block' : 'none'">
-                        <span style="font-weight:bold; color:#2d3748;">📂 Grade ${grade}</span>
-                        <span style="float:right; font-size:12px; color:#718096; margin-right:15px;">${grouped[grade].length} Students ▼</span>
-                    </div>
-                </div>
-                <div class="grade-student-list" style="display:block;">
-                    ${grouped[grade].join('')}
-                </div>
-            </div>`; 
-    });
-    d.innerHTML = finalHtml; 
 }
 
     let studentToDelete = null;
@@ -6915,10 +7421,12 @@ window.resolveRaidMath = function(moveId, selected, correct) {
     if(overlay) overlay.remove();
 
     if (selected == correct) {
+        recordMathParticipation(true);
         showFloatingText(document.body, "MATH CRIT! (2x)", "crit");
         soundManager.playSFX('correct');
         useRaidMove(moveId, 2.0, 1.0); 
     } else {
+        recordMathParticipation(false);
         showFloatingText(document.body, "WRONG! (Vuln Up)", "weak");
         soundManager.playSFX('wrong');
         useRaidMove(moveId, 0.5, 2.0);
@@ -8084,6 +8592,8 @@ if(teacherData.rewardMultiplier) {
     document.getElementById('qm-reward-slider').value = teacherData.rewardMultiplier;
     document.getElementById('qm-mult-display').innerText = teacherData.rewardMultiplier + 'x';
 }
+initTeacherBeaconListener();
+initCycleListener();
                 showToast("Welcome back!", "success");
             } else {
                 showToast("Wrong Password", "error");
@@ -8604,7 +9114,7 @@ async function loadGradebookTests() {
 }
 
 // ==========================================
-// 📊 GRADEBOOK (Fixed Data Path)
+// 📊 MASTER GRADEBOOK ENGINE (HARDENED)
 // ==========================================
 async function renderGradebook() {
     const g = document.getElementById('gb-grade-select').value;
@@ -8612,53 +9122,51 @@ async function renderGradebook() {
     const tbody = document.getElementById('gradebook-body');
     
     if(!g || !selectedUrl) return;
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:gray;">Scanning scores...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:gray;">Scanning Class Records...</td></tr>';
 
     try {
+        // Fetch all students
         const q = await window.fbase.getDocs(window.fbase.collection(window.db, "students"));
         let html = "";
         let count = 0;
         
-        // Target Filename (e.g. "test_Place_Value.json")
-        const targetFile = selectedUrl.split('/').pop().trim();
+        // Normalize the filename we are looking for (e.g., "test_addition.json")
+        const targetFile = selectedUrl.split('/').pop().toLowerCase().trim();
         
         q.forEach(doc => {
             const s = doc.data();
             
-            // Filter by grade
-            // We use String() to ensure "2" matches 2
+            // Only look at students in the selected grade
             if (String(s.assignedGrade) !== String(g)) return; 
-            
             count++;
             
-            // --- CRITICAL FIX: LOOK INSIDE 'saveData' ---
+            // --- ARCHITECT'S FIX: Check both compressed 'eh' and long 'examHistory' ---
             const saveData = s.saveData || {};
-            const history = saveData.examHistory || {}; 
-            // --------------------------------------------
+            const history = saveData.eh || saveData.examHistory || {}; 
 
-            let h = null;
+            let foundScore = null;
 
-            // Universal Search Loop
-            const foundKey = Object.keys(history).find(studentKey => {
-                const studentFile = studentKey.split('/').pop().trim();
-                return studentFile === targetFile;
+            // SMART MATCH: Loop through student's tests to find a filename match
+            Object.keys(history).forEach(studentKey => {
+                const studentFile = studentKey.split('/').pop().toLowerCase().trim();
+                if (studentFile === targetFile) {
+                    foundScore = history[studentKey];
+                }
             });
 
-            if (foundKey) h = history[foundKey];
-
-            if (h) {
-                const pct = Math.round((h.score / h.total) * 100);
+            if (foundScore) {
+                const pct = Math.round((foundScore.score / foundScore.total) * 100);
                 const color = pct >= 70 ? 'score-pass' : 'score-fail';
-                const dateStr = h.timestamp ? new Date(h.timestamp).toLocaleDateString() : "Unknown";
+                const dateStr = foundScore.timestamp ? new Date(foundScore.timestamp).toLocaleDateString() : "Completed";
                 
                 html += `<tr>
                     <td style="font-weight:bold;">${s.username}</td>
-                    <td class="${color}">${h.score}/${h.total} (${pct}%)</td>
-                    <td>✅ Done</td>
-                    <td style="font-size:12px; color:#718096;">${dateStr}</td>
+                    <td class="${color}">${foundScore.score}/${foundScore.total} (${pct}%)</td>
+                    <td style="color:#38a169;">✅ Done</td>
+                    <td style="font-size:11px; color:#718096;">${dateStr}</td>
                 </tr>`;
             } else {
-                html += `<tr style="opacity:0.6;">
+                html += `<tr style="opacity:0.5;">
                     <td>${s.username}</td>
                     <td>-</td>
                     <td style="color:#d69e2e;">⏳ Pending</td>
@@ -8670,12 +9178,12 @@ async function renderGradebook() {
         if (count === 0) {
             tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">No students found in Grade ${g}.</td></tr>`;
         } else {
-            tbody.innerHTML = html || '<tr><td colspan="4" style="text-align:center;">Students found, but no matching scores yet.</td></tr>';
+            tbody.innerHTML = html;
         }
         
     } catch (e) {
-        console.error(e);
-        tbody.innerHTML = `<tr><td colspan="4" style="color:red; text-align:center;">Error: ${e.message}</td></tr>`;
+        console.error("Gradebook Error:", e);
+        tbody.innerHTML = `<tr><td colspan="4" style="color:red; text-align:center;">Error loading data.</td></tr>`;
     }
 }
 // 🔊 READ ALOUD FOR EXAMS
@@ -9662,6 +10170,7 @@ function triggerBuildQuiz() {
         
         btn.onclick = () => {
             if (opt == q.a) {
+                recordMathParticipation(true);
                 // --- ✅ CORRECT ANSWER ---
                 soundManager.playSFX('correct');
                 addBP(10); // Reward increased to 10
@@ -9671,6 +10180,7 @@ function triggerBuildQuiz() {
                 // UNLOCK: Close the modal so they can build again
                 modal.classList.remove('active');
             } else {
+                recordMathParticipation(false);
                 // --- ❌ WRONG ANSWER ---
                 soundManager.playSFX('wrong');
                 
@@ -10037,6 +10547,7 @@ async function sendGifterCompliment(msg) {
 }
 
 async function sendFriendNotification(friend, type, bpAmount, message) {
+    gameState.dailyQuests.social = 1;
     const ref = window.fbase.doc(window.db, "students", friend);
     
     // The note itself can stay readable, but the keys in the database MUST be tiny
@@ -10495,8 +11006,12 @@ function towerStartFocus() {
 
 function towerResolveFocus(ans, correct) {
     document.getElementById('tower-math-popup').style.display = 'none';
-    if (ans == correct) { towerFocusActive = true; soundManager.playSFX('correct'); showToast("POWER LOADED!", "success"); }
-    else { towerFocusActive = false; soundManager.playSFX('wrong'); }
+    if (ans == correct) {
+        recordMathParticipation(true);
+        towerFocusActive = true; soundManager.playSFX('correct'); showToast("POWER LOADED!", "success"); }
+    else {
+        recordMathParticipation(false);
+        towerFocusActive = false; soundManager.playSFX('wrong'); }
     towerShowCommandBar(towerBattleState.playerTeam[towerTurnIndex]);
 }
 
@@ -10521,6 +11036,337 @@ function towerOpenSquadManager() {
 }
 function towerCloseSquadManager() { document.getElementById('tower-squad-modal').style.display = 'none'; }
 function resetTowerProgress() { if(confirm("Return to Floor 1?")) { gameState.currentTowerFloor = 1; saveGame(true); renderTowerLobby(); } }
+  
+  // --- PRO ARCHAEOLOGY ENGINE ---
+const RelicEngine = {
+    // This picks a random high-value item from your existing data
+    pickNewTarget: function() {
+        const roll = Math.random();
+        let target = {};
+
+        if (roll < 0.3) { // 30% Chance for a Pet Egg
+            const rarity = Math.random() > 0.8 ? 'epic' : 'rare';
+            const pool = PET_TYPES[rarity];
+            const pet = pool[Math.floor(Math.random() * pool.length)];
+            target = { name: pet.name + " Egg", img: pet.image, type: 'egg', data: pet };
+        } 
+        else if (roll < 0.6) { // 30% Chance for Equipment
+            const equip = SHOP_ITEMS.equipment[Math.floor(Math.random() * SHOP_ITEMS.equipment.length)];
+            target = { name: "Rare " + equip.name, img: equip.image, type: 'equip', data: equip };
+        } 
+        else { // 40% Chance for Luxury Building Blocks
+            const block = BUILDER_BLOCKS[Math.floor(Math.random() * BUILDER_BLOCKS.length)];
+            target = { name: "20x " + block.name, img: block.icon, type: 'block', data: block };
+        }
+
+        gameState.excavationTarget = target;
+        this.updateUI();
+    },
+
+    updateUI: function() {
+        const dp = gameState.digProgress || 0;
+        const target = gameState.excavationTarget;
+        if (!target) return this.pickNewTarget();
+
+        const imgEl = document.getElementById('fossil-icon');
+        const fill = document.getElementById('dig-fill');
+        const count = document.getElementById('dig-count');
+
+        // Update Silhouette
+        imgEl.src = target.img;
+        if (dp >= 15) {
+            imgEl.className = "fossil-img is-revealing"; // Glowing state
+        } else {
+            imgEl.className = "fossil-img is-fossil"; // Pure black state
+        }
+
+        // Update Bar
+        fill.style.width = (dp / 20 * 100) + "%";
+        count.innerText = `${dp}/20`;
+    },
+
+    grantReward: function() {
+        const t = gameState.excavationTarget;
+        if (t.type === 'egg') {
+            const newEgg = JSON.parse(JSON.stringify(t.data));
+            newEgg.id = 'egg_' + Date.now();
+            newEgg.isHatched = false;
+            newEgg.hatchProgress = 0;
+            gameState.pets.push(newEgg);
+        } else if (t.type === 'block') {
+            const id = t.data.id;
+            gameState.builder.inventory[id] = (gameState.builder.inventory[id] || 0) + 20;
+        } else if (t.type === 'equip') {
+            // Give 50 scraps for gear discovery or add the item
+            gameState.inventory.forgeScraps += 25;
+        }
+
+        triggerRewardCeremony("RELIC UNEARTHED!", `You discovered: ${t.name}`, `<img src="${t.img}" style="width:100px;">`, () => {
+            this.pickNewTarget(); // Pick next one immediately
+            saveGame(true);
+        });
+    }
+};
+
+
+// --- TEACHER: TRIGGER THE BOOST ---
+async function triggerClassBoost() {
+    if (!currentLoggedTeacher) return;
+    if (!confirm("Activate 20-minute Brain Boost for the whole class?")) return;
+
+    const bRef = window.fbase.doc(window.db, "class_stats", `beacon_${currentLoggedTeacher}`);
+    
+    await window.fbase.setDoc(bRef, {
+        isBoostActive: true,
+        boostEndTime: Date.now() + (20 * 60 * 1000), // 20 minutes
+        totalEnergy: 0 // Reset for next time
+    }, { merge: true });
+
+    showToast("🚀 BRAIN BOOST ACTIVATED!", "success");
+}
+
+// TEACHER VIEW: Watches the Beacon charge
+function initTeacherBeaconListener() {
+    if (!currentLoggedTeacher) return;
+    window.fbase.onSnapshot(window.fbase.doc(window.db, "class_stats", `beacon_${currentLoggedTeacher}`), (doc) => {
+        if (doc.exists()) {
+            const d = doc.data();
+            const pct = Math.min(100, (d.totalEnergy / 1000) * 100);
+            document.getElementById('t-beacon-fill').style.width = pct + "%";
+            document.getElementById('t-beacon-val').innerText = `${d.totalEnergy}/1000`;
+            
+            const btn = document.getElementById('activate-boost-btn');
+            const msg = document.getElementById('boost-active-msg');
+            
+            if (d.isBoostActive && d.boostEndTime > Date.now()) {
+                btn.style.display = 'none';
+                msg.style.display = 'block';
+            } else if (d.totalEnergy >= 1000) {
+                btn.style.display = 'block';
+                msg.style.display = 'none';
+            } else {
+                btn.style.display = 'none';
+                msg.style.display = 'none';
+            }
+        }
+    });
+}
+
+// --- MASTER STUDENT LISTENER (BEACON + BOOST + RESET) ---
+async function initClassBeacon() {
+    // 🛡️ ARCHITECT FIX: If teacherId is missing, look it up in the database first
+    if (!gameState.teacherId && gameState.playerName) {
+        try {
+            const sDoc = await window.fbase.getDoc(window.fbase.doc(window.db, "students", gameState.playerName));
+            if (sDoc.exists()) {
+                gameState.teacherId = sDoc.data().teacherId;
+                console.log("📡 Teacher ID recovered:", gameState.teacherId);
+            }
+        } catch(e) { console.error("Error finding teacher:", e); }
+    }
+
+    // If we still don't have an ID, we can't load the leaderboard, so we stop here.
+    if (!gameState.teacherId) {
+        console.warn("⚠️ Leaderboard Blocked: No Teacher ID found.");
+        return;
+    }
+
+    // Start listening to the Teacher's Class Beacon
+    window.fbase.onSnapshot(window.fbase.doc(window.db, "class_stats", `beacon_${gameState.teacherId}`), (doc) => {
+        if (!doc.exists()) return;
+        const d = doc.data();
+
+        // 4. LEADERBOARD REFRESH (This draws the students on the board)
+        if (d.leaderboard) {
+            renderScholarLeaderboard(d.leaderboard);
+        }
+        
+// 1. AUTO-RESET LOGIC (Clears scores if teacher starts a new topic)
+        if (d.currentCycleId && d.currentCycleId !== (gameState.lastCycleId || "")) {
+            console.log("🆕 New Math Cycle Detected! Resetting scores...");
+            gameState.mathCorrect = 0;
+            gameState.mathTotal = 0;
+            gameState.lastCycleId = d.currentCycleId; // Record that we have reset for this lesson
+            
+            showToast(`Teacher started new topic: ${d.currentCycleName || "Fresh Start"}!`, "info");
+            saveGame(true); // This pushes the "0" scores back to the teacher's dashboard
+        }
+
+        // 2. BEACON PROGRESS LOGIC (Updates the blue bar)
+        const energy = d.totalEnergy || 0;
+        const pct = Math.min(100, (energy / 1000) * 100);
+        const beaconBar = document.getElementById('beacon-fill');
+        const beaconLabel = document.getElementById('beacon-text');
+        if (beaconBar) beaconBar.style.width = pct + "%";
+
+        // 3. BOOST ACTIVATION LOGIC (Double BP Mode)
+        if (d.isBoostActive && d.boostEndTime > Date.now()) {
+            gameState.isBrainBoosted = true;
+            if (beaconLabel) {
+                beaconLabel.innerText = "🔥 BOOST ACTIVE!";
+                beaconLabel.className = "boost-active-text";
+            }
+            document.getElementById('screen-study').classList.add('beacon-boost-glow');
+            if(!window.boostNotified) {
+                showToast("🌟 TEACHER ACTIVATED BRAIN BOOST!", "success");
+                soundManager.playSFX('levelUp');
+                window.boostNotified = true;
+            }
+        } else {
+            gameState.isBrainBoosted = false;
+            window.boostNotified = false;
+            if (beaconLabel) {
+                beaconLabel.innerText = `${energy}/1000`;
+                beaconLabel.className = "";
+            }
+            document.getElementById('screen-study').classList.remove('beacon-boost-glow');
+        }
+    });
+}
+
+// --- UNIVERSAL SCHOLAR TRACKING ---
+function recordMathParticipation(isCorrect) {
+    // 1. Update local memory
+    gameState.mathTotal = (gameState.mathTotal || 0) + 1;
+    if (isCorrect) {
+        gameState.mathCorrect = (gameState.mathCorrect || 0) + 1;
+    }
+
+    // 2. Immediate Local UI update (optional, but good for feedback)
+    console.log(`📊 Scholar Progress: ${gameState.mathCorrect} / ${gameState.mathTotal}`);
+
+    // 3. Mark as "Dirty" so the Heartbeat Save pushes this to Firebase
+    hasUnsavedChanges = true;
+    
+    // 4. Update the Leaderboard (We will build the Cloud part of this in Phase 2)
+    syncToClassLeaderboard(); 
+}
+
+// --- LEADERBOARD SYNC ENGINE ---
+async function syncToClassLeaderboard() {
+    // 1. Safety Check: Only sync if we have a name and a teacher
+    if (!gameState.teacherId || !gameState.playerName || gameState.playerName === "Student") return;
+
+    console.log("🏆 Syncing " + gameState.playerName + " to Leaderboard...");
+
+    const bRef = window.fbase.doc(window.db, "class_stats", `beacon_${gameState.teacherId}`);
+    
+    try {
+        await window.fbase.runTransaction(window.db, async (transaction) => {
+            const sfDoc = await transaction.get(bRef);
+            
+            // If the class folder doesn't exist, create it
+            if (!sfDoc.exists()) {
+                transaction.set(bRef, { 
+                    leaderboard: [{ name: gameState.playerName, score: gameState.mathCorrect || 0 }],
+                    totalEnergy: 0,
+                    teacherId: gameState.teacherId
+                });
+                return;
+            }
+
+            let leaderboard = sfDoc.data().leaderboard || [];
+            
+            // 2. Update my score if I'm already there, otherwise add me
+            const myIndex = leaderboard.findIndex(entry => entry.name === gameState.playerName);
+            if (myIndex !== -1) {
+                leaderboard[myIndex].score = gameState.mathCorrect || 0;
+            } else {
+                leaderboard.push({ name: gameState.playerName, score: gameState.mathCorrect || 0 });
+            }
+
+            // 3. Sort by score and keep top 10
+            leaderboard.sort((a, b) => b.score - a.score);
+            leaderboard = leaderboard.slice(0, 10);
+
+            transaction.update(bRef, { leaderboard: leaderboard });
+        });
+        console.log("✅ Leaderboard Sync Complete!");
+    } catch (e) {
+        console.error("❌ Leaderboard Sync Failed:", e);
+    }
+}
+
+// --- TEACHER: RESET THE MATH SCORES ---
+async function resetMathCycle() {
+    const topicName = document.getElementById('new-cycle-name').value.trim() || "New Lesson";
+    if (!currentLoggedTeacher) return;
+    if (!confirm(`Are you sure? This will clear the "Correct/Total" scores for EVERY student in your class to start: ${topicName}`)) return;
+
+    const bRef = window.fbase.doc(window.db, "class_stats", `beacon_${currentLoggedTeacher}`);
+    
+    const newCycleId = "cycle_" + Date.now(); // Create a unique ID
+
+    await window.fbase.updateDoc(bRef, {
+        currentCycleId: newCycleId,
+        currentCycleName: topicName,
+        leaderboard: []
+    });
+
+    document.getElementById('new-cycle-name').value = "";
+    showToast(`Board Reset! New Topic: ${topicName}`, "success");
+}
+
+// Update the Teacher Dashboard view to show the active cycle name
+function initCycleListener() {
+    if (!currentLoggedTeacher) return;
+    window.fbase.onSnapshot(window.fbase.doc(window.db, "class_stats", `beacon_${currentLoggedTeacher}`), (doc) => {
+        if (doc.exists()) {
+            const d = doc.data();
+            if (d.currentCycleName) {
+                document.getElementById('t-active-topic').innerText = d.currentCycleName;
+            }
+        }
+    });
+}
+
+function renderScholarLeaderboard(entries) {
+    const list = document.getElementById('scholar-leaderboard-list');
+    if (!list || !entries) return;
+
+    if (entries.length === 0) {
+        list.innerHTML = `<div style="text-align:center; padding:10px; color:gray; font-size:12px;">The board is fresh! Be the first to solve.</div>`;
+        return;
+    }
+
+    let html = "";
+    // Only show Top 10
+    const displayList = entries.slice(0, 10);
+    
+    displayList.forEach((entry, index) => {
+        const isMe = entry.name === gameState.playerName;
+        const rank = index + 1;
+        let medal = "";
+        if (rank === 1) medal = "🥇 ";
+        else if (rank === 2) medal = "🥈 ";
+        else if (rank === 3) medal = "🥉 ";
+
+        html += `
+            <div class="lb-row ${isMe ? 'lb-me' : ''}">
+                <div class="lb-rank">${rank}</div>
+                <div class="lb-name">${medal}${entry.name}</div>
+                <div class="lb-score">${entry.score} Solved</div>
+            </div>
+        `;
+    });
+
+    // --- ADD "MY POSITION" FOOTER ---
+    const myRank = entries.findIndex(e => e.name === gameState.playerName) + 1;
+    if (myRank > 10) {
+        html += `
+            <div style="border-top: 2px dashed #edf2f7; margin-top:5px; padding-top:5px;">
+                <div class="lb-row lb-me">
+                    <div class="lb-rank">${myRank}</div>
+                    <div class="lb-name">${gameState.playerName} (You)</div>
+                    <div class="lb-score">${gameState.mathCorrect} Solved</div>
+                </div>
+            </div>
+        `;
+    }
+
+    list.innerHTML = html;
+}
+
   </script>
   <!-- 🚧 CONSTRUCTION QUIZ MODAL -->
 <div class="modal-overlay" id="build-quiz-modal" style="z-index: 9999;">
@@ -10557,6 +11403,21 @@ function resetTowerProgress() { if(confirm("Return to Floor 1?")) { gameState.cu
         <p id="reveal-item-desc" style="color: #4a5568; margin-bottom: 25px;">+5 Damage Bonus</p>
         
         <button class="gacha-btn" style="padding: 15px; margin: 0;" onclick="closeLootReveal()">CLAIM ITEM</button>
+    </div>
+</div>
+<!-- 🎯 DAILY QUEST MODAL -->
+<div class="modal-overlay" id="quest-modal">
+    <div class="confirm-modal" style="max-width: 450px; border: 4px solid #f56565;">
+        <div style="background:#f56565; color:white; padding:15px; display:flex; justify-content:space-between; align-items:center;">
+            <h2 style="margin:0; color:white; font-size:20px;">🎯 Daily Bounties</h2>
+            <button onclick="toggleQuestBoard(false)" style="background:none; border:none; color:white; font-size:24px; cursor:pointer;">&times;</button>
+        </div>
+        <div id="daily-quest-list" style="padding:15px; max-height:400px; overflow-y:auto;">
+            <!-- Quests injected by JS -->
+        </div>
+        <div style="padding:10px; border-top:1px solid #eee;">
+            <button class="confirm-btn no" style="width:100%;" onclick="toggleQuestBoard(false)">Close</button>
+        </div>
     </div>
 </div>
 </body>
