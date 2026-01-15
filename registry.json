@@ -12,7 +12,7 @@
     "special_items.json"
   ],
   "powers": [
-    "powerv2.json"
+    "powerv1.json"
   ],
   "blocks": [
     "custom_blocks.json"
