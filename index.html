@@ -1776,6 +1776,17 @@ body {
    </div>
    <main class="content">
    <section id="screen-study" class="screen active">
+       
+       <!-- 🎓 ACTIVE EXAM ALERT CARD (Architect Fix) -->
+    <div id="active-exam-card" class="exam-card" style="display: none; margin-bottom: 20px;">
+        <div style="font-size: 40px; margin-bottom: 10px;">📝</div>
+        <h2 id="exam-card-title" style="color: #e53e3e; font-weight: bold; font-size: 20px;">Exam Assigned!</h2>
+        <p id="exam-card-status" style="color: #718096; font-size: 13px; margin-bottom: 15px;">Your teacher has assigned a test.</p>
+        <button id="start-exam-btn" class="login-btn" style="background: #e53e3e; box-shadow: 0 5px 0 #9b2c2c;" onclick="initExamMode()">
+            START EXAM NOW
+        </button>
+    </div>
+    
     <!-- NEW: MASTER ENGAGEMENT DASHBOARD -->
     <div class="study-dashboard">
         <!-- ⛏️ ARCHAEOLOGY SITE -->
@@ -2854,7 +2865,8 @@ loadGitHubData();
 function compressState(state) {
     let compressed = {};
     for (let key in state) {
-        if (['activeQuestionPool', 'battleState', 'currentQuestion', 'questBattleActive', 'pendingQuestRewardData'].includes(key)) continue;
+        // ARCHITECT FIX: Exclude Teacher-controlled fields from the student's personal bundle
+        if (['activeQuestionPool', 'battleState', 'currentQuestion', 'questBattleActive', 'pendingQuestRewardData', 'selectedTopics', 'assignedExam'].includes(key)) continue;
         
         const shortKey = SAVE_KEYS[key] || key;
         let value = state[key];
@@ -3037,7 +3049,20 @@ try {
                 finalData = cloudData; // Use as-is, repairSaveData will handle the rest
             }
 
-           gameState = { ...gameState, ...finalData };
+           // --- ARCHITECT FIX: TEACHER PRIORITY LOAD ---
+            // 1. Memoize (remember) what the Teacher assigned at the root
+            const teacherTopics = gameState.selectedTopics;
+            const teacherExam = gameState.assignedExam;
+            const teacherGrade = gameState.grade;
+
+            // 2. Load the student's personal data (Pets, BP, etc.)
+            gameState = { ...gameState, ...finalData };
+
+            // 3. Force-Restore Teacher's assignments so they aren't overwritten
+            gameState.selectedTopics = teacherTopics || [];
+            gameState.assignedExam = teacherExam || "";
+            gameState.grade = teacherGrade;
+            // --------------------------------------------
           // 🛡️ ARCHITECT FIX: Align local math score with saved math score
             gameState.mathCorrect = finalData.mathCorrect || 0;
             gameState.mathTotal = finalData.mathTotal || 0;
@@ -3356,8 +3381,10 @@ function repairSaveData() {
           renderHub();
           updateDailyQuests(); // <--- ADD THIS HERE
           initClassBeacon();
-          setTimeout(() => { syncToClassLeaderboard(); }, 2000); 
-          checkActiveExam();
+          setTimeout(() => { 
+              syncToClassLeaderboard(); 
+              checkActiveExam(); // Refreshes the Red Card UI
+          }, 2000);
         });
 
     function loadExternalPets() {
