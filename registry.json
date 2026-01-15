@@ -1,6 +1,5 @@
 {
   "pets": [
-    "ultra_evolutions.json",
     "evolutions.json",
     "missingpets.json"
   ],
@@ -13,7 +12,6 @@
     "special_items.json"
   ],
   "powers": [
-    "powerv1.json",
     "powerv2.json"
   ],
   "blocks": [
