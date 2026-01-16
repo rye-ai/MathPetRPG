@@ -1303,7 +1303,7 @@ body {
     <form id="setup-form">
      <div class="setup-section"><label class="setup-label">1. Username</label><input type="text" id="student-name" class="login-input" placeholder="Enter Username" required></div>
      <div class="setup-section"><label class="setup-label">2. Password</label><input type="password" id="student-pass" class="login-input" placeholder="Enter Password" required></div>
-     <button type="submit" class="login-btn">Start Adventure! 🚀</button>
+     <button type="submit" id="login-submit-btn" class="login-btn" disabled style="background:#a0aec0; cursor:wait; box-shadow:none;">⏳ Loading Game Data...</button>
     </form>
 
     <!-- SECRET TRIGGER -->
@@ -2360,6 +2360,14 @@ const SAVE_KEYS = {
     rarity: 'rty', element: 'el', image: 'img', imageStyle: 'ims', emoji: 'emj',
     dailyQuests: 'dq',
     isFirstAttempt: 'ifa',
+    
+    // Add these inside the existing { } braces:
+    maxHP: 'mhp',
+    powers: 'pwr',
+    evolutionStage: 'evs',
+    savedEvolutions: 'sevo',
+    badges: 'bdg',
+    isFirstAttempt: 'ifa',
 
     // Item & Power Properties (From GitHub JSONs)
     instanceId: 'iid', baseId: 'bid', prefix: 'pfx', 
@@ -2850,6 +2858,18 @@ async function loadGitHubData() {
         }
 
         console.log("✅ Registry Loaded: All Systems Static.");
+
+        // 🔑 GATEKEEPER: Unlock the login button now that data is ready
+        const startBtn = document.getElementById('login-submit-btn');
+        if (startBtn) {
+            startBtn.disabled = false;
+            startBtn.innerText = "Start Adventure! 🚀";
+            startBtn.style.background = "#48bb78"; 
+            startBtn.style.cursor = "pointer";
+            startBtn.style.boxShadow = "0 5px 0 #2f855a";
+            console.log("🔓 Game Data Sync Complete. Login Unlocked.");
+        }
+
     } catch (e) {
         console.error("❌ Registry Critical Error:", e.message);
     }
@@ -2875,7 +2895,7 @@ function compressState(state) {
         if (key === 'pets' && Array.isArray(value)) {
             value = value.map(pet => {
                 let cp = {};
-                const essentials = ['id', 'type', 'name', 'hp', 'level', 'xp', 'maxXp', 'powers', 'stars', 'isHatched', 'hatchProgress', 'evolutionStage', 'equipment', 'savedEvolutions'];
+                const essentials = ['id', 'type', 'name', 'hp', 'maxHP', 'level', 'xp', 'maxXp', 'powers', 'stars', 'isHatched', 'hatchProgress', 'evolutionStage', 'equipment', 'savedEvolutions', 'badges'];
                 for (let k in pet) {
                     if (essentials.includes(k)) cp[SAVE_KEYS[k] || k] = pet[k];
                 }
@@ -2945,25 +2965,43 @@ function decompressData(data) {
                 let dp = {};
                 for (let k in compressedPet) dp[invertedKeys[k] || k] = compressedPet[k];
                 
-                // 🔥 FORCE STATS TO BE NUMBERS (Prevents Immortal/NaN bug)
-                dp.hp = Number(dp.hp) || 0;
-                dp.maxHP = Number(dp.maxHP) || 50;
-                dp.level = Number(dp.level) || 1;
-                dp.xp = Number(dp.xp) || 0;
-                dp.maxXp = Number(dp.maxXp) || 300;
+                // 1. 🛡️ THE "STRING CLEANER": If the image is garbage text, delete it!
+                if (!dp.image || dp.image === "undefined" || dp.image === "null" || !dp.image.startsWith('http')) {
+                    dp.image = ""; // This forces the game to look at the Registry below
+                }
 
+                // 2. Look up the Registry (GitHub Data)
                 let baseData = null;
                 for (const rarity in PET_TYPES) {
                     const found = PET_TYPES[rarity].find(b => b.id === dp.type);
                     if (found) { baseData = found; break; }
                 }
+
                 if (baseData) {
-                    dp.image = dp.image || baseData.image;
-                    dp.imageStyle = dp.imageStyle || baseData.imageStyle;
-                    dp.element = dp.element || baseData.element;
-                    dp.rarity = dp.rarity || baseData.rarity;
-                    dp.emoji = dp.emoji || baseData.emoji;
+                    // 3. 🚀 FORCE RE-SYNC: Always use the Registry image unless the pet has an evolution image
+                    dp.image = baseData.image; 
+                    dp.imageStyle = baseData.imageStyle || dp.imageStyle;
+                    dp.element = baseData.element;
+                    dp.rarity = baseData.rarity;
+                    dp.emoji = baseData.emoji;
+                    dp.maxHP = Number(dp.maxHP || baseData.baseHP || 50);
+
+                    // 4. Handle Evolution Images (Overrides base image)
+                    const stage = Number(dp.evolutionStage || 0);
+                    const chain = EVOLUTION_CHAINS[dp.type] || dp.savedEvolutions;
+                    if (stage > 0 && chain && Array.isArray(chain)) {
+                        const evoData = chain[stage - 1]; 
+                        if (evoData && evoData.image) {
+                            dp.image = evoData.image; 
+                        }
+                    }
                 }
+
+                // 🩹 DATA HARDENING
+                dp.powers = (dp.powers && Array.isArray(dp.powers)) ? dp.powers : ['claw_attack'];
+                dp.badges = (dp.badges && Array.isArray(dp.badges)) ? dp.badges : [];
+                dp.equipment = (dp.equipment && typeof dp.equipment === 'object') ? dp.equipment : {};
+
                 return dp;
             });
         }
@@ -3350,6 +3388,7 @@ function repairSaveData() {
       if (!auth.success) { showToast(auth.message, "error"); return; }
       gameState.playerName = n; loadExternalPets();
       const cloudLoaded = await loadProgressFromFirebase(n);
+      rehydrateAllPets(); // Try to find images immediately
       if (!cloudLoaded || gameState.pets.length === 0) if (gameState.pets.length === 0) initializeGame();
       if (auth.assignment) { 
           gameState.grade = auth.assignment.grade; 
@@ -4000,48 +4039,76 @@ function resolveInBattleMath(selected, correct) {
 
     function renderHub() {
       const c = document.getElementById('hub-content'); 
-      const p = gameState.pets.find(pet => pet.id === gameState.currentPetId);
-      // ----------------------------------------------------
-      // 🛠️ AUTO-REPAIR: Fix Missing Evolution Images
-      // ----------------------------------------------------
-      if (p && p.isHatched) {
-          // 1. Get the evolution chain (From your new rewards.json)
-          let chain = EVOLUTION_CHAINS[p.type];
-          
-          // Legacy Fallback: If not found globally, check local save
-          if (!chain && p.savedEvolutions) {
-              chain = p.savedEvolutions;
-              EVOLUTION_CHAINS[p.type] = p.savedEvolutions;
-          }
+      if (!c) return; 
 
-          // 2. Apply Fix based on Stage
-          if (chain && Array.isArray(chain)) {
-              
-              // ➤ STAGE 1 FIX (e.g., Level 10-19)
-              // If they evolved once, use the 1st image in the list
-              if (p.evolutionStage === 1 && chain[0] && chain[0].image) {
-                  if (p.image !== chain[0].image) {
-                      console.log("🔧 Repairing Stage 1 Image: " + p.name);
-                      p.image = chain[0].image;
-                      p.imageStyle = chain[0].imageStyle || p.imageStyle;
-                      if(chain[0].element) p.element = chain[0].element; // Fix Element too
-                      saveGame(); // Save immediately so it sticks
-                  }
-              }
-              
-              // ➤ STAGE 2 FIX (e.g., Level 20+)
-              // If they evolved twice, use the 2nd image in the list
-              else if (p.evolutionStage >= 2 && chain[1] && chain[1].image) {
-                  if (p.image !== chain[1].image) {
-                      console.log("🔧 Repairing Stage 2 Image: " + p.name);
-                      p.image = chain[1].image;
-                      p.imageStyle = chain[1].imageStyle || p.imageStyle;
-                      if(chain[1].element) p.element = chain[1].element; // Fix Element too
-                      saveGame(); // Save immediately so it sticks
-                  }
+      // 1. ATTEMPT TO FIND THE PET
+      let p = gameState.pets.find(pet => pet.id === gameState.currentPetId);
+
+      // 2. THE SELF-HEALER: If currentPetId is wrong, pick the first pet in the list
+      if (!p && gameState.pets.length > 0) {
+          console.warn("🩹 Pet pointer was broken. Auto-fixing...");
+          p = gameState.pets[0];
+          gameState.currentPetId = p.id;
+      }
+
+      // 3. THE SAFETY NET: If they have NO pets, show a message instead of crashing
+      if (!p) { 
+          c.innerHTML = `
+            <div style="text-align:center; padding:50px; color:#4a5568;">
+                <div style="font-size:80px; margin-bottom:20px;">🥚</div>
+                <h2 style="font-size:24px; font-weight:bold;">No Pets Found</h2>
+                <p style="margin-bottom:20px;">Your collection is empty! Visit the shop or solve math to find an egg.</p>
+                <button class="action-btn blue" onclick="switchTab('shop')" style="max-width:200px; margin:0 auto;">Visit Shop</button>
+            </div>`; 
+          return; 
+      }
+
+      // 4. DATA RE-HYDRATION: If image is missing, restore it from Registry
+      if (p.isHatched && !p.image) {
+          for (const rarity in PET_TYPES) {
+              const baseData = PET_TYPES[rarity].find(b => b.id === p.type);
+              if (baseData) {
+                  p.image = baseData.image;
+                  p.imageStyle = baseData.imageStyle;
+                  p.element = p.element || baseData.element;
+                  p.emoji = p.emoji || baseData.emoji;
+                  p.maxHP = p.maxHP || baseData.baseHP;
+                  break;
               }
           }
       }
+      
+      // 4.5 DATA HARDENING: Ensure arrays exist so the UI doesn't crash on .length
+      if (!p.powers || !Array.isArray(p.powers)) {
+          console.log("🩹 Fixing missing powers for: " + p.name);
+          p.powers = ['claw_attack']; // Give them a basic move so they aren't stuck
+      }
+      if (!p.badges || !Array.isArray(p.badges)) {
+          p.badges = [];
+      }
+      if (!p.equipment || typeof p.equipment !== 'object') {
+          p.equipment = {};
+      }
+
+      // 5. AUTO-REPAIR: Evolution Image Logic (Safely Wrapped)
+      if (p.isHatched) {
+          let chain = EVOLUTION_CHAINS[p.type];
+          if (!chain && p.savedEvolutions) { chain = p.savedEvolutions; EVOLUTION_CHAINS[p.type] = p.savedEvolutions; }
+
+          if (chain && Array.isArray(chain)) {
+              if (p.evolutionStage === 1 && chain[0]?.image && p.image !== chain[0].image) {
+                  p.image = chain[0].image; p.imageStyle = chain[0].imageStyle || p.imageStyle;
+                  if(chain[0].element) p.element = chain[0].element;
+                  saveGame(); 
+              } else if (p.evolutionStage >= 2 && chain[1]?.image && p.image !== chain[1].image) {
+                  p.image = chain[1].image; p.imageStyle = chain[1].imageStyle || p.imageStyle;
+                  if(chain[1].element) p.element = chain[1].element;
+                  saveGame(); 
+              }
+          }
+      }
+
+      // --- END OF PROTECTION BLOCK ---
       // ----------------------------------------------------
       // Calculate gear bonuses for display
       const gear = getPetEquipmentStats(p);
@@ -4278,7 +4345,19 @@ function renderInventory(isEgg) {
     
     return h || "<p style='color:#718096; font-size:11px;'>No items.</p>";
 }
-    function renderPowersList(p) { return p.powers.length===0?"None.":p.powers.map(pid=>{const i=findShopItem(pid);return i?`<div style="padding:5px;">${i.image?`<img src="${i.image}" style="width:20px;">`:i.icon} ${i.name}</div>`:'';}).join(''); }
+    function renderPowersList(p) { 
+        // SAFETY GUARD: Check if p or powers exists
+        if (!p || !p.powers) return "None.";
+        
+        if (p.powers.length === 0) return "None.";
+        
+        return p.powers.map(pid => {
+            const i = findShopItem(pid);
+            if (!i) return '';
+            const iconHtml = i.image ? `<img src="${i.image}" style="width:20px;">` : i.icon;
+            return `<div style="padding:5px; display:flex; align-items:center; gap:5px;">${iconHtml} ${i.name}</div>`;
+        }).join(''); 
+    }
     function switchPet(id) { gameState.currentPetId = id; saveGame(); renderHub(); }
     
     function hatchPet() { 
@@ -11394,6 +11473,29 @@ function renderScholarLeaderboard(entries) {
     list.innerHTML = html;
 }
 
+function rehydrateAllPets() {
+        if (!gameState.pets || gameState.pets.length === 0) return;
+
+        gameState.pets.forEach(p => {
+            // Find this pet's "Recipe" in the Registry
+            let baseData = null;
+            for (const rarity in PET_TYPES) {
+                const found = PET_TYPES[rarity].find(b => b.id === p.type);
+                if (found) { baseData = found; break; }
+            }
+
+            // If we found the recipe, paint the image/element/rarity
+            if (baseData) {
+                p.image = baseData.image;
+                p.imageStyle = baseData.imageStyle || p.imageStyle;
+                p.element = p.element || baseData.element;
+                p.rarity = p.rarity || baseData.rarity;
+                p.emoji = p.emoji || baseData.emoji;
+            }
+        });
+        
+        console.log("🌊 Pets Rehydrated with Registry Data.");
+    }
   </script>
   <!-- 🚧 CONSTRUCTION QUIZ MODAL -->
 <div class="modal-overlay" id="build-quiz-modal" style="z-index: 9999;">
