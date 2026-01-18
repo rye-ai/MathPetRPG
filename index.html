@@ -3095,6 +3095,7 @@ try {
 
             // 2. Load the student's personal data (Pets, BP, etc.)
             gameState = { ...gameState, ...finalData };
+            
 
             // 3. Force-Restore Teacher's assignments so they aren't overwritten
             gameState.selectedTopics = teacherTopics || [];
@@ -3118,6 +3119,9 @@ try {
                 gameState.givenToday = 0;
             }
 
+            repairSaveData(); 
+            
+            updateStatsDisplay();
             return true;
         }
     } catch (e) { console.error("Cloud Load Error:", e); }
@@ -3187,59 +3191,97 @@ function repairSaveData() {
         fixed = true; 
     }
     
-    if (!gameState.dailyQuests) gameState.dailyQuests = { lastDate: "", math: 0, combat: 0, social: 0, claimed: [false, false, false] };
-    if (gameState.isFirstAttempt === undefined) gameState.isFirstAttempt = true;
+    // 🎯 DAILY QUEST INITIALIZER
+    if (!gameState.dailyQuests) {
+        gameState.dailyQuests = { lastDate: "", math: 0, combat: 0, social: 0, claimed: [false, false, false] };
+        fixed = true;
+    }
+    if (gameState.isFirstAttempt === undefined) { gameState.isFirstAttempt = true; fixed = true; }
     
+    // 🛡️ TEAM/SQUAD INITIALIZER
     if (!gameState.team || gameState.team.length === 0) { 
         gameState.team = gameState.currentPetId ? [gameState.currentPetId] : []; 
         fixed = true; 
     }
     
-    // 2. The Health Aligner (Original Plan: 50 + Lvl*10)
+    // 2. 🏥 THE PET DOCTOR (Identity & Schema Insurance)
     if (gameState.pets && Array.isArray(gameState.pets)) {
+        // Remove "Ghost" pets (null entries in the list)
+        const originalCount = gameState.pets.length;
+        gameState.pets = gameState.pets.filter(p => p !== null && p !== undefined && typeof p === 'object');
+        if (gameState.pets.length !== originalCount) fixed = true;
+
         gameState.pets.forEach(p => {
-            p.level = Number(p.level || 1);
+            // A. Identity Insurance: If 'type' is lost, recover it by Name
+            if (!p.type || p.type === "undefined") {
+                const recoveryMap = { 
+                    'Liark': 'liark_01', 'Raygon': 'ray', 'Tyrannosaurus': 'trex_01', 
+                    'Groochy': 'tree_01', 'Noahsaur': 'noahsaur_01', 'Ms.Frolch': 'msfrolch_01' 
+                };
+                if (recoveryMap[p.name]) { p.type = recoveryMap[p.name]; fixed = true; }
+            }
+            
+            // --- 🛡️ B. THE ICON FIXER (Crucial) ---
+            // This forces the icon to match the evolution stage immediately
+            const stage = p.evolutionStage || 0;
+            if (p.isHatched && stage > 0) {
+                let chain = EVOLUTION_CHAINS[p.type];
+                if (!chain && p.savedEvolutions) chain = p.savedEvolutions;
+
+                if (chain && chain[stage - 1]) {
+                    const correctImg = chain[stage - 1].image;
+                    // If the saved image is still the old one, update it!
+                    if (p.image !== correctImg) {
+                        p.image = correctImg;
+                        p.imageStyle = chain[stage - 1].imageStyle || 'blend-multiply';
+                        fixed = true; // This triggers a save to the cloud with the right info
+                        console.log(`🎨 Icon Sync: Updated ${p.name} to evolved form.`);
+                    }
+                }
+            }
+
+            // B. Folder Insurance: Prevents Hub crashing on ".length" errors
+            if (!p.powers) { p.powers = []; fixed = true; }
+            if (!p.badges) { p.badges = []; fixed = true; }
+            if (!p.equipment) { p.equipment = {}; fixed = true; }
+            if (p.stars === undefined) { p.stars = 0; fixed = true; }
+
+            // C. Health Aligner: Fixes NaN and immortal pets
+            p.level = Number(p.level || p.lvl || 1);
+            // Re-calculate the "Fair Max HP" based on level
             const correctMaxHP = 50 + (p.level * 10);
-            if (isNaN(p.maxHP) || p.maxHP !== correctMaxHP) {
+            
+            if (isNaN(p.maxHP) || p.maxHP === null || p.maxHP < 50) {
                 p.maxHP = correctMaxHP;
                 p.hp = p.maxHP;
                 fixed = true;
             }
+            
             p.hp = Number(p.hp);
-            if (isNaN(p.hp) || p.hp > p.maxHP) { p.hp = p.maxHP; fixed = true; }
+            if (isNaN(p.hp) || p.hp > p.maxHP || p.hp === null) { 
+                p.hp = p.maxHP; 
+                fixed = true; 
+            }
         });
     }
 
     // 3. ⚖️ THE FAIRNESS RESET (Global Equipment Level Wipe)
     if (gameState.inventory.equipment && Array.isArray(gameState.inventory.equipment)) {
         gameState.inventory.equipment.forEach(item => {
-            // Reset every item back to Level 1
-            if (item.level > 1) {
-                console.log(`⚖️ Fairness Reset: ${item.name} set to Level 1`);
-                item.level = 1; 
-                fixed = true;
-            }
-
-            // Stat Reset: Return stats to "Starting Power"
-            // This removes the thousands of HP/ATK gained from the exploit
+            if (item.level > 1) { item.level = 1; fixed = true; }
             if (item.prefix) {
                 const rarity = item.rarity || 'basic';
-                let fairStat = 10; // Default for basic
+                let fairStat = 10; 
                 if (rarity === 'rare') fairStat = 15;
                 if (rarity === 'legendary') fairStat = 25;
-
-                // Only reset if the stat is currently higher than the fair starting point
-                if (item.prefix.stat > fairStat) {
-                    item.prefix.stat = fairStat;
-                    fixed = true;
-                }
+                if (item.prefix.stat > fairStat) { item.prefix.stat = fairStat; fixed = true; }
             }
         });
     }
 
     // 4. Final Save: Commit the cleanup to the Cloud
     if (fixed) {
-        console.log("✅ Database Fairness Check: All Gear Reset to Level 1.");
+        console.log("✅ Auto-Doctor: Database fully repaired and protected.");
         saveGame(true); 
     }
 }
@@ -4114,13 +4156,14 @@ function resolveInBattleMath(selected, correct) {
       const gear = getPetEquipmentStats(p);
       const displayMaxHP = p.maxHP + gear.hp;
       // Mastery Slot Logic
-      if (!p.badges) p.badges = [];
+      // 🛡️ UI SHIELD: Prevents crash if badges are missing
+      const currentBadges = p.badges || []; 
       const totalSlots = p.level >= 30 ? 3 : (p.level >= 15 ? 2 : 1);
-      const emptySlots = totalSlots - p.badges.length;
+      const emptySlots = Math.max(0, totalSlots - currentBadges.length);
 
       let masteryHTML = `<div style="display:flex; gap:5px; margin-top:5px; justify-content:center;">`;
       for(let i=0; i<3; i++) {
-          const badge = p.badges[i];
+          const badge = currentBadges[i];
           const isLocked = i >= totalSlots;
           const style = isLocked ? "background:#cbd5e0; opacity:0.5;" : (badge ? "background:#ebf8ff; border:2px solid #5a67d8;" : "background:white; border:2px dashed #cbd5e0;");
           const icon = isLocked ? "🔒" : (badge ? "🏅" : "");
@@ -4305,8 +4348,45 @@ ${emptySlots > 0 && gameState.badgeInventory.length > 0 ? `<button class="action
       <div class="pet-collection">${renderCollection()}</div>`;
     }
     
-    function renderCollection() { return gameState.pets.map(p => `<div class="pet-card ${p.id===gameState.currentPetId?'active':''}" onclick="switchPet('${p.id}')"><div class="pet-card-visual">${!p.isHatched?'🥚':(p.image?`<img src="${p.image}" class="${p.imageStyle}" style="width:40px;height:40px;">`:p.emoji)}</div><div style="font-size:12px;">${p.isHatched ? p.name : "Mystery Egg"}</div></div>`).join(''); }
+    function renderCollection() { 
+        // 🛡️ ARCHITECT FIX: Calculate the correct evolution image on-the-fly
+        return gameState.pets.filter(p => p && p.id).map(p => {
+            const isActive = p.id === gameState.currentPetId;
+            
+            // 1. THE SMART LOOKUP: Don't just trust p.image
+            let displayImg = p.image; 
+            const stage = p.evolutionStage || 0;
+            
+            if (p.isHatched && stage > 0) {
+                // Find the evolution data for this specific pet type
+                let chain = EVOLUTION_CHAINS[p.type];
+                if (!chain && p.savedEvolutions) chain = p.savedEvolutions;
 
+                // If it's evolved, pick the image from the chain instead of the saved image
+                if (chain && chain[stage - 1]) {
+                    displayImg = chain[stage - 1].image;
+                }
+            }
+
+            // 2. Determine Visual (Egg vs Calculated Image)
+            let visual = p.emoji || '🐾';
+            if (!p.isHatched) {
+                visual = '🥚';
+            } else if (displayImg) {
+                visual = `<img src="${displayImg}" class="${p.imageStyle || ''}" style="width:40px;height:40px; object-fit:contain;">`;
+            }
+
+            // 3. Return the HTML Card
+            return `
+            <div class="pet-card ${isActive ? 'active' : ''}" onclick="switchPet('${p.id}')">
+                <div class="pet-card-visual">${visual}</div>
+                <div style="font-size:10px; font-weight:bold; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                    ${p.isHatched ? p.name : "Mystery Egg"}
+                </div>
+                ${p.isHatched ? `<div style="font-size:8px; color:#718096; font-weight:bold;">Lvl ${p.level}</div>` : ''}
+            </div>`;
+        }).join(''); 
+    }
     // --- PRO EQUIPMENT: HUB INVENTORY VIEW ---
 // --- PRO UI: CLEAN INVENTORY (Consumables Only) ---
 function renderInventory(isEgg) { 
@@ -4605,15 +4685,23 @@ function renderInventory(isEgg) {
         }, 500);
         
         setTimeout(() => { 
-            p.name = newName; 
-            p.image = next.image; 
-            p.imageStyle = next.imageStyle; 
-            p.rarity = next.rarity; 
-            p.maxHP = next.baseHP; 
-            const gear = getPetEquipmentStats(p);
-            p.hp = (parseInt(p.maxHP) || 50) + (gear.hp || 0); 
-            p.evolutionStage = (p.evolutionStage || 0) + 1;
-            if (next.element) p.element = next.element;
+            // 🛡️ DATA PRESERVATION: Keep all old data, only update what changed
+            const updatedPet = {
+                ...p, // This keeps the ID, the XP, the Stars, etc.
+                name: newName,
+                image: next.image,
+                imageStyle: next.imageStyle || 'blend-multiply',
+                rarity: next.rarity,
+                maxHP: next.baseHP || p.maxHP,
+                evolutionStage: (p.evolutionStage || 0) + 1
+            };
+
+            // Apply the update to the pet in the list
+            const petIdx = gameState.pets.findIndex(pet => pet.id === p.id);
+            gameState.pets[petIdx] = updatedPet;
+            
+            // Re-heal to full Max HP
+            gameState.pets[petIdx].hp = gameState.pets[petIdx].maxHP;
 
             c.innerHTML = next.image ? `<img src="${next.image}" class="evo-pet-image ${next.imageStyle}">` : next.emoji; 
             c.classList.add('flash-and-scale'); 
