@@ -131,6 +131,39 @@
       }
     ]
   },
+   {
+    "id": "MLK",
+    "type": "MLK",
+    "name": "Mike",
+    "rarity": "legendary",
+    "element": ["light", "wind"],
+    "baseHP": 70,
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/V2/m1.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "🐉",
+    "evolutions": [
+      {
+        "name": "Mike (Awakened)", 
+        "level": 10,
+        "cost": 100,
+        "baseHP": 100,
+        "rarity": "legendary",
+        "element": ["light", "wind"],
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/V2/m2.png",
+        "imageStyle": "blend-multiply"
+      },
+      {
+        "name": "Mike (God)",
+        "level": 20,
+        "cost": 200,
+        "baseHP": 200,
+        "rarity": "legendary",
+        "element": ["light", "wind"],
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/V2/m3.png",
+        "imageStyle": "blend-multiply"
+      }
+    ]
+  },
   {
     "id": "ray",
     "type": "ray",
