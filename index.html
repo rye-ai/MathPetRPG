@@ -2745,137 +2745,99 @@ let currentBuyingItem = null;
    // --- PRO REGISTRY ENGINE (0% API Usage) ---
 let GITHUB_REGISTRY = null;
 
+// --- 🏭 THE MASTER PET FACTORY (The Sanity Filter) ---
+function createPetInstance(baseId, customName = null, isHatched = true) {
+    let baseData = null;
+    // Look in the PET_TYPES object already defined at the top
+    for (const rarity in PET_TYPES) {
+        const found = PET_TYPES[rarity].find(b => b.id === baseId);
+        if (found) { baseData = found; break; }
+    }
+    if (!baseData) return null;
+
+    const maxHP = Number(baseData.baseHP || baseData.hp || 50);
+    return {
+        id: 'pet_' + Date.now() + Math.floor(Math.random() * 1000),
+        type: baseId,
+        name: customName || baseData.name,
+        image: baseData.image || "",
+        imageStyle: baseData.imageStyle || 'blend-multiply',
+        emoji: baseData.emoji || '🐾',
+        rarity: baseData.rarity || 'common',
+        element: baseData.element || 'normal',
+        level: 1, xp: 0, maxXp: 100,
+        hp: maxHP, maxHP: maxHP,   
+        isHatched: isHatched,
+        hatchProgress: isHatched ? 100 : 0,
+        evolutionStage: 0,
+        powers: baseData.powers || ['claw_attack'],
+        stars: 0, equipment: {}, badges: [],
+        savedEvolutions: EVOLUTION_CHAINS[baseId] || []
+    };
+}
+
+// --- 🛡️ THE LOADING GATE ---
 async function loadGitHubData() {
+    const loginBtn = document.getElementById('login-submit-btn');
+    if (loginBtn) {
+        loginBtn.disabled = true;
+        loginBtn.innerText = "⏳ Syncing with GitHub...";
+        loginBtn.style.background = "#a0aec0";
+    }
     if (!GITHUB_CONFIG.enabled) return;
-    console.log("🚀 Initializing Master Registry...");
-
     try {
-        // 1. Fetch the Registry (Address Book)
         const registryRes = await fetch(getGhUrl('registry.json'));
-        if (!registryRes.ok) throw new Error("registry.json not found on GitHub");
-        GITHUB_REGISTRY = await registryRes.json();
-
-        // HELPER: Fetch that handles spaces in names automatically
+        if (!registryRes.ok) throw new Error("registry.json not found");
+        const registryData = await registryRes.json();
         const directFetch = async (folder, file) => {
-            // encodeURIComponent fixes the "Space" problem by turning " " into "%20"
             const safePath = file.split('/').map(part => encodeURIComponent(part)).join('/');
             const res = await fetch(getGhUrl(`${folder}/${safePath}`));
-            if (!res.ok) {
-                console.warn(`⚠️ File Missing: ${folder}/${file}`);
-                return null;
-            }
-            return await res.json();
+            return res.ok ? await res.json() : null;
         };
-
-        // 2. LOAD PETS (Smart Unwrapper)
-        if (GITHUB_REGISTRY.pets) {
-            for (const file of GITHUB_REGISTRY.pets) {
+        if (registryData.pets) {
+            for (const file of registryData.pets) {
                 const data = await directFetch('pets', file);
                 if (data) {
-                    // This helper registers the pet and saves their evolution path
                     const registerOne = (petObj, evoList = null) => {
                         const r = petObj.rarity || 'common';
                         if (!PET_TYPES[r]) PET_TYPES[r] = [];
                         if (!PET_TYPES[r].find(x => x.id === petObj.id)) {
                             PET_TYPES[r].push(petObj);
-                            // Link evolutions if provided in the object or passed separately
                             if (evoList) EVOLUTION_CHAINS[petObj.id] = evoList;
-                            else if (petObj.evolutions) EVOLUTION_CHAINS[petObj.id] = petObj.evolutions;
                         }
                     };
-
                     if (Array.isArray(data)) {
-                        data.forEach(item => {
-                            if (item.base) {
-                                // CASE: List of families (Like your evolutions.json)
-                                registerOne(item.base, item.evolutions);
-                            } else {
-                                // CASE: List of simple pets
-                                registerOne(item);
-                            }
-                        });
-                    } else if (data.base) {
-                        // CASE: Single family object
-                        registerOne(data.base, data.evolutions);
+                        data.forEach(item => item.base ? registerOne(item.base, item.evolutions) : registerOne(item));
                     } else {
-                        // CASE: Single simple pet object
-                        registerOne(data);
+                        data.base ? registerOne(data.base, data.evolutions) : registerOne(data);
                     }
                 }
             }
         }
-        // 3. LOAD ENEMIES
-        for (const file of (GITHUB_REGISTRY.enemies || [])) {
+        // Load Enemies/Items
+        for (const file of (registryData.enemies || [])) {
             const data = await directFetch('enemies', file);
             if (data && Array.isArray(data)) {
                 if (file.includes('boss')) BOSS_TYPES = [...BOSS_TYPES, ...data];
                 else MONSTER_TYPES = [...MONSTER_TYPES, ...data];
             }
         }
-
-        // 4. LOAD ITEMS & POWERS
-        const itemData = await Promise.all((GITHUB_REGISTRY.items || []).map(f => directFetch('items', f)));
-        itemData.forEach(d => { if(d && Array.isArray(d)) SHOP_ITEMS.equipment = [...(SHOP_ITEMS.equipment||[]), ...d]; });
-        
-        const powerData = await Promise.all((GITHUB_REGISTRY.powers || []).map(f => directFetch('powers', f)));
-        powerData.forEach(d => { if(d && Array.isArray(d)) SHOP_ITEMS.power_items = [...SHOP_ITEMS.power_items, ...d]; });
-
-        // 5. LOAD EVENT LIST (Required for Adventure Tab)
+        const itemData = await Promise.all((registryData.items || []).map(f => directFetch('items', f)));
+        itemData.forEach(d => { if(d) SHOP_ITEMS.equipment = [...(SHOP_ITEMS.equipment||[]), ...d]; });
+        const powerData = await Promise.all((registryData.powers || []).map(f => directFetch('powers', f)));
+        powerData.forEach(d => { if(d) SHOP_ITEMS.power_items = [...SHOP_ITEMS.power_items, ...d]; });
         const events = await directFetch('events', 'event_list.json');
-        if (events) {
-            availableEvents = events;
-            const advTab = document.querySelector('.adventure-tab');
-            if(advTab) advTab.style.display = 'block';
-            renderAdventureList();
+        if (events) { availableEvents = events; renderAdventureList(); }
+        console.log("✅ Registry Synchronized.");
+        if (loginBtn) {
+            loginBtn.disabled = false;
+            loginBtn.innerText = "Start Adventure! 🚀";
+            loginBtn.style.background = "#48bb78";
         }
-        
-        // 6. LOAD BLOCKS (The Voxel Builder Library)
-        if (GITHUB_REGISTRY.blocks) {
-            for (const file of GITHUB_REGISTRY.blocks) {
-                const data = await directFetch('blocks', file);
-                if (data && Array.isArray(data)) {
-                    data.forEach(block => {
-                        // Ensure the block isn't already registered
-                        if (!BUILDER_BLOCKS.find(b => b.id === block.id)) {
-                            // Professional Fix: Add fallbacks so the 3D faces don't disappear
-                            if (!block.side) block.side = block.top || block.color;
-                            if (!block.color) block.color = block.side;
-                            
-                            BUILDER_BLOCKS.push(block);
-                            
-                            // Map the ID to a tiny "Code" for Firebase saving (e.g. 'z1', 'z2')
-                            const nextIndex = Object.keys(VOXEL_MAP).length + 1;
-                            const code = 'z' + nextIndex;
-                            
-                            if (!VOXEL_MAP[block.id]) {
-                                VOXEL_MAP[block.id] = code;
-                                VOXEL_LOOKUP[code] = block.id;
-                            }
-                        }
-                    });
-                }
-            }
-        }
-
-        console.log("✅ Registry Loaded: All Systems Static.");
-
-        // 🔑 GATEKEEPER: Unlock the login button now that data is ready
-        const startBtn = document.getElementById('login-submit-btn');
-        if (startBtn) {
-            startBtn.disabled = false;
-            startBtn.innerText = "Start Adventure! 🚀";
-            startBtn.style.background = "#48bb78"; 
-            startBtn.style.cursor = "pointer";
-            startBtn.style.boxShadow = "0 5px 0 #2f855a";
-            console.log("🔓 Game Data Sync Complete. Login Unlocked.");
-        }
-
     } catch (e) {
-        console.error("❌ Registry Critical Error:", e.message);
+        console.error("❌ Registry Error:", e);
     }
 }
-
-// Initial Start
 loadGitHubData();
 // ==========================================
 // 🚀 PRO BACKEND ENGINE: COMPRESSION & SYNC
@@ -3485,43 +3447,41 @@ function repairSaveData() {
     }
 
     function initializeGame() { 
-        // Create Starter Cat
-        const starterId = 'starter_cat';
-        gameState.pets.push({ 
-            id: starterId, type: 'monster_01', emoji: '🐱', 
-            image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/V2/1.png', 
-            imageStyle: 'blend-multiply', name: 'Cat', 
-            hatchProgress: 100, isHatched: true, hp: 40, maxHP: 40, 
-            powers: ['claw_attack'], rarity: 'common', evolutionStage: 0, 
-            level: 1, xp: 0, maxXp: 300, element: 'normal' 
-        }); 
+        console.log("🐣 Initializing New Player Starter Pack...");
+        
+        // 1. Create Starter Cat using the Factory (The safe machine we just built)
+        const starterCat = createPetInstance('monster_01', 'Cat', true);
+        
+        if (starterCat) {
+            gameState.pets.push(starterCat);
+            gameState.currentPetId = starterCat.id;
+            gameState.team = [starterCat.id]; // Put Cat in the Squad
+        }
 
-        // Create Starter Egg
+        // 2. Create Starter Egg using the Factory
         const eggPool = PET_TYPES.common;
-        const base = eggPool[Math.floor(Math.random() * eggPool.length)];
-        const freeEgg = JSON.parse(JSON.stringify(base));
-        freeEgg.id = 'starter_egg_' + Date.now(); 
-        freeEgg.type = base.id; freeEgg.isHatched = false; 
-        freeEgg.hatchProgress = 0; freeEgg.level = 1; freeEgg.xp = 0; 
-        freeEgg.maxXp = 100; freeEgg.powers = []; freeEgg.maxHP = base.baseHP; 
-        freeEgg.hp = base.baseHP;
-        gameState.pets.push(freeEgg);
+        if (eggPool && eggPool.length > 0) {
+            const randomBase = eggPool[Math.floor(Math.random() * eggPool.length)];
+            const starterEgg = createPetInstance(randomBase.id, "Mystery Egg", false);
+            if (starterEgg) {
+                gameState.pets.push(starterEgg);
+            }
+        }
 
-        // --- SQUAD UPDATE ---
-        gameState.team = [starterId]; 
-        // --------------------
-
-        gameState.currentPetId = starterId; 
+        // 3. Set Starter Resources
         gameState.brainPoints = 100; 
         gameState.stamina = 100; 
         gameState.inventory['arena_ticket'] = 1;
         
-        // --- NEW: BUILDER DATA ---
+        // 4. Set Starter Builder Land
         gameState.builder = {
-            landSize: 6, // 6x6 Grid
-            voxels: {},  // Saved blocks
-            inventory: { 'grass': 10, 'wood': 5 } // Starter blocks
+            landSize: 6,
+            voxels: {},
+            inventory: { 'grass': 10, 'wood': 5, 'stone': 5 }
         };
+
+        console.log("✅ Starter Pack Created Successfully.");
+        saveGame(true); // Force sync to Firebase
     }
     
 // ==========================================
@@ -4441,28 +4401,63 @@ function renderInventory(isEgg) {
     function switchPet(id) { gameState.currentPetId = id; saveGame(); renderHub(); }
     
     function hatchPet() { 
-        const p = gameState.pets.find(pet => pet.id === gameState.currentPetId); 
-        if(p.hatchProgress>=100) { 
-            p.isHatched=true; 
-            for(const r in PET_TYPES) { 
-                const f=PET_TYPES[r].find(b=>b.id===p.type); 
-                if(f) { p.name=f.name; p.element = f.element; p.maxHP = f.baseHP; p.hp = f.baseHP; } 
-            } 
-            // Auto add to squad if space
-            if (!gameState.team) gameState.team = [];
-            if (gameState.team.length < 6 && !gameState.team.includes(p.id)) { gameState.team.push(p.id); }
+    const p = gameState.pets.find(pet => pet.id === gameState.currentPetId); 
+    if(!p || p.isHatched || p.hatchProgress < 100) return;
 
-            const m = document.getElementById('hatch-modal');
-            const v = document.getElementById('hatch-egg-visual');
-            const t = document.getElementById('hatch-text');
-            const l = document.getElementById('hatch-light');
-            const b = document.getElementById('hatch-finish-btn');
-            m.style.display = 'flex'; v.innerHTML = '🥚'; v.className = 'egg-shaking'; t.innerText = "It's hatching..."; b.style.display = 'none';
-            setTimeout(() => { l.style.animation = "flashWhite 1s forwards"; soundManager.playSFX('levelUp'); }, 2000);
-            setTimeout(() => { v.className = ''; v.innerHTML = p.image ? `<img src="${p.image}" class="pet-image ${p.imageStyle}" style="width:300px; height:300px;">` : p.emoji; v.style.animation = "petPopIn 0.8s"; t.innerText = `Hatched ${p.name}!`; b.style.display = 'block'; saveGame(); renderHub(); }, 2500);
-            b.onclick = () => { m.style.display = 'none'; };
-        } 
+    // 1. Find the "Recipe" for what is inside the egg
+    let baseData = null;
+    for (const rarity in PET_TYPES) {
+        const found = PET_TYPES[rarity].find(b => b.id === p.type);
+        if (found) { baseData = found; break; }
     }
+
+    if (baseData) {
+        // 2. Transform the egg into the pet
+        p.isHatched = true;
+        p.name = baseData.name;
+        p.image = baseData.image;
+        p.imageStyle = baseData.imageStyle || 'blend-multiply';
+        p.element = baseData.element;
+        p.emoji = baseData.emoji;
+        p.maxHP = Number(baseData.baseHP || baseData.hp || 50);
+        p.hp = p.maxHP;
+        p.powers = baseData.powers || ['claw_attack'];
+        
+        // Auto-add to squad if there is space
+        if (!gameState.team) gameState.team = [];
+        if (gameState.team.length < 6 && !gameState.team.includes(p.id)) {
+            gameState.team.push(p.id);
+        }
+
+        // 3. Visual Ceremony
+        const m = document.getElementById('hatch-modal');
+        const v = document.getElementById('hatch-egg-visual');
+        const t = document.getElementById('hatch-text');
+        const l = document.getElementById('hatch-light');
+        const b = document.getElementById('hatch-finish-btn');
+        
+        m.style.display = 'flex'; 
+        v.innerHTML = '🥚'; 
+        v.className = 'egg-shaking'; 
+        t.innerText = "It's hatching..."; 
+        b.style.display = 'none';
+        
+        setTimeout(() => { if(l) l.style.animation = "flashWhite 1s forwards"; soundManager.playSFX('levelUp'); }, 2000);
+        setTimeout(() => { 
+            v.className = ''; 
+            v.innerHTML = p.image ? `<img src="${p.image}" class="pet-image ${p.imageStyle}" style="width:300px; height:300px;">` : p.emoji; 
+            v.style.animation = "petPopIn 0.8s"; 
+            t.innerText = `Hatched ${p.name}!`; 
+            b.style.display = 'block'; 
+            saveGame(true); 
+            renderHub(); 
+        }, 2500);
+        
+        b.onclick = () => { m.style.display = 'none'; };
+    } else {
+        showToast("Error: Hatching data lost!", "error");
+    }
+}
     
     function sellEgg() {
     const p = gameState.pets.find(pet => pet.id === gameState.currentPetId);
@@ -4778,12 +4773,35 @@ function renderInventory(isEgg) {
         c.innerHTML = h;
     }
     function buyGacha() {
-        if(gameState.brainPoints<5000) { showToast("Need 5000 BP!", "error"); return; }
-        gameState.brainPoints-=5000; updateStatsDisplay(); saveGame();
-        const pulls=[]; for(let i=0;i<3;i++){ const r=Math.random(); const pool = r < 0.50 ? PET_TYPES.rare : (r < 0.95 ? PET_TYPES.epic : PET_TYPES.legendary); const p=pool[Math.floor(Math.random()*pool.length)]; pulls.push({id:'p'+Date.now()+i,type:p.id,name:p.name,image:p.image,imageStyle:p.imageStyle,emoji:p.emoji,rarity:p.rarity||'rare',hp:p.baseHP,maxHP:p.baseHP,powers:[],isHatched:true,hatchProgress:100,evolutionStage:0,level:1,xp:0,maxXp:100,element:p.element}); }
-        gameState.pets.push(...pulls); startGachaAnimation(pulls);
-    }
-    function startGachaAnimation(pulls) { soundManager.playSFX('gacha'); document.getElementById('gacha-cinematic-modal').style.display='flex'; document.getElementById('gacha-flash-overlay').style.animation='gachaFlash 1s ease-out 1.5s'; setTimeout(()=>revealNextPet(pulls,0), 2500); }
+    if(gameState.brainPoints < 5000) { showToast("Need 5000 BP!", "error"); return; }
+    
+    // Lock the gate during summoning
+    gameState.brainPoints -= 5000; 
+    updateStatsDisplay(); 
+    
+    const pulls = []; 
+    for(let i=0; i<3; i++) { 
+        const r = Math.random(); 
+        const pool = r < 0.50 ? PET_TYPES.rare : (r < 0.95 ? PET_TYPES.epic : PET_TYPES.legendary); 
+        const base = pool[Math.floor(Math.random() * pool.length)]; 
+        
+        // USE THE FACTORY
+        const newPet = createPetInstance(base.id, base.name, true);
+        if (newPet) pulls.push(newPet);
+    } 
+    
+    gameState.pets.push(...pulls); 
+    saveGame(true);
+    startGachaAnimation(pulls);
+}
+
+function startGachaAnimation(pulls) { 
+    soundManager.playSFX('gacha'); 
+    document.getElementById('gacha-cinematic-modal').style.display = 'flex'; 
+    const flash = document.getElementById('gacha-flash-overlay');
+    if(flash) flash.style.animation = 'gachaFlash 1s ease-out 1.5s'; 
+    setTimeout(() => revealNextPet(pulls, 0), 2500); 
+}
     function revealNextPet(pulls,i) { const p=pulls[i]; const c=document.getElementById('pet-reveal-container'); c.innerHTML=''; const vis = p.image?`<img src="${p.image}" class="gacha-reveal-visual ${p.imageStyle}">`:`<div style="font-size:100px">${p.emoji}</div>`; const el = document.createElement('div'); el.className=`gacha-pet-reveal ${p.rarity}`; el.style.animation='petPopIn 1s forwards'; el.innerHTML = `<div class="rarity-badge rarity-${p.rarity}">${p.rarity}</div>${vis}<div style="font-weight:bold;margin-top:15px;">${p.name}</div>`; c.appendChild(el); const ctrl = document.getElementById('gacha-cinematic-controls'); ctrl.innerHTML=''; ctrl.style.opacity=1; const btn = document.createElement('button'); btn.className='gacha-btn'; btn.innerText=i<2?'Continue':'Finish'; btn.onclick=()=>i<2?revealNextPet(pulls,i+1):closeGachaCinematic(pulls); ctrl.appendChild(btn); }
     function closeGachaCinematic(pulls) { document.getElementById('gacha-cinematic-modal').style.display='none'; const c=document.getElementById('gacha-reveal-container'); c.innerHTML=pulls.map(p=>`<div class="gacha-card"><div>${p.image?`<img src="${p.image}" class="${p.imageStyle}" style="width:60px;">`:p.emoji}</div><div>${p.name}</div><div class="rarity-badge rarity-${p.rarity}">${p.rarity}</div></div>`).join(''); document.getElementById('gacha-reveal-modal').classList.add('active'); }
     function closeGacha() { document.getElementById('gacha-reveal-modal').classList.remove('active'); switchTab('hub'); }
@@ -11562,28 +11580,47 @@ function renderScholarLeaderboard(entries) {
 }
 
 function rehydrateAllPets() {
-        if (!gameState.pets || gameState.pets.length === 0) return;
+    if (!gameState.pets || gameState.pets.length === 0) return;
 
-        gameState.pets.forEach(p => {
-            // Find this pet's "Recipe" in the Registry
-            let baseData = null;
-            for (const rarity in PET_TYPES) {
-                const found = PET_TYPES[rarity].find(b => b.id === p.type);
-                if (found) { baseData = found; break; }
-            }
+    gameState.pets.forEach(p => {
+        const currentId = p.tp || p.type || 'monster_01';
+        let baseData = null;
 
-            // If we found the recipe, paint the image/element/rarity
-            if (baseData) {
+        // 1. Hunt for the Pet Profile in our GitHub Registry
+        for (const rarity in PET_TYPES) {
+            const found = PET_TYPES[rarity].find(b => b.id === currentId);
+            if (found) { baseData = found; break; }
+        }
+
+        if (baseData) {
+            // 2. IMAGE RECOVERY: If image is broken, force-link to GitHub
+            const isBroken = !p.image || p.image === "undefined" || p.image === "" || p.image === "null";
+            
+            if (isBroken) {
                 p.image = baseData.image;
-                p.imageStyle = baseData.imageStyle || p.imageStyle;
+                p.imageStyle = baseData.imageStyle || 'blend-multiply';
                 p.element = p.element || baseData.element;
                 p.rarity = p.rarity || baseData.rarity;
                 p.emoji = p.emoji || baseData.emoji;
+                p.maxHP = Number(p.maxHP || baseData.baseHP || 50);
             }
-        });
-        
-        console.log("🌊 Pets Rehydrated with Registry Data.");
-    }
+
+            // 3. EVOLUTION SYNC: Ensure evolved pets show their evolved forms
+            const stage = Number(p.evolutionStage || 0);
+            const chain = EVOLUTION_CHAINS[currentId] || p.savedEvolutions;
+            if (stage > 0 && chain && chain[stage - 1]) {
+                const evoData = chain[stage - 1];
+                // Force the evolved image onto the pet
+                if (evoData.image) p.image = evoData.image;
+            }
+        }
+
+        // 4. STAT RECOVERY
+        p.hp = Number(p.hp);
+        if (isNaN(p.hp)) p.hp = p.maxHP || 50;
+    });
+    console.log("🏥 All pet visuals synchronized with the Cloud Registry.");
+}
   </script>
   <!-- 🚧 CONSTRUCTION QUIZ MODAL -->
 <div class="modal-overlay" id="build-quiz-modal" style="z-index: 9999;">
