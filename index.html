@@ -2348,47 +2348,36 @@ body {
 // --- PRO INFRASTRUCTURE: UNIVERSAL COMPRESSION DICTIONARY ---
 const SAVE_KEYS = {
     // Top-Level State
-    brainPoints: 'bp', stamina: 'st', maxStamina: 'mst', pets: 'p',
-    inventory: 'inv', team: 'tm', currentPetId: 'cpid', mapX: 'mx',
-    mapY: 'my', dailyStreak: 'ds', lastLoginDate: 'lld', questProgress: 'qp',
+    // --- 1. CORE PLAYER STATE ---
+    brainPoints: 'bp', stamina: 'st', maxStamina: 'mst', inventory: 'inv', 
+    team: 'tm', currentPetId: 'cpid', mapX: 'mx', mapY: 'my', 
+    dailyStreak: 'ds', lastLoginDate: 'lld', questProgress: 'qp',
     toolHistory: 'th', grade: 'gr', examHistory: 'eh', builder: 'bld',
-    
-    // Pet & Entity Properties
-    id: 'id', type: 'tp', name: 'nm', hp: 'hp', level: 'lv', xp: 'xp', 
-    maxXp: 'mxp', powers: 'pwr', stars: 'str', isHatched: 'ih', 
-    hatchProgress: 'hpg', evolutionStage: 'evs', equipment: 'eqp',
-    rarity: 'rty', element: 'el', image: 'img', imageStyle: 'ims', emoji: 'emj',
-    dailyQuests: 'dq',
-    isFirstAttempt: 'ifa',
-    
-    // Add these inside the existing { } braces:
-    maxHP: 'mhp',
-    powers: 'pwr',
-    evolutionStage: 'evs',
-    savedEvolutions: 'sevo',
-    badges: 'bdg',
-    isFirstAttempt: 'ifa',
+    playerName: 'pn', lastCycleId: 'lcid', highestTowerFloor: 'htf',
+    pets: 'p', mathCorrect: 'mc', mathTotal: 'mt',
 
-    // Item & Power Properties (From GitHub JSONs)
-    instanceId: 'iid', baseId: 'bid', prefix: 'pfx', 
-    price: 'prc', description: 'dsc', desc: 'dsc', icon: 'icn', 
-    baseStat: 'bst', stat: 'stt', statBonus: 'stb', value: 'val',
-    duration: 'dur', chance: 'chc', effect: 'eff', color: 'clr',
-    healing: 'hel', xpReward: 'xpr', logic: 'lgc', target: 'trg',
-    
-    givenToday: 'gt', notifications: 'nt', starsReceived: 'sr',
-    badges: 'bdg', badgeInventory: 'bin',lastCycleId: 'lcid',
-    
-    // Add these to the existing SAVE_KEYS list
-    isVisiting: 'iv',
-    inBattle: 'ib',
-    playerName: 'pn',
-    burstMode: 'bm',
-    assignedExam: 'ax',
-    selectedTopics: 'st',highestTowerFloor: 'htf',
-    
-    // Builder & Forge
-    voxels: 'vx', landSize: 'ls', forgeScraps: 'fgs', level: 'lvl'
+    // --- 2. PET DNA & STATS ---
+    id: 'id', type: 'tp', name: 'nm', hp: 'hp', maxHP: 'mhp', 
+    level: 'lv', xp: 'xp', maxXp: 'mxp', powers: 'pwr', stars: 'str', 
+    isHatched: 'ih', hatchProgress: 'hpg', evolutionStage: 'evs', 
+    equipment: 'eqp', rarity: 'rty', element: 'el', image: 'img', 
+    imageStyle: 'ims', emoji: 'emj', savedEvolutions: 'sevo', badges: 'bdg',
+
+    // --- 3. ITEMS, GEAR & FORGE ---
+    instanceId: 'iid', baseId: 'bid', prefix: 'pfx', price: 'prc', 
+    description: 'dsc', desc: 'dsc', icon: 'icn', baseStat: 'bst', 
+    stat: 'stt', statBonus: 'stb', value: 'val', duration: 'dur', 
+    chance: 'chc', effect: 'eff', color: 'clr', healing: 'hel', 
+    xpReward: 'xpr', logic: 'lgc', target: 'trg', forgeScraps: 'fgs',
+
+    // --- 4. SOCIAL & QUESTS ---
+    givenToday: 'gt', notifications: 'nt', starsReceived: 'sr', 
+    badgeInventory: 'bin', isVisiting: 'iv', inBattle: 'ib', 
+    burstMode: 'bm', assignedExam: 'ax', selectedTopics: 'st',
+    dailyQuests: 'dq', isFirstAttempt: 'ifa',
+
+    // --- 5. BUILDER ENGINE ---
+    voxels: 'vx', landSize: 'ls'
 };
 
 // --- PRO EQUIPMENT: PREFIX SYSTEM ---
@@ -2690,6 +2679,94 @@ let currentBuyingItem = null;
             { id: 'arena_ticket', name: 'Arena Ticket', icon: '🎟️', price: 150, desc: 'Enter 1 Arena Fight', type: 'ticket' } 
         ] 
     };
+    
+    // --- THE ARITHMETIC SHIELD ---
+// Forces any value to be a safe number. If it's NaN, it resets to fallback.
+function safeNum(val, fallback = 0) {
+    const n = Math.floor(Number(val));
+    return Number.isFinite(n) ? n : fallback;
+}
+
+// Centralized BP Updater (Prevents NaN and String-concatenation)
+function adjustBP(amount) {
+    const current = safeNum(gameState.brainPoints);
+    const change = safeNum(amount);
+    gameState.brainPoints = Math.max(0, current + change);
+    updateStatsDisplay();
+    hasUnsavedChanges = true;
+}
+
+function adjustStamina(amount) {
+    const current = safeNum(gameState.stamina);
+    const change = safeNum(amount);
+    // This forces stamina to stay between 0 and 100
+    gameState.stamina = Math.min(100, Math.max(0, current + change));
+    updateStatsDisplay();
+    hasUnsavedChanges = true;
+}
+
+// --- ⚖️ SQUAD LEVEL SYNC ENGINE (REPAIRED & EGG-SAFE) ---
+function applySquadLevelSync() {
+    if (!gameState.pets || gameState.pets.length < 6) return;
+
+    // 1. Get ONLY hatched pets. Eggs do NOT count toward the floor.
+    const hatchedPets = gameState.pets.filter(p => p.isHatched === true);
+    
+    // 2. If they don't have at least 6 hatched pets, we can't set a floor yet.
+    if (hatchedPets.length < 6) return;
+
+    // 3. Sort hatched pets by level (Highest to Lowest)
+    const allLevels = hatchedPets
+        .map(p => {
+            // Find the level using any possible name (lv or level)
+            const val = p.level || p.lv || p.lvl || 1;
+            return safeNum(val, 1);
+        })
+        .sort((a, b) => b - a);
+
+    // 4. The 6th pet in the list is our Floor
+    const levelFloor = allLevels[5]; 
+
+    // 5. Only sync if the floor is actually worth boosting (higher than 1)
+    if (levelFloor <= 1) return;
+
+    let updated = false;
+    gameState.pets.forEach(p => {
+        const currentLvl = safeNum(p.level || p.lv || p.lvl, 1);
+        
+        // 6. ONLY boost if the pet is lower than the floor.
+        if (currentLvl < levelFloor) {
+            console.log(`⚖️ Squad Sync: Boosting ${p.name} to Level ${levelFloor}`);
+            p.level = levelFloor;
+            p.lv = levelFloor;
+            
+            // Re-calculate stats for the new higher level
+            p.maxHP = 50 + (levelFloor * 10);
+            p.hp = p.maxHP; 
+            p.mhp = p.maxHP;
+            p.maxXp = levelFloor * 300 + 200;
+            p.xp = 0; 
+            updated = true;
+        }
+    });
+
+    if (updated) {
+        hasUnsavedChanges = true;
+        // Optional: saveGame(true); // Uncomment if you want it to save to cloud instantly
+    }
+}
+
+// Centralized Pet HP Updater
+function adjustPetHP(pet, amount) {
+    if (!pet) return;
+    const gear = getPetEquipmentStats(pet);
+    const max = safeNum(pet.maxHP) + safeNum(gear.hp);
+    const current = safeNum(pet.hp);
+    const change = safeNum(amount);
+    
+    pet.hp = Math.min(max, Math.max(0, current + change));
+    hasUnsavedChanges = true;
+}
 
     const MathEngine = {
         generate: (gradeInput) => {
@@ -2776,68 +2853,107 @@ function createPetInstance(baseId, customName = null, isHatched = true) {
     };
 }
 
-// --- 🛡️ THE LOADING GATE ---
+// --- PHASE 1: THE GATEKEEPER ENGINE ---
+// --- 🛡️ PHASE 1: THE GATEKEEPER (LOADER) ---
 async function loadGitHubData() {
     const loginBtn = document.getElementById('login-submit-btn');
+    
     if (loginBtn) {
         loginBtn.disabled = true;
-        loginBtn.innerText = "⏳ Syncing with GitHub...";
+        loginBtn.innerText = "⏳ Syncing Registry...";
         loginBtn.style.background = "#a0aec0";
     }
+
     if (!GITHUB_CONFIG.enabled) return;
+
     try {
+        console.log("📡 Connecting to GitHub Registry...");
         const registryRes = await fetch(getGhUrl('registry.json'));
-        if (!registryRes.ok) throw new Error("registry.json not found");
+        if (!registryRes.ok) throw new Error("Registry not found");
         const registryData = await registryRes.json();
+
         const directFetch = async (folder, file) => {
-            const safePath = file.split('/').map(part => encodeURIComponent(part)).join('/');
-            const res = await fetch(getGhUrl(`${folder}/${safePath}`));
-            return res.ok ? await res.json() : null;
+            try {
+                const safePath = file.split('/').map(part => encodeURIComponent(part)).join('/');
+                const res = await fetch(getGhUrl(`${folder}/${safePath}`));
+                return res.ok ? await res.json() : null;
+            } catch (e) { return null; }
         };
+
+        // A. Load Pets
         if (registryData.pets) {
             for (const file of registryData.pets) {
                 const data = await directFetch('pets', file);
                 if (data) {
-                    const registerOne = (petObj, evoList = null) => {
-                        const r = petObj.rarity || 'common';
+                    const processEntry = (entry) => {
+                        const petBlueprint = entry.base ? entry.base : entry;
+                        const evolutions = entry.evolutions || null;
+                        const r = petBlueprint.rarity || 'common';
                         if (!PET_TYPES[r]) PET_TYPES[r] = [];
-                        if (!PET_TYPES[r].find(x => x.id === petObj.id)) {
-                            PET_TYPES[r].push(petObj);
-                            if (evoList) EVOLUTION_CHAINS[petObj.id] = evoList;
+
+                        if (!PET_TYPES[r].find(x => x.id === petBlueprint.id)) {
+                            PET_TYPES[r].push(petBlueprint);
+                            if (evolutions) EVOLUTION_CHAINS[petBlueprint.id] = evolutions;
                         }
                     };
-                    if (Array.isArray(data)) {
-                        data.forEach(item => item.base ? registerOne(item.base, item.evolutions) : registerOne(item));
-                    } else {
-                        data.base ? registerOne(data.base, data.evolutions) : registerOne(data);
-                    }
+                    if (Array.isArray(data)) data.forEach(item => processEntry(item));
+                    else processEntry(data);
                 }
             }
         }
-        // Load Enemies/Items
-        for (const file of (registryData.enemies || [])) {
-            const data = await directFetch('enemies', file);
-            if (data && Array.isArray(data)) {
-                if (file.includes('boss')) BOSS_TYPES = [...BOSS_TYPES, ...data];
-                else MONSTER_TYPES = [...MONSTER_TYPES, ...data];
+
+        // B. Load Enemies/Items/Powers
+        const enemies = await Promise.all((registryData.enemies || []).map(f => directFetch('enemies', f)));
+        enemies.forEach((d, idx) => {
+            if (d && Array.isArray(d)) {
+                if (registryData.enemies[idx].includes('boss')) BOSS_TYPES = [...BOSS_TYPES, ...d];
+                else MONSTER_TYPES = [...MONSTER_TYPES, ...d];
             }
-        }
-        const itemData = await Promise.all((registryData.items || []).map(f => directFetch('items', f)));
-        itemData.forEach(d => { if(d) SHOP_ITEMS.equipment = [...(SHOP_ITEMS.equipment||[]), ...d]; });
-        const powerData = await Promise.all((registryData.powers || []).map(f => directFetch('powers', f)));
-        powerData.forEach(d => { if(d) SHOP_ITEMS.power_items = [...SHOP_ITEMS.power_items, ...d]; });
-        const events = await directFetch('events', 'event_list.json');
-        if (events) { availableEvents = events; renderAdventureList(); }
-        console.log("✅ Registry Synchronized.");
+        });
+
+        const items = await Promise.all((registryData.items || []).map(f => directFetch('items', f)));
+        items.forEach(d => { if(d) SHOP_ITEMS.equipment = [...(SHOP_ITEMS.equipment||[]), ...d]; });
+
+        const powers = await Promise.all((registryData.powers || []).map(f => directFetch('powers', f)));
+        // D. Sync Custom Voxel Blocks (The "Unroller")
+        const blockFiles = await Promise.all((registryData.blocks || []).map(f => directFetch('blocks', f)));
+        blockFiles.forEach(fileData => { 
+            if (fileData && Array.isArray(fileData)) {
+                fileData.forEach(block => {
+                    // Only add if the ID doesn't exist yet
+                    if (!BUILDER_BLOCKS.find(b => b.id === block.id)) {
+                        BUILDER_BLOCKS.push(block); 
+                        // Add to the save-system compression map
+                        const shortId = block.id.substring(0,2);
+                        VOXEL_MAP[block.id] = shortId; 
+                        VOXEL_LOOKUP[shortId] = block.id;
+                    }
+                });
+            }
+        });
+        powers.forEach(d => { if(d) SHOP_ITEMS.power_items = [...SHOP_ITEMS.power_items, ...d]; });
+
+        // --- ✅ FINAL SUCCESS HANDSHAKE ---
+        console.log("✅ Registry Synchronized Successfully.");
         if (loginBtn) {
             loginBtn.disabled = false;
             loginBtn.innerText = "Start Adventure! 🚀";
             loginBtn.style.background = "#48bb78";
+            loginBtn.style.cursor = "pointer";
+            loginBtn.style.boxShadow = "0 5px 0 #2f855a";
         }
+
     } catch (e) {
-        console.error("❌ Registry Error:", e);
+        console.error("❌ Registry Sync Failed!", e);
+        if (loginBtn) {
+            loginBtn.innerText = "⚠️ Offline Mode (Retry)";
+            loginBtn.disabled = false;
+            loginBtn.style.background = "#f56565";
+        }
     }
 }
+
+// Immediately trigger the load
 loadGitHubData();
 // ==========================================
 // 🚀 PRO BACKEND ENGINE: COMPRESSION & SYNC
@@ -2917,84 +3033,88 @@ function decompressData(data) {
     let state = {};
     const invertedKeys = Object.fromEntries(Object.entries(SAVE_KEYS).map(([k, v]) => [v, k]));
 
-    for (let key in data) {
+for (let key in data) {
         const longKey = invertedKeys[key] || key;
         let value = data[key];
 
-        // 1. Decompress Pets (FIXED VERSION to prevent NaN)
+        // --- 🛡️ SHIELD 1: TOP-LEVEL NUMBERS (BP, Stamina, etc) ---
+        // This forces them to be numbers immediately. No "NaN" can pass here.
+        if (['bp', 'st', 'mst', 'mc', 'mt', 'ds', 'htf'].includes(key)) {
+            state[longKey] = safeNum(value);
+            continue;
+        }
+
+        // --- 🛡️ SHIELD 2: PET DECOMPRESSION ---
         if (longKey === 'pets' && Array.isArray(value)) {
             value = value.map(compressedPet => {
                 let dp = {};
                 for (let k in compressedPet) dp[invertedKeys[k] || k] = compressedPet[k];
                 
-                // 1. 🛡️ THE "STRING CLEANER": If the image is garbage text, delete it!
-                if (!dp.image || dp.image === "undefined" || dp.image === "null" || !dp.image.startsWith('http')) {
-                    dp.image = ""; // This forces the game to look at the Registry below
-                }
+                // Force numeric stats for Pet
+                dp.hp = safeNum(dp.hp);
+                dp.maxHP = safeNum(dp.maxHP, 50);
+                dp.level = safeNum(dp.level, 1);
+                dp.xp = safeNum(dp.xp);
+                dp.maxXp = safeNum(dp.maxXp, 100);
+                dp.evolutionStage = safeNum(dp.evolutionStage);
 
-                // 2. Look up the Registry (GitHub Data)
+                // Re-sync Image from Registry
                 let baseData = null;
+                const speciesId = dp.type || dp.tp; // Supports both compressed and long
                 for (const rarity in PET_TYPES) {
-                    const found = PET_TYPES[rarity].find(b => b.id === dp.type);
+                    const found = PET_TYPES[rarity].find(b => b.id === speciesId);
                     if (found) { baseData = found; break; }
                 }
 
                 if (baseData) {
-                    // 3. 🚀 FORCE RE-SYNC: Always use the Registry image unless the pet has an evolution image
                     dp.image = baseData.image; 
                     dp.imageStyle = baseData.imageStyle || dp.imageStyle;
                     dp.element = baseData.element;
                     dp.rarity = baseData.rarity;
                     dp.emoji = baseData.emoji;
-                    dp.maxHP = Number(dp.maxHP || baseData.baseHP || 50);
-
-                    // 4. Handle Evolution Images (Overrides base image)
+                    
+                    // Keep Evolution visuals
                     const stage = Number(dp.evolutionStage || 0);
-                    const chain = EVOLUTION_CHAINS[dp.type] || dp.savedEvolutions;
-                    if (stage > 0 && chain && Array.isArray(chain)) {
-                        const evoData = chain[stage - 1]; 
-                        if (evoData && evoData.image) {
-                            dp.image = evoData.image; 
-                        }
+                    let chain = EVOLUTION_CHAINS[speciesId] || dp.savedEvolutions || dp.sevo;
+                    if (stage > 0 && chain && chain[stage - 1]) {
+                        if (chain[stage - 1].image) dp.image = chain[stage - 1].image;
                     }
                 }
 
-                // 🩹 DATA HARDENING
-                dp.powers = (dp.powers && Array.isArray(dp.powers)) ? dp.powers : ['claw_attack'];
-                dp.badges = (dp.badges && Array.isArray(dp.badges)) ? dp.badges : [];
+                // Protect against missing lists
+                dp.powers = Array.isArray(dp.powers) ? dp.powers : ['claw_attack'];
+                dp.badges = Array.isArray(dp.badges) ? dp.badges : [];
                 dp.equipment = (dp.equipment && typeof dp.equipment === 'object') ? dp.equipment : {};
 
                 return dp;
             });
         }
         
-        // 2. Decompress Inventory (THE FIX!)
+        // --- 🛡️ SHIELD 3: INVENTORY DECOMPRESSION ---
         if (longKey === 'inventory' && value) {
             let di = {};
             for (let k in value) {
                 const lk = invertedKeys[k] || k;
-                if (lk === 'equipment' && Array.isArray(value[k])) {
-                    di.equipment = value[k].map(cItem => {
+                // Handle Equipment List
+                if (lk === 'eqp' || lk === 'equipment') {
+                    di.equipment = (value[k] || []).map(cItem => {
                         let dItem = {};
-                        for (let p in cItem) {
-                            if (p === 'pfx') {
-                                dItem.prefix = {};
-                                for (let pk in cItem.pfx) dItem.prefix[invertedKeys[pk] || pk] = cItem.pfx[pk];
-                            } else {
-                                dItem[invertedKeys[p] || p] = cItem[p];
-                            }
-                        }
+                        for (let p in cItem) dItem[invertedKeys[p] || p] = cItem[p];
+                        // Cast Item Numbers
+                        if (dItem.prefix) dItem.prefix.stat = safeNum(dItem.prefix.stat);
+                        dItem.level = safeNum(dItem.level, 1);
                         return dItem;
                     });
                 } else {
-                    di[lk] = value[k];
+                    // Handle Consumables (Potions, etc)
+                    di[lk] = safeNum(value[k]); 
                 }
             }
             state[longKey] = di;
             continue;
         }
 
-        // 3. Decompress Builder
+        // --- 🛡️ SHIELD 4: BUILDER ENGINE ---
         if (longKey === 'builder' && value) {
             let db = { landSize: 6, voxels: {}, inventory: {} };
             for (let k in value) {
@@ -3022,6 +3142,9 @@ async function loadProgressFromFirebase(username) {
         const docSnap = await window.fbase.getDoc(window.fbase.doc(window.db, "students", username));
         if (docSnap.exists()) {
             const cloudData = docSnap.data().saveData;
+            // Safety: Sync keys so the game always finds the pet list
+            if (cloudData.p && !cloudData.pets) cloudData.pets = cloudData.p;
+            if (cloudData.pets && !cloudData.p) cloudData.p = cloudData.pets;
             if (!cloudData) return false;
             
             // Fetch Teacher World Settings
@@ -3092,6 +3215,22 @@ try {
 
 // 4. PRO SAVE: Compression + Dirty State
 async function saveProgressToFirebase() {
+    
+    // --- 🚨 EMERGENCY BRAKE: DATA LOSS PROTECTION ---
+    // If the game thinks the student has 0 pets, it is likely a loading error.
+    // We stop the save so we don't accidentally delete their pets in the cloud.
+    if (!gameState.pets || gameState.pets.length === 0) {
+        console.error("🛑 EMERGENCY BRAKE: 0 pets detected. Aborting save to prevent data loss.");
+        return false;
+    }
+    
+    // --- NAN CRITICAL STOP ---
+    if (!Number.isFinite(gameState.brainPoints)) {
+        console.error("⛔ CRITICAL: BP is NaN. Save Aborted to protect Cloud Data.");
+        // Try to auto-repair locally before the next heartbeat
+        gameState.brainPoints = safeNum(gameState.brainPoints, 0); 
+        return false;
+    }
     if (!gameState.playerName || !hasUnsavedChanges || gameState.playerName === "Student") return;
 
     console.log("🕒 Heartbeat Sync: Pushing compressed bundle...");
@@ -3209,7 +3348,10 @@ function repairSaveData() {
             if (p.stars === undefined) { p.stars = 0; fixed = true; }
 
             // C. Health Aligner: Fixes NaN and immortal pets
-            p.level = Number(p.level || p.lvl || 1);
+           // Look for the level in any key (level, lv, or lvl). If none found, use 1.
+        const foundLevel = p.level || p.lv || p.lvl || 1;
+        p.level = safeNum(foundLevel, 1);
+        p.lv = p.level; // Force both to be the same so the game stays synced
             // Re-calculate the "Fair Max HP" based on level
             const correctMaxHP = 50 + (p.level * 10);
             
@@ -3338,7 +3480,7 @@ function repairSaveData() {
       if (!isWalkable(targetTile)) return;
       
       gameState.mapX = newX; gameState.mapY = newY; 
-      gameState.stamina = Math.max(0, gameState.stamina - 1); 
+      adjustStamina(-1); 
       updateStatsDisplay(); 
       drawMap();
       if ([1,4,5,6].includes(targetTile)) checkEncounter(targetTile);
@@ -3881,7 +4023,8 @@ function resolveInBattleMath(selected, correct) {
         if (activePet && activePet.rarity === 'legendary' && activePet.hp > 0) {
             if (activePet.element === 'light' || (Array.isArray(activePet.element) && activePet.element.includes('light'))) {
                 const healAmt = Math.floor(activePet.maxHP * 0.05);
-                activePet.hp = Math.min(activePet.maxHP, activePet.hp + healAmt);
+                // THE SHIELD: Use adjustPetHP instead of raw math
+                adjustPetHP(activePet, healAmt);
                 const pVis = document.getElementById('battle-player-visual');
                 if(pVis) showFloatingText(pVis.parentElement, `+${healAmt}`, "heal");
             }
@@ -3984,8 +4127,8 @@ function resolveInBattleMath(selected, correct) {
             gameState.isFirstAttempt = false; // They missed it! No longer counts for the quest
             recordMathParticipation(false);
             // Wrong Answer (No lock needed here)
-            const d = Math.min(gameState.brainPoints, 5); 
-            gameState.brainPoints -= d; 
+            const d = Math.min(safeNum(gameState.brainPoints), 5); 
+            adjustBP(-d); 
             updateStatsDisplay(); 
             
             gameState.combo = 0; 
@@ -4002,15 +4145,14 @@ function resolveInBattleMath(selected, correct) {
     const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
     const gear = getPetEquipmentStats(pet);
     
-    // Bonus from Scholar's Gear
-    const bonus = Math.floor(gear.bpBoost || 0);
-    const total = a + bonus;
+    const bonus = Math.floor(Number(gear.bpBoost || 0));
+    const amount = safeNum(a);
+    const total = amount + bonus;
     
-    gameState.brainPoints += total;
-    updateStatsDisplay();
-    saveGame();
+    // THE SHIELD: Use adjustBP instead of +=
+    adjustBP(total);
     
-    if (bonus > 0) showToast(`+${total} BP (Scholar Bonus!)`, "success");
+    if (bonus > 0 && amount > 0) showToast(`+${total} BP (Scholar Bonus!)`, "success");
 }
 
     // --- SQUAD SYSTEM ---
@@ -4508,7 +4650,7 @@ function renderInventory(isEgg) {
         } else if (id === 'stamina_potion') {
             if (gameState.stamina >= 100) return showToast("Stamina full!", "info");
             gameState.inventory[id]--;
-            gameState.stamina = Math.min(gameState.stamina + 50, 100);
+            adjustStamina(50);
             showToast("Used Energy! (+50)", "success");
         }
         updateStatsDisplay();
@@ -4776,7 +4918,7 @@ function renderInventory(isEgg) {
     if(gameState.brainPoints < 5000) { showToast("Need 5000 BP!", "error"); return; }
     
     // Lock the gate during summoning
-    gameState.brainPoints -= 5000; 
+    adjustBP(-5000); 
     updateStatsDisplay(); 
     
     const pulls = []; 
@@ -4810,7 +4952,7 @@ function startGachaAnimation(pulls) {
     const baseItem = findShopItem(id);
     if (gameState.brainPoints < baseItem.price) return showToast("Not enough BP", "error");
 
-    gameState.brainPoints -= baseItem.price;
+    adjustBP(-baseItem.price);
 
     if (type === 'power') {
         const p = gameState.pets.find(pet => pet.id === gameState.currentPetId);
@@ -5553,9 +5695,14 @@ if (isWilds || isAdventure) updateAdventureHUD();
         addBattleLog(`${enemy.name} attacked for ${dmg} DMG!`, 'enemy');
         
         const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
-        pet.hp = gameState.battleState.playerHP; 
+        
+        // THE SHIELD: Apply damage via adjustPetHP and sync local state
+        adjustPetHP(pet, -dmg);
+        gameState.battleState.playerHP = pet.hp; 
 
-        document.getElementById('player-hp-bar').style.width = (gameState.battleState.playerHP / pet.maxHP * 100) + "%";
+        const gear = getPetEquipmentStats(pet);
+        const currentMax = pet.maxHP + gear.hp;
+        document.getElementById('player-hp-bar').style.width = (pet.hp / currentMax * 100) + "%";
         document.getElementById('player-hp-text').innerText = `${Math.ceil(gameState.battleState.playerHP)}/${pet.maxHP}`;
 
         if (gameState.battleState.playerHP <= 0) { await wait(1000); handlePlayerFaint(); }
@@ -5645,6 +5792,8 @@ if(qmMult > 1) showToast(`BONUS EVENT: ${qmMult}x Rewards!`, "success");
             soundManager.playSFX('levelUp');
             showToast(`Level Up: ${leveledUpNames.join(", ")}!`, "success");
         }
+        
+        applySquadLevelSync(); // Update the floor for everyone else
         
         // 4. Random Egg Drop (Wilds Only)
         if (!bs.isBoss && !bs.isArena && !gameState.questBattleActive && Math.random() < 0.1) {
@@ -6057,7 +6206,7 @@ function claimQuestReward(id, amount) {
         gameState.currentPetId = null;
     }
 
-    gameState.brainPoints += 10; 
+    adjustBP(10); 
     saveGame(); 
     renderHub(); 
     document.getElementById('release-modal').classList.remove('active'); 
@@ -6343,7 +6492,7 @@ function checkAdventureRandomEncounter(tileType) {
     questY = ny; 
     
     // --- NEW: CONSUME STAMINA & UPDATE UI ---
-    gameState.stamina = Math.max(0, gameState.stamina - 1);
+    adjustStamina(-1);
     updateStatsDisplay();
 
     drawAdventureMap(); 
@@ -6598,7 +6747,18 @@ function toggleTeacherLogin() {
             
             // Check for compressed 'sd' or long 'saveData'
             const saveData = s.saveData || {};
-
+            
+            // --- 🚩 THE CORRUPTION DETECTOR ---
+            // Check if BP is NaN OR if any pet has NaN health
+            const bpVal = saveData.brainPoints !== undefined ? saveData.brainPoints : saveData.bp;
+            const isBpBroken = (bpVal === null || isNaN(bpVal) || typeof bpVal === 'undefined') && bpVal !== 0;
+            
+            const petsList = saveData.pets || saveData.p || [];
+            const isPetBroken = Array.isArray(petsList) && petsList.some(p => isNaN(p.hp) || isNaN(p.h) || isNaN(p.level) || isNaN(p.lv));
+            
+            const needsRepair = isBpBroken || isPetBroken;
+            // ----------------------------------
+            
             // 🛡️ ARCHITECT'S "CYCLE RESET" LOGIC
             // We compare the student's last recorded lesson ID to your current one.
             let displayCorrect = saveData.mathCorrect || 0;
@@ -6624,7 +6784,10 @@ function toggleTeacherLogin() {
                 <div class="student-list-item">
                     <input type="checkbox" class="student-select-checkbox" data-username="${s.username}" onchange="updateBulkActionBar()">
                     <div class="student-info" style="display:flex; flex-direction:column; align-items:flex-start;">
-                        <div style="font-size:16px; font-weight:bold;">${s.username}</div>
+                        <div style="font-size:16px; font-weight:bold; display:flex; align-items:center; gap:8px;">
+    ${s.username} 
+    ${needsRepair ? `<span style="background:#f56565; color:white; font-size:10px; padding:2px 6px; border-radius:4px; animation: pulse 1s infinite;" title="Data Corruption Detected!">⚠️ CORRUPT</span>` : ''}
+</div>
                         <div style="display:flex; align-items:center; gap:10px; margin-top:5px; width:100%;">
                             <div style="font-size:11px; background:#fef3c7; color:#92400e; padding:1px 6px; border-radius:8px; white-space:nowrap;">🧠 ${saveData.brainPoints || 0} BP</div>
                             
@@ -6645,6 +6808,7 @@ function toggleTeacherLogin() {
                     </div>
                     <div style="display:flex; gap:5px;">
                         <button class="action-btn green" style="width:auto; padding:5px 10px; font-size:12px; margin:0;" onclick="giveStudentBP('${s.username}')">🎁</button>
+                        <button class="action-btn red" style="width:auto; padding:5px 10px; font-size:12px; margin:0; background: ${needsRepair ? '#e53e3e' : '#ed8936'}; border: ${needsRepair ? '2px solid white' : 'none'};" onclick="repairStudentWallet('${s.username}', ${saveData.mathCorrect || 0})" title="Repair NaN Wallet">🔧</button>
                         <button class="action-btn blue" style="width:auto; padding:5px 10px; font-size:12px; margin:0;" onclick="openTopicManager('${s.username}')">Manage</button>
                         <button class="action-btn red" style="width:auto; padding:5px 10px; font-size:12px; margin:0;" onclick="openDeleteModal('${s.username}')">🗑️</button>
                     </div>
@@ -6714,6 +6878,65 @@ function toggleTeacherLogin() {
         loadStudentList();
     } catch (e) {
         showToast("User not found or offline.", "error");
+    }
+}
+
+async function repairStudentWallet(username, mathCorrect) {
+    if(!confirm(`⚠️ FULL REPAIR for ${username}? ⚠️\n\nThis will reset BP and SPAWN a new pet if they lost theirs.`)) return;
+
+    const docRef = window.fbase.doc(window.db, "students", username);
+    
+    try {
+        const docSnap = await window.fbase.getDoc(docRef);
+        if (!docSnap.exists()) return showToast("Student not found", "error");
+        
+        let data = docSnap.data();
+        let sd = data.saveData || {};
+
+        // 1. Fix BP Shield
+        sd.bp = safeNum(mathCorrect) * 10;
+
+        // 2. Fix Pets (The Engine)
+        let petsList = sd.pets || sd.p || [];
+        
+        // --- 🏥 LIFE SUPPORT: RESCUE EMPTY ACCOUNTS ---
+        // If the student has 0 pets, we give them a Starter Cat so they can play again.
+        if (!Array.isArray(petsList) || petsList.length === 0) {
+            console.log("🚑 Life Support: Spawning Rescue Pet for " + username);
+            const starterCat = {
+                id: 'rescued_' + Date.now(),
+                type: 'monster_01', 
+                nm: 'Rescued Cat', 
+                lv: 1, hp: 50, mhp: 50, xp: 0, mxp: 500,
+                pwr: ['claw_attack'], 
+                ih: true, hpg: 100, evs: 0, rty: 'common'
+            };
+            petsList = [starterCat];
+        }
+
+        // Clean up the pets (Heal them and fix NaN levels)
+        sd.pets = petsList.map(p => {
+            const level = safeNum(p.lv || p.level || 1);
+            p.lv = level;
+            p.level = level;
+            p.mhp = 50 + (level * 10);
+            p.hp = p.mhp; // Full heal
+            p.xp = 0;
+            p.mxp = level * 300 + 200;
+            return p;
+        });
+        
+        // Force the compressed key to match
+        sd.p = sd.pets;
+
+        // 3. Final Save
+        await window.fbase.updateDoc(docRef, { saveData: sd });
+        
+        showToast(`✅ ${username} has been rescued and repaired!`, "success");
+        loadStudentList(); 
+    } catch (e) {
+        console.error("Rescue Error:", e);
+        showToast("Repair failed. Check console.", "error");
     }
 }
     
@@ -6890,49 +7113,109 @@ async function bulkRewardBP() {
     function showMultiplayerMenu() { document.getElementById('wilds-menu').style.display='none'; document.getElementById('multiplayer-menu').style.display='block'; }
     
     async function createPvPRoom() { 
-        if(gameState.brainPoints<100) return showToast("Need 100 BP", "error"); 
-        const pet=gameState.pets.find(p=>p.id===gameState.currentPetId);
-        if(pet.hp <= 0) return showToast("Your pet is too weak! Heal it first.", "error");
-        gameState.brainPoints-=100; updateStatsDisplay(); 
-        const code=Math.floor(1000+Math.random()*9000).toString(); 
-        currentRoomId=code; isHost=true; localOpponentHP = 0; localPlayerHP = pet.hp;
-        await window.fbase.setDoc(window.fbase.doc(window.db,"rooms",code),{ hostName:gameState.playerName, hostPet:pet, status:"waiting", turn:"host", hostHP:pet.hp, hostMaxHP:pet.maxHP, guestHP:0, guestMaxHP:0, logs:[`${gameState.playerName} created room.`] }); 
-        document.getElementById('multiplayer-menu').style.display='none'; 
-        document.getElementById('pvp-lobby-screen').style.display='block'; 
-        document.getElementById('display-room-code').innerText=code; 
-        subscribeToRoom(code); 
-    }
+    if(gameState.brainPoints < 100) return showToast("Need 100 BP", "error"); 
+    const squad = getSquad(); // Get all 6 pets
+    if(squad.length === 0) return showToast("Your squad is empty!", "error");
+
+    adjustBP(-100); 
+    const code = Math.floor(1000 + Math.random() * 9000).toString(); 
+    currentRoomId = code; isHost = true; 
+
+    // We save the entire squad array to the room
+    await window.fbase.setDoc(window.fbase.doc(window.db,"rooms",code),{ 
+            hostName:gameState.playerName, 
+            hostSquad:getSquad(), 
+            status:"waiting", 
+            turn:"host", 
+            lastAction: null,
+            logs:[`${gameState.playerName} created room.`] 
+        });
+
+    document.getElementById('multiplayer-menu').style.display = 'none'; 
+    document.getElementById('pvp-lobby-screen').style.display = 'block'; 
+    document.getElementById('display-room-code').innerText = code; 
+    subscribeToRoom(code); 
+}
     
     async function joinPvPRoom() { 
-        const code=document.getElementById('room-code-input').value.trim(); const pet=gameState.pets.find(p=>p.id===gameState.currentPetId); 
-        if(pet.hp <= 0) return showToast("Your pet is too weak! Heal it first.", "error");
-        const r=await window.fbase.getDoc(window.fbase.doc(window.db,"rooms",code)); 
-        if(r.exists() && r.data().status==="waiting") { 
-            currentRoomId=code; isHost=false; localOpponentHP = r.data().hostHP; localPlayerHP = pet.hp;
-            await window.fbase.updateDoc(window.fbase.doc(window.db,"rooms",code),{ guestName:gameState.playerName, guestPet:pet, guestHP:pet.hp, guestMaxHP:pet.maxHP, status:"connected", logs:window.fbase.arrayUnion(`${gameState.playerName} joined!`)}); 
-            document.getElementById('multiplayer-menu').style.display='none'; document.getElementById('pvp-lobby-screen').style.display='block'; document.getElementById('display-room-code').innerText=code; subscribeToRoom(code); 
-        } else { showToast("Room Error", "error"); }
-    }
+    const code = document.getElementById('room-code-input').value.trim(); 
+    const squad = getSquad();
+    if(squad.length === 0) return showToast("Your squad is empty!", "error");
+
+    const r = await window.fbase.getDoc(window.fbase.doc(window.db, "rooms", code)); 
+    if(r.exists() && r.data().status === "waiting") { 
+        currentRoomId = code; isHost = false; 
+        await window.fbase.updateDoc(window.fbase.doc(window.db,"rooms",code),{ 
+                guestName:gameState.playerName, 
+                guestSquad:getSquad(), 
+                status:"connected", 
+                logs:window.fbase.arrayUnion(`${gameState.playerName} joined!`)
+            }); 
+        document.getElementById('multiplayer-menu').style.display = 'none'; 
+        document.getElementById('pvp-lobby-screen').style.display = 'block'; 
+        document.getElementById('display-room-code').innerText = code; 
+        subscribeToRoom(code); 
+    } else { showToast("Room Error", "error"); }
+}
     
-    function subscribeToRoom(code) { 
-        pvpUnsubscribe = window.fbase.onSnapshot(window.fbase.doc(window.db,"rooms",code), (doc)=>{ 
-            const d=doc.data(); if(!d) return; 
-            document.getElementById('pvp-host-status').innerHTML=`Host: ${d.hostName}`; 
-            document.getElementById('pvp-guest-status').innerHTML=`Guest: ${d.guestName||'...'}`; 
-            if(d.status==='connected' && isHost) document.getElementById('pvp-start-btn').style.display='block'; 
-            if(d.status==='battle') { 
-                if(document.getElementById('pvp-lobby-screen').style.display!=='none') { 
-                    document.getElementById('pvp-lobby-screen').style.display='none'; 
-                    const availableBGs = [...Object.values(BATTLE_BACKGROUNDS), ...ARENA_IMGS];
-                    const randomBG = availableBGs[Math.floor(Math.random() * availableBGs.length)];
-                    document.querySelector('#battle-ui .battle-arena').style.backgroundImage = `url('${randomBG}')`;
-                    document.getElementById('battle-ui').style.display='flex'; 
-                    soundManager.playBGM('boss'); 
-                } 
-                renderPvPBattle(d); 
-            } 
-        }); 
+   let pvpLastActionTime = 0; 
+
+function subscribeToRoom(code) { 
+    pvpUnsubscribe = window.fbase.onSnapshot(window.fbase.doc(window.db,"rooms",code), (doc) => { 
+        const d = doc.data(); 
+        if(!d) return; 
+
+        if(d.status === 'battle') { 
+            if(document.getElementById('pvp-lobby-screen').style.display !== 'none') { 
+                document.getElementById('pvp-lobby-screen').style.display = 'none'; 
+                document.getElementById('battle-ui').style.display = 'flex'; 
+                soundManager.playBGM('boss'); 
+            }
+
+            // 1. DRAW PETS FIRST
+            renderPvPBattle(d); 
+
+            // 2. TRIGGER PROJECTILE SECOND
+            if (d.lastAction && d.lastAction.ts > pvpLastActionTime) {
+                pvpLastActionTime = d.lastAction.ts;
+                // Wait 50ms to ensure the browser has finished "drawing" the pets
+                setTimeout(() => playSquadPvpAnimation(d.lastAction), 50);
+            }
+        } else {
+            document.getElementById('pvp-host-status').innerHTML = `Host: ${d.hostName}`; 
+            document.getElementById('pvp-guest-status').innerHTML = `Guest: ${d.guestName||'...'}`; 
+            if(d.status === 'connected' && isHost) document.getElementById('pvp-start-btn').style.display='block'; 
+        }
+    }); 
+}
+
+// THIS PHYSICALLY THROWS THE ATTACK
+async function playSquadPvpAnimation(act) {
+    // Finds the DIVs using the IDs we set in renderPvPBattle
+    const attackerId = `slot-${act.side}-${act.aIdx}`;
+    const defenderSide = (act.side === 'host' ? 'guest' : 'host');
+    const defenderId = `slot-${defenderSide}-${act.tIdx}`;
+
+    const attackerEl = document.getElementById(attackerId);
+    const targetEl = document.getElementById(defenderId);
+
+    if (attackerEl && targetEl) {
+        soundManager.playSFX('attack');
+        
+        // 1. Lunge (Jump forward)
+        const moveX = (act.side === 'host' ? 40 : -40);
+        attackerEl.style.transform = `translateX(${moveX}px)`;
+        
+        // 2. Projectile (Icon flying across)
+        createProjectile(act.icon, attackerEl, targetEl);
+        
+        // 3. Impact
+        await new Promise(r => setTimeout(r, 500)); 
+        attackerEl.style.transform = "none";
+        targetEl.style.animation = "damageShake 0.4s";
+        soundManager.playSFX('hit');
     }
+}
 // --- ⚔️ FULL PVP SUITE (Mobile/Split-Screen Ready) ---
 
 // 1. START BATTLE (Host Only)
@@ -6943,118 +7226,133 @@ async function startPvPBattle() {
     }); 
 }
 
-// 2. RENDER BATTLE SCENE (The Big Fix)
-// --- ⚔️ PVP RENDERER (Clean Version - No Logs) ---
+// --- ⚔️ 6v6 SQUAD PVP RENDERER (ANIMATION READY) ---
 function renderPvPBattle(d) {
-    // 1. Determine Identity
-    const amIHost = isHost; 
-    const myData = amIHost ? { name: d.hostName, pet: d.hostPet, hp: d.hostHP, max: d.hostMaxHP } 
-                           : { name: d.guestName, pet: d.guestPet, hp: d.guestHP, max: d.guestMaxHP };
-    const oppData = amIHost ? { name: d.guestName, pet: d.guestPet, hp: d.guestHP, max: d.guestMaxHP } 
-                            : { name: d.hostName, pet: d.hostPet, hp: d.hostHP, max: d.hostMaxHP };
+    const stage = document.querySelector('#battle-ui .battle-arena');
+    
+    // We only clear the stage if the pets aren't there yet.
+    // This prevents deleting projectiles while they are flying!
+    if (!document.getElementById('slot-host-0')) {
+        stage.innerHTML = ''; 
+    }
+    
+    const hostSlots = [[25,40,'row-top'], [15,40,'row-top'], [5,40,'row-top'], [30,50,'row-bottom'], [20,50,'row-bottom'], [10,50,'row-bottom']];
+    const guestSlots = [[55,40,'row-top'], [65,40,'row-top'], [75,40,'row-top'], [60,50,'row-bottom'], [70,50,'row-bottom'], [80,50,'row-bottom']];
 
-    // 2. Visuals
-    const pVis = document.getElementById('battle-player-visual');
-    const eVis = document.getElementById('battle-enemy-visual');
+    // DRAW/UPDATE HOST SQUAD
+    d.hostSquad.forEach((p, i) => {
+        let div = document.getElementById('slot-host-' + i);
+        if (!div) {
+            div = document.createElement('div');
+            div.id = 'slot-host-' + i;
+            div.className = `hero-slot ${hostSlots[i][2]}`;
+            div.style.left = hostSlots[i][0] + "%"; div.style.top = hostSlots[i][1] + "%";
+            div.style.width = "15%";
+            stage.appendChild(div);
+        }
+        const isFainted = p.hp <= 0;
+        div.style.filter = isFainted ? "grayscale(1) opacity(0.4)" : "none";
+        div.innerHTML = `<div class="hero-hp-number">${isFainted ? 'KO' : Math.ceil(p.hp)}</div><img src="${p.image}" class="hero-img-unit ${p.imageStyle || ''}">`;
+    });
 
-    pVis.classList.remove('flipped-opponent');
-    pVis.innerHTML = myData.pet.image 
-        ? `<img src="${myData.pet.image}" class="battler-image ${myData.pet.imageStyle}" style="width:200px; height:200px;">` 
-        : `<div style="font-size:100px;">${myData.pet.emoji}</div>`;
+    // DRAW/UPDATE GUEST SQUAD
+    d.guestSquad.forEach((p, i) => {
+        let div = document.getElementById('slot-guest-' + i);
+        if (!div) {
+            div = document.createElement('div');
+            div.id = 'slot-guest-' + i;
+            div.className = `hero-slot ${guestSlots[i][2]}`;
+            div.style.left = guestSlots[i][0] + "%"; div.style.top = guestSlots[i][1] + "%";
+            div.style.width = "15%";
+            stage.appendChild(div);
+        }
+        const isFainted = p.hp <= 0;
+        div.style.filter = isFainted ? "grayscale(1) opacity(0.4)" : "none";
+        div.innerHTML = `<div class="hero-hp-number" style="color:#f56565;">${isFainted ? '' : Math.ceil(p.hp)}</div><img src="${p.image}" class="hero-img-unit ${p.imageStyle || ''}" style="transform:scaleX(-1);">`;
+    });
 
-    eVis.classList.add('flipped-opponent');
-    eVis.innerHTML = oppData.pet.image 
-        ? `<img src="${oppData.pet.image}" class="battler-image ${oppData.pet.imageStyle}" style="width:200px; height:200px;">` 
-        : `<div class="emoji-wrapper" style="font-size:100px;">${oppData.pet.emoji || '👤'}</div>`;
-
-    // 3. Bars
-    document.getElementById('player-battle-name').innerHTML = `${myData.name}`;
-    document.getElementById('enemy-name').innerHTML = `${oppData.name || "Waiting..."}`;
-
-    document.getElementById('player-hp-bar').style.width = Math.max(0, (myData.hp / myData.max) * 100) + "%";
-    document.getElementById('player-hp-text').innerText = `${Math.ceil(myData.hp)}/${myData.max}`;
-    document.getElementById('enemy-hp-bar').style.width = Math.max(0, (oppData.hp / oppData.max) * 100) + "%";
-
-    // 4. Force Mobile Size
-    const eContainer = document.getElementById('enemy-container');
-    if (eContainer) eContainer.classList.add('boss-mode');
-
-    // 5. Controls
-    const panel = document.querySelector('.battle-ui-panel');
+    // --- TURN CONTROL LOGIC ---
+    const amIHost = isHost;
     const isMyTurn = (d.turn === 'host' && amIHost) || (d.turn === 'guest' && !amIHost);
-    
-    // Status Indicator (Important for PVP timing)
-    const turnStatus = isMyTurn ? 
-        `<div style="color:#48bb78; font-weight:bold; animation: pulseGold 1s infinite; text-align:center; margin-bottom:10px;">⚡ YOUR TURN!</div>` : 
-        `<div style="color:#a0aec0; text-align:center; margin-bottom:10px;">⏳ Waiting for opponent...</div>`;
+    const mySquad = amIHost ? d.hostSquad : d.guestSquad;
+    const oppSquad = amIHost ? d.guestSquad : d.hostSquad;
 
-    let buttons = myData.pet.powers.map(pid => {
-        const move = findShopItem(pid);
-        const style = isMyTurn ? "" : "opacity: 0.5; cursor: not-allowed; background: #cbd5e0; box-shadow: none;";
-        const action = isMyTurn ? `usePvPAttack('${pid}')` : "";
-        return `<button class="action-btn green" style="${style}" onclick="${action}">${move.name}</button>`;
-    }).join('');
-    
-    buttons += `<button class="action-btn red" onclick="leavePvPRoom()">🏳️ Surrender</button>`;
+    const panel = document.querySelector('.battle-ui-panel');
+    const activePet = mySquad.find(p => p.hp > 0); 
 
-    // ✅ CLEAN UI: No Logs, just Status + Buttons
-    if (panel) {
-        panel.innerHTML = `
-            ${turnStatus}
-            <div id="action-buttons-grid" class="battle-actions">${buttons}</div>
-        `;
+    if (!activePet) {
+        panel.innerHTML = `<div style="text-align:center; color:#e53e3e; font-weight:bold; padding:20px;">SQUAD DEFEATED</div>`;
+    } else if (isMyTurn) {
+        const turnHeader = `<div style="color:#48bb78; font-weight:bold; text-align:center; margin-bottom:5px;">⚡ YOUR TURN (${activePet.name})</div>`;
+        const buttons = activePet.powers.map(pid => {
+            const move = findShopItem(pid);
+            return `<button class="action-btn green" onclick="usePvPAttack('${pid}')">${move.name}</button>`;
+        }).join('');
+        panel.innerHTML = `${turnHeader}<div class="battle-actions">${buttons}</div>`;
+    } else {
+        panel.innerHTML = `<div style="text-align:center; color:#718096; padding:20px;">Opponent's Turn...</div>`;
     }
 
-    // 6. End Game
-    if (myData.hp <= 0) { alert("❌ You Lost!"); leavePvPRoom(); }
-    else if (oppData.hp <= 0 && oppData.name) { alert("🏆 You Won!"); leavePvPRoom(); }
+    // --- WIN/LOSS CHECK ---
+    if (!mySquad.some(p => p.hp > 0)) { alert("❌ Defeat!"); leavePvPRoom(); }
+    else if (!oppSquad.some(p => p.hp > 0) && d.guestName) { alert("🏆 Victory!"); leavePvPRoom(); }
 }
 
 // 3. ATTACK ACTION (Animated)
+// --- ⚔️ 6v6 ANIMATED PVP ATTACK ENGINE ---
 async function usePvPAttack(pid) {
-    const item = findShopItem(pid);
+    const move = findShopItem(pid);
     const r = window.fbase.doc(window.db, "rooms", currentRoomId);
     
-    // Animation
-    const pVis = document.getElementById('battle-player-visual');
-    const eVis = document.getElementById('battle-enemy-visual');
-    
-    soundManager.playSFX('attack');
-    pVis.style.animation = "attackLunge 0.3s";
-    createProjectile(item.image || item.icon, pVis, eVis);
-    
-    setTimeout(() => {
-        pVis.style.animation = "";
-        eVis.style.animation = "damageShake 0.5s"; 
-        soundManager.playSFX('hit');
-        if(typeof vibratePhone === 'function') vibratePhone(50);
-    }, 400);
-
-    // Database Update
     try {
         await window.fbase.runTransaction(window.db, async(t) => {
             const doc = await t.get(r);
             if (!doc.exists()) throw "Room closed";
             const d = doc.data();
             
-            // Turn Check
-            if (!((d.turn === 'host' && isHost) || (d.turn === 'guest' && !isHost))) return; 
+            // 1. Turn Enforcement (Alternate Turns)
+            const mySide = isHost ? 'host' : 'guest';
+            const oppSide = isHost ? 'guest' : 'host';
+            if (d.turn !== mySide) return; 
 
-            const dmg = (item.damage || 10) + Math.floor(Math.random() * 5);
-            let updates = {};
+            let mySquad = [...d[mySide + 'Squad']];
+            let enemySquad = [...d[oppSide + 'Squad']];
             
-            if (isHost) {
-                updates.guestHP = Math.max(0, d.guestHP - dmg);
-                updates.turn = 'guest';
-                updates.logs = window.fbase.arrayUnion(`Host: ${item.name} (-${dmg})`);
-            } else {
-                updates.hostHP = Math.max(0, d.hostHP - dmg);
-                updates.turn = 'host';
-                updates.logs = window.fbase.arrayUnion(`Guest: ${item.name} (-${dmg})`);
-            }
+            // 2. Identify Attacker and Target positions
+            const aIdx = mySquad.findIndex(p => p.hp > 0);
+            const tIdx = enemySquad.findIndex(p => p.hp > 0);
+            
+            if (tIdx === -1 || aIdx === -1) return; 
+
+            // 3. Calculate Damage
+            const baseDmg = safeNum(move.damage || 10);
+            const levelBonus = safeNum(mySquad[aIdx].level || 1) * 2;
+            const dmg = baseDmg + levelBonus + Math.floor(Math.random() * 10);
+
+            // 4. Apply Damage
+            enemySquad[tIdx].hp = Math.max(0, enemySquad[tIdx].hp - dmg);
+
+            // 5. Build the Update with the PROJECTILE SIGNAL
+            let updates = {};
+            updates[oppSide + 'Squad'] = enemySquad;
+            updates.turn = oppSide; // Flip turn to opponent
+            
+            // This is the "Packet" that triggers the projectile on both screens
+            updates.lastAction = {
+                side: mySide,
+                aIdx: aIdx,
+                tIdx: tIdx,
+                icon: move.image || move.icon,
+                ts: Date.now()
+            };
+
+            updates.logs = window.fbase.arrayUnion(`${d[mySide + 'Name']} used ${move.name}!`);
+
             t.update(r, updates);
         });
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+        console.error("PVP Sync Error:", e);
+    }
 }
 
 // 4. LEAVE ROOM (Cleanup)
@@ -7498,7 +7796,7 @@ async function joinRaid() {
     }
 
     // 3. Deduct BP and Start (Maybe free if claiming? For now, keep cost 1 BP)
-    gameState.brainPoints -= 1;
+    adjustBP(-1);
     updateStatsDisplay();
     saveGame();
 
@@ -8411,6 +8709,8 @@ window.confirmBulkUse = function(itemId, quantity) {
             ? `Leveled up ${levelsGained} times!` 
             : `Added ${totalXP} XP!`;
     }
+    
+    applySquadLevelSync(); // Update floor after potion usage
 
     saveGame();
     renderHub();
@@ -9440,7 +9740,7 @@ function readExamQuestion() {
         // 3. Validate and Deduct
         if (newName && newName.trim() !== "" && newName !== p.name) {
             // Deduct BP
-            gameState.brainPoints -= 100;
+            adjustBP(-100);
             
             // Update Name
             newName = newName.trim().substring(0, 15); // Limit length to 15 chars
@@ -9676,36 +9976,26 @@ function openEquipMenu(slotType) {
             showToast("Unequipped.", "info");
         }
     }
-// --- PRO EQUIPMENT: SAFE CALCULATOR (NO MORE NaN) ---
 function getPetEquipmentStats(pet) {
+    // HARD DEFAULTS
     let stats = { dmg: 0, hp: 0, crit: 0, lifesteal: 0, bpBoost: 0, immune: [] };
+    
     if (!pet || !pet.equipment || !gameState.inventory || !gameState.inventory.equipment) return stats;
 
     Object.values(pet.equipment).forEach(instanceId => {
         const item = gameState.inventory.equipment.find(i => i.instanceId === instanceId);
         if (!item) return;
 
-        const base = findShopItem(item.baseId) || {};
         const prefix = item.prefix || {};
 
-        // 🔥 FIX: Use Number() and || 0 on every single value to prevent NaN
-        const bStat = Number(base.baseStat) || 0;
-        if (item.type === 'weapon') stats.dmg += bStat;
-        if (item.type === 'armor') stats.hp += bStat;
-
-        const pStat = Number(prefix.stat) || 0;
-        const pVal = Number(prefix.value) || 0;
-
-        if (prefix.type === "dmg") stats.dmg += pStat;
-        if (prefix.type === "hp") stats.hp += pStat;
-        if (prefix.type === "crit") stats.crit += pStat;
-        if (prefix.type === "lifesteal") stats.lifesteal += pVal;
-        if (prefix.type === "bp_boost") stats.bpBoost += pVal;
-        if (prefix.type === "all") { stats.dmg += pStat; stats.hp += pStat; }
+        // Use safeNum on every single property to be 100% sure
+        stats.dmg += safeNum(prefix.type === "dmg" ? prefix.stat : (prefix.type === "all" ? prefix.stat : 0));
+        stats.hp += safeNum(prefix.type === "hp" ? prefix.stat : (prefix.type === "all" ? prefix.stat : 0));
+        stats.crit += safeNum(prefix.type === "crit" ? prefix.stat : 0);
         
-        if (prefix.type === "immunity" && prefix.effect) {
-            stats.immune.push(prefix.effect);
-        }
+        if (prefix.type === "lifesteal") stats.lifesteal += Number(prefix.value || 0);
+        if (prefix.type === "bp_boost") stats.bpBoost += Number(prefix.value || 0);
+        if (prefix.type === "immunity" && prefix.effect) stats.immune.push(prefix.effect);
     });
     return stats;
 }
@@ -10020,43 +10310,30 @@ function getPetEquipmentStats(pet) {
 }
 
     function renderPalette() {
-        const p = document.getElementById('block-palette');
-        
-        // Eraser Tool
-        let html = `
-        <div class="block-btn ${buildState.selectedTool==='eraser'?'active':''}" onclick="selectTool('eraser')">
-            <div style="font-size:24px;">🧼</div><div class="block-qty">DEL</div>
-        </div>`;
-        
-        BUILDER_BLOCKS.forEach(b => {
-            const qty = gameState.builder.inventory[b.id] || 0;
-            const active = buildState.selectedTool === b.id ? 'active' : '';
-            const style = qty === 0 ? 'opacity:0.6; filter:grayscale(1);' : '';
-            
-            const action = qty > 0 ? `selectTool('${b.id}')` : `buyBlock('${b.id}')`;
-            const label = qty > 0 ? `x${qty}` : `${b.cost}BP`;
-            
-            // --- 🌟 THE FIX IS HERE 🌟 ---
-            let iconDisplay;
-            
-            if (b.icon && b.icon.startsWith('http')) {
-                // If it is a LINK, render an IMAGE tag
-                iconDisplay = `<img src="${b.icon}" style="width:30px; height:30px; object-fit:contain; pointer-events:none;">`;
-            } else {
-                // If it is NOT a link (like an Emoji), render TEXT
-                iconDisplay = `<div style="font-size:24px;">${b.icon || '📦'}</div>`;
-            }
-            // -----------------------------
+    const p = document.getElementById('block-palette');
+    if (!p) return;
 
-            html += `
-            <div class="block-btn ${active}" style="${style}" onclick="${action}">
-                ${iconDisplay}
-                <div class="block-qty">${label}</div>
-            </div>`;
-        });
+    let html = `<div class="block-btn ${buildState.selectedTool==='eraser'?'active':''}" onclick="selectTool('eraser')"><div>🧼</div><div class="block-qty">DEL</div></div>`;
+    
+    BUILDER_BLOCKS.forEach(b => {
+        const qty = gameState.builder.inventory[b.id] || 0;
+        const active = buildState.selectedTool === b.id ? 'active' : '';
+        const style = qty === 0 ? 'opacity:0.6; filter:grayscale(1);' : '';
+        const action = qty > 0 ? `selectTool('${b.id}')` : `buyBlock('${b.id}')`;
+        const label = qty > 0 ? `x${qty}` : `${b.cost}BP`;
         
-        p.innerHTML = html;
-    }
+        let iconDisplay = "";
+        const tex = b.icon || b.top; 
+        if (tex && tex.toString().startsWith('http')) {
+            iconDisplay = `<img src="${tex}" style="width:30px; height:30px; object-fit:cover; border-radius:4px; pointer-events:none;">`;
+        } else {
+            iconDisplay = `<div style="font-size:24px;">${b.icon || '📦'}</div>`;
+        }
+
+        html += `<div class="block-btn ${active}" style="${style}" onclick="${action}">${iconDisplay}<div class="block-qty">${label}</div></div>`;
+    });
+    p.innerHTML = html;
+}
     
 
     // --- ACTIONS ---
@@ -10100,7 +10377,7 @@ function getPetEquipmentStats(pet) {
     
     if(gameState.brainPoints >= currentCost) {
         if(confirm(`Expand Land to ${gameState.builder.landSize+2}x${gameState.builder.landSize+2} for ${currentCost} BP?`)) {
-            gameState.brainPoints -= currentCost;
+            adjustBP(-currentCost);
             gameState.builder.landSize += 2;
             
             updateStatsDisplay();
@@ -11156,7 +11433,7 @@ async function towerHealFullTeam() {
     }
 
     // 3. Deduct and Heal
-    gameState.brainPoints -= finalCost;
+    adjustBP(-finalCost);
     gameState.team.forEach(id => {
         const p = gameState.pets.find(x => x.id === id);
         if(p) p.hp = p.maxHP;
@@ -11579,47 +11856,66 @@ function renderScholarLeaderboard(entries) {
     list.innerHTML = html;
 }
 
+// --- 🏥 THE SUPER-DOCTOR (REHYDRATOR) ---
 function rehydrateAllPets() {
     if (!gameState.pets || gameState.pets.length === 0) return;
 
-    gameState.pets.forEach(p => {
-        const currentId = p.tp || p.type || 'monster_01';
-        let baseData = null;
+    console.log("🏥 Super-Doctor: Commencing Shielded Rehydration...");
 
-        // 1. Hunt for the Pet Profile in our GitHub Registry
+    gameState.pets.forEach(p => {
+        // 1. Identify species (Check compressed 'tp' or full 'type')
+        const speciesId = p.type || p.tp || 'monster_01';
+
+        // 2. Find Blueprint in the Registry
+        let blueprint = null;
         for (const rarity in PET_TYPES) {
-            const found = PET_TYPES[rarity].find(b => b.id === currentId);
-            if (found) { baseData = found; break; }
+            const found = PET_TYPES[rarity].find(b => b.id === speciesId);
+            if (found) { blueprint = found; break; }
         }
 
-        if (baseData) {
-            // 2. IMAGE RECOVERY: If image is broken, force-link to GitHub
-            const isBroken = !p.image || p.image === "undefined" || p.image === "" || p.image === "null";
-            
-            if (isBroken) {
-                p.image = baseData.image;
-                p.imageStyle = baseData.imageStyle || 'blend-multiply';
-                p.element = p.element || baseData.element;
-                p.rarity = p.rarity || baseData.rarity;
-                p.emoji = p.emoji || baseData.emoji;
-                p.maxHP = Number(p.maxHP || baseData.baseHP || 50);
+        if (blueprint) {
+            p.type = speciesId; 
+            p.rarity = p.rarity || blueprint.rarity;
+            p.element = p.element || blueprint.element;
+            p.emoji = p.emoji || blueprint.emoji;
+
+            // Visual Sync (Fix broken images)
+            const isImgBroken = !p.image || p.image === "" || p.image === "undefined" || p.image.length < 10;
+            if (isImgBroken) {
+                p.image = blueprint.image; 
+                p.imageStyle = blueprint.imageStyle || 'blend-multiply';
             }
 
-            // 3. EVOLUTION SYNC: Ensure evolved pets show their evolved forms
-            const stage = Number(p.evolutionStage || 0);
-            const chain = EVOLUTION_CHAINS[currentId] || p.savedEvolutions;
+            // Evolution Visual Sync
+            const stage = safeNum(p.evolutionStage || p.evs);
+            let chain = EVOLUTION_CHAINS[speciesId] || p.savedEvolutions || p.sevo;
             if (stage > 0 && chain && chain[stage - 1]) {
                 const evoData = chain[stage - 1];
-                // Force the evolved image onto the pet
                 if (evoData.image) p.image = evoData.image;
             }
         }
 
-        // 4. STAT RECOVERY
-        p.hp = Number(p.hp);
-        if (isNaN(p.hp)) p.hp = p.maxHP || 50;
+        // 3. 🛡️ DATA HARDENING (Prevent crashes)
+        p.powers = Array.isArray(p.powers) ? p.powers : ['claw_attack'];
+        p.badges = Array.isArray(p.badges) ? p.badges : [];
+        p.equipment = (p.equipment && typeof p.equipment === 'object') ? p.equipment : {};
+        p.stars = safeNum(p.stars);
+
+        // 4. 🛡️ LEVEL PROTECTION (The Level 1 Fix)
+        const foundLevel = p.level || p.lv || p.lvl || 1;
+        p.level = safeNum(foundLevel, 1);
+        p.lv = p.level; 
+
+        // 5. 🛡️ STAT SHIELD
+        p.maxHP = safeNum(p.maxHP || p.mhp, (50 + (p.level * 10)));
+        p.hp = safeNum(p.hp, p.maxHP);
+        if (p.hp > p.maxHP) p.hp = p.maxHP;
+        p.xp = safeNum(p.xp);
+        p.maxXp = safeNum(p.maxXp, (p.level * 300 + 200));
     });
-    console.log("🏥 All pet visuals synchronized with the Cloud Registry.");
+
+    applySquadLevelSync(); // Force level floor
+    console.log("✅ All pets have been fully reconstructed, shielded, and synced.");
 }
   </script>
   <!-- 🚧 CONSTRUCTION QUIZ MODAL -->
