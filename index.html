@@ -4463,44 +4463,60 @@ ${emptySlots > 0 && gameState.badgeInventory.length > 0 ? `<button class="action
     }
     
     function renderCollection() { 
-        // 🛡️ ARCHITECT FIX: Calculate the correct evolution image on-the-fly
-        return gameState.pets.filter(p => p && p.id).map(p => {
-            const isActive = p.id === gameState.currentPetId;
-            
-            // 1. THE SMART LOOKUP: Don't just trust p.image
-            let displayImg = p.image; 
-            const stage = p.evolutionStage || 0;
-            
-            if (p.isHatched && stage > 0) {
-                // Find the evolution data for this specific pet type
-                let chain = EVOLUTION_CHAINS[p.type];
-                if (!chain && p.savedEvolutions) chain = p.savedEvolutions;
+    // 1. Create a copy and SORT the pets (Highest Level first, Eggs at the end)
+    const sortedPets = [...gameState.pets]
+        .filter(p => p && p.id)
+        .sort((a, b) => {
+            // Rule A: Hatched pets come first
+            if (a.isHatched && !b.isHatched) return -1;
+            if (!a.isHatched && b.isHatched) return 1;
 
-                // If it's evolved, pick the image from the chain instead of the saved image
-                if (chain && chain[stage - 1]) {
-                    displayImg = chain[stage - 1].image;
-                }
+            // Rule B: Sort by Level (Highest First)
+            const lvA = safeNum(a.level || a.lv || 1);
+            const lvB = safeNum(b.level || b.lv || 1);
+            return lvB - lvA;
+        });
+
+    // 2. Generate the HTML cards
+    return sortedPets.map((p, index) => {
+        const isActive = p.id === gameState.currentPetId;
+        
+        // --- EVOLUTION IMAGE LOGIC (Preserved from your original) ---
+        let displayImg = p.image; 
+        const stage = p.evolutionStage || 0;
+        if (p.isHatched && stage > 0) {
+            let chain = EVOLUTION_CHAINS[p.type] || p.savedEvolutions;
+            if (chain && chain[stage - 1]) displayImg = chain[stage - 1].image;
+        }
+
+        // --- VISUAL SELECTION ---
+        let visual = p.emoji || '🐾';
+        if (!p.isHatched) {
+            visual = '🥚';
+        } else if (displayImg) {
+            visual = `<img src="${displayImg}" class="${p.imageStyle || ''}" style="width:40px;height:40px; object-fit:contain;">`;
+        }
+
+        // --- NEW: TOP 6 SQUAD INDICATOR ---
+        // Adds a small green badge to the strongest 6 pets
+        const squadBadge = (p.isHatched && index < 6) 
+            ? `<div style="position:absolute; top:-5px; right:-5px; background:#48bb78; color:white; font-size:8px; padding:1px 5px; border-radius:4px; font-weight:bold; z-index:10; box-shadow:0 2px 4px rgba(0,0,0,0.3); border:1px solid white;">SQUAD</div>` 
+            : "";
+
+        return `
+        <div class="pet-card ${isActive ? 'active' : ''}" onclick="switchPet('${p.id}')" style="position:relative;">
+            ${squadBadge}
+            <div class="pet-card-visual">${visual}</div>
+            <div style="font-size:10px; font-weight:bold; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                ${p.isHatched ? p.name : "Mystery Egg"}
+            </div>
+            ${p.isHatched 
+                ? `<div style="font-size:8px; color:#718096; font-weight:bold;">Lvl ${p.level}</div>` 
+                : `<div style="font-size:8px; color:#f6ad55; font-weight:bold;">${p.hatchProgress || 0}%</div>`
             }
-
-            // 2. Determine Visual (Egg vs Calculated Image)
-            let visual = p.emoji || '🐾';
-            if (!p.isHatched) {
-                visual = '🥚';
-            } else if (displayImg) {
-                visual = `<img src="${displayImg}" class="${p.imageStyle || ''}" style="width:40px;height:40px; object-fit:contain;">`;
-            }
-
-            // 3. Return the HTML Card
-            return `
-            <div class="pet-card ${isActive ? 'active' : ''}" onclick="switchPet('${p.id}')">
-                <div class="pet-card-visual">${visual}</div>
-                <div style="font-size:10px; font-weight:bold; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                    ${p.isHatched ? p.name : "Mystery Egg"}
-                </div>
-                ${p.isHatched ? `<div style="font-size:8px; color:#718096; font-weight:bold;">Lvl ${p.level}</div>` : ''}
-            </div>`;
-        }).join(''); 
-    }
+        </div>`;
+    }).join(''); 
+}
     // --- PRO EQUIPMENT: HUB INVENTORY VIEW ---
 // --- PRO UI: CLEAN INVENTORY (Consumables Only) ---
 function renderInventory(isEgg) { 
