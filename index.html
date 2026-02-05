@@ -1513,6 +1513,18 @@ body {
                            <option value="6">Grade 6</option>
                        </select>
                        <button class="action-btn green" onclick="createStudentAccount()">Create Account</button>
+                       <!-- START OF BULK IMPORT UI -->
+<div style="border-top: 2px dashed #cbd5e0; margin-top: 25px; padding-top: 20px;">
+    <h2 style="font-size:18px; font-weight:bold; margin-bottom:5px; color:#4a5568;">📂 Bulk Import Roster</h2>
+    <p style="font-size:11px; color:#718096; margin-bottom:15px;">
+        Upload a .csv file with 3 columns: <br>
+        <strong>Username, Password, Grade</strong>
+    </p>
+    <input type="file" id="csv-file-input" accept=".csv" class="login-input" style="font-size: 13px; padding: 8px; background: white; border: 2px solid #cbd5e0;">
+    <button class="action-btn blue" id="csv-import-btn" onclick="importStudentsCSV()">🚀 Upload & Enroll</button>
+    <div id="csv-status" style="font-size:12px; margin-top:10px; font-weight:bold; text-align:center;"></div>
+</div>
+<!-- END OF BULK IMPORT UI -->
                    </div>
 
                    <!-- 2. CLASS RAID CONTROLS -->
@@ -6701,6 +6713,87 @@ function toggleTeacherLogin() {
     
     showToast(`Created student: ${u}`, "success"); 
     loadStudentList(); // Refresh list
+}
+// --- 📂 NEW: BULK CSV IMPORT LOGIC ---
+async function importStudentsCSV() {
+    const fileInput = document.getElementById('csv-file-input');
+    const status = document.getElementById('csv-status');
+    const btn = document.getElementById('csv-import-btn');
+
+    if (!fileInput.files[0]) return showToast("Please select a CSV file!", "error");
+    if (!currentLoggedTeacher) return showToast("Error: No teacher logged in.", "error");
+
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+
+    // Visual loading state
+    btn.disabled = true;
+    btn.innerText = "⏳ Processing...";
+    status.innerText = "Reading CSV rows...";
+    status.style.color = "#4a5568";
+
+    reader.onload = async (e) => {
+        try {
+            const text = e.target.result;
+            // Split into rows and remove empty ones
+            const rows = text.split(/\r?\n/).filter(row => row.trim() !== "");
+            
+            const batch = window.fbase.writeBatch(window.db);
+            let count = 0;
+            let skipped = 0;
+
+            for (let i = 0; i < rows.length; i++) {
+                // Split by comma: Username, Password, Grade
+                const cols = rows[i].split(',').map(c => c.trim());
+                
+                const u = cols[0];
+                const p = cols[1];
+                const g = cols[2];
+
+                // Skip if the row is missing information
+                if (!u || !p || !g) {
+                    skipped++;
+                    continue;
+                }
+
+                const studentRef = window.fbase.doc(window.db, "students", u);
+                
+                // Add this student to the list of updates
+                batch.set(studentRef, {
+                    username: u,
+                    password: p,
+                    assignedGrade: g,
+                    assignedTopics: [],
+                    teacherId: currentLoggedTeacher,
+                    createdAt: new Date()
+                }, { merge: true }); // 'merge: true' saves their pets if they already exist
+                
+                count++;
+            }
+
+            if (count > 0) {
+                await batch.commit(); // Send everything to the database at once
+                status.innerText = `✅ Success! Enrolled ${count} students.`;
+                status.style.color = "#48bb78";
+                showToast(`Imported ${count} students`, "success");
+                loadStudentList(); // Refresh the teacher's list
+            } else {
+                status.innerText = "❌ No valid data found in CSV.";
+                status.style.color = "#f56565";
+            }
+
+        } catch (err) {
+            console.error(err);
+            status.innerText = "❌ Error. Make sure your CSV is formatted correctly.";
+            status.style.color = "#f56565";
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "🚀 Upload & Enroll";
+            fileInput.value = ""; // Reset the file picker
+        }
+    };
+
+    reader.readAsText(file);
 }
     function toggleAllStudents(c) { document.querySelectorAll('.student-select-checkbox').forEach(cb => cb.checked = c); updateBulkActionBar(); }
     function toggleGradeStudents(checkbox, grade) {
