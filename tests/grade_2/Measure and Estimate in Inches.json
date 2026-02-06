@@ -1,0 +1,76 @@
+{
+  "meta": {
+    "title": "Measure and Estimate in Inches",
+    "passThreshold": 0.8,
+    "rewards": {
+      "bp": 150,
+      "items": [
+        { "id": "xp_potion", "qty": 1 },
+        { "id": "arena_ticket", "qty": 1 }
+      ],
+      "pet": null
+    }
+  },
+  "questions": [
+    {
+      "q": "Look at the counters on the ruler below. What is the distance between the two counters?",
+      "qVisualHTML": "<svg width='300' height='100' viewBox='0 0 300 100' style='background:#f9f9f9; border-radius:8px;'><rect x='10' y='50' width='280' height='30' fill='#e0e0e0' stroke='#333' /><line x1='10' y1='50' x2='10' y2='80' stroke='#333' /><text x='13' y='75' font-family='monospace' font-size='12'>0</text><line x1='80' y1='50' x2='80' y2='80' stroke='#333' /><text x='83' y='75' font-family='monospace' font-size='12'>1</text><line x1='150' y1='50' x2='150' y2='80' stroke='#333' /><text x='153' y='75' font-family='monospace' font-size='12'>2</text><line x1='220' y1='50' x2='220' y2='80' stroke='#333' /><text x='223' y='75' font-family='monospace' font-size='12'>3</text><line x1='290' y1='50' x2='290' y2='80' stroke='#333' /><text x='280' y='75' font-family='monospace' font-size='12'>4</text><circle cx='80' cy='30' r='10' fill='#FF5722' /><circle cx='220' cy='30' r='10' fill='#FF5722' /><line x1='80' y1='30' x2='220' y2='30' stroke='#FF5722' stroke-dasharray='4' /></svg>",
+      "a": "2 inches",
+      "options": ["1 inch", "2 inches", "3 inches", "4 inches"]
+    },
+    {
+      "q": "Estimate the length of the glue stick. (Hint: The blue bar is 1 inch long).",
+      "qVisualHTML": "<svg width='300' height='80' viewBox='0 0 300 80' style='background:#fff;'><rect x='20' y='40' width='60' height='10' fill='#2196F3' /><text x='20' y='30' font-size='12' fill='#2196F3'>Reference: 1 inch</text><rect x='20' y='55' width='180' height='20' rx='5' fill='#FFC107' stroke='#F57F17' /><text x='210' y='70' font-size='14'>Glue Stick</text></svg>",
+      "a": "3 inches",
+      "options": ["1 inch", "3 inches", "10 inches", "12 inches"]
+    },
+    {
+      "q": "What is the length of the toy car shown below?",
+      "qVisualHTML": "<svg width='450' height='120' viewBox='0 0 450 120' style='background:#f0f8ff; border-radius:8px;'><path d='M40,60 L240,60 L240,30 Q240,10 200,10 L100,10 L60,30 L40,30 Z' fill='#9C27B0' /><circle cx='70' cy='60' r='15' fill='#333' /><circle cx='210' cy='60' r='15' fill='#333' /><rect x='40' y='80' width='400' height='30' fill='#FFF' stroke='#333' /><line x1='40' y1='80' x2='40' y2='110' stroke='#333' /><text x='45' y='105' font-family='monospace'>0</text><line x1='106' y1='80' x2='106' y2='110' stroke='#333' /><text x='111' y='105' font-family='monospace'>1</text><line x1='173' y1='80' x2='173' y2='110' stroke='#333' /><text x='178' y='105' font-family='monospace'>2</text><line x1='240' y1='80' x2='240' y2='110' stroke='#333' /><text x='245' y='105' font-family='monospace'>3</text><line x1='306' y1='80' x2='306' y2='110' stroke='#333' /><text x='311' y='105' font-family='monospace'>4</text><line x1='372' y1='80' x2='372' y2='110' stroke='#333' /><text x='377' y='105' font-family='monospace'>5</text><line x1='438' y1='80' x2='438' y2='110' stroke='#333' /><text x='443' y='105' font-family='monospace'>6</text></svg>",
+      "a": "3 inches",
+      "options": ["2 inches", "3 inches", "4 inches", "30 inches"]
+    },
+    {
+      "q": "The paper clip is 2 inches long. Which is the best estimate for the length of the string?",
+      "qVisualHTML": "<svg width='300' height='100' viewBox='0 0 300 100' style='background:#fff;'><text x='10' y='20' font-size='12' fill='#555'>Paper Clip (2 in):</text><rect x='10' y='30' width='60' height='10' rx='5' fill='#9E9E9E' /><text x='10' y='60' font-size='12' fill='#555'>String:</text><line x1='10' y1='80' x2='160' y2='80' stroke='#4CAF50' stroke-width='6' stroke-linecap='round'/></svg>",
+      "a": "5 inches",
+      "options": ["2 inches", "3 inches", "5 inches", "7 inches"]
+    },
+    {
+      "q": "Alexa measures a ribbon to be 4 inches long. Which measurement below is LONGER than Alexa's ribbon?",
+      "qVisualHTML": "<svg width='300' height='80' viewBox='0 0 300 80' style='background:#fff; border-radius:8px;'><rect x='10' y='10' width='200' height='20' fill='#E91E63' /><rect x='10' y='40' width='300' height='30' fill='#e0e0e0' stroke='#333' /><line x1='10' y1='40' x2='10' y2='70' stroke='#333' /><text x='13' y='65' font-family='monospace'>0</text><line x1='60' y1='40' x2='60' y2='70' stroke='#333' /><text x='63' y='65' font-family='monospace'>1</text><line x1='110' y1='40' x2='110' y2='70' stroke='#333' /><text x='113' y='65' font-family='monospace'>2</text><line x1='160' y1='40' x2='160' y2='70' stroke='#333' /><text x='163' y='65' font-family='monospace'>3</text><line x1='210' y1='40' x2='210' y2='70' stroke='#333' /><text x='213' y='65' font-family='monospace'>4</text></svg>",
+      "a": "5 inches",
+      "options": ["2 inches", "3 inches", "4 inches", "5 inches"]
+    },
+    {
+      "q": "Measure the length of the green worm using the ruler provided.",
+      "qVisualHTML": "<svg width='300' height='80' viewBox='0 0 300 80' style='background:#f9f9f9; border-radius:8px;'><path d='M20,30 Q30,20 40,30 T60,30 T80,30 T100,30 T120,30 T140,30 T160,30 T180,30 T200,30 T220,30' fill='none' stroke='#8BC34A' stroke-width='10' stroke-linecap='round' /><rect x='20' y='50' width='250' height='25' fill='#FFF' stroke='#333' /><line x1='20' y1='50' x2='20' y2='75' stroke='#333' /><text x='23' y='70' font-size='10'>0</text><line x1='70' y1='50' x2='70' y2='75' stroke='#333' /><text x='73' y='70' font-size='10'>1</text><line x1='120' y1='50' x2='120' y2='75' stroke='#333' /><text x='123' y='70' font-size='10'>2</text><line x1='170' y1='50' x2='170' y2='75' stroke='#333' /><text x='173' y='70' font-size='10'>3</text><line x1='220' y1='50' x2='220' y2='75' stroke='#333' /><text x='223' y='70' font-size='10'>4</text><line x1='270' y1='50' x2='270' y2='75' stroke='#333' /><text x='273' y='70' font-size='10'>5</text></svg>",
+      "a": "4 inches",
+      "options": ["2 inches", "3 inches", "4 inches", "5 inches"]
+    },
+    {
+      "q": "The blue block starts at 2 inches and ends at 5 inches. How long is the block?",
+      "qVisualHTML": "<svg width='300' height='80' viewBox='0 0 300 80' style='background:#fff;'><rect x='100' y='20' width='150' height='20' fill='#2196F3' opacity='0.8' /><rect x='0' y='50' width='300' height='25' fill='#eee' stroke='#333' /><line x1='0' y1='50' x2='0' y2='75' stroke='#333' /><text x='5' y='70' font-size='10'>0</text><line x1='50' y1='50' x2='50' y2='75' stroke='#333' /><text x='55' y='70' font-size='10'>1</text><line x1='100' y1='50' x2='100' y2='75' stroke='#333' /><text x='105' y='70' font-size='10'>2</text><line x1='150' y1='50' x2='150' y2='75' stroke='#333' /><text x='155' y='70' font-size='10'>3</text><line x1='200' y1='50' x2='200' y2='75' stroke='#333' /><text x='205' y='70' font-size='10'>4</text><line x1='250' y1='50' x2='250' y2='75' stroke='#333' /><text x='255' y='70' font-size='10'>5</text></svg>",
+      "a": "3 inches",
+      "options": ["2 inches", "3 inches", "5 inches", "7 inches"]
+    },
+    {
+      "q": "Compare the two pencils. How much longer is Pencil B than Pencil A?",
+      "qVisualHTML": "<svg width='300' height='100' viewBox='0 0 300 100' style='background:#fff;'><text x='10' y='20' font-size='12'>Pencil A (2 in):</text><rect x='10' y='25' width='60' height='10' fill='#FFC107' /><text x='10' y='60' font-size='12'>Pencil B (5 in):</text><rect x='10' y='65' width='150' height='10' fill='#FF9800' /></svg>",
+      "a": "3 inches",
+      "options": ["2 inches", "3 inches", "5 inches", "7 inches"]
+    },
+    {
+      "q": "Estimate the height of the flower. The pot is 2 inches tall.",
+      "qVisualHTML": "<svg width='150' height='200' viewBox='0 0 150 200' style='background:#E0F7FA; border-radius:8px;'><rect x='50' y='140' width='50' height='40' fill='#795548' /><text x='110' y='165' font-size='12' fill='#555'>2 in</text><line x1='105' y1='140' x2='105' y2='180' stroke='#555' /><path d='M75,140 L75,60' stroke='green' stroke-width='4' /><circle cx='75' cy='60' r='15' fill='pink' /><text x='110' y='100' font-size='12' fill='#555'>?</text></svg>",
+      "a": "4 inches",
+      "options": ["2 inches", "4 inches", "1 inch", "10 inches"]
+    },
+    {
+      "q": "Which object is about 1 inch long?",
+      "qVisualHTML": "<div style='display:flex; gap:10px; justify-content:center;'><div style='text-align:center;'>📏<br>Ruler</div><div style='text-align:center;'>🚌<br>Bus</div><div style='text-align:center;'>📎<br>Paper Clip</div></div>",
+      "a": "Paper Clip",
+      "options": ["Bus", "Paper Clip", "Ruler", "Bicycle"]
+    }
+  ]
+}
