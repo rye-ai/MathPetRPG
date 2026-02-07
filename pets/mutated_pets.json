@@ -1,0 +1,13 @@
+[
+  {
+    "id": "solar_rex_01",
+    "name": "Solar Rex",
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/V1/21.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "🦖☀️",
+    "baseHP": 150,
+    "rarity": "legendary",
+    "element": ["fire", "light"],
+    "powers": ["fire_spell", "light_beam", "mega_punch"]
+  }
+]
