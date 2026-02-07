@@ -19,6 +19,9 @@
   "blocks": [
     "custom_blocks.json"
   ],
+  "fusion": [
+    "fusion_recipes.json"
+  ],
   "events": [
     "event_list.json",
     "christmas_reward.json",
