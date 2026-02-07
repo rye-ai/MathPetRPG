@@ -50,6 +50,8 @@
   <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
   
   <style>@view-transition { navigation: auto; }</style>
+  <!-- Link to the external Fusion Lab Styles -->
+<link rel="stylesheet" href="fusion_lab.css">
   
   <!-- Custom Game Styles -->
   <style>
@@ -1760,6 +1762,7 @@ body {
        <button class="tab" data-tab="build" onclick="switchTab('build')">🏰 Build</button>
        <button class="tab" data-tab="tools" onclick="switchTab('tools')">🛠️ Tools</button>
        <button class="tab" data-tab="tower" onclick="switchTab('tower')">🗼 Tower</button>
+       <button class="tab" data-tab="fusion" onclick="switchTab('fusion')">🧪 Lab</button>
    </nav>
    <!-- PRO UI: ADVENTURE HUD & JOURNAL -->
    <div class="adventure-hud" id="adv-hud">
@@ -2221,6 +2224,14 @@ body {
 
 
     </div> <!-- END OF TOWER ARENA -->
+</section>
+
+<!-- The Fusion Lab Stage -->
+<section id="screen-fusion" class="screen">
+    <div id="fusion-lab-root">
+        <!-- Everything here will be injected by fusion_lab.js -->
+        <div style="text-align:center; padding:50px; color:gray;">Initializing Laboratory...</div>
+    </div>
 </section>
 
 <!-- 4. The Math Pop-up (Centered Overlay) -->
@@ -3060,7 +3071,14 @@ for (let key in data) {
         if (longKey === 'pets' && Array.isArray(value)) {
             value = value.map(compressedPet => {
                 let dp = {};
-                for (let k in compressedPet) dp[invertedKeys[k] || k] = compressedPet[k];
+                 for (let k in compressedPet) {
+                    const longName = invertedKeys[k] || k;
+                    const shortName = k;
+                    const val = compressedPet[k];
+
+                    dp[longName] = val;  // Set the long version (e.g., 'type')
+                    dp[shortName] = val; // Set the short version (e.g., 'tp')
+                }
                 
                 // Force numeric stats for Pet
                 dp.hp = safeNum(dp.hp);
@@ -5238,7 +5256,24 @@ function getScaledEnemy(baseEnemyTemplate, playerLevel) {
     function getElementMultiplier(moveType, targetInput) { if (!moveType || !targetInput) return 1.0; const atk = moveType.toLowerCase(); const targetTypes = Array.isArray(targetInput) ? targetInput : [targetInput]; let totalMultiplier = 1.0; targetTypes.forEach(defType => { const def = defType.toLowerCase(); const typeData = TYPE_CHART[atk]; if (typeData) { if (typeData.strong.includes(def)) totalMultiplier *= 2.0; else if (typeData.weak.includes(def)) totalMultiplier *= 0.5; } }); return totalMultiplier; }
 
     function startBattle(tileType, isBoss, isArena, specificEnemy = null) {
-        const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+        // 🛡️ BATTLE BODYGUARD: Ensure we have a valid pet before starting
+    let pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+
+    // If the pet is missing (Undefined), try to grab the first pet in your list
+    if (!pet && gameState.pets.length > 0) {
+        console.warn("🛡️ desync detected: Active pet was undefined. Switching to pet[0].");
+        pet = gameState.pets[0];
+        gameState.currentPetId = pet.id;
+    }
+
+    // If you STILL don't have a pet (List is empty), stop the battle before it crashes
+    if (!pet) {
+        showToast("No pets available to battle!", "error");
+        finalizeExit(); // Cleanly exit back to the map
+        return;
+    }
+
+    // Element failsafe (Restoring the line we removed)
         
         // Element failsafe
         if (!pet.element) { 
@@ -5970,7 +6005,8 @@ if(qmMult > 1) showToast(`BONUS EVENT: ${qmMult}x Rewards!`, "success");
         soundManager.playBGM('wilds'); 
     }
 }
-    function switchTab(t) { 
+    function switchTab(t) {
+        if(t === 'fusion') selectedSlot1 = null; selectedSlot2 = null; // Reset lab on enter
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
     document.querySelectorAll('.tab').forEach(b => b.classList.remove('active')); 
     
@@ -11262,6 +11298,18 @@ let towerTurnIndex = 0;
 
 // 1. THE LOBBY
 function renderTowerLobby() {
+    
+    // 🛡️ SQUAD BODYGUARD: Remove "Ghost" pets that were fused or released
+    if (gameState.team && gameState.team.length > 0) {
+        // Only keep IDs that actually exist in the main pets list
+        gameState.team = gameState.team.filter(id => gameState.pets.some(p => p.id === id));
+        
+        // If the squad is now empty, put the current active pet in it so it's not broken
+        if (gameState.team.length === 0 && gameState.currentPetId) {
+            gameState.team = [gameState.currentPetId];
+        }
+    }
+    
     isTowerActing = false;
     towerTurnIndex = 0;
     towerFocusActive = false;
@@ -12079,5 +12127,7 @@ function rehydrateAllPets() {
         </div>
     </div>
 </div>
+<!-- The external Fusion Lab logic -->
+<script src="fusion_lab.js" type="module"></script>
 </body>
  </html>
