@@ -2,7 +2,6 @@
   "pets": [
     "evolutions.json",
     "missingpets.json",
-    "regular_pets.json",
     "mutated_pets.json"
   ],
   "enemies": [
