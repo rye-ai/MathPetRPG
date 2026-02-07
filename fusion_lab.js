@@ -9,7 +9,7 @@ setInterval(() => {
     const root = document.getElementById('fusion-lab-root');
     if (!root) return;
     const isVisible = root.parentElement.classList.contains('active');
-    if (isVisible && root.innerHTML.includes("Connecting")) {
+    if (isVisible && root.innerHTML.includes("Initializing")) {
         startFusionLab();
     }
 }, 1000);
