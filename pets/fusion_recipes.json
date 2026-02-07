@@ -1,0 +1,8 @@
+[
+  {
+    "parents": ["monster_01", "monster_04"],
+    "result": "solar_rex_01",
+    "cost": 500,
+    "description": "The heat of Kittire meets the lightning of Royalion."
+  }
+]
