@@ -1,7 +1,9 @@
 {
   "pets": [
     "evolutions.json",
-    "missingpets.json"
+    "missingpets.json",
+    "regular_pets.json",
+    "mutated_pets.json"
   ],
   "enemies": [
     "boss.json",
