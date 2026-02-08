@@ -1,4 +1,3 @@
-
 /* --- FUSION_CSS_START --- */
 #fusion-lab-root { 
     height: 100%; 
@@ -53,6 +52,24 @@
     z-index: 5;
 }
 
+/* --- 🌟 NEW: THE ENERGY SPHERE (Hides the Result Pet) --- */
+.energy-sphere {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #fff 0%, #63b3ed 40%, transparent 70%);
+    box-shadow: 0 0 30px #4299e1, inset 0 0 20px #fff;
+    animation: corePulse 1.5s infinite ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@keyframes corePulse {
+    0%, 100% { transform: scale(1); opacity: 0.7; filter: blur(2px); }
+    50% { transform: scale(1.15); opacity: 1; filter: blur(0px); box-shadow: 0 0 50px #63b3ed; }
+}
+
 /* --- PET SPRITE STYLING --- */
 @keyframes breathing {
     0% { transform: scale(1); }
@@ -67,7 +84,7 @@
 }
 
 .fusion-pet-sprite {
-    width: 210px; /* 140px + 50% */
+    width: 210px; 
     height: 210px;
     object-fit: contain;
     filter: drop-shadow(0 0 10px rgba(99, 179, 237, 0.5));
@@ -172,4 +189,3 @@
     pointer-events: none;
 }
 /* --- FUSION_CSS_END --- */
-
