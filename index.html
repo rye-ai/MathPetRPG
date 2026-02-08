@@ -2877,7 +2877,7 @@ function createPetInstance(baseId, customName = null, isHatched = true) {
 }
 
 // --- PHASE 1: THE GATEKEEPER ENGINE ---
-// --- 🛡️ PHASE 1: THE GATEKEEPER (LOADER) ---
+// --- 🛡️ PHASE 1: THE MASTER GATEKEEPER (LOADER - REPAIRED) ---
 async function loadGitHubData() {
     const loginBtn = document.getElementById('login-submit-btn');
     
@@ -2903,8 +2903,10 @@ async function loadGitHubData() {
             } catch (e) { return null; }
         };
 
-        // A. Load Pets
+        // A. LOAD ALL PETS (Strict Sequential Wait)
+        // This forces the game to wait for mutated_pets.json to finish!
         if (registryData.pets) {
+            console.log("🧬 Downloading Pet Species...");
             for (const file of registryData.pets) {
                 const data = await directFetch('pets', file);
                 if (data) {
@@ -2938,15 +2940,15 @@ async function loadGitHubData() {
         items.forEach(d => { if(d) SHOP_ITEMS.equipment = [...(SHOP_ITEMS.equipment||[]), ...d]; });
 
         const powers = await Promise.all((registryData.powers || []).map(f => directFetch('powers', f)));
-        // D. Sync Custom Voxel Blocks (The "Unroller")
+        powers.forEach(d => { if(d) SHOP_ITEMS.power_items = [...SHOP_ITEMS.power_items, ...d]; });
+
+        // D. Sync Custom Voxel Blocks (Kept for Builder Feature)
         const blockFiles = await Promise.all((registryData.blocks || []).map(f => directFetch('blocks', f)));
         blockFiles.forEach(fileData => { 
             if (fileData && Array.isArray(fileData)) {
                 fileData.forEach(block => {
-                    // Only add if the ID doesn't exist yet
                     if (!BUILDER_BLOCKS.find(b => b.id === block.id)) {
                         BUILDER_BLOCKS.push(block); 
-                        // Add to the save-system compression map
                         const shortId = block.id.substring(0,2);
                         VOXEL_MAP[block.id] = shortId; 
                         VOXEL_LOOKUP[shortId] = block.id;
@@ -2954,10 +2956,10 @@ async function loadGitHubData() {
                 });
             }
         });
-        powers.forEach(d => { if(d) SHOP_ITEMS.power_items = [...SHOP_ITEMS.power_items, ...d]; });
 
         // --- ✅ FINAL SUCCESS HANDSHAKE ---
-        console.log("✅ Registry Synchronized Successfully.");
+        // Button only turns green AFTER everything (including blocks) is ready!
+        console.log("✅ All Systems Ready. Opening Gate.");
         if (loginBtn) {
             loginBtn.disabled = false;
             loginBtn.innerText = "Start Adventure! 🚀";
@@ -12012,17 +12014,19 @@ function renderScholarLeaderboard(entries) {
     list.innerHTML = html;
 }
 
-// --- 🏥 THE SUPER-DOCTOR (REHYDRATOR) ---
+// --- 🏥 THE SUPER-DOCTOR (REHYDRATOR - LEGENDARY GUARD VERSION) ---
 function rehydrateAllPets() {
     if (!gameState.pets || gameState.pets.length === 0) return;
 
     console.log("🏥 Super-Doctor: Commencing Shielded Rehydration...");
 
     gameState.pets.forEach(p => {
-        // 1. Identify species (Check compressed 'tp' or full 'type')
-        const speciesId = p.type || p.tp || 'monster_01';
+        // 🛡️ ARCHITECT FIX 1: No default 'monster_01'. 
+        // We look for type, tp, or id. If all are missing, we skip this pet.
+        const speciesId = p.type || p.tp || p.id; 
+        if (!speciesId) return;
 
-        // 2. Find Blueprint in the Registry
+        // Find Blueprint in the Registry (GitHub Data)
         let blueprint = null;
         for (const rarity in PET_TYPES) {
             const found = PET_TYPES[rarity].find(b => b.id === speciesId);
@@ -12030,39 +12034,45 @@ function rehydrateAllPets() {
         }
 
         if (blueprint) {
+            // Found it! Sync identities
             p.type = speciesId; 
+            p.tp = speciesId; 
             p.rarity = p.rarity || blueprint.rarity;
             p.element = p.element || blueprint.element;
             p.emoji = p.emoji || blueprint.emoji;
 
-            // Visual Sync (Fix broken images)
-            const isImgBroken = !p.image || p.image === "" || p.image === "undefined" || p.image.length < 10;
+            // Fix broken images
+            const isImgBroken = !p.image || p.image === "" || p.image === "undefined";
             if (isImgBroken) {
                 p.image = blueprint.image; 
                 p.imageStyle = blueprint.imageStyle || 'blend-multiply';
             }
 
-            // Evolution Visual Sync
+            // Evolution Visual Sync (Kept from your original)
             const stage = safeNum(p.evolutionStage || p.evs);
             let chain = EVOLUTION_CHAINS[speciesId] || p.savedEvolutions || p.sevo;
             if (stage > 0 && chain && chain[stage - 1]) {
                 const evoData = chain[stage - 1];
                 if (evoData.image) p.image = evoData.image;
             }
+        } else {
+            // 🛡️ ARCHITECT FIX 2: If NOT found in registry, DO NOTHING.
+            // Do not turn the pet into a cat. This keeps the legendary name/stats safe.
+            console.warn("🏥 Doctor: Skipping reset for " + speciesId + " (Registry not loaded yet)");
         }
 
-        // 3. 🛡️ DATA HARDENING (Prevent crashes)
-        p.powers = Array.isArray(p.powers) ? p.powers : ['claw_attack'];
+        // --- 🛡️ DATA HARDENING (Prevent crashes) ---
+        p.powers = Array.isArray(p.powers) ? p.powers : (p.powers ? [p.powers] : ['claw_attack']);
         p.badges = Array.isArray(p.badges) ? p.badges : [];
         p.equipment = (p.equipment && typeof p.equipment === 'object') ? p.equipment : {};
         p.stars = safeNum(p.stars);
 
-        // 4. 🛡️ LEVEL PROTECTION (The Level 1 Fix)
+        // Level Protection
         const foundLevel = p.level || p.lv || p.lvl || 1;
         p.level = safeNum(foundLevel, 1);
         p.lv = p.level; 
 
-        // 5. 🛡️ STAT SHIELD
+        // Stat Shield (Ensures pet has valid HP/XP based on level)
         p.maxHP = safeNum(p.maxHP || p.mhp, (50 + (p.level * 10)));
         p.hp = safeNum(p.hp, p.maxHP);
         if (p.hp > p.maxHP) p.hp = p.maxHP;
@@ -12070,8 +12080,8 @@ function rehydrateAllPets() {
         p.maxXp = safeNum(p.maxXp, (p.level * 300 + 200));
     });
 
-    applySquadLevelSync(); // Force level floor
-    console.log("✅ All pets have been fully reconstructed, shielded, and synced.");
+    applySquadLevelSync(); 
+    console.log("✅ Rehydration Complete: Legendary pets are shielded from the Cat Curse.");
 }
   </script>
   <!-- 🚧 CONSTRUCTION QUIZ MODAL -->
