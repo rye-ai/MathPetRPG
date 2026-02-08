@@ -165,32 +165,49 @@ async function executeMutation() {
     // 🛡️ ARCHITECT GUARD 2: Unequip items automatically so they aren't lost
     [selectedSlot1, selectedSlot2].forEach(p => { p.equipment = {}; });
 
-    // 4. Update Game State
+   // 4. Update Game State (SHIELDED BIRTH CERTIFICATE)
     const avgLvl = Math.floor(((selectedSlot1.level || 1) + (selectedSlot2.level || 1)) / 2);
+    
+    // This creates the new pet with all the hidden ID tags needed to stop the "Cat Bug"
     const newPet = { 
         ...resultBase, 
         id: 'mutant_'+Date.now(), 
+        type: resultBase.id, // 🛡️ Species ID for Game logic
+        tp: resultBase.id,   // 🛡️ Species ID for Save logic
         level: avgLvl, 
+        lv: avgLvl,          // Sync Level for both systems
         hp: 120+(avgLvl*10), 
         maxHP: 120+(avgLvl*10), 
         isHatched: true, 
         evolutionStage: 0, 
-        stars: 0 
+        stars: 0,
+        powers: resultBase.powers || ['claw_attack'],
+        equipment: {},
+        badges: []
     };
 
+    // Deduct BP
     gameState.brainPoints -= recipe.cost;
+    
     const id1 = selectedSlot1.id; 
     const id2 = selectedSlot2.id;
     
-    // Safety filter to remove parents
+    // 🛡️ SECURITY: Remove the parents and add the new legend
     gameState.pets = gameState.pets.filter(p => p.id !== id1 && p.id !== id2);
     gameState.pets.push(newPet);
     gameState.currentPetId = newPet.id;
     
+    // Update Squad if parents were in it
+    if (gameState.team) {
+        gameState.team = gameState.team.filter(id => id !== id1 && id !== id2);
+        if (gameState.team.length < 6) gameState.team.push(newPet.id);
+    }
+
+    // Force Cloud Save immediately
     saveGame(true);
 
     await new Promise(r => setTimeout(r, 500));
-
+    
     // 5. Final Reward (THIS is where the pet is revealed!)
     triggerRewardCeremony(
         "LEGENDARY MUTATION COMPLETE!", 
