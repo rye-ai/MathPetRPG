@@ -1,4 +1,3 @@
-
 /* --- FUSION_JS_START --- */
 let selectedSlot1 = null;
 let selectedSlot2 = null;
@@ -39,7 +38,7 @@ function renderLabUI() {
                 <h2 style="color:#63b3ed; text-shadow: 0 0 15px #000; font-weight:900; letter-spacing:2px; font-size:24px;">🧬 MUTATION CENTER</h2>
             </div>
 
-            <!-- Slot A (Beside left rock feature) -->
+            <!-- Slot A -->
             <div class="slot-a-pos" id="pod-a">
                 ${selectedSlot1 
                     ? `<img src="${selectedSlot1.image}" class="fusion-pet-sprite ${selectedSlot1.imageStyle}" onclick="deselectSlot(1)">` 
@@ -51,7 +50,7 @@ function renderLabUI() {
                 ${recipe ? `<div class="fusion-vortex vortex-active">${renderResultSilhouette(recipe)}</div>` : ''}
             </div>
 
-            <!-- Slot B (Beside right rock feature, flipped) -->
+            <!-- Slot B -->
             <div class="slot-b-pos" id="pod-b">
                 ${selectedSlot2 
                     ? `<img src="${selectedSlot2.image}" class="fusion-pet-sprite flipped-sprite ${selectedSlot2.imageStyle}" onclick="deselectSlot(2)">` 
@@ -117,6 +116,18 @@ function findActiveRecipe() {
 async function executeMutation() {
     const recipe = findActiveRecipe();
     if (!recipe || isFusing) return;
+
+    // 🛡️ ARCHITECT GUARD 1: Verify Result exists on GitHub before proceeding
+    let resultBase = null;
+    for (const r in PET_TYPES) {
+        const found = PET_TYPES[r].find(p => p.id === recipe.result);
+        if (found) { resultBase = JSON.parse(JSON.stringify(found)); break; }
+    }
+
+    if (!resultBase) {
+        alert("🚨 DATA ERROR: The result ID '" + recipe.result + "' was not found in mutated_pets.json. Check your GitHub IDs! No pets were deleted.");
+        return;
+    }
     
     if (!confirm(`Warning: ${selectedSlot1.name} and ${selectedSlot2.name} will be consumed to create a Legend. Proceed?`)) return;
 
@@ -126,19 +137,23 @@ async function executeMutation() {
     const flash = document.getElementById('lab-flash');
     const actionZone = document.querySelector('.fusion-action-zone');
 
-    // 1. Energy Charge (Idle breathing stops here as 'charging' takes over)
+    // 1. Energy Charge
     actionZone.style.opacity = '0';
-    podA.classList.add('charging');
-    podB.classList.add('charging-flipped');
+    if(podA) podA.classList.add('charging');
+    if(podB) podB.classList.add('charging-flipped');
     soundManager.playSFX('attack');
     
     await new Promise(r => setTimeout(r, 2000));
 
     // 2. Converge to center
-    podA.classList.remove('charging');
-    podB.classList.remove('charging-flipped');
-    podA.parentElement.classList.add('flying-a');
-    podB.parentElement.classList.add('flying-b');
+    if(podA) {
+        podA.classList.remove('charging');
+        podA.parentElement.classList.add('flying-a');
+    }
+    if(podB) {
+        podB.classList.remove('charging-flipped');
+        podB.parentElement.classList.add('flying-b');
+    }
 
     await new Promise(r => setTimeout(r, 800));
 
@@ -146,14 +161,11 @@ async function executeMutation() {
     flash.classList.add('nova-active');
     soundManager.playSFX('gacha');
 
+    // 🛡️ ARCHITECT GUARD 2: Unequip items automatically so they aren't lost
+    [selectedSlot1, selectedSlot2].forEach(p => { p.equipment = {}; });
+
     // 4. Update Game State
-    let resultBase = null;
-    for (const r in PET_TYPES) {
-        const found = PET_TYPES[r].find(p => p.id === recipe.result);
-        if (found) { resultBase = JSON.parse(JSON.stringify(found)); break; }
-    }
-    
-    const avgLvl = Math.floor((selectedSlot1.level + selectedSlot2.level) / 2);
+    const avgLvl = Math.floor(((selectedSlot1.level || 1) + (selectedSlot2.level || 1)) / 2);
     const newPet = { 
         ...resultBase, 
         id: 'mutant_'+Date.now(), 
@@ -168,6 +180,8 @@ async function executeMutation() {
     gameState.brainPoints -= recipe.cost;
     const id1 = selectedSlot1.id; 
     const id2 = selectedSlot2.id;
+    
+    // Safety filter to remove parents
     gameState.pets = gameState.pets.filter(p => p.id !== id1 && p.id !== id2);
     gameState.pets.push(newPet);
     gameState.currentPetId = newPet.id;
