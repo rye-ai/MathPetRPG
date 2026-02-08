@@ -4,6 +4,7 @@ let selectedSlot2 = null;
 let fusionRecipes = [];
 let isFusing = false;
 
+// Watch for the Fusion Tab
 setInterval(() => {
     const root = document.getElementById('fusion-lab-root');
     if (!root) return;
@@ -45,7 +46,7 @@ function renderLabUI() {
                     : `<div class="fusion-empty-pod" onclick="showToast('Select a pet from the list!', 'info')">+</div>`}
             </div>
 
-            <!-- Result/Vortex -->
+            <!-- Result/Vortex (NOW HIDING THE RESULT) -->
             <div class="vortex-pos">
                 ${recipe ? `<div class="fusion-vortex vortex-active">${renderResultSilhouette(recipe)}</div>` : ''}
             </div>
@@ -75,12 +76,12 @@ function renderLabUI() {
 
 function renderResultSilhouette(recipe) {
     if (!recipe) return "";
-    let resultData = null;
-    for (const r in PET_TYPES) {
-        const found = PET_TYPES[r].find(p => p.id === recipe.result);
-        if (found) { resultData = found; break; }
-    }
-    return resultData ? `<img src="${resultData.image}" class="silhouette" style="width:110px; height:110px;">` : "?";
+    
+    // 🛡️ ARCHITECT FIX: We now show the Glowing Energy Sphere instead of the pet image.
+    // This keeps the 55 unique hybrids a total surprise!
+    return `<div class="energy-sphere">
+                <div style="font-size:24px; font-weight:bold; color:white; text-shadow: 0 0 10px #000;">?</div>
+            </div>`;
 }
 
 function renderCandidateList() {
@@ -190,7 +191,7 @@ async function executeMutation() {
 
     await new Promise(r => setTimeout(r, 500));
 
-    // 5. Final Reward
+    // 5. Final Reward (THIS is where the pet is revealed!)
     triggerRewardCeremony(
         "LEGENDARY MUTATION COMPLETE!", 
         `The DNA has stabilized into ${newPet.name}!`, 
