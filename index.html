@@ -2557,7 +2557,8 @@ let currentBuyingItem = null;
       rare: [ { id: 'monster_13', name: 'CaraBrown', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/V1/31.png', imageStyle: 'blend-multiply', emoji: '❓', baseHP: 60, rarity: 'rare', element: 'earth' } ],
       epic: [ { id: 'monster_14', name: 'Ms.Mckenfish', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/V1/1.png', imageStyle: 'blend-multiply', emoji: '❓', baseHP: 70, rarity: 'epic', element: 'fire' } ],
       legendary: [ { id: 'monster_15', name: 'Pilandoc', image: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/V1/34.png', imageStyle: 'blend-multiply', emoji: '❓', baseHP: 90, rarity: 'legendary', element: ['light', 'fire'] } ],
-      event: [] 
+      event: [],
+       mutated: [] 
     };
 
     const EVOLUTION_CHAINS = {
@@ -2903,17 +2904,28 @@ async function loadGitHubData() {
             } catch (e) { return null; }
         };
 
-        // A. LOAD ALL PETS (Strict Sequential Wait)
-        // This forces the game to wait for mutated_pets.json to finish!
+        // A. LOAD ALL PETS (With Mutation Shield)
         if (registryData.pets) {
             console.log("🧬 Downloading Pet Species...");
+            
+            // 1. Ensure the 'mutated' bucket exists in your pet list
+            if (!PET_TYPES.mutated) PET_TYPES.mutated = [];
+
             for (const file of registryData.pets) {
                 const data = await directFetch('pets', file);
+                
+                // 2. CHECK: Is this the specific file for fusions?
+                const isMutatedFile = file.toLowerCase().includes('mutated');
+
                 if (data) {
                     const processEntry = (entry) => {
                         const petBlueprint = entry.base ? entry.base : entry;
                         const evolutions = entry.evolutions || null;
-                        const r = petBlueprint.rarity || 'common';
+                        
+                        // 3. LOGIC: If it's the mutation file, put it in 'mutated'.
+                        // Otherwise, put it in its normal rarity (rare, epic, etc.)
+                        const r = isMutatedFile ? 'mutated' : (petBlueprint.rarity || 'common');
+                        
                         if (!PET_TYPES[r]) PET_TYPES[r] = [];
 
                         if (!PET_TYPES[r].find(x => x.id === petBlueprint.id)) {
