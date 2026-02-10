@@ -4916,6 +4916,7 @@ function renderInventory(isEgg) {
             m.style.display = 'none'; 
             saveGame(true); 
             renderHub(); 
+            if (typeof initFusionLab === 'function') initFusionLab(); // Pre-updates the Lab
         };
     }
     
@@ -4993,6 +4994,7 @@ function renderInventory(isEgg) {
     } 
     
     gameState.pets.push(...pulls); 
+    applySquadLevelSync(); 
     saveGame(true);
     startGachaAnimation(pulls);
 }
@@ -6069,6 +6071,13 @@ if(qmMult > 1) showToast(`BONUS EVENT: ${qmMult}x Rewards!`, "success");
             renderTowerLobby(); 
         }
     }
+    
+    if (t === 'fusion') {
+    if (typeof initFusionLab === 'function') {
+        console.log("🧪 Syncing Fusion Lab with fresh pet data...");
+        initFusionLab(); // This tells the external JS to re-scan gameState.pets
+    }
+}
 
     if (t !== 'wilds') { 
         document.getElementById('rpg-wrapper').style.display = 'none'; 
