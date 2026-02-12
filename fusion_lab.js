@@ -85,12 +85,40 @@ function renderResultSilhouette(recipe) {
 }
 
 function renderCandidateList() {
-    const candidates = gameState.pets.filter(p => p.isHatched && p.evolutionStage >= 2 && p.id !== selectedSlot1?.id && p.id !== selectedSlot2?.id);
-    if (candidates.length === 0) return "<p style='font-size:11px; color:#718096; width:100%; text-align:center;'>No Evolution 3 pets available.</p>";
+    // This filter checks both your standard Dino fusions AND your new Apin System
+    const candidates = gameState.pets.filter(p => {
+        if (!p.isHatched) return false;
+        
+        // Don't show pets that are already sitting in Slot 1 or Slot 2
+        if (p.id === selectedSlot1?.id || p.id === selectedSlot2?.id) return false;
+
+        // RULE 1: Standard Stage 3 pets (Traditional Dino Fusions)
+        if (p.evolutionStage >= 2) return true;
+
+        // RULE 2: The "Apin Protocol" (Special Tags)
+        if (p.canAlwaysFuse === true) {
+            // If it has a minimum level requirement (like Apin), check it
+            if (p.minFusionLevel) {
+                return p.level >= p.minFusionLevel;
+            }
+            // If it has the tag but no level limit (like Catalysts), let it in!
+            return true;
+        }
+
+        return false;
+    });
+
+    // Error message if the player doesn't have anyone eligible
+    if (candidates.length === 0) {
+        return "<p style='text-align:center; color:gray; font-size:11px; width:100%;'>No candidates found.<br>(Need Stage 3 or Level 10 Apin/Catalysts)</p>";
+    }
+
+    // Draw the list of eligible pets
     return candidates.map(p => `
         <div class="pet-card" onclick="selectForFusion('${p.id}')" style="background: rgba(255,255,255,0.1); border: 1px solid #63b3ed; padding:5px;">
             <img src="${p.image}" style="width:35px; height:35px; object-fit:contain;">
             <div style="font-size:8px; color:white; font-weight:bold; overflow:hidden;">${p.name}</div>
+            <div style="font-size:7px; color:#63b3ed;">Lvl ${p.level}</div>
         </div>`).join('');
 }
 
