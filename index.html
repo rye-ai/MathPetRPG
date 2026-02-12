@@ -12059,6 +12059,8 @@ function rehydrateAllPets() {
             p.type = speciesId; 
             p.tp = speciesId; 
             p.rarity = p.rarity || blueprint.rarity;
+         p.canAlwaysFuse = blueprint.canAlwaysFuse || false;
+            p.minFusionLevel = blueprint.minFusionLevel || 0;
             p.element = p.element || blueprint.element;
             p.emoji = p.emoji || blueprint.emoji;
 
