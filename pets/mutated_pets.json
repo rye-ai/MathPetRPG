@@ -53,5 +53,15 @@
   { "id": "f_spin_tric", "name": "Spin-Trice Hybrid", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/mutated/12.png", "baseHP": 400, "rarity": "legendary", "element": ["water", "grass"] },
   { "id": "f_steg_trex", "name": "Steg-Trex Hybrid", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/mutated/10.png", "baseHP": 400, "rarity": "legendary", "element": ["earth", "fire"] },
   { "id": "f_steg_tric", "name": "Steg-Trice Hybrid", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/mutated/18.png", "baseHP": 400, "rarity": "legendary", "element": ["earth", "grass"] },
-  { "id": "f_trex_tric", "name": "Trex-Trice Hybrid", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/mutated/2.png", "baseHP": 400, "rarity": "legendary", "element": ["fire", "grass"] }
+  { "id": "f_trex_tric", "name": "Trex-Trice Hybrid", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/mutated/2.png", "baseHP": 400, "rarity": "legendary", "element": ["fire", "grass"] },
+  { "id": "f_apin_fura", "name": "Rovolon", "rarity": "epic", "element": ["fire", "normal"], "image": "LINK_HERE", "imageStyle": "blend-multiply", "baseHP": 300 },
+  { "id": "f_apin_misu", "name": "Anaquos", "rarity": "epic", "element": ["water", "normal"], "image": "LINK_HERE", "imageStyle": "blend-multiply", "baseHP": 300 },
+  { "id": "f_apin_vora", "name": "Genzora", "rarity": "epic", "element": ["grass", "normal"], "image": "LINK_HERE", "imageStyle": "blend-multiply", "baseHP": 300 },
+  { "id": "f_apin_zela", "name": "Razek", "rarity": "epic", "element": ["electric", "normal"], "image": "LINK_HERE", "imageStyle": "blend-multiply", "baseHP": 300 },
+  { "id": "f_apin_doma", "name": "Roglith", "rarity": "epic", "element": ["earth", "normal"], "image": "LINK_HERE", "imageStyle": "blend-multiply", "baseHP": 300 },
+  { "id": "f_apin_kura", "name": "Rizvern", "rarity": "epic", "element": ["ice", "normal"], "image": "LINK_HERE", "imageStyle": "blend-multiply", "baseHP": 300 },
+  { "id": "f_apin_vela", "name": "Cinphyr", "rarity": "epic", "element": ["wind", "normal"], "image": "LINK_HERE", "imageStyle": "blend-multiply", "baseHP": 300 },
+  { "id": "f_apin_nora", "name": "Edumbrus", "rarity": "epic", "element": ["shadow", "normal"], "image": "LINK_HERE", "imageStyle": "blend-multiply", "baseHP": 300 },
+  { "id": "f_apin_lira", "name": "Anglumen", "rarity": "epic", "element": ["light", "normal"], "image": "LINK_HERE", "imageStyle": "blend-multiply", "baseHP": 300 },
+  { "id": "f_apin_pura", "name": "Monark", "rarity": "epic", "element": ["normal", "normal"], "image": "LINK_HERE", "imageStyle": "blend-multiply", "baseHP": 300 }
 ]
