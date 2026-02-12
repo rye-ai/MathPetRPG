@@ -185,7 +185,7 @@
         "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/raygon/2.png",
         "imageStyle": "blend-multiply"
       },
-      {
+     {
         "name": "Raygon (God)",
         "level": 20,
         "cost": 200,
@@ -196,5 +196,162 @@
         "imageStyle": "blend-multiply"
       }
     ]
+  },
+  {
+    "id": "apin_01",
+    "type": "apin_01",
+    "name": "Apin",
+    "rarity": "rare",
+    "element": "normal",
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/apin/1.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "🐾",
+    "baseHP": 60,
+    "canAlwaysFuse": true,
+    "minFusionLevel": 10,
+    "evolutions": []
+  },
+  {
+    "id": "cata_fura",
+    "type": "cata_fura",
+    "name": "Fura",
+    "rarity": "epic",
+    "element": "fire",
+    "image": "LINK_HERE",
+    "imageStyle": "blend-multiply",
+    "emoji": "🔥",
+    "baseHP": 50,
+    "canAlwaysFuse": true,
+    "evolutions": []
+  },
+  {
+    "id": "cata_misu",
+    "type": "cata_misu",
+    "name": "Misu",
+    "rarity": "epic",
+    "element": "water",
+    "image": "LINK_HERE",
+    "imageStyle": "blend-multiply",
+    "emoji": "💧",
+    "baseHP": 50,
+    "canAlwaysFuse": true,
+    "evolutions": []
+  },
+  {
+    "id": "cata_vora",
+    "type": "cata_vora",
+    "name": "Vora",
+    "rarity": "epic",
+    "element": "grass",
+    "image": "LINK_HERE",
+    "imageStyle": "blend-multiply",
+    "emoji": "🌿",
+    "baseHP": 50,
+    "canAlwaysFuse": true,
+    "evolutions": []
+  },
+  {
+    "id": "cata_zela",
+    "type": "cata_zela",
+    "name": "Zela",
+    "rarity": "epic",
+    "element": "electric",
+    "image": "LINK_HERE",
+    "imageStyle": "blend-multiply",
+    "emoji": "⚡",
+    "baseHP": 50,
+    "canAlwaysFuse": true,
+    "evolutions": []
+  },
+  {
+    "id": "cata_doma",
+    "type": "cata_doma",
+    "name": "Doma",
+    "rarity": "epic",
+    "element": "earth",
+    "image": "LINK_HERE",
+    "imageStyle": "blend-multiply",
+    "emoji": "🪨",
+    "baseHP": 50,
+    "canAlwaysFuse": true,
+    "evolutions": []
+  },
+  {
+    "id": "cata_kura",
+    "type": "cata_kura",
+    "name": "Kura",
+    "rarity": "epic",
+    "element": "ice",
+    "image": "LINK_HERE",
+    "imageStyle": "blend-multiply",
+    "emoji": "❄️",
+    "baseHP": 50,
+    "canAlwaysFuse": true,
+    "evolutions": []
+  },
+  {
+    "id": "cata_vela",
+    "type": "cata_vela",
+    "name": "Vela",
+    "rarity": "epic",
+    "element": "wind",
+    "image": "LINK_HERE",
+    "imageStyle": "blend-multiply",
+    "emoji": "🌪️",
+    "baseHP": 50,
+    "canAlwaysFuse": true,
+    "evolutions": []
+  },
+  {
+    "id": "cata_nora",
+    "type": "cata_nora",
+    "name": "Nora",
+    "rarity": "epic",
+    "element": "shadow",
+    "image": "LINK_HERE",
+    "imageStyle": "blend-multiply",
+    "emoji": "🌑",
+    "baseHP": 50,
+    "canAlwaysFuse": true,
+    "evolutions": []
+  },
+  {
+    "id": "cata_lira",
+    "type": "cata_lira",
+    "name": "Lira",
+    "rarity": "epic",
+    "element": "light",
+    "image": "LINK_HERE",
+    "imageStyle": "blend-multiply",
+    "emoji": "✨",
+    "baseHP": 50,
+    "canAlwaysFuse": true,
+    "evolutions": []
+  },
+  {
+    "id": "cata_pura",
+    "type": "cata_pura",
+    "name": "Pura",
+    "rarity": "epic",
+    "element": "normal",
+    "image": "LINK_HERE",
+    "imageStyle": "blend-multiply",
+    "emoji": "⚪",
+    "baseHP": 50,
+    "canAlwaysFuse": true,
+    "evolutions": []
+  },
+  {
+    "id": "cata_olla",
+    "type": "cata_olla",
+    "name": "Olla",
+    "rarity": "epic",
+    "element": "normal",
+    "image": "LINK_HERE",
+    "imageStyle": "blend-multiply",
+    "emoji": "💎",
+    "baseHP": 50,
+    "canAlwaysFuse": true,
+    "evolutions": []
   }
 ]
