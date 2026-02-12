@@ -53,5 +53,15 @@
   {"parents": ["spino_01", "trice_01"], "result": "f_spin_tric", "cost": 500},
   {"parents": ["stego_01", "trex_01"], "result": "f_steg_trex", "cost": 500},
   {"parents": ["stego_01", "trice_01"], "result": "f_steg_tric", "cost": 500},
-  {"parents": ["trex_01", "trice_01"], "result": "f_trex_tric", "cost": 500}
+  {"parents": ["trex_01", "trice_01"], "result": "f_trex_tric", "cost": 500},
+  {"parents": ["apin_01", "cata_fura"], "result": "f_apin_fura", "cost": 500},
+  {"parents": ["apin_01", "cata_misu"], "result": "f_apin_misu", "cost": 500},
+  {"parents": ["apin_01", "cata_vora"], "result": "f_apin_vora", "cost": 500},
+  {"parents": ["apin_01", "cata_zela"], "result": "f_apin_zela", "cost": 500},
+  {"parents": ["apin_01", "cata_doma"], "result": "f_apin_doma", "cost": 500},
+  {"parents": ["apin_01", "cata_kura"], "result": "f_apin_kura", "cost": 500},
+  {"parents": ["apin_01", "cata_vela"], "result": "f_apin_vela", "cost": 500},
+  {"parents": ["apin_01", "cata_nora"], "result": "f_apin_nora", "cost": 500},
+  {"parents": ["apin_01", "cata_lira"], "result": "f_apin_lira", "cost": 500},
+  {"parents": ["apin_01", "cata_pura"], "result": "f_apin_pura", "cost": 500}
 ]
