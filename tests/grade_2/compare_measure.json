@@ -1,0 +1,133 @@
+{
+  "meta": {
+    "title": "Add and Subtract Lengths",
+    "passThreshold": 0.7,
+    "rewards": {
+      "bp": 500,
+      "items": [
+        {
+          "id": "xp_potion",
+          "qty": 30
+        }
+      ],
+      "pet": {
+        "id": "baseten_01",
+        "name": "Onesy",
+        "element": "wind",
+        "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/baseten/1.png"
+      }
+    }
+  },
+  "questions": [
+    {
+      "q": "Diego has a blue kite that is 21 inches long. He has a red kite that is 17 inches longer than the blue kite. What is the length of the red kite?",
+      "qVisualHTML": "",
+      "a": "38 inches",
+      "options": [
+        "38 inches",
+        "4 inches",
+        "55 inches",
+        "34 inches"
+      ]
+    },
+    {
+      "q": "Maya has a kite string that is 20 inches long. She cuts off a piece that is 17 inches long. How much string is left?",
+      "qVisualHTML": "",
+      "a": "3 inches",
+      "options": [
+        "37 inches",
+        "3 inches",
+        "10 inches",
+        "7 inches"
+      ]
+    },
+    {
+      "q": "Julian has a yellow kite that is 68 inches long. His green kite is 17 inches shorter than the yellow kite. What is the length of the green kite?",
+      "qVisualHTML": "",
+      "a": "51 inches",
+      "options": [
+        "51 inches",
+        "85 inches",
+        "41 inches",
+        "61 inches"
+      ]
+    },
+    {
+      "q": "Sofia is building a kite and has two pieces of wood. One piece is 37 inches long, and the other piece is 19 inches long. What is the total length of the two pieces of wood?",
+      "qVisualHTML": "",
+      "a": "56 inches",
+      "options": [
+        "18 inches",
+        "46 inches",
+        "56 inches",
+        "66 inches"
+      ]
+    },
+    {
+      "q": "Mrs. Li has a wood board that is 72 inches long. She cuts off 18 inches. How long is the board now?",
+      "qVisualHTML": "<div style='font-size:20px; text-align:center;'><svg viewBox='0 0 200 50' xmlns='http://www.w3.org/2000/svg'><rect x='10' y='15' width='180' height='20' fill='#d3d3d3' stroke='black'/><line x1='140' y1='10' x2='140' y2='40' stroke='red' stroke-dasharray='4' stroke-width='2'/><text x='70' y='30' font-size='12'>?</text><text x='165' y='30' font-size='12'>18 in</text><line x1='10' y1='10' x2='190' y2='10' stroke='black'/><text x='100' y='8' font-size='10' text-anchor='middle'>72 inches</text></svg></div>",
+      "a": "54 inches",
+      "options": [
+        "64 inches",
+        "54 inches",
+        "90 inches",
+        "56 inches"
+      ]
+    },
+    {
+      "q": "Clayton makes a statue that is 27 feet tall. The statue is on a platform that is 13 feet tall. What is the total height of the statue standing on the platform?",
+      "qVisualHTML": "<div style='font-size:20px; text-align:center;'><svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect x='30' y='60' width='40' height='20' fill='#8B4513'/><text x='50' y='75' font-size='12' text-anchor='middle' fill='white'>13 ft</text><rect x='40' y='10' width='20' height='50' fill='#A9A9A9'/><text x='50' y='40' font-size='12' text-anchor='middle' fill='black'>27 ft</text></svg></div>",
+      "a": "40 feet",
+      "options": [
+        "14 feet",
+        "17 feet",
+        "27 feet",
+        "40 feet"
+      ]
+    },
+    {
+      "q": "Martin has a blue rug that is 28 inches long. He has a red rug that is 15 inches longer than the blue rug. What is the length of the red rug?",
+      "qVisualHTML": "<div style='font-size:20px; text-align:center;'><svg viewBox='0 0 150 60' xmlns='http://www.w3.org/2000/svg'><rect x='10' y='10' width='80' height='15' fill='#3498db'/><text x='50' y='22' font-size='10' fill='white' text-anchor='middle'>28 in</text><rect x='10' y='35' width='120' height='15' fill='#e74c3c'/><text x='50' y='47' font-size='10' fill='white' text-anchor='middle'>28 in</text><text x='105' y='47' font-size='10' fill='white' text-anchor='middle'>+15 in</text></svg></div>",
+      "a": "43 inches",
+      "options": [
+        "13 inches",
+        "33 inches",
+        "43 inches",
+        "42 inches"
+      ]
+    },
+    {
+      "q": "Cade and Leslie are painting a banner that is 85 inches long. Cade paints 29 inches of the banner. Leslie paints the rest of the banner. How many inches of the banner does Leslie paint?",
+      "qVisualHTML": "<div style='font-size:20px; text-align:center;'><svg viewBox='0 0 200 50' xmlns='http://www.w3.org/2000/svg'><rect x='10' y='15' width='180' height='20' fill='white' stroke='black'/><rect x='10' y='15' width='60' height='20' fill='#f39c12'/><text x='40' y='29' font-size='10' text-anchor='middle' fill='white'>29 in</text><text x='125' y='29' font-size='10' text-anchor='middle'>Leslie's part?</text><line x1='10' y1='10' x2='190' y2='10' stroke='black'/><text x='100' y='8' font-size='10' text-anchor='middle'>85 inches</text></svg></div>",
+      "a": "56 inches",
+      "options": [
+        "66 inches",
+        "56 inches",
+        "114 inches",
+        "64 inches"
+      ]
+    },
+    {
+      "q": "A jumping frog leaps 45 inches. A grasshopper leaps 12 inches further than the frog. How far did the grasshopper leap?",
+      "qVisualHTML": "",
+      "a": "57 inches",
+      "options": [
+        "33 inches",
+        "57 inches",
+        "55 inches",
+        "47 inches"
+      ]
+    },
+    {
+      "q": "Sarah has a ribbon that is 90 inches long. She uses 35 inches to wrap a gift. How much ribbon is left?",
+      "qVisualHTML": "",
+      "a": "55 inches",
+      "options": [
+        "65 inches",
+        "55 inches",
+        "125 inches",
+        "45 inches"
+      ]
+    }
+  ]
+}
