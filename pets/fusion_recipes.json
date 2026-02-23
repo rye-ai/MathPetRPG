@@ -63,5 +63,20 @@
   {"parents": ["apin_01", "cata_vela"], "result": "f_apin_vela", "cost": 500},
   {"parents": ["apin_01", "cata_nora"], "result": "f_apin_nora", "cost": 500},
   {"parents": ["apin_01", "cata_lira"], "result": "f_apin_lira", "cost": 500},
-  {"parents": ["apin_01", "cata_pura"], "result": "f_apin_pura", "cost": 500}
+  {"parents": ["apin_01", "cata_pura"], "result": "f_apin_pura", "cost": 500},
+  {"parents": ["monster_01", "cata_pura"], "result": "f_mon01", "cost": 1000},
+  {"parents": ["monster_02", "cata_kura"], "result": "f_mon02", "cost": 1000},
+  {"parents": ["monster_03", "cata_misu"], "result": "f_mon03", "cost": 1000},
+  {"parents": ["monster_04", "cata_fura"], "result": "f_mon04", "cost": 1000},
+  {"parents": ["monster_05", "cata_doma"], "result": "f_mon05", "cost": 1000},
+  {"parents": ["monster_06", "cata_fura"], "result": "f_mon06", "cost": 1000},
+  {"parents": ["monster_07", "cata_fura"], "result": "f_mon07", "cost": 1000},
+  {"parents": ["monster_08", "cata_kura"], "result": "f_mon08", "cost": 1000},
+  {"parents": ["monster_09", "cata_fura"], "result": "f_mon09", "cost": 1000},
+  {"parents": ["monster_10", "cata_lira"], "result": "f_mon10", "cost": 1000},
+  {"parents": ["monster_11", "cata_fura"], "result": "f_mon11", "cost": 1000},
+  {"parents": ["monster_12", "cata_kura"], "result": "f_mon12", "cost": 1000},
+  {"parents": ["monster_13", "cata_doma"], "result": "f_mon13", "cost": 1000},
+  {"parents": ["monster_14", "cata_fura"], "result": "f_mon14", "cost": 1000},
+  {"parents": ["monster_15", "cata_lira"], "result": "f_mon15", "cost": 1000}
 ]
