@@ -207,7 +207,7 @@ async function executeMutation() {
         hp: 120+(avgLvl*10), 
         maxHP: 120+(avgLvl*10), 
         isHatched: true, 
-        evolutionStage: 0, 
+        evolutionStage: 2, 
         stars: 0,
         powers: resultBase.powers || ['claw_attack'],
         equipment: {},
