@@ -1,0 +1,78 @@
+{
+  "meta": {
+    "title": "Find the Quotient (Up to 50)",
+    "passThreshold": 0.7,
+    "rewards": {
+      "bp": 1000,
+      "items": [
+        {
+          "id": "xp_potion",
+          "qty": 10
+        }
+      ],
+      "pet": null
+    }
+  },
+  "questions": [
+    {
+      "q": "Look at the dots. If you divide 12 dots into 3 equal rows, how many dots are in each row? (12 ÷ 3 = ?)",
+      "qVisualHTML": "<svg width='150' height='100' xmlns='http://www.w3.org/2000/svg'><g fill='#f56565'><circle cx='30' cy='25' r='8'/><circle cx='60' cy='25' r='8'/><circle cx='90' cy='25' r='8'/><circle cx='120' cy='25' r='8'/><circle cx='30' cy='50' r='8'/><circle cx='60' cy='50' r='8'/><circle cx='90' cy='50' r='8'/><circle cx='120' cy='50' r='8'/><circle cx='30' cy='75' r='8'/><circle cx='60' cy='75' r='8'/><circle cx='90' cy='75' r='8'/><circle cx='120' cy='75' r='8'/></g></svg>",
+      "a": "4",
+      "options": ["3", "4", "5", "6"]
+    },
+    {
+      "q": "There are 15 blocks. If you divide them into 5 equal columns, how many blocks are in each column? (15 ÷ 5 = ?)",
+      "qVisualHTML": "<svg width='180' height='100' xmlns='http://www.w3.org/2000/svg'><g fill='#4299e1'><rect x='20' y='20' width='15' height='15'/><rect x='50' y='20' width='15' height='15'/><rect x='80' y='20' width='15' height='15'/><rect x='110' y='20' width='15' height='15'/><rect x='140' y='20' width='15' height='15'/><rect x='20' y='45' width='15' height='15'/><rect x='50' y='45' width='15' height='15'/><rect x='80' y='45' width='15' height='15'/><rect x='110' y='45' width='15' height='15'/><rect x='140' y='45' width='15' height='15'/><rect x='20' y='70' width='15' height='15'/><rect x='50' y='70' width='15' height='15'/><rect x='80' y='70' width='15' height='15'/><rect x='110' y='70' width='15' height='15'/><rect x='140' y='70' width='15' height='15'/></g></svg>",
+      "a": "3",
+      "options": ["2", "3", "4", "5"]
+    },
+    {
+      "q": "Find the quotient: 20 ÷ 4 = ?",
+      "qVisualHTML": "<svg width='180' height='120' xmlns='http://www.w3.org/2000/svg'><g fill='#48bb78'><circle cx='30' cy='20' r='6'/><circle cx='60' cy='20' r='6'/><circle cx='90' cy='20' r='6'/><circle cx='120' cy='20' r='6'/><circle cx='150' cy='20' r='6'/><circle cx='30' cy='45' r='6'/><circle cx='60' cy='45' r='6'/><circle cx='90' cy='45' r='6'/><circle cx='120' cy='45' r='6'/><circle cx='150' cy='45' r='6'/><circle cx='30' cy='70' r='6'/><circle cx='60' cy='70' r='6'/><circle cx='90' cy='70' r='6'/><circle cx='120' cy='70' r='6'/><circle cx='150' cy='70' r='6'/><circle cx='30' cy='95' r='6'/><circle cx='60' cy='95' r='6'/><circle cx='90' cy='95' r='6'/><circle cx='120' cy='95' r='6'/><circle cx='150' cy='95' r='6'/></g></svg>",
+      "a": "5",
+      "options": ["4", "5", "6", "8"]
+    },
+    {
+      "q": "If you share 10 oranges equally between 2 friends, how many oranges does each friend get? (10 ÷ 2 = ?)",
+      "qVisualHTML": "<svg width='180' height='70' xmlns='http://www.w3.org/2000/svg'><g fill='#ed8936'><circle cx='30' cy='20' r='8'/><circle cx='60' cy='20' r='8'/><circle cx='90' cy='20' r='8'/><circle cx='120' cy='20' r='8'/><circle cx='150' cy='20' r='8'/><circle cx='30' cy='50' r='8'/><circle cx='60' cy='50' r='8'/><circle cx='90' cy='50' r='8'/><circle cx='120' cy='50' r='8'/><circle cx='150' cy='50' r='8'/></g></svg>",
+      "a": "5",
+      "options": ["2", "4", "5", "10"]
+    },
+    {
+      "q": "Find the quotient: 24 ÷ 6 = ?",
+      "qVisualHTML": "<svg width='210' height='120' xmlns='http://www.w3.org/2000/svg'><g fill='#9f7aea'><rect x='20' y='15' width='10' height='10'/><rect x='50' y='15' width='10' height='10'/><rect x='80' y='15' width='10' height='10'/><rect x='110' y='15' width='10' height='10'/><rect x='140' y='15' width='10' height='10'/><rect x='170' y='15' width='10' height='10'/><rect x='20' y='40' width='10' height='10'/><rect x='50' y='40' width='10' height='10'/><rect x='80' y='40' width='10' height='10'/><rect x='110' y='40' width='10' height='10'/><rect x='140' y='40' width='10' height='10'/><rect x='170' y='40' width='10' height='10'/><rect x='20' y='65' width='10' height='10'/><rect x='50' y='65' width='10' height='10'/><rect x='80' y='65' width='10' height='10'/><rect x='110' y='65' width='10' height='10'/><rect x='140' y='65' width='10' height='10'/><rect x='170' y='65' width='10' height='10'/><rect x='20' y='90' width='10' height='10'/><rect x='50' y='90' width='10' height='10'/><rect x='80' y='90' width='10' height='10'/><rect x='110' y='90' width='10' height='10'/><rect x='140' y='90' width='10' height='10'/><rect x='170' y='90' width='10' height='10'/></g></svg>",
+      "a": "4",
+      "options": ["3", "4", "5", "6"]
+    },
+    {
+      "q": "There are 16 circles sorted into 4 equal rows. How many are in each row? (16 ÷ 4 = ?)",
+      "qVisualHTML": "<svg width='150' height='120' xmlns='http://www.w3.org/2000/svg'><g fill='#ecc94b'><circle cx='30' cy='20' r='7'/><circle cx='60' cy='20' r='7'/><circle cx='90' cy='20' r='7'/><circle cx='120' cy='20' r='7'/><circle cx='30' cy='45' r='7'/><circle cx='60' cy='45' r='7'/><circle cx='90' cy='45' r='7'/><circle cx='120' cy='45' r='7'/><circle cx='30' cy='70' r='7'/><circle cx='60' cy='70' r='7'/><circle cx='90' cy='70' r='7'/><circle cx='120' cy='70' r='7'/><circle cx='30' cy='95' r='7'/><circle cx='60' cy='95' r='7'/><circle cx='90' cy='95' r='7'/><circle cx='120' cy='95' r='7'/></g></svg>",
+      "a": "4",
+      "options": ["2", "3", "4", "8"]
+    },
+    {
+      "q": "Find the quotient: 30 ÷ 5 = ?",
+      "qVisualHTML": "<svg width='210' height='150' xmlns='http://www.w3.org/2000/svg'><g fill='#38b2ac'><circle cx='30' cy='20' r='5'/><circle cx='60' cy='20' r='5'/><circle cx='90' cy='20' r='5'/><circle cx='120' cy='20' r='5'/><circle cx='150' cy='20' r='5'/><circle cx='180' cy='20' r='5'/><circle cx='30' cy='45' r='5'/><circle cx='60' cy='45' r='5'/><circle cx='90' cy='45' r='5'/><circle cx='120' cy='45' r='5'/><circle cx='150' cy='45' r='5'/><circle cx='180' cy='45' r='5'/><circle cx='30' cy='70' r='5'/><circle cx='60' cy='70' r='5'/><circle cx='90' cy='70' r='5'/><circle cx='120' cy='70' r='5'/><circle cx='150' cy='70' r='5'/><circle cx='180' cy='70' r='5'/><circle cx='30' cy='95' r='5'/><circle cx='60' cy='95' r='5'/><circle cx='90' cy='95' r='5'/><circle cx='120' cy='95' r='5'/><circle cx='150' cy='95' r='5'/><circle cx='180' cy='95' r='5'/><circle cx='30' cy='120' r='5'/><circle cx='60' cy='120' r='5'/><circle cx='90' cy='120' r='5'/><circle cx='120' cy='120' r='5'/><circle cx='150' cy='120' r='5'/><circle cx='180' cy='120' r='5'/></g></svg>",
+      "a": "6",
+      "options": ["5", "6", "7", "8"]
+    },
+    {
+      "q": "What is 18 divided by 3?",
+      "qVisualHTML": "<svg width='210' height='100' xmlns='http://www.w3.org/2000/svg'><g fill='#f687b3'><rect x='20' y='20' width='12' height='12'/><rect x='50' y='20' width='12' height='12'/><rect x='80' y='20' width='12' height='12'/><rect x='110' y='20' width='12' height='12'/><rect x='140' y='20' width='12' height='12'/><rect x='170' y='20' width='12' height='12'/><rect x='20' y='45' width='12' height='12'/><rect x='50' y='45' width='12' height='12'/><rect x='80' y='45' width='12' height='12'/><rect x='110' y='45' width='12' height='12'/><rect x='140' y='45' width='12' height='12'/><rect x='170' y='45' width='12' height='12'/><rect x='20' y='70' width='12' height='12'/><rect x='50' y='70' width='12' height='12'/><rect x='80' y='70' width='12' height='12'/><rect x='110' y='70' width='12' height='12'/><rect x='140' y='70' width='12' height='12'/><rect x='170' y='70' width='12' height='12'/></g></svg>",
+      "a": "6",
+      "options": ["5", "6", "7", "9"]
+    },
+    {
+      "q": "Find the quotient: 8 ÷ 2 = ?",
+      "qVisualHTML": "<svg width='150' height='70' xmlns='http://www.w3.org/2000/svg'><g fill='#667eea'><circle cx='30' cy='20' r='8'/><circle cx='60' cy='20' r='8'/><circle cx='90' cy='20' r='8'/><circle cx='120' cy='20' r='8'/><circle cx='30' cy='50' r='8'/><circle cx='60' cy='50' r='8'/><circle cx='90' cy='50' r='8'/><circle cx='120' cy='50' r='8'/></g></svg>",
+      "a": "4",
+      "options": ["2", "3", "4", "6"]
+    },
+    {
+      "q": "If you have 25 square tiles and arrange them into 5 equal rows, how many tiles are in each row? (25 ÷ 5 = ?)",
+      "qVisualHTML": "<svg width='180' height='150' xmlns='http://www.w3.org/2000/svg'><g fill='#e53e3e'><rect x='20' y='15' width='12' height='12'/><rect x='50' y='15' width='12' height='12'/><rect x='80' y='15' width='12' height='12'/><rect x='110' y='15' width='12' height='12'/><rect x='140' y='15' width='12' height='12'/><rect x='20' y='40' width='12' height='12'/><rect x='50' y='40' width='12' height='12'/><rect x='80' y='40' width='12' height='12'/><rect x='110' y='40' width='12' height='12'/><rect x='140' y='40' width='12' height='12'/><rect x='20' y='65' width='12' height='12'/><rect x='50' y='65' width='12' height='12'/><rect x='80' y='65' width='12' height='12'/><rect x='110' y='65' width='12' height='12'/><rect x='140' y='65' width='12' height='12'/><rect x='20' y='90' width='12' height='12'/><rect x='50' y='90' width='12' height='12'/><rect x='80' y='90' width='12' height='12'/><rect x='110' y='90' width='12' height='12'/><rect x='140' y='90' width='12' height='12'/><rect x='20' y='115' width='12' height='12'/><rect x='50' y='115' width='12' height='12'/><rect x='80' y='115' width='12' height='12'/><rect x='110' y='115' width='12' height='12'/><rect x='140' y='115' width='12' height='12'/></g></svg>",
+      "a": "5",
+      "options": ["4", "5", "6", "10"]
+    }
+  ]
+}
