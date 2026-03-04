@@ -1,0 +1,128 @@
+{
+  "meta": {
+    "title": "Basic Multiplication (1-5 & 10)",
+    "passThreshold": 0.8,
+    "rewards": {
+      "bp": 1000,
+      "items": [
+        {
+          "id": "xp_potion",
+          "qty": 15
+        }
+      ],
+      "pet": null
+    }
+  },
+  "questions": [
+    {
+      "q": "Farmer Joe has 4 boxes of apples. Each box contains exactly 5 apples. How many apples does he have in total?",
+      "qVisualHTML": "<svg width='220' height='60' xmlns='http://www.w3.org/2000/svg'><rect x='10' y='10' width='40' height='40' rx='4' stroke='#8B4513' stroke-width='2' fill='#FFF8DC'/><text x='30' y='35' text-anchor='middle' font-family='sans-serif' font-weight='bold' fill='#D22B2B'>5</text><rect x='60' y='10' width='40' height='40' rx='4' stroke='#8B4513' stroke-width='2' fill='#FFF8DC'/><text x='80' y='35' text-anchor='middle' font-family='sans-serif' font-weight='bold' fill='#D22B2B'>5</text><rect x='110' y='10' width='40' height='40' rx='4' stroke='#8B4513' stroke-width='2' fill='#FFF8DC'/><text x='130' y='35' text-anchor='middle' font-family='sans-serif' font-weight='bold' fill='#D22B2B'>5</text><rect x='160' y='10' width='40' height='40' rx='4' stroke='#8B4513' stroke-width='2' fill='#FFF8DC'/><text x='180' y='35' text-anchor='middle' font-family='sans-serif' font-weight='bold' fill='#D22B2B'>5</text></svg>",
+      "a": "20",
+      "options": [
+        "9",
+        "15",
+        "20",
+        "25"
+      ]
+    },
+    {
+      "q": "You encounter 3 friendly cats in the village. Each cat has 4 legs. How many cat legs are there in total?",
+      "qVisualHTML": "<svg width='180' height='60' xmlns='http://www.w3.org/2000/svg'><circle cx='35' cy='30' r='20' stroke='#333' stroke-width='2' fill='#EEE'/><text x='35' y='35' text-anchor='middle' font-family='sans-serif' font-weight='bold'>4</text><circle cx='90' cy='30' r='20' stroke='#333' stroke-width='2' fill='#EEE'/><text x='90' y='35' text-anchor='middle' font-family='sans-serif' font-weight='bold'>4</text><circle cx='145' cy='30' r='20' stroke='#333' stroke-width='2' fill='#EEE'/><text x='145' y='35' text-anchor='middle' font-family='sans-serif' font-weight='bold'>4</text></svg>",
+      "a": "12",
+      "options": [
+        "7",
+        "10",
+        "12",
+        "16"
+      ]
+    },
+    {
+      "q": "The guild baker baked 10 trays of magical cookies. If there are 5 cookies on each tray, how many cookies did the baker make?",
+      "qVisualHTML": "<svg width='280' height='70' xmlns='http://www.w3.org/2000/svg'><g stroke='#555' stroke-width='1' fill='#F5DEB3'><rect x='10' y='10' width='20' height='20' rx='2'/><rect x='35' y='10' width='20' height='20' rx='2'/><rect x='60' y='10' width='20' height='20' rx='2'/><rect x='85' y='10' width='20' height='20' rx='2'/><rect x='110' y='10' width='20' height='20' rx='2'/><rect x='10' y='35' width='20' height='20' rx='2'/><rect x='35' y='35' width='20' height='20' rx='2'/><rect x='60' y='35' width='20' height='20' rx='2'/><rect x='85' y='35' width='20' height='20' rx='2'/><rect x='110' y='35' width='20' height='20' rx='2'/></g><text x='145' y='40' font-family='sans-serif' font-size='14' font-weight='bold' fill='#333'>x 5 cookies each</text></svg>",
+      "a": "50",
+      "options": [
+        "15",
+        "25",
+        "50",
+        "100"
+      ]
+    },
+    {
+      "q": "You need to plant herbs in 5 garden patches. Each patch needs exactly 3 seeds. How many seeds do you need in total?",
+      "qVisualHTML": "<svg width='260' height='60' xmlns='http://www.w3.org/2000/svg'><path d='M20,45 L40,45 M70,45 L90,45 M120,45 L140,45 M170,45 L190,45 M220,45 L240,45' stroke='#2E8B57' stroke-width='6' stroke-linecap='round'/><text x='30' y='30' text-anchor='middle' font-family='sans-serif' font-weight='bold' fill='#2E8B57'>3</text><text x='80' y='30' text-anchor='middle' font-family='sans-serif' font-weight='bold' fill='#2E8B57'>3</text><text x='130' y='30' text-anchor='middle' font-family='sans-serif' font-weight='bold' fill='#2E8B57'>3</text><text x='180' y='30' text-anchor='middle' font-family='sans-serif' font-weight='bold' fill='#2E8B57'>3</text><text x='230' y='30' text-anchor='middle' font-family='sans-serif' font-weight='bold' fill='#2E8B57'>3</text></svg>",
+      "a": "15",
+      "options": [
+        "8",
+        "10",
+        "15",
+        "20"
+      ]
+    },
+    {
+      "q": "The wizard has 2 enchanted pouches. Each pouch contains 10 glowing gems. How many glowing gems does the wizard have?",
+      "qVisualHTML": "<svg width='160' height='80' xmlns='http://www.w3.org/2000/svg'><rect x='20' y='10' width='45' height='60' rx='8' stroke='#8A2BE2' stroke-width='3' fill='#F8F8FF'/><text x='42' y='45' text-anchor='middle' font-family='sans-serif' font-weight='bold' fill='#8A2BE2'>10</text><rect x='85' y='10' width='45' height='60' rx='8' stroke='#8A2BE2' stroke-width='3' fill='#F8F8FF'/><text x='107' y='45' text-anchor='middle' font-family='sans-serif' font-weight='bold' fill='#8A2BE2'>10</text></svg>",
+      "a": "20",
+      "options": [
+        "12",
+        "20",
+        "30",
+        "100"
+      ]
+    },
+    {
+      "q": "A knight finds 5 treasure chests in a dungeon. Each chest holds 4 gold coins. How many gold coins did the knight find in total?",
+      "qVisualHTML": "<svg width='270' height='60' xmlns='http://www.w3.org/2000/svg'><rect x='10' y='10' width='40' height='40' rx='2' stroke='#B8860B' stroke-width='2' fill='#FFD700'/><text x='30' y='35' text-anchor='middle' font-family='sans-serif' font-weight='bold' fill='#8B4513'>4</text><rect x='60' y='10' width='40' height='40' rx='2' stroke='#B8860B' stroke-width='2' fill='#FFD700'/><text x='80' y='35' text-anchor='middle' font-family='sans-serif' font-weight='bold' fill='#8B4513'>4</text><rect x='110' y='10' width='40' height='40' rx='2' stroke='#B8860B' stroke-width='2' fill='#FFD700'/><text x='130' y='35' text-anchor='middle' font-family='sans-serif' font-weight='bold' fill='#8B4513'>4</text><rect x='160' y='10' width='40' height='40' rx='2' stroke='#B8860B' stroke-width='2' fill='#FFD700'/><text x='180' y='35' text-anchor='middle' font-family='sans-serif' font-weight='bold' fill='#8B4513'>4</text><rect x='210' y='10' width='40' height='40' rx='2' stroke='#B8860B' stroke-width='2' fill='#FFD700'/><text x='230' y='35' text-anchor='middle' font-family='sans-serif' font-weight='bold' fill='#8B4513'>4</text></svg>",
+      "a": "20",
+      "options": [
+        "9",
+        "16",
+        "20",
+        "24"
+      ]
+    },
+    {
+      "q": "The blacksmith is crafting 2 swords. Each sword requires 2 iron ingots. How many iron ingots are needed in total?",
+      "qVisualHTML": "<svg width='120' height='60' xmlns='http://www.w3.org/2000/svg'><polygon points='20,10 40,10 40,40 30,50 20,40' stroke='#555' stroke-width='2' fill='#CCC'/><text x='30' y='35' text-anchor='middle' font-family='sans-serif' font-weight='bold' fill='#333'>2</text><polygon points='70,10 90,10 90,40 80,50 70,40' stroke='#555' stroke-width='2' fill='#CCC'/><text x='80' y='35' text-anchor='middle' font-family='sans-serif' font-weight='bold' fill='#333'>2</text></svg>",
+      "a": "4",
+      "options": [
+        "2",
+        "4",
+        "6",
+        "8"
+      ]
+    },
+    {
+      "q": "An elven ranger shoots 10 volleys of arrows. Each volley contains 3 arrows. How many arrows were shot in total?",
+      "qVisualHTML": "<svg width='280' height='70' xmlns='http://www.w3.org/2000/svg'><g stroke='#4682B4' stroke-width='2' fill='#87CEEB'><circle cx='20' cy='20' r='10'/><circle cx='45' cy='20' r='10'/><circle cx='70' cy='20' r='10'/><circle cx='95' cy='20' r='10'/><circle cx='120' cy='20' r='10'/><circle cx='20' cy='45' r='10'/><circle cx='45' cy='45' r='10'/><circle cx='70' cy='45' r='10'/><circle cx='95' cy='45' r='10'/><circle cx='120' cy='45' r='10'/></g><text x='145' y='40' font-family='sans-serif' font-size='14' font-weight='bold' fill='#333'>x 3 arrows</text></svg>",
+      "a": "30",
+      "options": [
+        "13",
+        "20",
+        "30",
+        "40"
+      ]
+    },
+    {
+      "q": "The alchemist brews 4 batches of health potions. Each batch makes 10 potions. How many potions did the alchemist brew?",
+      "qVisualHTML": "<svg width='220' height='70' xmlns='http://www.w3.org/2000/svg'><path d='M20,20 L30,20 L35,50 L15,50 Z' stroke='#8B0000' stroke-width='2' fill='#FF6347'/><text x='25' y='45' text-anchor='middle' font-family='sans-serif' font-weight='bold' font-size='12' fill='#FFF'>10</text><path d='M70,20 L80,20 L85,50 L65,50 Z' stroke='#8B0000' stroke-width='2' fill='#FF6347'/><text x='75' y='45' text-anchor='middle' font-family='sans-serif' font-weight='bold' font-size='12' fill='#FFF'>10</text><path d='M120,20 L130,20 L135,50 L115,50 Z' stroke='#8B0000' stroke-width='2' fill='#FF6347'/><text x='125' y='45' text-anchor='middle' font-family='sans-serif' font-weight='bold' font-size='12' fill='#FFF'>10</text><path d='M170,20 L180,20 L185,50 L165,50 Z' stroke='#8B0000' stroke-width='2' fill='#FF6347'/><text x='175' y='45' text-anchor='middle' font-family='sans-serif' font-weight='bold' font-size='12' fill='#FFF'>10</text></svg>",
+      "a": "40",
+      "options": [
+        "14",
+        "20",
+        "40",
+        "50"
+      ]
+    },
+    {
+      "q": "You find 3 magical spellbooks in the library. Each spellbook contains 5 spells. How many spells are there in total?",
+      "qVisualHTML": "<svg width='180' height='60' xmlns='http://www.w3.org/2000/svg'><rect x='10' y='10' width='35' height='45' rx='3' stroke='#4B0082' stroke-width='2' fill='#9370DB'/><text x='27' y='38' text-anchor='middle' font-family='sans-serif' font-weight='bold' fill='#FFF'>5</text><rect x='60' y='10' width='35' height='45' rx='3' stroke='#4B0082' stroke-width='2' fill='#9370DB'/><text x='77' y='38' text-anchor='middle' font-family='sans-serif' font-weight='bold' fill='#FFF'>5</text><rect x='110' y='10' width='35' height='45' rx='3' stroke='#4B0082' stroke-width='2' fill='#9370DB'/><text x='127' y='38' text-anchor='middle' font-family='sans-serif' font-weight='bold' fill='#FFF'>5</text></svg>",
+      "a": "15",
+      "options": [
+        "8",
+        "12",
+        "15",
+        "20"
+      ]
+    }
+  ]
+}
