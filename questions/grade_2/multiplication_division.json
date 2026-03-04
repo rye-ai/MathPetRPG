@@ -1,0 +1,285 @@
+[
+{
+"q": "How many apples in total?",
+"qVisualHTML": "🍎🍎🍎🍎   🍎🍎🍎🍎   🍎🍎🍎🍎",
+"a": "12",
+"options": ["7", "12", "15", "8"]
+},
+{
+"q": "Which multiplication sentence matches this array?",
+"qVisualHTML": "<svg width='120' height='50'><g fill='#e53e3e'><circle cx='10' cy='10' r='6'/><circle cx='30' cy='10' r='6'/><circle cx='50' cy='10' r='6'/><circle cx='70' cy='10' r='6'/><circle cx='90' cy='10' r='6'/><circle cx='10' cy='30' r='6'/><circle cx='30' cy='30' r='6'/><circle cx='50' cy='30' r='6'/><circle cx='70' cy='30' r='6'/><circle cx='90' cy='30' r='6'/></g></svg>",
+"a": "2 x 5 = 10",
+"options": ["2 + 5 = 7", "2 x 5 = 10", "5 x 5 = 25", "10 x 1 = 10"]
+},
+{
+"q": "Lily has 4 boxes of crayons. Each box has 5 crayons. How many crayons does she have in all?",
+"qVisualHTML": "",
+"a": "20",
+"options": ["9", "16", "20", "25"]
+},
+{
+"q": "Solve: 3 x 4 = ?",
+"qVisualHTML": "",
+"a": "12"
+},
+{
+"q": "Solve: 5 x 5 = ?",
+"qVisualHTML": "",
+"a": "25"
+},
+{
+"q": "Count by 10s. How many stars?",
+"qVisualHTML": "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐
+
+
+
+⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐
+
+
+
+⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐",
+"a": "30",
+"options": ["20", "30", "40", "13"]
+},
+{
+"q": "Which is the same as 4 + 4 + 4?",
+"qVisualHTML": "",
+"a": "3 x 4",
+"options": ["4 x 4", "3 + 4", "3 x 4", "4 x 1"]
+},
+{
+"q": "Solve: 10 x 4 = ?",
+"qVisualHTML": "",
+"a": "40"
+},
+{
+"q": "A spider has 8 legs. If there are 2 spiders, how many legs are there in total?",
+"qVisualHTML": "",
+"a": "16"
+},
+{
+"q": "Which equation matches the jumps on the number line?",
+"qVisualHTML": "<svg width='200' height='60'><line x1='10' y1='40' x2='190' y2='40' stroke='black' stroke-width='2'/><path d='M10,40 Q30,10 50,40' fill='none' stroke='blue' stroke-width='2'/><path d='M50,40 Q70,10 90,40' fill='none' stroke='blue' stroke-width='2'/><path d='M90,40 Q110,10 130,40' fill='none' stroke='blue' stroke-width='2'/><text x='130' y='55' font-size='12'>6</text></svg>",
+"a": "3 x 2 = 6",
+"options": ["3 + 2 = 5", "3 x 2 = 6", "2 x 4 = 8", "6 x 1 = 6"]
+},
+{
+"q": "What is 1 x 9?",
+"qVisualHTML": "",
+"a": "9"
+},
+{
+"q": "Any number multiplied by 1 is...",
+"qVisualHTML": "",
+"a": "The same number",
+"options": ["Zero", "One", "Ten", "The same number"]
+},
+{
+"q": "Solve: 4 x 4 = ?",
+"qVisualHTML": "",
+"a": "16"
+},
+{
+"q": "How many squares are in this array?",
+"qVisualHTML": "<svg width='80' height='80'><rect x='10' y='10' width='15' height='15' fill='green'/><rect x='30' y='10' width='15' height='15' fill='green'/><rect x='50' y='10' width='15' height='15' fill='green'/><rect x='10' y='30' width='15' height='15' fill='green'/><rect x='30' y='30' width='15' height='15' fill='green'/><rect x='50' y='30' width='15' height='15' fill='green'/><rect x='10' y='50' width='15' height='15' fill='green'/><rect x='30' y='50' width='15' height='15' fill='green'/><rect x='50' y='50' width='15' height='15' fill='green'/></svg>",
+"a": "9",
+"options": ["6", "9", "12", "3"]
+},
+{
+"q": "Solve: 2 x 7 = ?",
+"qVisualHTML": "",
+"a": "14"
+},
+{
+"q": "There are 5 cars. Each car has 4 wheels. How many wheels in total?",
+"qVisualHTML": "",
+"a": "20",
+"options": ["9", "16", "20", "24"]
+},
+{
+"q": "If 3 x 5 = 15, then what is 5 x 3?",
+"qVisualHTML": "",
+"a": "15",
+"options": ["8", "15", "35", "53"]
+},
+{
+"q": "Match the picture to the equation.",
+"qVisualHTML": "🍪🍪   🍪🍪   🍪🍪   🍪🍪",
+"a": "4 x 2 = 8",
+"options": ["4 + 2 = 6", "4 x 2 = 8", "2 x 2 = 4", "8 x 2 = 16"]
+},
+{
+"q": "Find the missing number: 5 x ___ = 35",
+"qVisualHTML": "",
+"a": "7"
+},
+{
+"q": "Find the missing number: ___ x 10 = 50",
+"qVisualHTML": "",
+"a": "5"
+},
+{
+"q": "Sam reads 3 pages a day. How many pages does he read in 5 days?",
+"qVisualHTML": "",
+"a": "15"
+},
+{
+"q": "Which of these is a multiple of 5?",
+"qVisualHTML": "",
+"a": "25",
+"options": ["12", "18", "25", "31"]
+},
+{
+"q": "Solve: 4 x 5 = ?",
+"qVisualHTML": "",
+"a": "20"
+},
+{
+"q": "What multiplication fact does this array show?",
+"qVisualHTML": "<svg width='60' height='100'><g fill='orange'><circle cx='15' cy='15' r='8'/><circle cx='40' cy='15' r='8'/><circle cx='15' cy='40' r='8'/><circle cx='40' cy='40' r='8'/><circle cx='15' cy='65' r='8'/><circle cx='40' cy='65' r='8'/><circle cx='15' cy='90' r='8'/><circle cx='40' cy='90' r='8'/></g></svg>",
+"a": "4 x 2 = 8",
+"options": ["4 + 2 = 6", "4 x 2 = 8", "2 x 2 = 4", "8 x 1 = 8"]
+},
+{
+"q": "Solve: 3 x 10 = ?",
+"qVisualHTML": "",
+"a": "30"
+},
+{
+"q": "Share 10 cookies equally between 2 kids. How many cookies does each kid get?",
+"qVisualHTML": "🍪🍪🍪🍪🍪🍪🍪🍪🍪🍪 ➡️ 👦 👧",
+"a": "5",
+"options": ["2", "5", "8", "12"]
+},
+{
+"q": "Solve: 12 ÷ 3 = ?",
+"qVisualHTML": "",
+"a": "4"
+},
+{
+"q": "15 birds are sitting on 3 trees. Each tree has the same number of birds. How many birds are on each tree?",
+"qVisualHTML": "",
+"a": "5",
+"options": ["3", "5", "12", "18"]
+},
+{
+"q": "What division equation is shown by the circles?",
+"qVisualHTML": "<svg width='220' height='60'><circle cx='30' cy='30' r='25' fill='none' stroke='black'/><circle cx='20' cy='30' r='4' fill='red'/><circle cx='30' cy='20' r='4' fill='red'/><circle cx='40' cy='30' r='4' fill='red'/><circle cx='85' cy='30' r='25' fill='none' stroke='black'/><circle cx='75' cy='30' r='4' fill='red'/><circle cx='85' cy='20' r='4' fill='red'/><circle cx='95' cy='30' r='4' fill='red'/><circle cx='140' cy='30' r='25' fill='none' stroke='black'/><circle cx='130' cy='30' r='4' fill='red'/><circle cx='140' cy='20' r='4' fill='red'/><circle cx='150' cy='30' r='4' fill='red'/><circle cx='195' cy='30' r='25' fill='none' stroke='black'/><circle cx='185' cy='30' r='4' fill='red'/><circle cx='195' cy='20' r='4' fill='red'/><circle cx='205' cy='30' r='4' fill='red'/></svg>",
+"a": "12 ÷ 4 = 3",
+"options": ["12 ÷ 3 = 4", "12 ÷ 4 = 3", "3 x 4 = 12", "12 - 4 = 8"]
+},
+{
+"q": "Solve: 20 ÷ 5 = ?",
+"qVisualHTML": "",
+"a": "4"
+},
+{
+"q": "Division is the opposite of...",
+"qVisualHTML": "",
+"a": "Multiplication",
+"options": ["Addition", "Subtraction", "Multiplication", "Fractions"]
+},
+{
+"q": "Solve: 50 ÷ 10 = ?",
+"qVisualHTML": "",
+"a": "5"
+},
+{
+"q": "A teacher has 24 pencils. She gives them equally to 4 students. How many does each student get?",
+"qVisualHTML": "",
+"a": "6"
+},
+{
+"q": "Group 8 balloons into pairs (groups of 2). How many groups do you have?",
+"qVisualHTML": "🎈🎈   🎈🎈   🎈🎈   🎈🎈",
+"a": "4",
+"options": ["2", "4", "6", "10"]
+},
+{
+"q": "If 4 x 5 = 20, what is 20 ÷ 4?",
+"qVisualHTML": "",
+"a": "5",
+"options": ["4", "5", "16", "24"]
+},
+{
+"q": "Solve: 16 ÷ 2 = ?",
+"qVisualHTML": "",
+"a": "8"
+},
+{
+"q": "Solve: 9 ÷ 3 = ?",
+"qVisualHTML": "",
+"a": "3"
+},
+{
+"q": "There are 30 students. They sit in teams of 5. How many teams are there?",
+"qVisualHTML": "",
+"a": "6",
+"options": ["5", "6", "25", "35"]
+},
+{
+"q": "10 blocks are divided into 2 equal rows. How many are in each row?",
+"qVisualHTML": "<svg width='150' height='50'><rect x='10' y='10' width='20' height='15' fill='purple'/><rect x='35' y='10' width='20' height='15' fill='purple'/><rect x='60' y='10' width='20' height='15' fill='purple'/><rect x='85' y='10' width='20' height='15' fill='purple'/><rect x='110' y='10' width='20' height='15' fill='purple'/><rect x='10' y='30' width='20' height='15' fill='purple'/><rect x='35' y='30' width='20' height='15' fill='purple'/><rect x='60' y='30' width='20' height='15' fill='purple'/><rect x='85' y='30' width='20' height='15' fill='purple'/><rect x='110' y='30' width='20' height='15' fill='purple'/></svg>",
+"a": "5",
+"options": ["2", "5", "8", "12"]
+},
+{
+"q": "Solve: 40 ÷ 10 = ?",
+"qVisualHTML": "",
+"a": "4"
+},
+{
+"q": "Solve: 25 ÷ 5 = ?",
+"qVisualHTML": "",
+"a": "5"
+},
+{
+"q": "What is 8 divided by 1?",
+"qVisualHTML": "",
+"a": "8",
+"options": ["1", "0", "8", "9"]
+},
+{
+"q": "I have 18 slices of pizza. I put 3 slices on each plate. How many plates do I need?",
+"qVisualHTML": "",
+"a": "6"
+},
+{
+"q": "Divide 15 fish into 3 equal bowls. How many fish in each?",
+"qVisualHTML": "🐟🐟🐟🐟🐟   🐟🐟🐟🐟🐟   🐟🐟🐟🐟🐟",
+"a": "5 fish in each bowl",
+"options": ["3 fish in each bowl", "5 fish in each bowl", "15 fish in each bowl", "12 fish in each bowl"]
+},
+{
+"q": "Find the missing number: ___ ÷ 2 = 10",
+"qVisualHTML": "",
+"a": "20"
+},
+{
+"q": "Solve: 35 ÷ 5 = ?",
+"qVisualHTML": "",
+"a": "7"
+},
+{
+"q": "Tom has 14 toy cars. He wants to pack them into boxes of 2. How many boxes will he fill?",
+"qVisualHTML": "",
+"a": "7",
+"options": ["6", "7", "12", "16"]
+},
+{
+"q": "Which division equation matches jumping backwards on the number line?",
+"qVisualHTML": "<svg width='200' height='60'><line x1='10' y1='40' x2='190' y2='40' stroke='black' stroke-width='2'/><path d='M130,40 Q110,10 90,40' fill='none' stroke='red' stroke-width='2'/><polygon points='90,40 95,33 85,33' fill='red'/><path d='M90,40 Q70,10 50,40' fill='none' stroke='red' stroke-width='2'/><polygon points='50,40 55,33 45,33' fill='red'/><path d='M50,40 Q30,10 10,40' fill='none' stroke='red' stroke-width='2'/><polygon points='10,40 15,33 5,33' fill='red'/><text x='130' y='55' font-size='12'>12</text><text x='10' y='55' font-size='12'>0</text></svg>",
+"a": "12 ÷ 4 = 3",
+"options": ["12 - 4 = 8", "12 ÷ 4 = 3", "12 ÷ 3 = 4", "3 x 4 = 12"]
+},
+{
+"q": "Solve: 21 ÷ 3 = ?",
+"qVisualHTML": "",
+"a": "7"
+},
+{
+"q": "Solve: 45 ÷ 5 = ?",
+"qVisualHTML": "",
+"a": "9"
+}
+]
