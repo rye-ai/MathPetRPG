@@ -7338,6 +7338,8 @@ function subscribeToRoom(code) {
                 document.getElementById('battle-ui').style.display = 'flex'; 
                 soundManager.playBGM('boss'); 
             }
+            
+            document.querySelector('#battle-ui .battle-arena').style.backgroundImage = `url('https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/%E2%80%9CA%20high-quality%20monster-inspired%20battle%20arena%20in%20landscape%20orientation.%20A%20large%2C%20circular%20stadium%20floor%20made%20of%20smooth%20stone%20tiles%20with%20subtle%20glowing%20patterns.%20Surrounding%20the%20arena%20are%20tall%20stadium%20walls%2C%20bright%20.jpg')`;
 
             // 1. DRAW PETS FIRST
             renderPvPBattle(d); 
@@ -11228,29 +11230,96 @@ async function sendFriendNotification(friend, type, bpAmount, message) {
     }
 }
 
+async function claimChosenPet(petId, petName, petImg) {
+    // 1. Add the pet to the player's collection (Level 5)
+    if (!gameState.pets) gameState.pets = [];
+    
+    gameState.pets.push({
+        id: "chosen_" + Date.now(),
+        tp: petId, nm: petName, lv: 5, hp: 100, mhp: 100, xp: 0, mxp: 1700,
+        pwr: ["claw_attack"], ih: true, hpg: 100, evs: 0, str: 0
+    });
+
+    // 2. Clear the mailbox (so the choice is gone)
+    await clearMailbox();
+
+    // 3. Show the cool victory ceremony for the one they chose!
+    const visual = `<img src="${petImg}" style="width:180px; height:180px; object-fit:contain; filter:drop-shadow(0 0 15px gold);">`;
+    triggerRewardCeremony("EXCELLENT CHOICE!", `You claimed your new Level 5 ${petName}!`, visual, null);
+    
+    // 4. Save and Refresh Hub
+    saveGame(true);
+    renderHub();
+}
+
 function showMailbox() {
     const notes = gameState.notifications || [];
+    if (notes.length === 0) return;
+
+    // --- 1. PICK ONE CHOICE CHECK (NEW!) ---
+    const choiceGift = notes.find(n => n.type === "pet_choice");
+    if (choiceGift) {
+        const modal = document.querySelector('#arena-modal .confirm-modal');
+        const overlay = document.getElementById('arena-modal');
+        
+        // Build the choice grid
+        let optionsHtml = `<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:15px;">`;
+        
+        choiceGift.options.forEach(petId => {
+            // Find the pet details from our internal registry
+            let details = null;
+            for (const r in PET_TYPES) {
+                const found = PET_TYPES[r].find(p => p.id === petId);
+                if (found) { details = found; break; }
+            }
+
+            if (details) {
+                optionsHtml += `
+                <div class="pet-card" style="border:2px solid #5a67d8; padding:10px;" onclick="claimChosenPet('${details.id}', '${details.name}', '${details.image}')">
+                    <img src="${details.image}" style="width:60px; height:60px; object-fit:contain;">
+                    <div style="font-weight:bold; font-size:12px; margin-top:5px;">${details.name}</div>
+                    <div class="rarity-badge rarity-${details.rarity}" style="font-size:8px;">${details.rarity}</div>
+                </div>`;
+            }
+        });
+        optionsHtml += `</div>`;
+
+        modal.innerHTML = `
+            <h2 style="color:#5a67d8;">🎁 A Gift Awaits!</h2>
+            <p style="font-weight:bold;">${choiceGift.text}</p>
+            <p style="font-size:12px; color:#718096;">Choose carefully! You can only pick ONE.</p>
+            ${optionsHtml}
+            <div style="margin-top:15px; font-size:10px; color:gray;">(Click a pet to claim it)</div>
+        `;
+        overlay.classList.add('active');
+        return;
+    }
+
+    // --- 2. SINGLE VISUAL GIFT CHECK ---
+    const specialGift = notes.find(n => n.type === "pet_gift");
+    if (specialGift) {
+        const visual = specialGift.img 
+            ? `<img src="${specialGift.img}" style="width:180px; height:180px; object-fit:contain; filter:drop-shadow(0 0 15px gold);">` 
+            : `<div style="font-size:100px">${specialGift.emoji || '🎁'}</div>`;
+        triggerRewardCeremony("SPECIAL GIFT!", specialGift.text, visual, () => { clearMailbox(); });
+        return;
+    }
+
+    // --- 3. ORIGINAL MAILBOX LOGIC (BP/Messages) ---
     let html = notes.map(n => `
         <div style="background:#f7fafc; padding:10px; border-radius:8px; border-left:4px solid #48bb78; margin-bottom:10px; text-align:left;">
             <div style="font-weight:bold; font-size:14px; color:#2d3748;">📬 From: ${n.from}</div>
-            <div style="font-size:13px; color:#4a5568; margin:5px 0;">"${n.text}"</div>
+            <div style="font-size:13px; color:#4a5568;">"${n.text}"</div>
             ${n.bp > 0 ? `<div style="font-weight:bold; color:#d69e2e; font-size:12px;">🎁 Received: ${n.bp} BP!</div>` : ''}
-        </div>
-    `).join('');
-
+        </div>`).join('');
     const totalBP = notes.reduce((sum, n) => sum + (n.bp || 0), 0);
     const modal = document.querySelector('#arena-modal .confirm-modal');
     const overlay = document.getElementById('arena-modal');
-    
     modal.innerHTML = `
         <h2 style="color:#48bb78;">Community Mailbox</h2>
-        <p>Friends visited your land while you were away!</p>
         <div style="max-height:250px; overflow-y:auto; margin:15px 0;">${html}</div>
-        <div style="background:#fef3c7; padding:10px; border-radius:10px; font-weight:bold; color:#92400e; margin-bottom:15px;">
-            Total Collected: +${totalBP} BP
-        </div>
-        <button class="confirm-btn yes" style="width:100%;" onclick="clearMailbox()">Awesome!</button>
-    `;
+        <div style="background:#fef3c7; padding:10px; border-radius:10px; font-weight:bold; color:#92400e; margin-bottom:15px;">Total Collected: +${totalBP} BP</div>
+        <button class="confirm-btn yes" style="width:100%;" onclick="clearMailbox()">Awesome!</button>`;
     overlay.classList.add('active');
 }
 
