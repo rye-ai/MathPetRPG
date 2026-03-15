@@ -78,5 +78,21 @@
   {"parents": ["monster_12", "cata_kura"], "result": "f_mon12", "cost": 1000},
   {"parents": ["monster_13", "cata_doma"], "result": "f_mon13", "cost": 1000},
   {"parents": ["monster_14", "cata_fura"], "result": "f_mon14", "cost": 1000},
-  {"parents": ["monster_15", "cata_lira"], "result": "f_mon15", "cost": 1000}
+  {"parents": ["monster_15", "cata_lira"], "result": "f_mon15", "cost": 1000},
+  {"parents": ["myatt_01", "cata_kura"], "result": "f_myatt", "cost": 1000},
+  {"parents": ["chrystianake_01", "cata_vela"], "result": "f_chake", "cost": 1000},
+  {"parents": ["jorborg_01", "cata_nora"], "result": "f_jorg", "cost": 1000},
+  {"parents": ["noahsaur_01", "cata_fura"], "result": "f_noah", "cost": 1000},
+  {"parents": ["semustang_01", "cata_zela"], "result": "f_semus", "cost": 1000},
+  {"parents": ["liark_01", "cata_misu"], "result": "f_liark", "cost": 1000},
+  {"parents": ["wonkey_01", "cata_vora"], "result": "f_wonk", "cost": 1000},
+  {"parents": ["msfrolch_01", "cata_kura"], "result": "f_msfrol", "cost": 1000},
+  {"parents": ["jaxire_01", "cata_fura"], "result": "f_jaxire", "cost": 1000},
+  {"parents": ["romzilla_01", "cata_zela"], "result": "f_romzilla", "cost": 1000},
+  {"parents": ["baseten_01", "cata_vela"], "result": "f_onesy", "cost": 1000},
+  {"parents": ["light_bearcat_baby", "cata_lira"], "result": "f_olabear", "cost": 1000},
+  {"parents": ["tree_01", "cata_vora"], "result": "f_groochy", "cost": 1000},
+  {"parents": ["Rudolf_01", "cata_lira"], "result": "f_rudolf", "cost": 1000},
+  {"parents": ["MLK", "cata_lira"], "result": "f_mike", "cost": 1000},
+  {"parents": ["ray", "cata_lira"], "result": "f_raygon", "cost": 1000}
 ]
