@@ -55,6 +55,8 @@
   
   <!-- Custom Game Styles -->
   <style>
+  #dashboard-pet-catalog::-webkit-scrollbar { width: 6px; }
+#dashboard-pet-catalog::-webkit-scrollbar-thumb { background: #5a67d8; border-radius: 10px; }
   .tower-math-overlay {
     position: absolute;
     top: 0; left: 0;
@@ -1573,6 +1575,7 @@ body {
                    <div id="bulk-action-bar" style="background:#ebf8ff; padding:10px 15px; border-bottom:1px solid #cceeff; display:none; justify-content:space-between; align-items:center;">
                        <span id="bulk-selected-count" style="font-weight:bold; color:#5a67d8;">0 Selected</span>
                        <button class="action-btn green" style="width:auto; padding:5px 10px; font-size:12px;" onclick="openBulkTopicManager()">Assign Topics</button>
+                       <button class="action-btn" style="width:auto; padding:5px 10px; font-size:12px; background:#9f7aea; margin-left:5px;" onclick="openGiftModal()">🎁 Send Gift</button>
                        <button class="action-btn" style="width:auto; padding:5px 10px; font-size:12px; background:#d69e2e; margin-left:5px;" onclick="bulkRewardBP()">🎁 Reward BP</button>
                    </div>
                    <div id="student-list-container" style="flex:1; overflow-y: auto;">
@@ -1721,6 +1724,51 @@ body {
                </div>
            </div>
        </div>
+       
+       <!-- 🎁 VISUAL TEACHER GIFT MODAL -->
+<div id="teacher-gift-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); align-items:center; justify-content:center; z-index:3500;">
+    <div style="background:white; padding:25px; border-radius:20px; width:550px; max-width:95%; box-shadow: 0 20px 60px rgba(0,0,0,0.5); display:flex; flex-direction:column; max-height:90vh;">
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h2 style="color:#5a67d8; margin:0; font-weight:900; font-size:22px;">🎁 Classroom Gift</h2>
+            <button class="action-btn red" style="width:40px; margin:0;" onclick="document.getElementById('teacher-gift-modal').style.display='none'">X</button>
+        </div>
+
+        <p id="gift-count-display" style="font-weight:bold; color:#4a5568; margin-bottom:15px; font-size:14px; background:#f7fafc; padding:8px; border-radius:8px; border-left:4px solid #5a67d8;">Sending to 0 students</p>
+
+        <div style="overflow-y:auto; flex:1; padding-right:10px;">
+            <label style="display:block; font-size:11px; font-weight:bold; color:#718096; margin-bottom:8px; text-transform:uppercase;">1. Select Pet from Registry</label>
+            
+            <!-- THE VISUAL GRID FOR PETS -->
+            <div id="dashboard-pet-catalog" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap:10px; border:2px solid #edf2f7; border-radius:12px; padding:12px; background:#f8fafc; min-height:250px;">
+                <!-- Pets are put here by the JavaScript automatically -->
+            </div>
+
+            <!-- This hidden line stores which pet you clicked -->
+            <input type="hidden" id="gift-selected-pet-id" value="">
+            
+            <div id="selected-pet-name-display" style="margin:15px 0; font-weight:900; color:#5a67d8; font-size:18px; text-align:center; background:#ebf8ff; padding:10px; border:2px dashed #5a67d8; border-radius:12px;">Selected Pet: None</div>
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-top:10px;">
+                <div>
+                    <label style="display:block; font-size:11px; font-weight:bold; color:#718096; margin-bottom:5px;">2. PET LEVEL</label>
+                    <input type="number" id="gift-pet-level" class="login-input" value="10" style="margin:0;">
+                </div>
+                <div>
+                    <label style="display:block; font-size:11px; font-weight:bold; color:#718096; margin-bottom:5px;">3. BONUS BP</label>
+                    <input type="number" id="gift-bp" class="login-input" placeholder="0" style="margin:0;">
+                </div>
+            </div>
+
+            <label style="display:block; font-size:11px; font-weight:bold; color:#718096; margin-top:15px; margin-bottom:5px;">4. ATTACH MESSAGE</label>
+            <input type="text" id="gift-msg" class="login-input" value="Great job in class today!" style="margin:0;">
+        </div>
+
+        <div style="margin-top:20px;">
+            <button class="action-btn green" style="font-size:18px; padding:15px;" onclick="processBulkGift()">🚀 DELIVER TO CLASS</button>
+        </div>
+    </div>
+</div>
 
        <!-- 4. EXISTING DELETE MODAL (Unchanged) -->
        <div class="modal-overlay" id="teacher-delete-modal" style="z-index:2300;">
@@ -6884,7 +6932,110 @@ async function importStudentsCSV() {
     updateBulkActionBar();
 }
     function updateBulkActionBar() { const c = document.querySelectorAll('.student-select-checkbox:checked').length; const b = document.getElementById('bulk-action-bar'); document.getElementById('bulk-selected-count').innerText = `${c} Selected`; b.style.display = c > 0 ? 'flex' : 'none'; }
+ 
+ // --- 🎁 TEACHER DASHBOARD GIFT LOGIC ---
+
+// 1. Open the window and fill the pet list
+function openGiftModal() {
+    const selected = document.querySelectorAll('.student-select-checkbox:checked');
+    if (selected.length === 0) return showToast("Select students from the roster first!", "error");
     
+    document.getElementById('gift-count-display').innerText = `Sending to ${selected.length} students`;
+    document.getElementById('teacher-gift-modal').style.display = 'flex';
+    
+    // Fill the grid with your GitHub pets
+    const catalog = document.getElementById('dashboard-pet-catalog');
+    catalog.innerHTML = ""; 
+
+    for (const rarity in PET_TYPES) {
+        PET_TYPES[rarity].forEach(pet => {
+            const petCard = document.createElement('div');
+            petCard.style.cssText = "cursor:pointer; padding:8px; text-align:center; border:2px solid #cbd5e0; background:white; border-radius:10px; transition:all 0.2s; position:relative;";
+            petCard.id = `catalog-${pet.id}`;
+            
+            const img = pet.image 
+                ? `<img src="${pet.image}" style="width:100%; height:50px; object-fit:contain; pointer-events:none;" class="${pet.imageStyle}">`
+                : `<div style="font-size:30px;">${pet.emoji}</div>`;
+
+            petCard.innerHTML = `
+                ${img}
+                <div style="font-size:10px; font-weight:bold; margin-top:5px; white-space:nowrap; overflow:hidden;">${pet.name}</div>
+            `;
+
+            petCard.onclick = () => {
+                // Deselect others
+                document.querySelectorAll('#dashboard-pet-catalog > div').forEach(d => d.style.borderColor = "#cbd5e0");
+                // Select this one
+                petCard.style.borderColor = "#5a67d8";
+                document.getElementById('gift-selected-pet-id').value = pet.id;
+                document.getElementById('selected-pet-name-display').innerText = "Selected: " + pet.name;
+            };
+            catalog.appendChild(petCard);
+        });
+    }
+}
+
+// 2. The function that actually talks to the Database
+async function processBulkGift() {
+    const selected = Array.from(document.querySelectorAll('.student-select-checkbox:checked')).map(cb => cb.dataset.username);
+    const petId = document.getElementById('gift-selected-pet-id').value;
+    const lvl = parseInt(document.getElementById('gift-pet-level').value) || 1;
+    const bp = parseInt(document.getElementById('gift-bp').value) || 0;
+    const msg = document.getElementById('gift-msg').value;
+
+    if (!petId) return showToast("Please select a pet from the list!", "error");
+
+    const batch = window.fbase.writeBatch(window.db);
+    
+    // Calculate stats for the chosen level
+    const hp = 50 + (lvl * 10);
+    const mxp = (lvl * 300) + 200;
+
+    // Find the image for the notification pop-up
+    let petName = petId;
+    let petImg = "";
+    for (const r in PET_TYPES) {
+        const found = PET_TYPES[r].find(p => p.id === petId);
+        if (found) { petImg = found.image; petName = found.name; break; }
+    }
+
+    for (let user of selected) {
+        const ref = window.fbase.doc(window.db, "students", user);
+        
+        // The Pet Object
+        const newPet = {
+            id: "gift_" + Date.now() + "_" + Math.random(),
+            tp: petId, nm: petName, lv: lvl, hp: hp, mhp: hp, xp: 0, mxp: mxp,
+            pwr: ["claw_attack"], ih: true, hpg: 100, evs: 0, str: 0
+        };
+
+        // The Mail Notification
+        const note = {
+            from: currentLoggedTeacher || "Headmaster",
+            type: "pet_gift",
+            img: petImg,
+            text: msg,
+            bp: bp,
+            time: Date.now()
+        };
+
+        batch.update(ref, {
+            "saveData.p": window.fbase.arrayUnion(newPet),
+            "saveData.bp": window.fbase.increment(bp),
+            "saveData.nt": window.fbase.arrayUnion(note)
+        });
+    }
+
+    try {
+        await batch.commit();
+        showToast(`Sent ${petName} to ${selected.length} students!`, "success");
+        document.getElementById('teacher-gift-modal').style.display = 'none';
+        loadStudentList();
+    } catch (e) {
+        alert("Error sending gifts: " + e.message);
+    }
+}
+  
    async function loadStudentList() {
     if (!currentLoggedTeacher) return;
 
@@ -11252,21 +11403,25 @@ async function claimChosenPet(petId, petName, petImg) {
     renderHub();
 }
 
+let selectedForClaim = []; // Temporary list to track choices
+
 function showMailbox() {
     const notes = gameState.notifications || [];
     if (notes.length === 0) return;
 
-    // --- 1. PICK ONE CHOICE CHECK (NEW!) ---
+    // --- 1. MULTI-CHOICE CHECK (MODIFIED) ---
     const choiceGift = notes.find(n => n.type === "pet_choice");
     if (choiceGift) {
         const modal = document.querySelector('#arena-modal .confirm-modal');
         const overlay = document.getElementById('arena-modal');
         
-        // Build the choice grid
+        // Use the limit from the patch (e.g., 3), or default to 1 if not set
+        const limit = choiceGift.limit || 1; 
+        selectedForClaim = []; // Reset selections when opening
+
         let optionsHtml = `<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:15px;">`;
         
         choiceGift.options.forEach(petId => {
-            // Find the pet details from our internal registry
             let details = null;
             for (const r in PET_TYPES) {
                 const found = PET_TYPES[r].find(p => p.id === petId);
@@ -11274,8 +11429,10 @@ function showMailbox() {
             }
 
             if (details) {
+                // Modified to call 'toggleSelection' instead of claiming immediately
                 optionsHtml += `
-                <div class="pet-card" style="border:2px solid #5a67d8; padding:10px;" onclick="claimChosenPet('${details.id}', '${details.name}', '${details.image}')">
+                <div id="choice-${details.id}" class="pet-card" style="border:2px solid #5a67d8; padding:10px; cursor:pointer; position:relative;" 
+                     onclick="togglePetSelection('${details.id}', '${details.name}', '${details.image}', ${limit})">
                     <img src="${details.image}" style="width:60px; height:60px; object-fit:contain;">
                     <div style="font-weight:bold; font-size:12px; margin-top:5px;">${details.name}</div>
                     <div class="rarity-badge rarity-${details.rarity}" style="font-size:8px;">${details.rarity}</div>
@@ -11285,17 +11442,21 @@ function showMailbox() {
         optionsHtml += `</div>`;
 
         modal.innerHTML = `
-            <h2 style="color:#5a67d8;">🎁 A Gift Awaits!</h2>
-            <p style="font-weight:bold;">${choiceGift.text}</p>
-            <p style="font-size:12px; color:#718096;">Choose carefully! You can only pick ONE.</p>
+            <h2 style="color:#5a67d8;">🎁 Choose Your Rewards!</h2>
+            <p style="font-weight:bold; margin-bottom:2px;">${choiceGift.text}</p>
+            <p id="choice-counter" style="color:#48bb78; font-weight:bold; font-size:14px; margin-bottom:10px;">Selected: 0 / ${limit}</p>
+            
             ${optionsHtml}
-            <div style="margin-top:15px; font-size:10px; color:gray;">(Click a pet to claim it)</div>
+            
+            <button id="multi-claim-btn" class="action-btn green" style="margin-top:15px; display:none;" onclick="finalizeMultiClaim()">
+                CLAIM SELECTED PETS
+            </button>
         `;
         overlay.classList.add('active');
         return;
     }
 
-    // --- 2. SINGLE VISUAL GIFT CHECK ---
+    // --- 2. SINGLE VISUAL GIFT CHECK (Unchanged) ---
     const specialGift = notes.find(n => n.type === "pet_gift");
     if (specialGift) {
         const visual = specialGift.img 
@@ -11305,7 +11466,7 @@ function showMailbox() {
         return;
     }
 
-    // --- 3. ORIGINAL MAILBOX LOGIC (BP/Messages) ---
+    // --- 3. ORIGINAL MAILBOX LOGIC (Unchanged) ---
     let html = notes.map(n => `
         <div style="background:#f7fafc; padding:10px; border-radius:8px; border-left:4px solid #48bb78; margin-bottom:10px; text-align:left;">
             <div style="font-weight:bold; font-size:14px; color:#2d3748;">📬 From: ${n.from}</div>
@@ -11317,8 +11478,11 @@ function showMailbox() {
     const overlay = document.getElementById('arena-modal');
     modal.innerHTML = `
         <h2 style="color:#48bb78;">Community Mailbox</h2>
+        <p>Friends visited your land while you were away!</p>
         <div style="max-height:250px; overflow-y:auto; margin:15px 0;">${html}</div>
-        <div style="background:#fef3c7; padding:10px; border-radius:10px; font-weight:bold; color:#92400e; margin-bottom:15px;">Total Collected: +${totalBP} BP</div>
+        <div style="background:#fef3c7; padding:10px; border-radius:10px; font-weight:bold; color:#92400e; margin-bottom:15px;">
+            Total Collected: +${totalBP} BP
+        </div>
         <button class="confirm-btn yes" style="width:100%;" onclick="clearMailbox()">Awesome!</button>`;
     overlay.classList.add('active');
 }
@@ -11330,6 +11494,52 @@ async function clearMailbox() {
         "saveData.notifications": []
     });
     saveGame(true);
+}
+
+function togglePetSelection(id, name, img, limit) {
+    const index = selectedForClaim.findIndex(p => p.id === id);
+    const card = document.getElementById(`choice-${id}`);
+
+    if (index > -1) {
+        // Unselect if already picked
+        selectedForClaim.splice(index, 1);
+        card.style.background = "white";
+        card.style.borderColor = "#5a67d8";
+    } else {
+        // Select if under limit
+        if (selectedForClaim.length < limit) {
+            selectedForClaim.push({ id, name, img });
+            card.style.background = "#ebf8ff";
+            card.style.borderColor = "#48bb78";
+        } else {
+            showToast(`You can only pick ${limit}!`, "error");
+        }
+    }
+
+    // Update UI
+    document.getElementById('choice-counter').innerText = `Selected: ${selectedForClaim.length} / ${limit}`;
+    document.getElementById('multi-claim-btn').style.display = (selectedForClaim.length === limit) ? "block" : "none";
+}
+
+async function finalizeMultiClaim() {
+    // 1. Add all chosen pets to the collection at Level 10
+    selectedForClaim.forEach(p => {
+        gameState.pets.push({
+            id: "chosen_" + Date.now() + "_" + Math.random(),
+            tp: p.id, nm: p.name, lv: 10, hp: 150, mhp: 150, xp: 0, mxp: 3200,
+            pwr: ["claw_attack", "mega_punch"], ih: true, hpg: 100, evs: 0, str: 0
+        });
+    });
+
+    // 2. Clear mailbox
+    await clearMailbox();
+
+    // 3. Close modal and show ceremony
+    document.getElementById('arena-modal').classList.remove('active');
+    triggerRewardCeremony("SQUAD RECRUITED!", `You claimed ${selectedForClaim.length} new pets!`, "🐾", null);
+    
+    saveGame(true);
+    renderHub();
 }
 // --- 🧬 MASTERY INFUSION SYSTEM ---
 
