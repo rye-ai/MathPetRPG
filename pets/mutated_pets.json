@@ -78,5 +78,21 @@
   { "id": "f_mon12", "name": "Rizchice", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/basicmutation/11.png", "baseHP": 250, "rarity": "epic", "element": ["ice", "normal"] },
   { "id": "f_mon13", "name": "Rogbrown", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/basicmutation/16.png", "baseHP": 250, "rarity": "epic", "element": ["earth", "normal"] },
   { "id": "f_mon14", "name": "Rofish", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/basicmutation/5.png", "baseHP": 400, "rarity": "epic", "element": ["fire", "normal"] },
-  { "id": "f_mon15", "name": "Angdoc", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/basicmutation/9.png", "baseHP": 450, "rarity": "epic", "element": ["light", "fire"] }
+  { "id": "f_mon15", "name": "Angdoc", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/basicmutation/9.png", "baseHP": 450, "rarity": "epic", "element": ["light", "fire"] },
+  { "id": "f_myatt", "name": "Rizyatt", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/basicmutation/23.png", "baseHP": 400, "rarity": "epic", "element": ["ice", "wind"] },
+  { "id": "f_chake", "name": "Cinnake", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/basicmutation/25.png", "baseHP": 400, "rarity": "epic", "element": ["wind", "shadow"] },
+  { "id": "f_jorg", "name": "Edborg", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/basicmutation/26.png", "baseHP": 400, "rarity": "epic", "element": ["shadow", "water"] },
+  { "id": "f_noah", "name": "Rosaur", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/basicmutation/17.png", "baseHP": 400, "rarity": "epic", "element": ["fire", "normal"] },
+  { "id": "f_semus", "name": "Ramustang", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/basicmutation/32.png", "baseHP": 400, "rarity": "epic", "element": ["electric", "fire"] },
+  { "id": "f_liark", "name": "Analiark", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/basicmutation/19.png", "baseHP": 400, "rarity": "epic", "element": ["water", "fire"] },
+  { "id": "f_wonk", "name": "Genkey", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/basicmutation/20.png", "baseHP": 400, "rarity": "epic", "element": ["grass", "ice"] },
+  { "id": "f_msfrol", "name": "Rizfrolch", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/basicmutation/21.png", "baseHP": 400, "rarity": "epic", "element": ["ice", "light"] },
+  { "id": "f_jaxire", "name": "Roxire", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/basicmutation/22.png", "baseHP": 400, "rarity": "epic", "element": ["fire", "normal"] },
+  { "id": "f_romzilla", "name": "Razilla", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/basicmutation/24.png", "baseHP": 400, "rarity": "epic", "element": ["electric", "normal"] },
+  { "id": "f_onesy", "name": "Cinesy", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/basicmutation/4.png", "baseHP": 400, "rarity": "epic", "element": ["wind", "normal"] },
+  { "id": "f_olabear", "name": "Angbear", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/basicmutation/13.png", "baseHP": 500, "legendary": "epic", "element": ["light", "normal"] },
+  { "id": "f_groochy", "name": "Genchoo", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/basicmutation/27.png", "baseHP": 500, "rarity": "epic", "element": ["grass", "ice"] },
+  { "id": "f_rudolf", "name": "Angdolf", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/basicmutation/29.png", "baseHP": 500, "rarity": "epic", "legendary": ["light", "ice"] },
+  { "id": "f_mike", "name": "Angmike", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/basicmutation/31.png", "baseHP": 500, "rarity": "epic", "legendary": ["light", "wind"] },
+  { "id": "f_raygon", "name": "Angray", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/basicmutation/1.png", "baseHP": 500, "rarity": "legendary", "element": ["light", "wind"] }
 ]
