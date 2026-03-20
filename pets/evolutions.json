@@ -35,6 +35,351 @@
     ]
   },
   {
+    "id": "sp_01",
+    "type": "sp_01",
+    "name": "Fireking",
+    "rarity": "rare",
+    "element": "fire",
+    "baseHP": 60,
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/1.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "👑",
+    "evolutions": [
+      { "name": "Fireking (Mid)", "level": 10, "cost": 100, "baseHP": 100, "rarity": "rare", "element": "fire", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/2.png", "imageStyle": "blend-multiply" },
+      { "name": "Fireking (Epic)", "level": 20, "cost": 200, "baseHP": 180, "rarity": "epic", "element": "fire", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/3.png", "imageStyle": "blend-multiply" }
+    ]
+  },
+  {
+    "id": "sp_02",
+    "type": "sp_02",
+    "name": "Firey Dude Prince",
+    "rarity": "rare",
+    "element": "fire",
+    "baseHP": 60,
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/4.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "🤴",
+    "evolutions": [
+      { "name": "Firey Dude (Mid)", "level": 10, "cost": 100, "baseHP": 100, "rarity": "rare", "element": "fire", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/5.png", "imageStyle": "blend-multiply" },
+      { "name": "Firey Dude (Epic)", "level": 20, "cost": 200, "baseHP": 180, "rarity": "epic", "element": "fire", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/6.png", "imageStyle": "blend-multiply" }
+    ]
+  },
+  {
+    "id": "sp_03",
+    "type": "sp_03",
+    "name": "Snakey",
+    "rarity": "rare",
+    "element": "grass",
+    "baseHP": 60,
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/7.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "🌿",
+    "evolutions": [
+      { "name": "Snakey (Mid)", "level": 10, "cost": 100, "baseHP": 100, "rarity": "rare", "element": "grass", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/8.png", "imageStyle": "blend-multiply" },
+      { "name": "Snakey (Epic)", "level": 20, "cost": 200, "baseHP": 180, "rarity": "epic", "element": "grass", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/9.png", "imageStyle": "blend-multiply" }
+    ]
+  },
+  {
+    "id": "sp_04",
+    "type": "sp_04",
+    "name": "St.Peter Snake",
+    "rarity": "rare",
+    "element": "shadow",
+    "baseHP": 60,
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/10.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "🌑",
+    "evolutions": [
+      { "name": "St.Peter (Mid)", "level": 10, "cost": 100, "baseHP": 100, "rarity": "rare", "element": "shadow", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/11.png", "imageStyle": "blend-multiply" },
+      { "name": "St.Peter (Epic)", "level": 20, "cost": 200, "baseHP": 180, "rarity": "epic", "element": "shadow", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/12.png", "imageStyle": "blend-multiply" }
+    ]
+  },
+  {
+    "id": "sp_05",
+    "type": "sp_05",
+    "name": "Racer",
+    "rarity": "rare",
+    "element": "wind",
+    "baseHP": 60,
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/13.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "🌪️",
+    "evolutions": [
+      { "name": "Racer (Mid)", "level": 10, "cost": 100, "baseHP": 100, "rarity": "rare", "element": "wind", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/14.png", "imageStyle": "blend-multiply" },
+      { "name": "Racer (Epic)", "level": 20, "cost": 200, "baseHP": 180, "rarity": "epic", "element": "wind", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/15.png", "imageStyle": "blend-multiply" }
+    ]
+  },
+  {
+    "id": "sp_06",
+    "type": "sp_06",
+    "name": "Sharky",
+    "rarity": "rare",
+    "element": "water",
+    "baseHP": 60,
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/16.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "🦈",
+    "evolutions": [
+      { "name": "Sharky (Mid)", "level": 10, "cost": 100, "baseHP": 100, "rarity": "rare", "element": "water", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/17.png", "imageStyle": "blend-multiply" },
+      { "name": "Sharky (Epic)", "level": 20, "cost": 200, "baseHP": 180, "rarity": "epic", "element": "water", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/18.png", "imageStyle": "blend-multiply" }
+    ]
+  },
+  {
+    "id": "sp_07",
+    "type": "sp_07",
+    "name": "Blackbear",
+    "rarity": "rare",
+    "element": "earth",
+    "baseHP": 60,
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/19.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "🐻",
+    "evolutions": [
+      { "name": "Blackbear (Mid)", "level": 10, "cost": 100, "baseHP": 100, "rarity": "rare", "element": "earth", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/20.png", "imageStyle": "blend-multiply" },
+      { "name": "Blackbear (Epic)", "level": 20, "cost": 200, "baseHP": 180, "rarity": "epic", "element": "earth", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/21.png", "imageStyle": "blend-multiply" }
+    ]
+  },
+  {
+    "id": "sp_08",
+    "type": "sp_08",
+    "name": "Dave",
+    "rarity": "rare",
+    "element": "normal",
+    "baseHP": 60,
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/22.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "👤",
+    "evolutions": [
+      { "name": "Dave (Mid)", "level": 10, "cost": 100, "baseHP": 100, "rarity": "rare", "element": "normal", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/23.png", "imageStyle": "blend-multiply" },
+      { "name": "Dave (Epic)", "level": 20, "cost": 200, "baseHP": 180, "rarity": "epic", "element": "normal", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/24.png", "imageStyle": "blend-multiply" }
+    ]
+  },
+  {
+    "id": "sp_09",
+    "type": "sp_09",
+    "name": "Lily",
+    "rarity": "rare",
+    "element": "grass",
+    "baseHP": 60,
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/25.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "🌸",
+    "evolutions": [
+      { "name": "Lily (Mid)", "level": 10, "cost": 100, "baseHP": 100, "rarity": "rare", "element": "grass", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/26.png", "imageStyle": "blend-multiply" },
+      { "name": "Lily (Epic)", "level": 20, "cost": 200, "baseHP": 180, "rarity": "epic", "element": "grass", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/27.png", "imageStyle": "blend-multiply" }
+    ]
+  },
+  {
+    "id": "sp_10",
+    "type": "sp_10",
+    "name": "Pencil Bear",
+    "rarity": "rare",
+    "element": "normal",
+    "baseHP": 60,
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/28.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "✏️",
+    "evolutions": [
+      { "name": "Pencil Bear (Mid)", "level": 10, "cost": 100, "baseHP": 100, "rarity": "rare", "element": "normal", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/29.png", "imageStyle": "blend-multiply" },
+      { "name": "Pencil Bear (Epic)", "level": 20, "cost": 200, "baseHP": 180, "rarity": "epic", "element": "normal", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/30.png", "imageStyle": "blend-multiply" }
+    ]
+  },
+  {
+    "id": "sp_11",
+    "type": "sp_11",
+    "name": "Watersauros",
+    "rarity": "rare",
+    "element": "water",
+    "baseHP": 60,
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/31.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "🦕",
+    "evolutions": [
+      { "name": "Watersauros (Mid)", "level": 10, "cost": 100, "baseHP": 100, "rarity": "rare", "element": "water", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/32.png", "imageStyle": "blend-multiply" },
+      { "name": "Watersauros (Epic)", "level": 20, "cost": 200, "baseHP": 180, "rarity": "epic", "element": "water", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/33.png", "imageStyle": "blend-multiply" }
+    ]
+  },
+  {
+    "id": "sp_12",
+    "type": "sp_12",
+    "name": "Firedog",
+    "rarity": "rare",
+    "element": "fire",
+    "baseHP": 60,
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/34.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "🐕",
+    "evolutions": [
+      { "name": "Firedog (Mid)", "level": 10, "cost": 100, "baseHP": 100, "rarity": "rare", "element": "fire", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/35.png", "imageStyle": "blend-multiply" },
+      { "name": "Firedog (Epic)", "level": 20, "cost": 200, "baseHP": 180, "rarity": "epic", "element": "fire", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/36.png", "imageStyle": "blend-multiply" }
+    ]
+  },
+  {
+    "id": "sp_13",
+    "type": "sp_13",
+    "name": "Gowolf",
+    "rarity": "rare",
+    "element": "shadow",
+    "baseHP": 60,
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/37.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "🐺",
+    "evolutions": [
+      { "name": "Gowolf (Mid)", "level": 10, "cost": 100, "baseHP": 100, "rarity": "rare", "element": "shadow", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/38.png", "imageStyle": "blend-multiply" },
+      { "name": "Gowolf (Epic)", "level": 20, "cost": 200, "baseHP": 180, "rarity": "epic", "element": "shadow", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/39.png", "imageStyle": "blend-multiply" }
+    ]
+  },
+  {
+    "id": "sp_14",
+    "type": "sp_14",
+    "name": "Strawberry Cake",
+    "rarity": "rare",
+    "element": "normal",
+    "baseHP": 60,
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/40.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "🍰",
+    "evolutions": [
+      { "name": "Cake (Mid)", "level": 10, "cost": 100, "baseHP": 100, "rarity": "rare", "element": "normal", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/41.png", "imageStyle": "blend-multiply" },
+      { "name": "Cake (Epic)", "level": 20, "cost": 200, "baseHP": 180, "rarity": "epic", "element": "normal", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/42.png", "imageStyle": "blend-multiply" }
+    ]
+  },
+  {
+    "id": "sp_15",
+    "type": "sp_15",
+    "name": "Bookliah",
+    "rarity": "rare",
+    "element": "light",
+    "baseHP": 60,
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/43.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "📖",
+    "evolutions": [
+      { "name": "Bookliah (Mid)", "level": 10, "cost": 100, "baseHP": 100, "rarity": "rare", "element": "light", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/44.png", "imageStyle": "blend-multiply" },
+      { "name": "Bookliah (Epic)", "level": 20, "cost": 200, "baseHP": 180, "rarity": "epic", "element": "light", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/45.png", "imageStyle": "blend-multiply" }
+    ]
+  },
+  {
+    "id": "sp_16",
+    "type": "sp_16",
+    "name": "Bunion",
+    "rarity": "rare",
+    "element": "earth",
+    "baseHP": 60,
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/46.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "🧅",
+    "evolutions": [
+      { "name": "Bunion (Mid)", "level": 10, "cost": 100, "baseHP": 100, "rarity": "rare", "element": "earth", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/47.png", "imageStyle": "blend-multiply" },
+      { "name": "Bunion (Epic)", "level": 20, "cost": 200, "baseHP": 180, "rarity": "epic", "element": "earth", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/48.png", "imageStyle": "blend-multiply" }
+    ]
+  },
+  {
+    "id": "sp_17",
+    "type": "sp_17",
+    "name": "Steven",
+    "rarity": "rare",
+    "element": "light",
+    "baseHP": 60,
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/49.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "✨",
+    "evolutions": [
+      { "name": "Steven (Mid)", "level": 10, "cost": 100, "baseHP": 100, "rarity": "rare", "element": "light", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/50.png", "imageStyle": "blend-multiply" },
+      { "name": "Steven (Epic)", "level": 20, "cost": 200, "baseHP": 180, "rarity": "epic", "element": "light", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/51.png", "imageStyle": "blend-multiply" }
+    ]
+  },
+  {
+    "id": "sp_18",
+    "type": "sp_18",
+    "name": "Coolboy",
+    "rarity": "rare",
+    "element": "ice",
+    "baseHP": 60,
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/52.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "😎",
+    "evolutions": [
+      { "name": "Coolboy (Mid)", "level": 10, "cost": 100, "baseHP": 100, "rarity": "rare", "element": "ice", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/53.png", "imageStyle": "blend-multiply" },
+      { "name": "Coolboy (Epic)", "level": 20, "cost": 200, "baseHP": 180, "rarity": "epic", "element": "ice", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/54.png", "imageStyle": "blend-multiply" }
+    ]
+  },
+  {
+    "id": "sp_19",
+    "type": "sp_19",
+    "name": "Owly",
+    "rarity": "rare",
+    "element": "wind",
+    "baseHP": 60,
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/55.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "🦉",
+    "evolutions": [
+      { "name": "Owly (Mid)", "level": 10, "cost": 100, "baseHP": 100, "rarity": "rare", "element": "wind", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/56.png", "imageStyle": "blend-multiply" },
+      { "name": "Owly (Epic)", "level": 20, "cost": 200, "baseHP": 180, "rarity": "epic", "element": "wind", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/57.png", "imageStyle": "blend-multiply" }
+    ]
+  },
+  {
+    "id": "sp_20",
+    "type": "sp_20",
+    "name": "Oxy",
+    "rarity": "rare",
+    "element": "electric",
+    "baseHP": 60,
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/58.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "🧪",
+    "evolutions": [
+      { "name": "Oxy (Mid)", "level": 10, "cost": 100, "baseHP": 100, "rarity": "rare", "element": "electric", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/59.png", "imageStyle": "blend-multiply" },
+      { "name": "Oxy (Epic)", "level": 20, "cost": 200, "baseHP": 180, "rarity": "epic", "element": "electric", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/60.png", "imageStyle": "blend-multiply" }
+    ]
+  },
+  {
+    "id": "sp_21",
+    "type": "sp_21",
+    "name": "Foxy",
+    "rarity": "rare",
+    "element": "electric",
+    "baseHP": 60,
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/61.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "🦊",
+    "evolutions": [
+      { "name": "Foxy (Mid)", "level": 10, "cost": 100, "baseHP": 100, "rarity": "rare", "element": "electric", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/62.png", "imageStyle": "blend-multiply" },
+      { "name": "Foxy (Epic)", "level": 20, "cost": 200, "baseHP": 180, "rarity": "epic", "element": "electric", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/63.png", "imageStyle": "blend-multiply" }
+    ]
+  },
+  {
+    "id": "sp_22",
+    "type": "sp_22",
+    "name": "Batty",
+    "rarity": "rare",
+    "element": "ice",
+    "baseHP": 60,
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/64.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "🦇",
+    "evolutions": [
+      { "name": "Batty (Mid)", "level": 10, "cost": 100, "baseHP": 100, "rarity": "rare", "element": "ice", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/65.png", "imageStyle": "blend-multiply" },
+      { "name": "Batty (Epic)", "level": 20, "cost": 200, "baseHP": 180, "rarity": "epic", "element": "ice", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/66.png", "imageStyle": "blend-multiply" }
+    ]
+  },
+  {
+    "id": "sp_23",
+    "type": "sp_23",
+    "name": "Drakewon",
+    "rarity": "rare",
+    "element": "light",
+    "baseHP": 60,
+    "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/67.png",
+    "imageStyle": "blend-multiply",
+    "emoji": "🐉",
+    "evolutions": [
+      { "name": "Drakewon (Mid)", "level": 10, "cost": 100, "baseHP": 100, "rarity": "rare", "element": "light", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/68.png", "imageStyle": "blend-multiply" },
+      { "name": "Drakewon (Epic)", "level": 20, "cost": 200, "baseHP": 180, "rarity": "epic", "element": "light", "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/mons/studentpet/69.png", "imageStyle": "blend-multiply" }
+    ]
+  },
+  {
     "id": "family_chrystianake",
     "base": {
       "id": "chrystianake_01",
