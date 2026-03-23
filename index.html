@@ -1811,6 +1811,7 @@ body {
        <button class="tab" data-tab="tools" onclick="switchTab('tools')">🛠️ Tools</button>
        <button class="tab" data-tab="tower" onclick="switchTab('tower')">🗼 Tower</button>
        <button class="tab" data-tab="fusion" onclick="switchTab('fusion')">🧪 Lab</button>
+       <button class="tab" data-tab="arcade" onclick="switchTab('arcade')">🕹️ Arcade</button>
    </nav>
    <!-- PRO UI: ADVENTURE HUD & JOURNAL -->
    <div class="adventure-hud" id="adv-hud">
@@ -2043,31 +2044,6 @@ body {
         </div>
     </div>
 
-<div id="tool-player-view">
-    <div class="focus-header">
-        <!-- Left Side: Title and Score -->
-        <div style="display:flex; align-items:center; gap:15px;">
-            <span id="active-tool-title" style="color:white; font-weight:bold; font-size:18px;">Tool Name</span>
-            <div style="background:#2d3748; padding:8px 20px; border-radius:20px; border:2px solid #48bb78; box-shadow: 0 0 10px rgba(72, 187, 120, 0.3);">
-                <span style="color:#a0aec0; font-size:12px; font-weight: bold;">SMART SCORE:</span>
-                <span id="focus-score-display" style="color:#48bb78; font-size: 24px; font-weight:bold; font-family:monospace;">0</span>
-            </div>
-        </div>
-
-        <!-- Middle/Right: The Cheering Pet (Now integrated) -->
-        <div class="cheer-zone">
-            <div id="pet-speech" class="speech-bubble">Amazing work!</div>
-            <div id="cheer-pet-visual"></div>
-        </div>
-
-        <!-- Right Side: Exit -->
-        <button class="action-btn red" style="width:auto; padding:8px 20px; margin:0;" onclick="exitTool()">💾 SAVE & EXIT</button>
-    </div>
-
-    <div style="flex:1; background:white; position:relative;">
-        <iframe id="tool-frame" style="width:100%; height:100%; border:none;" sandbox="allow-scripts allow-modals allow-same-origin allow-popups"></iframe>
-    </div>
-</div>
     </section>
     <section id="screen-hub" class="screen"><div id="hub-content"></div></section>
     <section id="screen-shop" class="screen"><div id="shop-content"></div></section>
@@ -2288,6 +2264,49 @@ body {
          <!-- Question Card injected here -->
      </div>
 </div>
+
+<section id="screen-arcade" class="screen">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; background: #f0fff4; padding: 15px; border-radius: 15px; border: 2px solid #48bb78;">
+            <div>
+                <h2 style="color: #2f855a; font-size: 24px; margin:0; font-weight: 900;">🕹️ The Arcade</h2>
+                <p style="font-size: 12px; color: #276749; margin:0;">Insert 150 BP to win Rare Pets and Items!</p>
+            </div>
+            <div style="text-align: right;">
+                <div style="background:white; padding:5px 10px; border-radius:10px; border:2px solid #48bb78; font-weight:bold; color:#2f855a;">
+                    ENTRY FEE: 150 BP
+                </div>
+            </div>
+        </div>
+
+        <div id="arcade-grid" class="adventure-grid">
+            <div style="color:gray; text-align:center; width:100%;">Connecting to Arcade Machines...</div>
+        </div>
+    </section>
+
+</section>
+
+    <!-- THE GLOBAL GAME PLAYER (Moved here so Arcade can see it!) -->
+    <div id="tool-player-view">
+        <div class="focus-header">
+            <div style="display:flex; align-items:center; gap:15px;">
+                <span id="active-tool-title" style="color:white; font-weight:bold; font-size:18px;">Tool Name</span>
+                <div style="background:#2d3748; padding:8px 20px; border-radius:20px; border:2px solid #48bb78; box-shadow: 0 0 10px rgba(72, 187, 120, 0.3);">
+                    <span style="color:#a0aec0; font-size:12px; font-weight: bold;">MODE:</span>
+                    <span id="focus-score-display" style="color:#48bb78; font-size: 24px; font-weight:bold; font-family:monospace;">0</span>
+                </div>
+            </div>
+            <div class="cheer-zone">
+                <div id="pet-speech" class="speech-bubble">Amazing work!</div>
+                <div id="cheer-pet-visual"></div>
+            </div>
+            <button class="action-btn red" style="width:auto; padding:8px 20px; margin:0;" onclick="exitTool()">💾 SAVE & EXIT</button>
+        </div>
+        <div style="flex:1; background:white; position:relative;">
+            <iframe id="tool-frame" style="width:100%; height:100%; border:none;" sandbox="allow-scripts allow-modals allow-same-origin allow-popups"></iframe>
+        </div>
+    </div>
+</main>
+
    </main>
   </div>
   
@@ -3788,6 +3807,46 @@ async function renderToolsTab() {
     }
 }
 
+async function renderArcadeTab() {
+    const grid = document.getElementById('arcade-grid');
+    grid.innerHTML = '<div style="color:gray; text-align:center; width:100%;">Connecting to Arcade Machines...</div>';
+
+    try {
+        // We look in the same Tools Database, same "games" folder
+        const q = window.fbase.collection(window.toolsDb, "games");
+        const snap = await window.fbase.getDocs(q);
+        grid.innerHTML = "";
+        
+        snap.forEach(doc => {
+            const t = doc.data();
+            // ONLY show games that are tagged as "games" in the subject
+            if (t.subject === 'games') {
+                grid.innerHTML += `
+                <div class="adventure-card" style="border: 2px solid #48bb78;" onclick="launchArcadeGame('${doc.id}')">
+                    <div class="adventure-header" style="background:linear-gradient(135deg, #48bb78, #2f855a)">
+                        <span>🕹️ ${t.title}</span>
+                    </div>
+                    <div class="adventure-body">
+                        <p class="adventure-desc">${t.topic || "Arcade Mini-Game"}</p>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
+                            <span style="background:#f6ad55; color:white; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:bold;">150 BP TO PLAY</span>
+                            <span style="font-size:10px; color:#718096;">Gr ${t.grade || "All"}</span>
+                        </div>
+                    </div>
+                </div>`;
+            }
+        });
+        
+        if(grid.innerHTML === "") {
+            grid.innerHTML = '<div style="color:gray; text-align:center; width:100%;">No games in the arcade yet. Check back soon!</div>';
+        }
+
+    } catch (e) { 
+        console.error("❌ renderArcadeTab Error:", e);
+        grid.innerHTML = "Connection Error."; 
+    }
+}
+
 // 2. LAUNCH FOCUS MODE (Lockdown)
 async function launchTool(docId) {
     try {
@@ -3851,57 +3910,139 @@ async function launchTool(docId) {
     } catch (e) { console.error(e); }
 }
 
-window.addEventListener('message', (e) => {
-    if (!e.data || e.data.type !== 'TOOL_SCORE' || !activeToolId) return;
-
-    const newScore = parseInt(e.data.score) || 0;
-    document.getElementById('focus-score-display').innerText = newScore;
-    
-    if (!gameState.toolHistory) gameState.toolHistory = {};
-    let record = gameState.toolHistory[activeToolId] || { score: 0, claimed: false };
-
-    if (newScore > lastKnownScore) {
-        const cheers = ["Great job!", "Keep going!", "You're a genius!", "Brain power increasing!"];
-        updatePetSpeech(cheers[Math.floor(Math.random() * cheers.length)]);
+async function launchArcadeGame(docId) {
+    if (gameState.brainPoints < 150) {
+        return showToast("Not enough BP! You need 150 BP to play.", "error");
     }
-    lastKnownScore = newScore;
 
-    if (!record.claimed) {
-        record.score = newScore;
-        gameState.toolHistory[activeToolId] = record;
+    if (!confirm("Insert 150 BP to start this game?")) return;
+
+    try {
+        adjustBP(-150);
+        showToast("Inserting Coin... 🪙", "info");
+        await saveProgressToFirebase();
+
+        const docSnap = await window.fbase.getDoc(window.fbase.doc(window.toolsDb, "games", docId));
+        if (!docSnap.exists()) return showToast("Game machine is out of order!", "error");
+
+        const data = docSnap.data();
+        activeToolId = docId;
+        activeToolTopic = "Arcade Prize"; // Helps the badge system
+
+        // 1. SHOW THE WINDOW
+        document.getElementById('tool-player-view').style.display = 'flex';
+        document.getElementById('active-tool-title').innerText = "🕹️ ARCADE: " + data.title;
+        document.getElementById('focus-score-display').innerText = "LIVE";
+
+        // 2. SET UP THE CHEERING PET (Reused from Math Lab)
+        const pet = gameState.pets.find(p => p.id === gameState.currentPetId);
+        const cheerVis = document.getElementById('cheer-pet-visual');
+        if (cheerVis && pet) {
+            cheerVis.innerHTML = pet.image 
+                ? `<img src="${pet.image}" class="cheer-pet-img ${pet.imageStyle}">` 
+                : `<div style="font-size:80px;">${pet.emoji}</div>`;
+            updatePetSpeech(`Good luck, ${gameState.playerName}! Win a prize!`);
+        }
+
+        // 3. LOAD THE GAME (Handles both Code and Links)
+        soundManager.stopBGM();
+        const frame = document.getElementById('tool-frame');
         
-        if (newScore >= 100) {
-            record.claimed = true;
-            record.score = 100;
-            
-            // 1. Award BP
-            addBP(500);
-
-            // 2. Award Mastery Badge using our saved topic
-            const badgeName = activeToolTopic; 
-            if (!gameState.badgeInventory.includes(badgeName)) {
-                gameState.badgeInventory.push(badgeName);
-            }
-
-            // 3. Effects
-            updatePetSpeech("🎉 MASTERY! YOU DID IT! 🎉");
-            soundManager.playSFX('levelUp');
-            
-            // 4. Save
-            saveGame(true); 
-
-            // 5. Success Ceremony
-            triggerRewardCeremony(
-                "TOOL MASTERED!", 
-                `Perfect Score! +500 BP & ${badgeName} Badge`, 
-                "🛠️", 
-                null
-            );
+        if (data.externalUrl && data.externalUrl.trim() !== "") {
+            frame.removeAttribute('srcdoc');
+            frame.src = data.externalUrl;
         } else {
-            saveGame(false); 
+            frame.src = "";
+            frame.srcdoc = data.htmlCode;
+        }
+
+    } catch (e) { 
+        console.error("Arcade Launch Error:", e);
+        showToast("Error starting game.", "error");
+    }
+}
+
+window.addEventListener('message', (e) => {
+    // THE NEW BOUNCER: Let in Tool Scores OR Arcade Rewards
+    if (!e.data || !activeToolId) return;
+
+    // --- BRANCH A: MATH TOOL SCORE ---
+    if (e.data.type === 'TOOL_SCORE') {
+        const newScore = parseInt(e.data.score) || 0;
+        document.getElementById('focus-score-display').innerText = newScore;
+        
+        if (!gameState.toolHistory) gameState.toolHistory = {};
+        let record = gameState.toolHistory[activeToolId] || { score: 0, claimed: false };
+
+        if (newScore > (window.lastKnownScore || 0)) {
+            const cheers = ["Great job!", "Keep going!", "You're a genius!", "Brain power increasing!"];
+            updatePetSpeech(cheers[Math.floor(Math.random() * cheers.length)]);
+        }
+        window.lastKnownScore = newScore;
+
+        if (!record.claimed) {
+            record.score = newScore;
+            gameState.toolHistory[activeToolId] = record;
+            
+            if (newScore >= 100) {
+                record.claimed = true;
+                record.score = 100;
+                addBP(500);
+                const badgeName = activeToolTopic; 
+                if (!gameState.badgeInventory.includes(badgeName)) {
+                    gameState.badgeInventory.push(badgeName);
+                }
+                updatePetSpeech("🎉 MASTERY! YOU DID IT! 🎉");
+                soundManager.playSFX('levelUp');
+                saveGame(true); 
+                triggerRewardCeremony("TOOL MASTERED!", `Perfect Score! +500 BP & ${badgeName} Badge`, "🛠️", null);
+            } else {
+                saveGame(false); 
+            }
         }
     }
+
+    // --- BRANCH B: ARCADE REWARD (NEW!) ---
+    if (e.data.type === 'ARCADE_REWARD') {
+        handleArcadeReward(e.data);
+    }
 });
+
+// THE NEW PRIZE ENGINE (Put this right below the listener block)
+function handleArcadeReward(data) {
+    const { rewardType, rewardId, qty, rewardName } = data;
+    console.log("🎁 Arcade Prize Received:", data);
+
+    let visual = "🎁";
+    let message = `You won ${qty || 1}x ${rewardName || 'Prize'}!`;
+
+    if (rewardType === 'pet') {
+        const newPet = createPetInstance(rewardId, null, true);
+        if (newPet) {
+            gameState.pets.push(newPet);
+            visual = newPet.image ? `<img src="${newPet.image}" style="width:150px;">` : newPet.emoji;
+            message = `You won a ${newPet.name}!`;
+        }
+    } 
+    else if (rewardType === 'item') {
+        gameState.inventory[rewardId] = (gameState.inventory[rewardId] || 0) + (qty || 1);
+        const item = findShopItem(rewardId);
+        visual = item ? item.icon : "🧪";
+    }
+    else if (rewardType === 'scraps') {
+        gameState.inventory.forgeScraps = (gameState.inventory.forgeScraps || 0) + (qty || 10);
+        visual = "⚙️";
+    }
+    else if (rewardType === 'block') {
+        if(!gameState.builder.inventory) gameState.builder.inventory = {};
+        gameState.builder.inventory[rewardId] = (gameState.builder.inventory[rewardId] || 0) + (qty || 5);
+        visual = "🧱";
+    }
+
+    triggerRewardCeremony("ARCADE WINNER!", message, visual, () => {
+        saveGame(true); 
+    });
+}
 
 async function exitTool() {
     if (!activeToolId) return;
@@ -6126,6 +6267,10 @@ if(qmMult > 1) showToast(`BONUS EVENT: ${qmMult}x Rewards!`, "success");
         initFusionLab(); // This tells the external JS to re-scan gameState.pets
     }
 }
+
+if (t === 'arcade') {
+        renderArcadeTab();
+    }
 
     if (t !== 'wilds') { 
         document.getElementById('rpg-wrapper').style.display = 'none'; 
