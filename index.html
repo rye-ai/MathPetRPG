@@ -1841,7 +1841,7 @@ body {
    <main class="content">
    <section id="screen-study" class="screen active">
        
-       <!-- 🎓 ACTIVE EXAM ALERT CARD (Architect Fix) -->
+       <!-- 🎓 ACTIVE EXAM ALERT CARD -->
     <div id="active-exam-card" class="exam-card" style="display: none; margin-bottom: 20px;">
         <div style="font-size: 40px; margin-bottom: 10px;">📝</div>
         <h2 id="exam-card-title" style="color: #e53e3e; font-weight: bold; font-size: 20px;">Exam Assigned!</h2>
@@ -1851,8 +1851,8 @@ body {
         </button>
     </div>
     
-    <!-- NEW: MASTER ENGAGEMENT DASHBOARD -->
-    <div class="study-dashboard">
+    <!-- MASTER ENGAGEMENT DASHBOARD (ID Added for Toggling) -->
+    <div class="study-dashboard" id="study-dashboard-ui">
         <!-- ⛏️ ARCHAEOLOGY SITE -->
         <div class="excavation-card">
             <div class="fossil-well" id="fossil-well">
@@ -1870,7 +1870,6 @@ body {
             </div>
         </div>
         
-
         <!-- 🌟 CLASS BEACON -->
         <div class="beacon-card">
             <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:bold; color:#5a67d8;">
@@ -1884,6 +1883,15 @@ body {
         </div>
     </div>
 
+    <!-- 📺 THE NEW HTML LESSON PLAYER (Hidden by default) -->
+    <div id="html-lesson-wrapper" style="display:none; width:100%; height:550px; background:white; border-radius:15px; border:4px solid #5a67d8; overflow:hidden; position:relative; box-shadow: 0 10px 25px rgba(0,0,0,0.2); margin-top:10px;">
+        <div id="lesson-loader-overlay" style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.9); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:10;">
+            <div style="font-size:50px; animation: subtleFloat 2s infinite;">📚</div>
+            <div style="font-weight:bold; color:#5a67d8; margin-top:10px;">Loading Magic Lesson...</div>
+        </div>
+        <iframe id="study-lesson-frame" style="width:100%; height:100%; border:none;" sandbox="allow-scripts allow-same-origin"></iframe>
+    </div>
+
     <!-- 1. THE EXAM INTERFACE (Lockdown) -->
     <div id="exam-interface" class="exam-lockdown">
         <div class="exam-header">
@@ -1893,11 +1901,10 @@ body {
         
         <div style="flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; align-items:center;">
             <div id="exam-visual" style="margin-bottom:20px; max-width:100%;"></div>
-            <!-- Question Text + Speaker Button -->
-          <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 30px;">
-              <div id="exam-q-text" style="font-size:24px; font-weight:bold; text-align:center; color:#2d3748; margin: 0;">...</div>
-              <button onclick="readExamQuestion()" class="bg-indigo-500 text-white p-2 rounded-full shadow-md hover:bg-indigo-600 transition duration-150" style="width: 40px; height: 40px; line-height: 1; border:none; cursor:pointer;">🔊</button>
-          </div>
+            <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 30px;">
+                <div id="exam-q-text" style="font-size:24px; font-weight:bold; text-align:center; color:#2d3748; margin: 0;">...</div>
+                <button onclick="readExamQuestion()" class="bg-indigo-500 text-white p-2 rounded-full shadow-md" style="width: 40px; height: 40px; border:none; cursor:pointer;">🔊</button>
+            </div>
             <div id="exam-options" style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; width:100%; max-width:600px;"></div>
         </div>
 
@@ -1910,78 +1917,61 @@ body {
         </div>
     </div>
 
-    <!-- 2. NEW RESULTS MODAL (Step-by-Step Review) -->
+    <!-- 2. EXAM RESULTS MODAL -->
     <div class="modal-overlay" id="exam-results-modal">
         <div class="confirm-modal" style="max-width:700px; width:95%; height:90vh; display:flex; flex-direction:column; padding:0; overflow:hidden;">
-            
-            <!-- Header: Score & Reward -->
             <div style="background:#2d3748; color:white; padding:15px; text-align:center;">
                 <h2 id="review-score-header" style="color:white; margin:0; font-size:20px;">Score: ...</h2>
                 <div id="review-reward-text" style="font-size:14px; color:#68d391; margin-top:5px;"></div>
             </div>
-
-            <!-- Scrollable Question Area -->
             <div style="flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; align-items:center;">
-                
-                <!-- Status Badge (Correct/Wrong) -->
                 <div id="review-status-badge" style="margin-bottom:15px; padding:5px 15px; border-radius:15px; font-weight:bold; text-transform:uppercase;">...</div>
-
-                <!-- Visual -->
                 <div id="review-visual" style="margin-bottom:20px; max-width:100%;"></div>
-                
-                <!-- Question Text -->
                 <div id="review-q-text" style="font-size:22px; font-weight:bold; text-align:center; margin-bottom:20px; color:#2d3748;">...</div>
-                
-                <!-- Options Grid (Disabled) -->
                 <div id="review-options" style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; width:100%; max-width:600px;"></div>
             </div>
-
-            <!-- Footer: Navigation -->
             <div style="background:#f7fafc; padding:15px; border-top:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
                 <button class="action-btn blue" style="width:100px;" onclick="changeReviewQ(-1)">⬅ Prev</button>
                 <div id="review-counter" style="font-weight:bold; color:#4a5568;">Q 1 / 10</div>
                 <button class="action-btn blue" style="width:100px;" onclick="changeReviewQ(1)">Next ➡</button>
             </div>
-            
-            <!-- Close Button -->
             <div style="padding:10px; background:white; border-top:1px solid #eee;">
                 <button class="confirm-btn yes" style="width:100%;" onclick="closeExamResults()">Finish Review</button>
             </div>
         </div>
     </div>
-     <div class="quiz-container">
+
+    <!-- 📝 CLASSIC QUIZ CONTAINER (ID Added for Toggling) -->
+    <div class="quiz-container" id="classic-quiz-ui">
       <div style="color: #718096; margin-bottom: 10px; font-size: 14px;">Solve to earn Brain Points!</div>
       <div id="question-visual-container" class="my-4 mx-auto" style="max-width: 90%; height: auto; display: flex; justify-content: center;"></div>
-      <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px;"><div class="question-text" id="question-text" style="margin: 0;">Loading question...</div><button id="tts-speaker-btn" onclick="readQuestionAloud()" class="bg-indigo-500 text-white p-2 rounded-full shadow-md hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition duration-150" style="width: 40px; height: 40px; line-height: 1;">🔊</button></div>
-      <div id="input-mode-container"><input type="number" id="answer-input" class="answer-input" placeholder="?"> <br> <button class="submit-btn" id="check-btn" style="margin-top: 20px;">Check Answer</button></div>
+      <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px;">
+          <div class="question-text" id="question-text" style="margin: 0;">Loading question...</div>
+          <button id="tts-speaker-btn" onclick="readQuestionAloud()" class="bg-indigo-500 text-white p-2 rounded-full shadow-md" style="width: 40px; height: 40px; line-height: 1; border:none;">🔊</button>
+      </div>
+      <div id="input-mode-container" style="display:none;">
+          <input type="number" id="answer-input" class="answer-input" placeholder="?"> <br> 
+          <button class="submit-btn" id="check-btn" style="margin-top: 20px;">Check Answer</button>
+      </div>
       <div id="mcq-mode-container" class="mcq-options" style="display:none"></div>
       <div id="feedback" class="feedback"></div>
-     </div>
+    </div>
     </section>
+
     <section id="screen-build" class="screen" style="padding: 0; height: 100%;">
         <div class="builder-container" id="builder-container">
-            
             <!-- 3D Scene -->
             <div class="perspective-container">
-                <div id="world" class="scene-3d">
-                    <!-- Blocks injected here by JS -->
-                </div>
+                <div id="world" class="scene-3d"></div>
             </div>
-
-            <!-- Hint Overlay -->
             <div style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.5); color: white; padding: 5px 10px; border-radius: 15px; font-size: 12px; pointer-events: none;">
                 🖱️ Drag to Rotate • Click to Build
             </div>
-
-            <!-- UI Controls -->
             <div class="build-ui">
-                <!-- Visitor Entry -->
                 <div id="build-main-controls" style="display: flex; gap: 10px; margin-bottom: 10px;">
                     <input type="text" id="visit-username" class="login-input" placeholder="Friend's Name" style="margin:0; flex:1; padding:5px; height: 35px;">
                     <button class="action-btn blue" style="width:auto; margin:0; padding:5px 15px; font-size:12px;" onclick="visitFriendLand()">Visit ✈️</button>
                 </div>
-
-                <!-- Visitor Tools (Hidden by default) -->
                 <div id="visitor-controls" style="display: none; background: #ebf8ff; padding: 10px; border-radius: 10px; border: 2px solid #4299e1; margin-bottom: 10px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                         <span id="visiting-name" style="font-weight:bold; color:#2b6cb0; font-size: 14px;">Visiting: -</span>
@@ -1993,25 +1983,15 @@ body {
                     </div>
                     <div id="kindness-meter" style="font-size:10px; color:#718096; margin-top:5px; text-align:center;">Kindness Purse: 100/100 BP</div>
                 </div>
-                <!-- Top Row: Tools -->
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <button class="action-btn red" style="width:auto; padding: 5px 10px; font-size: 12px;" onclick="resetBuilderView()">Reset View</button>
-                    <div style="font-weight:bold; font-size:14px; color:#2d3748;">
-                        Land: <span id="land-size-display">6x6</span>
-                    </div>
+                    <div style="font-weight:bold; font-size:14px; color:#2d3748;">Land: <span id="land-size-display">6x6</span></div>
                     <button class="action-btn blue" style="width:auto; padding: 5px 10px; font-size: 12px;" onclick="expandLand()">Expand (500 BP)</button>
                 </div>
-
-                <!-- Bottom Row: Block Palette -->
                 <div class="palette-scroll" id="block-palette">
-                    <!-- Javascript will fill this -->
-                    <div class="block-btn active">
-                        <div>🧱</div>
-                        <div class="block-qty">x99</div>
-                    </div>
+                    <div class="block-btn active"><div>🧱</div><div class="block-qty">x99</div></div>
                 </div>
             </div>
-
         </div>
     </section>
     <section id="screen-tools" class="screen">
@@ -2502,6 +2482,7 @@ let localPendingDamage = 0;
 let currentEquipSlot = null;
 let currentBuyingItem = null;
     let gameState = {
+        gradeMasterPool: [], // Stores every question in the grade folder
         mathCorrect: 0,
         mathTotal: 0,
         lastCycleId: "",
@@ -3633,7 +3614,40 @@ function repairSaveData() {
     function checkArenaEntry() { if (document.getElementById('arena-modal').classList.contains('active')) return; const t = gameState.inventory['arena_ticket'] || 0; document.getElementById('arena-ticket-display').innerText = `(You have: ${t})`; document.getElementById('arena-modal').classList.add('active'); document.getElementById('enter-arena-btn').onclick = () => { if (t > 0) { gameState.inventory['arena_ticket']--; closeArenaModal(); startBattle(8, false, true); } else { showToast("No tickets!", "error"); closeArenaModal(); } }; }
     function closeArenaModal() { document.getElementById('arena-modal').classList.remove('active'); }
 
-    async function loadAssignmentAndQuestions(a) { if (!a || !a.grade || !a.topics || a.topics.length === 0) { gameState.activeQuestionPool = []; return false; } gameState.activeQuestionPool = []; for (const val of a.topics) { if (val.startsWith('INTERNAL:')) { const k = val.replace('INTERNAL:', ''); const q = QUESTION_REPOSITORY[a.grade][k]; if (q) gameState.activeQuestionPool = gameState.activeQuestionPool.concat(q); } else { try { const res = await fetch(val); if (res.ok) { const q = await res.json(); if (Array.isArray(q)) gameState.activeQuestionPool = gameState.activeQuestionPool.concat(q); } } catch (err) {} } } if (gameState.activeQuestionPool.length === 0) return false; return true; }
+    async function loadAssignmentAndQuestions(a) { 
+        if (!a || !a.grade || !a.topics || a.topics.length === 0) { 
+            gameState.activeQuestionPool = []; 
+            gameState.activeLessonPool = []; // New pile for HTML lessons
+            return false; 
+        } 
+        
+        gameState.activeQuestionPool = []; 
+        gameState.activeLessonPool = []; // Reset pools
+
+        for (const val of a.topics) { 
+            // 1. Check if it is an HTML Lesson
+            if (val.toLowerCase().endsWith('.html')) {
+                gameState.activeLessonPool.push(val);
+                continue; // Move to next topic
+            }
+
+            // 2. Otherwise, treat as JSON or Internal topic
+            if (val.startsWith('INTERNAL:')) { 
+                const k = val.replace('INTERNAL:', ''); 
+                const q = QUESTION_REPOSITORY[a.grade][k]; 
+                if (q) gameState.activeQuestionPool = gameState.activeQuestionPool.concat(q); 
+            } else { 
+                try { 
+                    const res = await fetch(val); 
+                    if (res.ok) { 
+                        const q = await res.json(); 
+                        if (Array.isArray(q)) gameState.activeQuestionPool = gameState.activeQuestionPool.concat(q); 
+                    } 
+                } catch (err) { console.warn("Failed to load JSON topic:", val); } 
+            } 
+        } 
+        return true; 
+    }
 
     document.getElementById('check-btn').addEventListener('click', () => checkAnswer());
     document.getElementById('answer-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') checkAnswer(); });
@@ -3653,6 +3667,7 @@ function repairSaveData() {
           gameState.assignedExam = auth.assignment.exam; // <--- NEW: Save to Game State
       }
       await loadAssignmentAndQuestions(auth.assignment);
+      await syncGradeLevelLibrary(); // <--- Run the full library scan
       checkDailyLogin();
       document.getElementById('display-name').innerText = gameState.playerName; 
       document.getElementById('display-grade').innerText = `Grade: ${gameState.grade}`;
@@ -3882,6 +3897,9 @@ async function launchTool(docId) {
         const frame = document.getElementById('tool-frame');
         const bridgeScript = `
             <script>
+            
+            
+            
                 // A. Variables for the Tool to find
                 window.INITIAL_SCORE = ${startScore};
                 window.smartScore = ${startScore};
@@ -3961,6 +3979,37 @@ async function launchArcadeGame(docId) {
         showToast("Error starting game.", "error");
     }
 }
+
+// --- STUDY HUB HTML HANDSHAKE ---
+window.addEventListener('message', (e) => {
+    // Check if the message is from one of our lessons
+    if (e.data && e.data.type === 'STUDY_RESULT') {
+        if (e.data.success) {
+            // ✅ CORRECT ANSWER inside HTML lesson
+            recordMathParticipation(true);
+            soundManager.playSFX('correct');
+            
+            // Give 10 BP (or 20 if boosted)
+            let finalReward = gameState.isBrainBoosted ? 20 : 10;
+            addBP(finalReward);
+
+            // Archaeology/Beacon Progress
+            gameState.digProgress = (gameState.digProgress || 0) + 1;
+            RelicEngine.updateUI();
+            
+            showToast(`Good job! +${finalReward} BP`, "success");
+
+            // Shuffle to the next lesson/question
+            setTimeout(generateNextQuestion, 1500); 
+        } else {
+            // ❌ INCORRECT ANSWER inside HTML lesson
+            recordMathParticipation(false);
+            soundManager.playSFX('wrong');
+            adjustBP(-5);
+            showToast("Incorrect! -5 BP", "error");
+        }
+    }
+});
 
 window.addEventListener('message', (e) => {
     // THE NEW BOUNCER: Let in Tool Scores OR Arcade Rewards
@@ -4203,29 +4252,81 @@ function claimQuestReward(id, amount) {
     saveGame(true);
 }
     
-    function generateNextQuestion() { 
-        gameState.isFirstAttempt = true; // Reset first attempt for the new question
-        let q;
-        if (!gameState.activeQuestionPool || gameState.activeQuestionPool.length === 0) { q = MathEngine.generate(gameState.grade); } 
-        else { q = gameState.activeQuestionPool[Math.floor(Math.random() * gameState.activeQuestionPool.length)]; }
-        gameState.currentQuestion = q; 
-        document.getElementById('question-visual-container').innerHTML = q.qVisualHTML || ''; 
-        document.getElementById('question-text').innerHTML = q.q; 
-        document.getElementById('feedback').innerText = ''; 
-        document.getElementById('input-mode-container').style.display = 'none'; 
-        const c = document.getElementById('mcq-mode-container'); c.style.display = 'grid'; c.innerHTML = ''; 
-        const options = q.options || MathEngine.generateDistractors(parseFloat(q.a));
-        options.forEach(opt => { const b = document.createElement('div'); b.className = 'mcq-btn'; b.innerText = opt; b.onclick = () => checkAnswer(opt); c.appendChild(b); }); 
+   function generateNextQuestion() { 
+        gameState.isFirstAttempt = true; 
+        
+        const hasQuestions = gameState.activeQuestionPool && gameState.activeQuestionPool.length > 0;
+        const hasLessons = gameState.activeLessonPool && gameState.activeLessonPool.length > 0;
+
+        // --- SHUFFLE LOGIC ---
+        // If we have both, 50/50 chance. Otherwise pick whatever is available.
+        let mode = 'json';
+        if (hasQuestions && hasLessons) {
+            mode = Math.random() > 0.5 ? 'json' : 'html';
+        } else if (hasLessons) {
+            mode = 'html';
+        }
+
+        if (mode === 'html') {
+            // MODE: HTML LESSON
+            document.getElementById('classic-quiz-ui').style.display = 'none';
+            document.getElementById('html-lesson-wrapper').style.display = 'block';
+            document.getElementById('lesson-loader-overlay').style.display = 'flex';
+
+            const randomUrl = gameState.activeLessonPool[Math.floor(Math.random() * gameState.activeLessonPool.length)];
+            const frame = document.getElementById('study-lesson-frame');
+            
+            // Set the source. When it loads, hide the overlay
+            frame.src = randomUrl;
+            frame.onload = () => {
+                document.getElementById('lesson-loader-overlay').style.display = 'none';
+            };
+        } else {
+            // MODE: CLASSIC JSON
+            document.getElementById('html-lesson-wrapper').style.display = 'none';
+            document.getElementById('classic-quiz-ui').style.display = 'block';
+            document.getElementById('study-lesson-frame').src = ""; // Clear memory
+
+            let q;
+            if (!hasQuestions) { 
+                q = MathEngine.generate(gameState.grade); 
+            } else { 
+                q = gameState.activeQuestionPool[Math.floor(Math.random() * gameState.activeQuestionPool.length)]; 
+            }
+            
+            gameState.currentQuestion = q; 
+            document.getElementById('question-visual-container').innerHTML = q.qVisualHTML || ''; 
+            document.getElementById('question-text').innerHTML = q.q; 
+            document.getElementById('feedback').innerText = ''; 
+            document.getElementById('input-mode-container').style.display = 'none'; 
+            const c = document.getElementById('mcq-mode-container'); 
+            c.style.display = 'grid'; 
+            c.innerHTML = ''; 
+            
+            const options = q.options || MathEngine.generateDistractors(parseFloat(q.a));
+            options.forEach(opt => { 
+                const b = document.createElement('div'); 
+                b.className = 'mcq-btn'; 
+                b.innerText = opt; 
+                b.onclick = () => checkAnswer(opt); 
+                c.appendChild(b); 
+            }); 
+        }
     }
     
    function openInBattleMath() {
     if (gameState.battleState.turnInProgress) return;
 
-    let q = (gameState.activeQuestionPool && gameState.activeQuestionPool.length > 0) 
-        ? gameState.activeQuestionPool[Math.floor(Math.random() * gameState.activeQuestionPool.length)] 
-        : MathEngine.generate(gameState.grade || "1");
+    // --- ARCHITECT FIX: USE MASTER POOL FIRST ---
+    let q;
+    if (gameState.gradeMasterPool && gameState.gradeMasterPool.length > 0) {
+        // Pick a random question from the entire grade library!
+        q = gameState.gradeMasterPool[Math.floor(Math.random() * gameState.gradeMasterPool.length)];
+    } else {
+        // Emergency fallback to random numbers if library fails
+        q = MathEngine.generate(gameState.grade || "1");
+    }
 
-    // Use the Tower Overlay as a Universal Overlay
     const overlay = document.getElementById('tower-math-popup');
     const content = document.getElementById('tower-math-content');
     
@@ -4982,14 +5083,10 @@ function renderInventory(isEgg) {
         }
 
         let q;
-        
-        // 1. TRY TO USE ASSIGNED TOPICS FIRST
-        if (gameState.activeQuestionPool && gameState.activeQuestionPool.length > 0) {
-            const randomIndex = Math.floor(Math.random() * gameState.activeQuestionPool.length);
-            q = gameState.activeQuestionPool[randomIndex];
-        } 
-        // 2. FALLBACK TO GENERIC MATH (If no topics assigned)
-        else {
+        // --- ARCHITECT FIX: USE MASTER POOL FOR EVOLUTION ---
+        if (gameState.gradeMasterPool && gameState.gradeMasterPool.length > 0) {
+            q = gameState.gradeMasterPool[Math.floor(Math.random() * gameState.gradeMasterPool.length)];
+        } else {
             q = MathEngine.generate(gameState.grade || "1");
         }
 
@@ -6210,7 +6307,13 @@ if(qmMult > 1) showToast(`BONUS EVENT: ${qmMult}x Rewards!`, "success");
         soundManager.playBGM('wilds'); 
     }
 }
+
+
     function switchTab(t) {
+        const studyFrame = document.getElementById('study-lesson-frame');
+    if (t !== 'study' && studyFrame) {
+        studyFrame.src = ""; // Stops any background music/processes from the lesson
+    }
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
     document.querySelectorAll('.tab').forEach(b => b.classList.remove('active')); 
     
@@ -7420,7 +7523,7 @@ async function repairStudentWallet(username, mathCorrect) {
         const g=document.getElementById('tm-grade-select').value; const d=document.getElementById('tm-topic-list'); d.innerHTML='Loading...'; let files=[]; 
         if(GITHUB_CONFIG.enabled) files=await fetchGithubFolder(`questions/grade_${g}`); d.innerHTML=''; 
         const isChecked = (val) => { return (currentStudentData && currentStudentData.assignedTopics && currentStudentData.assignedTopics.includes(val)) ? 'checked' : ''; };
-        if(files.length>0) { files.filter(f=>f.name.endsWith('.json')).forEach(f=> { d.innerHTML+=`<label class="topic-checkbox-label" style="display:block; margin:5px 0;"><input type="checkbox" value="${f.download_url}" ${isChecked(f.download_url)}> ${f.name}</label>`; }); } else { Object.keys(QUESTION_REPOSITORY[g]||{}).forEach(t=> { const val = `INTERNAL:${t}`; d.innerHTML+=`<label class="topic-checkbox-label" style="display:block; margin:5px 0;"><input type="checkbox" value="${val}" ${isChecked(val)}> ${t}</label>`; }); }
+        if(files.length>0) { files.filter(f=>f.name.endsWith('.json') || f.name.endsWith('.html')).forEach(f=> { d.innerHTML+=`<label class="topic-checkbox-label" style="display:block; margin:5px 0;"><input type="checkbox" value="${f.download_url}" ${isChecked(f.download_url)}> ${f.name}</label>`; }); } else { Object.keys(QUESTION_REPOSITORY[g]||{}).forEach(t=> { const val = `INTERNAL:${t}`; d.innerHTML+=`<label class="topic-checkbox-label" style="display:block; margin:5px 0;"><input type="checkbox" value="${val}" ${isChecked(val)}> ${t}</label>`; }); }
     }
     
     async function saveStudentTopics() { 
@@ -7576,49 +7679,114 @@ async function bulkRewardBP() {
     function showMultiplayerMenu() { document.getElementById('wilds-menu').style.display='none'; document.getElementById('multiplayer-menu').style.display='block'; }
     
     async function createPvPRoom() { 
-    if(gameState.brainPoints < 100) return showToast("Need 100 BP", "error"); 
-    const squad = getSquad(); // Get all 6 pets
-    if(squad.length === 0) return showToast("Your squad is empty!", "error");
+        if(gameState.brainPoints < 100) return showToast("Need 100 BP", "error"); 
+        
+        // 1. Get the Squad
+        const rawSquad = getSquad(); 
+        if(rawSquad.length === 0) return showToast("Your squad is empty!", "error");
 
-    adjustBP(-100); 
-    const code = Math.floor(1000 + Math.random() * 9000).toString(); 
-    currentRoomId = code; isHost = true; 
-
-    // We save the entire squad array to the room
-    await window.fbase.setDoc(window.fbase.doc(window.db,"rooms",code),{ 
-            hostName:gameState.playerName, 
-            hostSquad:getSquad(), 
-            status:"waiting", 
-            turn:"host", 
-            lastAction: null,
-            logs:[`${gameState.playerName} created room.`] 
+        // --- ARCHITECT FIX: DATA SANITIZER ---
+        // This removes any "undefined" that crashes Firebase
+        const cleanSquad = rawSquad.map(pet => {
+            const p = {...pet};
+            return {
+                id: p.id || 'unknown',
+                tp: p.type || p.tp || 'monster_01',
+                nm: p.name || 'Pet',
+                hp: Number(p.hp) || 50,
+                mhp: Number(p.maxHP || p.mhp) || 50,
+                lv: Number(p.level || p.lv) || 1,
+                img: p.image || '',
+                ims: p.imageStyle || '',
+                emj: p.emoji || '🐾',
+                el: p.element || 'normal',
+                pwr: Array.isArray(p.powers) ? p.powers : ['claw_attack']
+            };
         });
 
-    document.getElementById('multiplayer-menu').style.display = 'none'; 
-    document.getElementById('pvp-lobby-screen').style.display = 'block'; 
-    document.getElementById('display-room-code').innerText = code; 
-    subscribeToRoom(code); 
-}
+        try {
+            adjustBP(-100); 
+            const code = Math.floor(1000 + Math.random() * 9000).toString(); 
+            currentRoomId = code; isHost = true; 
+
+            // 2. Save to Firebase with cleaned data
+            await window.fbase.setDoc(window.fbase.doc(window.db,"rooms",code),{ 
+                hostName: gameState.playerName || "Player 1", 
+                hostSquad: cleanSquad, // Uses the clean version!
+                status: "waiting", 
+                turn: "host", 
+                lastAction: null,
+                logs: [`${gameState.playerName} created room.`] 
+            });
+
+            document.getElementById('multiplayer-menu').style.display = 'none'; 
+            document.getElementById('pvp-lobby-screen').style.display = 'block'; 
+            document.getElementById('display-room-code').innerText = code; 
+            subscribeToRoom(code); 
+            
+        } catch (e) {
+            console.error("Firebase Room Error:", e);
+            showToast("Failed to create room. Data error.", "error");
+            adjustBP(100); // Refund BP if it fails!
+        }
+    }
     
     async function joinPvPRoom() { 
-    const code = document.getElementById('room-code-input').value.trim(); 
-    const squad = getSquad();
-    if(squad.length === 0) return showToast("Your squad is empty!", "error");
+    const codeInput = document.getElementById('room-code-input');
+    if (!codeInput) return;
+    const code = codeInput.value.trim(); 
+    
+    // 1. Get the Squad and filter out any "empty" slots
+    const rawSquad = getSquad().filter(p => p !== undefined && p !== null);
+    if(rawSquad.length === 0) return showToast("Your squad is empty!", "error");
 
-    const r = await window.fbase.getDoc(window.fbase.doc(window.db, "rooms", code)); 
-    if(r.exists() && r.data().status === "waiting") { 
-        currentRoomId = code; isHost = false; 
-        await window.fbase.updateDoc(window.fbase.doc(window.db,"rooms",code),{ 
-                guestName:gameState.playerName, 
-                guestSquad:getSquad(), 
-                status:"connected", 
-                logs:window.fbase.arrayUnion(`${gameState.playerName} joined!`)
+    // --- 🛡️ ARCHITECT'S SECURITY SHIELD (JOINER VERSION) ---
+    // This removes any "undefined" values that crash Firebase
+    const cleanSquad = rawSquad.map(pet => {
+        return {
+            id: String(pet.id || 'unknown'),
+            tp: String(pet.type || pet.tp || 'monster_01'),
+            nm: String(pet.name || 'Pet'),
+            hp: Number(pet.hp) || 50,
+            mhp: Number(pet.maxHP || pet.mhp) || 50,
+            lv: Number(pet.level || pet.lv) || 1,
+            img: String(pet.image || ''),
+            ims: String(pet.imageStyle || ''),
+            emj: String(pet.emoji || '🐾'),
+            el: pet.element || 'normal',
+            pwr: Array.isArray(pet.powers) ? pet.powers : ['claw_attack']
+        };
+    });
+
+    try {
+        const roomRef = window.fbase.doc(window.db, "rooms", code);
+        const r = await window.fbase.getDoc(roomRef); 
+        
+        if(r.exists() && r.data().status === "waiting") { 
+            currentRoomId = code; 
+            isHost = false; 
+            
+            // 2. Update the room with the Clean Data
+            await window.fbase.updateDoc(roomRef, { 
+                guestName: String(gameState.playerName || "Player 2"), 
+                guestSquad: cleanSquad, // The sanitized squad
+                status: "connected", 
+                logs: window.fbase.arrayUnion(`${gameState.playerName || 'Guest'} joined!`)
             }); 
-        document.getElementById('multiplayer-menu').style.display = 'none'; 
-        document.getElementById('pvp-lobby-screen').style.display = 'block'; 
-        document.getElementById('display-room-code').innerText = code; 
-        subscribeToRoom(code); 
-    } else { showToast("Room Error", "error"); }
+
+            document.getElementById('multiplayer-menu').style.display = 'none'; 
+            document.getElementById('pvp-lobby-screen').style.display = 'block'; 
+            document.getElementById('display-room-code').innerText = code; 
+            
+            subscribeToRoom(code); 
+            showToast("Connected to Room!", "success");
+        } else { 
+            showToast("Room is full or doesn't exist.", "error"); 
+        }
+    } catch (e) {
+        console.error("Firebase PVP Join Error:", e);
+        showToast("Connection failed: Data error.", "error");
+    }
 }
     
    let pvpLastActionTime = 0; 
@@ -7629,24 +7797,33 @@ function subscribeToRoom(code) {
         if(!d) return; 
 
         if(d.status === 'battle') { 
+            // --- 🛡️ ARCHITECT FIX: ONLY RUN THIS ONCE PER BATTLE ---
+            // This checks if we are still in the lobby. If we are, move to the arena.
             if(document.getElementById('pvp-lobby-screen').style.display !== 'none') { 
                 document.getElementById('pvp-lobby-screen').style.display = 'none'; 
                 document.getElementById('battle-ui').style.display = 'flex'; 
                 soundManager.playBGM('boss'); 
-            }
-            
-            document.querySelector('#battle-ui .battle-arena').style.backgroundImage = `url('https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/%E2%80%9CA%20high-quality%20monster-inspired%20battle%20arena%20in%20landscape%20orientation.%20A%20large%2C%20circular%20stadium%20floor%20made%20of%20smooth%20stone%20tiles%20with%20subtle%20glowing%20patterns.%20Surrounding%20the%20arena%20are%20tall%20stadium%20walls%2C%20bright%20.jpg')`;
+                
+                // PICK A RANDOM BACKGROUND FROM YOUR LIST
+                const fallback = 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur.png';
+                const randomArena = (ARENA_IMGS && ARENA_IMGS.length > 0) 
+                    ? ARENA_IMGS[Math.floor(Math.random() * ARENA_IMGS.length)] 
+                    : fallback;
 
-            // 1. DRAW PETS FIRST
+                document.querySelector('#battle-ui .battle-arena').style.backgroundImage = `url('${randomArena}')`;
+            }
+            // --- END OF FIX ---
+
+            // 1. DRAW PETS (This updates HP bars in real-time)
             renderPvPBattle(d); 
 
-            // 2. TRIGGER PROJECTILE SECOND
+            // 2. TRIGGER PROJECTILE
             if (d.lastAction && d.lastAction.ts > pvpLastActionTime) {
                 pvpLastActionTime = d.lastAction.ts;
-                // Wait 50ms to ensure the browser has finished "drawing" the pets
                 setTimeout(() => playSquadPvpAnimation(d.lastAction), 50);
             }
         } else {
+            // Handle the "Waiting for Player" screen
             document.getElementById('pvp-host-status').innerHTML = `Host: ${d.hostName}`; 
             document.getElementById('pvp-guest-status').innerHTML = `Guest: ${d.guestName||'...'}`; 
             if(d.status === 'connected' && isHost) document.getElementById('pvp-start-btn').style.display='block'; 
@@ -7695,8 +7872,6 @@ async function startPvPBattle() {
 function renderPvPBattle(d) {
     const stage = document.querySelector('#battle-ui .battle-arena');
     
-    // We only clear the stage if the pets aren't there yet.
-    // This prevents deleting projectiles while they are flying!
     if (!document.getElementById('slot-host-0')) {
         stage.innerHTML = ''; 
     }
@@ -7717,7 +7892,8 @@ function renderPvPBattle(d) {
         }
         const isFainted = p.hp <= 0;
         div.style.filter = isFainted ? "grayscale(1) opacity(0.4)" : "none";
-        div.innerHTML = `<div class="hero-hp-number">${isFainted ? 'KO' : Math.ceil(p.hp)}</div><img src="${p.image}" class="hero-img-unit ${p.imageStyle || ''}">`;
+        // --- ARCHITECT FIX: Use p.img and p.ims ---
+        div.innerHTML = `<div class="hero-hp-number">${isFainted ? 'KO' : Math.ceil(p.hp)}</div><img src="${p.img}" class="hero-img-unit ${p.ims || ''}">`;
     });
 
     // DRAW/UPDATE GUEST SQUAD
@@ -7733,7 +7909,8 @@ function renderPvPBattle(d) {
         }
         const isFainted = p.hp <= 0;
         div.style.filter = isFainted ? "grayscale(1) opacity(0.4)" : "none";
-        div.innerHTML = `<div class="hero-hp-number" style="color:#f56565;">${isFainted ? '' : Math.ceil(p.hp)}</div><img src="${p.image}" class="hero-img-unit ${p.imageStyle || ''}" style="transform:scaleX(-1);">`;
+        // --- ARCHITECT FIX: Use p.img and p.ims ---
+        div.innerHTML = `<div class="hero-hp-number" style="color:#f56565;">${isFainted ? '' : Math.ceil(p.hp)}</div><img src="${p.img}" class="hero-img-unit ${p.ims || ''}" style="transform:scaleX(-1);">`;
     });
 
     // --- TURN CONTROL LOGIC ---
@@ -7748,8 +7925,9 @@ function renderPvPBattle(d) {
     if (!activePet) {
         panel.innerHTML = `<div style="text-align:center; color:#e53e3e; font-weight:bold; padding:20px;">SQUAD DEFEATED</div>`;
     } else if (isMyTurn) {
-        const turnHeader = `<div style="color:#48bb78; font-weight:bold; text-align:center; margin-bottom:5px;">⚡ YOUR TURN (${activePet.name})</div>`;
-        const buttons = activePet.powers.map(pid => {
+        const turnHeader = `<div style="color:#48bb78; font-weight:bold; text-align:center; margin-bottom:5px;">⚡ YOUR TURN (${activePet.nm})</div>`;
+        // --- ARCHITECT FIX: Use activePet.pwr ---
+        const buttons = activePet.pwr.map(pid => {
             const move = findShopItem(pid);
             return `<button class="action-btn green" onclick="usePvPAttack('${pid}')">${move.name}</button>`;
         }).join('');
@@ -7758,7 +7936,6 @@ function renderPvPBattle(d) {
         panel.innerHTML = `<div style="text-align:center; color:#718096; padding:20px;">Opponent's Turn...</div>`;
     }
 
-    // --- WIN/LOSS CHECK ---
     if (!mySquad.some(p => p.hp > 0)) { alert("❌ Defeat!"); leavePvPRoom(); }
     else if (!oppSquad.some(p => p.hp > 0) && d.guestName) { alert("🏆 Victory!"); leavePvPRoom(); }
 }
@@ -7775,7 +7952,7 @@ async function usePvPAttack(pid) {
             if (!doc.exists()) throw "Room closed";
             const d = doc.data();
             
-            // 1. Turn Enforcement (Alternate Turns)
+            // 1. Turn Enforcement
             const mySide = isHost ? 'host' : 'guest';
             const oppSide = isHost ? 'guest' : 'host';
             if (d.turn !== mySide) return; 
@@ -7783,7 +7960,7 @@ async function usePvPAttack(pid) {
             let mySquad = [...d[mySide + 'Squad']];
             let enemySquad = [...d[oppSide + 'Squad']];
             
-            // 2. Identify Attacker and Target positions
+            // 2. Identify positions
             const aIdx = mySquad.findIndex(p => p.hp > 0);
             const tIdx = enemySquad.findIndex(p => p.hp > 0);
             
@@ -7791,18 +7968,18 @@ async function usePvPAttack(pid) {
 
             // 3. Calculate Damage
             const baseDmg = safeNum(move.damage || 10);
-            const levelBonus = safeNum(mySquad[aIdx].level || 1) * 2;
+            // --- 🛡️ ARCHITECT FIX: Changed .level to .lv ---
+            const levelBonus = safeNum(mySquad[aIdx].lv || 1) * 2;
             const dmg = baseDmg + levelBonus + Math.floor(Math.random() * 10);
 
-            // 4. Apply Damage
+            // 4. Apply Damage (enemySquad[tIdx].hp already matches)
             enemySquad[tIdx].hp = Math.max(0, enemySquad[tIdx].hp - dmg);
 
-            // 5. Build the Update with the PROJECTILE SIGNAL
+            // 5. Build Update
             let updates = {};
             updates[oppSide + 'Squad'] = enemySquad;
-            updates.turn = oppSide; // Flip turn to opponent
+            updates.turn = oppSide; 
             
-            // This is the "Packet" that triggers the projectile on both screens
             updates.lastAction = {
                 side: mySide,
                 aIdx: aIdx,
@@ -12530,6 +12707,37 @@ function rehydrateAllPets() {
     applySquadLevelSync(); 
     console.log("✅ Rehydration Complete: Legendary pets are shielded from the Cat Curse.");
 }
+
+async function syncGradeLevelLibrary() {
+        if (!gameState.grade) return;
+        
+        console.log("📚 Syncing Grade Master Pool for Grade " + gameState.grade);
+        const loginBtn = document.getElementById('login-submit-btn');
+        if(loginBtn) loginBtn.innerText = "📚 Syncing Grade Library...";
+
+        try {
+            // 1. Get the list of all files in the grade folder
+            let files = await fetchGithubFolder(`questions/grade_${gameState.grade}`);
+            let jsonFiles = files.filter(f => f.name.endsWith('.json'));
+
+            gameState.gradeMasterPool = [];
+
+            // 2. Download each JSON file and add its questions to the Master Pool
+            for (let file of jsonFiles) {
+                const res = await fetch(file.download_url);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (Array.isArray(data)) {
+                        gameState.gradeMasterPool = gameState.gradeMasterPool.concat(data);
+                    }
+                }
+            }
+            console.log(`✅ Master Library Sync Complete! ${gameState.gradeMasterPool.length} questions ready.`);
+        } catch (e) {
+            console.error("❌ Master Library Sync Failed:", e);
+        }
+    }
+
   </script>
   <!-- 🚧 CONSTRUCTION QUIZ MODAL -->
 <div class="modal-overlay" id="build-quiz-modal" style="z-index: 9999;">
