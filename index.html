@@ -69,7 +69,7 @@
     z-index: 15000; /* Force it above all other layers */
 }
     :root {
-        --bg-login: url('https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/Untitled%20design.png'); 
+        --bg-login: url('https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/Gemini_Generated_Image_nootrtnootrtnoot.png'); 
         --bg-game:  url('https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/Untitled%20design%20(1).png'); 
     }
 
@@ -92,19 +92,34 @@
     position: fixed; 
     top: 0; 
     left: 0; 
-    width: 100vw; /* Force full viewport width */
-    height: 100vh; /* Force full viewport height */
+    width: 100vw; 
+    height: 100vh; 
     background: var(--bg-login) no-repeat center center fixed; 
     background-size: cover; 
-    z-index: 5000; /* Increased Z-Index to be sure */
+    z-index: 5000; 
     display: flex; 
-    align-items: center; 
+    align-items: flex-end; /* Changed from center to push to bottom */
     justify-content: center; 
     overflow-y: auto; 
     padding: 20px; 
+    padding-bottom: 4vh; /* Adds a gap at the bottom */
 }
     .login-overlay.hidden { display: none; }
-    .login-box { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.5); border-radius: 20px; padding: 30px; box-shadow: 0 10px 50px rgba(0,0,0,0.5); text-align: center; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative; }
+    .login-box { 
+        background: rgba(255, 255, 255, 0.85); 
+        backdrop-filter: blur(8px); 
+        -webkit-backdrop-filter: blur(8px); 
+        border: 1px solid rgba(255,255,255,0.5); 
+        border-radius: 20px; 
+        padding: 20px; /* Reduced from 30 */
+        box-shadow: 0 10px 50px rgba(0,0,0,0.5); 
+        text-align: center; 
+        max-width: 400px; /* Reduced from 600 */
+        width: 100%; 
+        max-height: 80vh; 
+        overflow-y: auto; 
+        position: relative; 
+    }
     .login-title { font-size: clamp(24px, 5vw, 32px); color: #5a67d8; margin-bottom: 10px; font-weight: bold; }
     .setup-section { margin-bottom: 20px; text-align: left; border-bottom: 2px solid #edf2f7; padding-bottom: 15px; }
     .setup-label { display: block; font-size: 16px; font-weight: bold; color: #2d3748; margin-bottom: 8px; }
@@ -132,10 +147,58 @@
     .mcq-btn { background: white; border: 3px solid #e2e8f0; border-radius: 15px; padding: 20px 10px; font-size: 22px; font-weight: bold; color: #4a5568; cursor: pointer; transition: all 0.1s; box-shadow: 0 6px 0 #cbd5e0; text-align: center; display: flex; align-items: center; justify-content: center; min-height: 80px; user-select: none; }
     .mcq-btn:active { transform: translateY(6px); box-shadow: none; background-color: #f7fafc; }
     
-    /* Hub & Grids */
-    .hub-grid { display: flex; flex-direction: column; gap: 20px; }
-    @media(min-width: 768px) { .hub-grid { flex-direction: row; align-items: flex-start; } .hub-left { flex: 1; max-width: 350px; position: sticky; top: 0; } .hub-right { flex: 1.5; } }
-    .pet-display { display: flex; flex-direction: column; align-items: center; text-align: center; width: 100%; }
+    /* 🏰 THE MASTER HUB DASHBOARD CSS */
+    .hub-grid { 
+        display: grid; 
+        /* Sidebar (140px) | Pet Stage (Flex) | Details Panel (300px) */
+        grid-template-columns: 140px 1fr 300px; 
+        gap: 10px; 
+        height: 70vh; /* Fixed height so columns can scroll independently */
+        min-height: 450px;
+        overflow: hidden; 
+        background: rgba(255,255,255,0.3);
+        border-radius: 15px;
+    }
+    
+    .hub-sidebar { 
+        display: flex; 
+        flex-direction: column; 
+        gap: 8px; 
+        overflow-y: auto; 
+        padding: 10px; 
+        background: rgba(255,255,255,0.5);
+    }
+
+    .hub-main-view { 
+        display: flex; 
+        flex-direction: column; 
+        align-items: center; 
+        justify-content: center;
+        padding: 20px;
+        background: white;
+        position: relative;
+    }
+
+    .hub-details-panel {
+        overflow-y: auto;
+        padding: 15px;
+        background: #f8fafc;
+        border-left: 2px solid #edf2f7;
+    }
+
+    .sidebar-pet-card {
+        width: 100%;
+        background: white;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 6px;
+        text-align: center;
+        cursor: pointer;
+        transition: 0.2s;
+        flex-shrink: 0;
+    }
+    .sidebar-pet-card.active { border-color: #5a67d8; background: #ebf8ff; }
+    .sidebar-pet-card img { width: 35px; height: 35px; object-fit: contain; }
     
     /* Battle Screen */
    /* Battle Screen: Game Boy Container */
@@ -1299,7 +1362,6 @@ body {
  <body><!-- Login Screen -->
   <div class="login-overlay" id="login-overlay">
    <div class="login-box">
-    <div class="login-icon" style="font-size: 40px; margin-bottom: 10px;">🏫</div>
     <h1 class="login-title">Math Pet Adventure</h1>
     <p style="color: #4a5568; margin-bottom: 20px; font-size: 14px; font-weight:bold;">Customize your learning journey!</p>
     
@@ -2377,6 +2439,22 @@ body {
     </div>
 </div>
   
+  <!-- 📖 PET LORE MODAL -->
+  <div class="modal-overlay" id="lore-modal" style="z-index: 10000;">
+      <div class="confirm-modal" style="max-width: 450px; background: #fffaf0; border: 4px solid #5a67d8;">
+          <h2 id="lore-pet-name" style="color: #5a67d8; margin-bottom: 5px;">Pet Lore</h2>
+          <div id="lore-pet-visual" style="font-size: 80px; margin: 10px 0; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.1));">🐾</div>
+          <hr style="border: 1px solid #e2e8f0; margin: 15px 0;">
+          <div id="lore-text" style="font-family: 'Georgia', serif; font-style: italic; line-height: 1.6; color: #4a5568; padding: 0 10px; max-height: 200px; overflow-y: auto;">
+              Loading story from the ancient archives...
+          </div>
+          <div class="confirm-buttons" style="margin-top: 25px;">
+              <button class="confirm-btn no" style="width: 100%; background: #5a67d8;" onclick="document.getElementById('lore-modal').classList.remove('active')">Close Book</button>
+          </div>
+      </div>
+  </div>
+  
+  
   <!-- Daily Reward Modal -->
   <div class="modal-overlay" id="daily-modal"><div class="confirm-modal"><h2>📅 Daily Reward</h2><p>Welcome back! Keep your streak alive.</p><div class="calendar-grid" id="daily-calendar"></div><button class="confirm-btn green" style="margin-top:20px; width:100%;" onclick="document.getElementById('daily-modal').classList.remove('active')">Collect Reward</button></div></div>
   
@@ -2583,7 +2661,7 @@ let currentBuyingItem = null;
     function getGhUrl(path) { return `https://raw.githubusercontent.com/${GITHUB_CONFIG.username}/${GITHUB_CONFIG.repo}/${GITHUB_CONFIG.branch}/${path}`; }
     async function fetchGithubFolder(folderPath) { try { const res = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.username}/${GITHUB_CONFIG.repo}/contents/${folderPath}?ref=${GITHUB_CONFIG.branch}`); if (res.status === 404 || !res.ok) return []; return await res.json(); } catch (e) { return []; } }
     let currentLoggedTeacher = null; // Stores "MrSmith" after login
-    let EXTERNAL_PET_DATA = []; // Now loaded from GitHub
+    let EXTERNAL_PET_DATA = []; window.loreLibrary = {};// Now loaded from GitHub
     let QUESTION_REPOSITORY = {}; const LEVEL_CAPS = { common: 50, uncommon: 50, rare: 60, epic: 75, legendary: 100 };
     const BATTLE_BACKGROUNDS = { 1: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur.png', 4: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(1).png', 5: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(3).png', 6: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(2).png', 7: 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/%E2%80%9CA%20high-quality%20monster-inspired%20battle%20arena%20in%20landscape%20orientation.%20A%20large%2C%20circular%20stadium%20floor%20made%20of%20smooth%20stone%20tiles%20with%20subtle%20glowing%20patterns.%20Surrounding%20the%20arena%20are%20tall%20stadium%20walls%2C%20bright%20.jpg' }; const ARENA_IMGS = [ 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur.png', 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(1).png', 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(2).png', 'https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/sprite/bg/undefined%20-%20Imgur%20(3).png' ];
     
@@ -2937,6 +3015,15 @@ async function loadGitHubData() {
     }
 
     if (!GITHUB_CONFIG.enabled) return;
+    
+    // 📜 LOAD PET LORE MANIFEST
+        try {
+            const loreRes = await fetch(getGhUrl('pet_lore.json'));
+            if (loreRes.ok) {
+                window.loreLibrary = await loreRes.ok ? await loreRes.json() : {};
+                console.log("📜 Lore Library Loaded", window.loreLibrary);
+            }
+        } catch (e) { console.log("No lore file found on GitHub yet."); }
 
     try {
         console.log("📡 Connecting to GitHub Registry...");
@@ -4623,34 +4710,32 @@ function resolveInBattleMath(selected, correct) {
       
       let v = p.image ? `<img src="${p.image}" class="pet-image ${p.imageStyle||''}" alt="${p.name}">` : `<div style="font-size:80px">${p.emoji}</div>`;
       
-      // 1. INCUBATOR VIEW (If egg)
       if (!p.isHatched) { 
           c.innerHTML = `
-            <div style="text-align:center; padding:20px;">
-                <h2>🥚 Incubator</h2>
-                <div class="pet-visual" style="font-size:100px;">🥚</div>
-                <h3>Mystery Egg</h3>
-                
-                <div style="margin:20px 0;">
-                    ${p.hatchProgress}% 
-                    <div class="hatch-bar-container"><div class="hatch-bar" style="width: ${p.hatchProgress}%;"></div></div>
+            <div class="hub-grid">
+                <div class="hub-sidebar">
+                    <div style="font-size:10px; font-weight:bold; color:#5a67d8; text-align:center; margin-bottom:5px;">COLLECTION</div>
+                    ${renderCollection()}
                 </div>
+                <div class="hub-main-view" style="grid-column: span 2;">
+                    <h2>🥚 Incubator</h2>
+                    <div class="pet-visual" style="font-size:120px; animation: eggShake 2s infinite;">🥚</div>
+                    <h3>Mystery Egg</h3>
+                    
+                    <div style="margin:20px 0; width:100%; max-width:300px;">
+                        <div style="font-weight:bold; margin-bottom:5px;">${p.hatchProgress}%</div>
+                        <div class="hatch-bar-container"><div class="hatch-bar" style="width: ${p.hatchProgress}%;"></div></div>
+                    </div>
 
-                <!-- Action Buttons Container -->
-                <div style="display:flex; flex-direction:column; gap:10px; max-width:280px; margin: 0 auto;">
-                    ${p.hatchProgress >= 100 
-                        ? `<button class="action-btn green" onclick="hatchPet()">✨ HATCH NOW! ✨</button>` 
-                        : `<p style="color:#718096; font-size:12px;">Use Items in Shop to speed up!</p>`
-                    }
-                    <!-- THE NEW SELL BUTTON -->
-                    <button class="action-btn" style="background:#ed8936; color:white; box-shadow: 0 4px 0 #c05621;" onclick="sellEgg()">
-                        💰 Sell Egg (+50 BP)
-                    </button>
+                    <div style="display:flex; gap:10px; width:100%; max-width:400px;">
+                        ${p.hatchProgress >= 100 
+                            ? `<button class="action-btn green" onclick="hatchPet()">✨ HATCH!</button>` 
+                            : `<div style="background:#edf2f7; padding:10px; border-radius:10px; flex:1;">${renderInventory(true)}</div>`
+                        }
+                        <button class="action-btn" style="background:#ed8936; color:white; width:auto;" onclick="sellEgg()">💰 Sell</button>
+                    </div>
                 </div>
-
-                <div style="margin-top:20px;">${renderInventory(true)}</div>
-            </div>
-            <div class="pet-collection">${renderCollection()}</div>`; 
+            </div>`; 
           return; 
       }
       
@@ -4745,65 +4830,113 @@ function resolveInBattleMath(selected, correct) {
           return `<div class="${css}" style="${borderStyle}" onclick="openEquipMenu('${type}')">${content}<div class="equip-badge">${type}</div></div>`;
       };
 
-      // 4. MAIN DISPLAY
+      
+      // 4. THE 3-COLUMN MASTER DASHBOARD
       c.innerHTML = `
       <div class="hub-grid">
-        <div class="hub-left">
-            <div class="pet-display">
-                <div class="pet-visual">${v}</div>
-                <div class="pet-name">
-                    Lvl ${p.level} ${p.name} <button onclick="renamePet()" style="background:none; border:none; cursor:pointer; font-size:16px;" title="Rename (100 BP)">✏️</button> <span class="rarity-badge rarity-${p.rarity}">${p.rarity}</span>
-                </div>
-                <!-- STARS -->
-                <div class="star-display">${starHTML}</div>
-<!-- Show Mastery Slots -->
-<div style="font-size:11px; color:#718096; margin-top:10px;">MASTERY SLOTS</div>
-${masteryHTML}
-${emptySlots > 0 && gameState.badgeInventory.length > 0 ? `<button class="action-btn blue" style="padding:5px; font-size:11px;" onclick="openInfusionMenu()">🧬 Infuse Mastery</button>` : ''}
-                <!-- STATS -->
-                <div style="font-size:12px;">XP: ${p.xp} / ${p.maxXp}</div>
-                <div class="xp-bar-container"><div class="xp-bar" style="width: ${(p.xp/p.maxXp)*100}%"></div></div>
-                
-                <!-- EQUIPMENT GRID -->
-                <div class="equipment-grid">
-                    ${renderSlot('weapon', '🗡️')} ${renderSlot('armor', '🛡️')} ${renderSlot('accessory', '💍')} ${renderSlot('charm', '🧿')}
-                </div>
-                
-                <!-- ACTION BUTTONS -->
+        
+        <!-- COLUMN 1: SIDEBAR (Scrollable Pet List) -->
+        <div class="hub-sidebar">
+            <div style="font-size:10px; font-weight:bold; color:#5a67d8; text-align:center; margin-bottom:10px; letter-spacing:1px;">COLLECTION</div>
+            ${renderCollection()}
+        </div>
+
+        <!-- COLUMN 2: HERO STAGE (The Pet) -->
+        <div class="hub-main-view">
+            <div class="pet-visual" style="font-size:150px; margin-top:-20px; position: relative;">
+                <!-- 📖 Lore Button -->
+                <button onclick="openLoreBook()" style="position: absolute; top: 10px; left: -20px; background: white; border: 2px solid #5a67d8; border-radius: 50%; width: 40px; height: 40px; font-size: 20px; cursor: pointer; z-index: 10; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">📖</button>
+                ${v}
+            </div>
+            <div class="pet-name" style="font-size:28px; font-weight:900;">
+                ${p.name} <button onclick="renamePet()" style="background:none; border:none; cursor:pointer; font-size:18px;">✏️</button>
+            </div>
+            <div class="rarity-badge rarity-${p.rarity}">${p.rarity}</div>
+            <div class="star-display" style="font-size:24px; margin-top:5px;">${starHTML}</div>
+            
+            <div style="margin-top:15px; width:100%; max-width:220px;">
+                ${masteryHTML}
+                ${emptySlots > 0 && gameState.badgeInventory.length > 0 ? `<button class="action-btn blue" style="padding:4px; font-size:10px; margin-top:10px;" onclick="openInfusionMenu()">🧬 Infuse Mastery</button>` : ''}
+            </div>
+
+            <div style="position:absolute; bottom:20px; width:80%; display:flex; gap:10px;">
                 ${actionButton}
-                <button class="action-btn red" style="margin-top:10px;" onclick="releasePet()">Release</button>
+                <button class="action-btn red" style="margin:0; width:100px; font-size:12px;" onclick="releasePet()">Release</button>
             </div>
         </div>
-        <div class="hub-right">
-            <div class="inventory-section"><h3>Stats</h3><div class="pet-stats"><div class="stat-box"><div class="stat-label">HP</div><div class="stat-value">${p.hp}/${displayMaxHP}</div></div><div class="stat-box"><div class="stat-label">Power</div><div class="stat-value">${p.powers.length}/4</div></div></div>${squadDisplay}</div>
-            ${ev}
-            <div class="inventory-section"><h3>🎒 Inventory</h3>${renderInventory(false)}</div>
-            <div class="inventory-section"><h3>⚔️ Powers</h3>${renderPowersList(p)}</div>
+
+        <!-- COLUMN 3: DETAILS PANEL (Stats, Gear, Moves) -->
+        <div class="hub-details-panel">
+            
+            <div class="inventory-section">
+                <h3 style="margin-top:0;">📊 LEVEL ${p.level} STATS</h3>
+                <div class="pet-stats">
+                    <div class="stat-box"><div class="stat-label">HP</div><div class="stat-value">${p.hp}/${displayMaxHP}</div></div>
+                    <div class="stat-box"><div class="stat-label">XP</div><div class="stat-value">${p.xp}/${p.maxXp}</div></div>
+                </div>
+                <div class="xp-bar-container" style="height:6px; margin-top:10px;"><div class="xp-bar" style="width: ${(p.xp/p.maxXp)*100}%"></div></div>
+                ${squadDisplay}
+            </div>
+
+            <div class="inventory-section">
+                <h3>🎒 EQUIPMENT</h3>
+                <div class="equipment-grid" style="justify-content: flex-start; gap:5px;">
+                    ${renderSlot('weapon', '🗡️')} ${renderSlot('armor', '🛡️')} ${renderSlot('accessory', '💍')} ${renderSlot('charm', '🧿')}
+                </div>
+            </div>
+
+            <div class="inventory-section">
+                <h3>⚔️ BATTLE MOVES</h3>
+                <div style="background:white; border-radius:10px; padding:5px; font-size:12px; border:1px solid #eee;">
+                    ${renderPowersList(p)}
+                </div>
+            </div>
+
+            <div class="inventory-section" style="background:#fffbeb; border:1px solid #f6e05e;">
+                ${ev}
+            </div>
+
+            <div class="inventory-section">
+                <h3>🧪 BAG</h3>
+                <div style="display:flex; flex-wrap:wrap; gap:5px;">
+                    ${renderInventory(false)}
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="pet-collection">${renderCollection()}</div>`;
+      </div>`;
     }
     
     function renderCollection() { 
-    // 1. Create a copy and SORT the pets (Highest Level first, Eggs at the end)
+    // 1. DATA PREP: Ensure team exists
+    const teamIds = gameState.team || [];
+
+    // 2. SMART SORTING:
+    // This puts actual Squad members at the very top, then high-level pets, then eggs.
     const sortedPets = [...gameState.pets]
         .filter(p => p && p.id)
         .sort((a, b) => {
-            // Rule A: Hatched pets come first
+            const aInSquad = teamIds.includes(a.id);
+            const bInSquad = teamIds.includes(b.id);
+
+            // Priority 1: If one is in squad and other isn't, squad member goes up
+            if (aInSquad && !bInSquad) return -1;
+            if (!aInSquad && bInSquad) return 1;
+
+            // Priority 2: Hatched pets above Eggs
             if (a.isHatched && !b.isHatched) return -1;
             if (!a.isHatched && b.isHatched) return 1;
 
-            // Rule B: Sort by Level (Highest First)
+            // Priority 3: Higher Level first
             const lvA = safeNum(a.level || a.lv || 1);
             const lvB = safeNum(b.level || b.lv || 1);
             return lvB - lvA;
         });
 
-    // 2. Generate the HTML cards
-    return sortedPets.map((p, index) => {
+    return sortedPets.map((p) => {
         const isActive = p.id === gameState.currentPetId;
+        const isInActualSquad = teamIds.includes(p.id); // Check actual team array
         
-        // --- EVOLUTION IMAGE LOGIC (Preserved from your original) ---
+        // Visual Sync
         let displayImg = p.image; 
         const stage = p.evolutionStage || 0;
         if (p.isHatched && stage > 0) {
@@ -4811,31 +4944,26 @@ ${emptySlots > 0 && gameState.badgeInventory.length > 0 ? `<button class="action
             if (chain && chain[stage - 1]) displayImg = chain[stage - 1].image;
         }
 
-        // --- VISUAL SELECTION ---
         let visual = p.emoji || '🐾';
         if (!p.isHatched) {
             visual = '🥚';
         } else if (displayImg) {
-            visual = `<img src="${displayImg}" class="${p.imageStyle || ''}" style="width:40px;height:40px; object-fit:contain;">`;
+            visual = `<img src="${displayImg}" class="${p.imageStyle || ''}" style="width:35px;height:35px; object-fit:contain;">`;
         }
 
-        // --- NEW: TOP 6 SQUAD INDICATOR ---
-        // Adds a small green badge to the strongest 6 pets
-        const squadBadge = (p.isHatched && index < 6) 
-            ? `<div style="position:absolute; top:-5px; right:-5px; background:#48bb78; color:white; font-size:8px; padding:1px 5px; border-radius:4px; font-weight:bold; z-index:10; box-shadow:0 2px 4px rgba(0,0,0,0.3); border:1px solid white;">SQUAD</div>` 
+        // 🛡️ THE FIX: Only show the badge if the pet is IN the squad array
+        const squadBadge = isInActualSquad 
+            ? `<div style="position:absolute; top:-2px; right:-2px; background:#48bb78; color:white; font-size:7px; padding:1px 4px; border-radius:4px; font-weight:bold; z-index:10; border:1px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">SQUAD</div>` 
             : "";
 
         return `
-        <div class="pet-card ${isActive ? 'active' : ''}" onclick="switchPet('${p.id}')" style="position:relative;">
+        <div class="sidebar-pet-card ${isActive ? 'active' : ''}" onclick="switchPet('${p.id}')" style="position:relative;">
             ${squadBadge}
-            <div class="pet-card-visual">${visual}</div>
-            <div style="font-size:10px; font-weight:bold; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                ${p.isHatched ? p.name : "Mystery Egg"}
+            <div>${visual}</div>
+            <div style="font-size:9px; font-weight:bold; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                ${p.isHatched ? p.name : "Egg"}
             </div>
-            ${p.isHatched 
-                ? `<div style="font-size:8px; color:#718096; font-weight:bold;">Lvl ${p.level}</div>` 
-                : `<div style="font-size:8px; color:#f6ad55; font-weight:bold;">${p.hatchProgress || 0}%</div>`
-            }
+            <div style="font-size:8px; color:#718096;">${p.isHatched ? 'Lvl '+ (p.level || p.lv || 1) : (p.hatchProgress || 0)+'%'}</div>
         </div>`;
     }).join(''); 
 }
@@ -10363,6 +10491,34 @@ function readExamQuestion() {
         alert("Text-to-Speech not supported on this browser.");
     }
 }
+   
+   // --- 📖 PET LORE SYSTEM ---
+    window.openLoreBook = function() {
+        const p = gameState.pets.find(pet => pet.id === gameState.currentPetId);
+        if(!p) return;
+
+        const modal = document.getElementById('lore-modal');
+        const nameEl = document.getElementById('lore-pet-name');
+        const visualEl = document.getElementById('lore-pet-visual');
+        const textEl = document.getElementById('lore-text');
+
+        // 1. Set Title and Visual
+        nameEl.innerText = p.name + "'s Origin";
+        visualEl.innerHTML = p.image 
+            ? `<img src="${p.image}" class="${p.imageStyle}" style="width:120px; height:120px; object-fit:contain;">` 
+            : p.emoji;
+
+        // 2. Lookup Lore from the GitHub library
+        const speciesId = p.type || p.tp;
+        const story = window.loreLibrary[speciesId] || "The history of this creature is still being written in the stars. Solve more math to uncover its secrets!";
+
+        textEl.innerText = story;
+
+        // 3. Open Modal
+        modal.classList.add('active');
+    };
+   
+   
    // ==========================================
     // ✏️ RENAME PET FUNCTION (100 BP Cost)
     // ==========================================
