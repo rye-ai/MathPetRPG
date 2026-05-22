@@ -3,9 +3,9 @@
     "evolutions.json",
     "missingpets.json",
     "pet_lore.json",
+    "luzon.json",
     "mutated_pets.json"
   ],
-  "luzon": [],
   "enemies": [
     "boss.json",
     "forest.json"
