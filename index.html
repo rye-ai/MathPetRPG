@@ -3018,12 +3018,16 @@ async function loadGitHubData() {
     
     // 📜 LOAD PET LORE MANIFEST
         try {
-            const loreRes = await fetch(getGhUrl('pets/pet_lore.json'));
+            // FIX: Added 'pets/' to the path
+            const loreRes = await fetch(getGhUrl('pets/pet_lore.json')); 
             if (loreRes.ok) {
-                window.loreLibrary = await loreRes.ok ? await loreRes.json() : {};
-                console.log("📜 Lore Library Loaded", window.loreLibrary);
+                const data = await loreRes.json();
+                window.loreLibrary = data;
+                console.log("📜 Lore Archive Synced from pets/ folder!");
+            } else {
+                console.error("📜 Lore file 404 - Check path on GitHub");
             }
-        } catch (e) { console.log("No lore file found on GitHub yet."); }
+        } catch (e) { console.error("Lore Load Error:", e); }
 
     try {
         console.log("📡 Connecting to GitHub Registry...");
