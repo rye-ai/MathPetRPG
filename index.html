@@ -10492,8 +10492,7 @@ function readExamQuestion() {
     }
 }
    
-   // --- 📖 PET LORE SYSTEM ---
-    window.openLoreBook = function() {
+   window.openLoreBook = function() {
         const p = gameState.pets.find(pet => pet.id === gameState.currentPetId);
         if(!p) return;
 
@@ -10502,23 +10501,34 @@ function readExamQuestion() {
         const visualEl = document.getElementById('lore-pet-visual');
         const textEl = document.getElementById('lore-text');
 
-        // 1. Set Title and Visual
+        // 1. Set UI
         nameEl.innerText = p.name + "'s Origin";
         visualEl.innerHTML = p.image 
             ? `<img src="${p.image}" class="${p.imageStyle}" style="width:120px; height:120px; object-fit:contain;">` 
             : p.emoji;
 
-        // 2. Lookup Lore from the GitHub library
-        const speciesId = p.type || p.tp;
-        const story = window.loreLibrary[speciesId] || "The history of this creature is still being written in the stars. Solve more math to uncover its secrets!";
+        // 2. SMART SEARCH ENGINE
+        // This takes "family_luzon_01" and also turns it into "luzon_01"
+        const rawId = (p.type || p.tp || "").toString();
+        const strippedId = rawId.replace('family_', ''); // Removes 'family_' if it exists
+        
+        // Search in this order: 
+        // 1. Exact match (family_luzon_01)
+        // 2. Stripped match (luzon_01)
+        // 3. Lowercase versions
+        const story = window.loreLibrary[rawId] || 
+                      window.loreLibrary[rawId.toLowerCase()] || 
+                      window.loreLibrary[strippedId] || 
+                      window.loreLibrary[strippedId.toLowerCase()] ||
+                      "The history of this creature is still being written in the stars. Solve more math to uncover its secrets!";
 
+        // 3. Update Text and Show
         textEl.innerText = story;
-
-        // 3. Open Modal
         modal.classList.add('active');
+
+        // Debug log so you can see what's happening in the background
+        console.log(`🔎 Lore Search: Raw [${rawId}] | Stripped [${strippedId}]`);
     };
-   
-   
    // ==========================================
     // ✏️ RENAME PET FUNCTION (100 BP Cost)
     // ==========================================
