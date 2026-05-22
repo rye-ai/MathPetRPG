@@ -101,7 +101,7 @@
   {
     "id": "luzon_04",
     "type": "luzon_04",
-    "name": "Agusan Marshguardian",
+    "name": "Albaynara",
     "rarity": "epic",
     "element": "shadow",
     "image": "https://raw.githubusercontent.com/rye-ai/MathPetRPG/main/pets/luzon/10.png",
@@ -110,7 +110,7 @@
     "baseHP": 80,
     "evolutions": [
       {
-        "name": "Agusan Marshguardian (Stage 2)",
+        "name": "Albaynara (Stage 2)",
         "level": 10,
         "cost": 100,
         "baseHP": 140,
@@ -120,7 +120,7 @@
         "imageStyle": "blend-multiply"
       },
       {
-        "name": "Agusan Marshguardian (Stage 3)",
+        "name": "Albaynara (Stage 3)",
         "level": 20,
         "cost": 200,
         "baseHP": 200,
