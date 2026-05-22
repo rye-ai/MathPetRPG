@@ -3018,7 +3018,7 @@ async function loadGitHubData() {
     
     // 📜 LOAD PET LORE MANIFEST
         try {
-            const loreRes = await fetch(getGhUrl('pet_lore.json'));
+            const loreRes = await fetch(getGhUrl('pets/pet_lore.json'));
             if (loreRes.ok) {
                 window.loreLibrary = await loreRes.ok ? await loreRes.json() : {};
                 console.log("📜 Lore Library Loaded", window.loreLibrary);
